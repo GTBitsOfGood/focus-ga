@@ -6,7 +6,10 @@
 - Install and enable [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) in VSCode
 - Install [MongoDB Community Server](https://www.mongodb.com/docs/manual/administration/install-community/) to host a local instance of MongoDB. It may also be helpful to download [MongoDB Compass](https://www.mongodb.com/try/download/compass#compass) to view the state of your database.
 - Get a locally running MongoDB instance.
-  You can use the command:
+  
+  Install [Docker](https://docs.docker.com/engine/install/).
+  
+  Then, to host the instance, you can use the command:
   ```sh
   docker run --name mongodb -d -p 27017:27017 mongo
   ```
