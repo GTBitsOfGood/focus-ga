@@ -14,7 +14,7 @@ const UserSchema = new Schema<User>({
     validator: (s: string) => emailRegex.test(s) 
   }},
   childAge: { type: Number, min: 0, required: true },
-  childDisabilities: { type: [Schema.Types.ObjectId], ref: 'Disability', required: true },
+  childDisabilities: [{ type: Schema.Types.ObjectId, ref: 'Disability', required: true }],
   address: {
     street: { type: String, required: true },
     city: { type: String, required: true },

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Types } from "mongoose";
+import { ContentType, ReportReason } from "./constants";
 
 export const userSchema = z.object({
   username: z.string(),
@@ -25,14 +26,14 @@ export const disabilitySchema = z.object({
 export const editDisabilitySchema = disabilitySchema.partial();
 
 export const reportSchema = z.object({
-  reason: z.enum(['Spam', 'Inappropriate', 'Harassment', 'Other']),
+  reason: z.nativeEnum(ReportReason),
   description: z.string().optional(),
   date: z.date(),
   isResolved: z.boolean().default(false),
   reportedUser: z.instanceof(Types.ObjectId),
   sourceUser: z.instanceof(Types.ObjectId),
   reportedContent: z.instanceof(Types.ObjectId),
-  contentType: z.enum(['User', 'Comment', 'Post'])
+  contentType: z.nativeEnum(ContentType)
 });
 
 export const editReportSchema = reportSchema.partial();

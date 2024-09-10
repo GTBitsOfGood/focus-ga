@@ -12,7 +12,7 @@ export async function createDisability(disability: Disability): Promise<void> {
 export async function getDisabilities(): Promise<ExtendId<Disability>[]> {
   await dbConnect();
 
-  const disabilities = DisabilityModel.find();
+  const disabilities = await DisabilityModel.find();
   return disabilities;
 }
 
