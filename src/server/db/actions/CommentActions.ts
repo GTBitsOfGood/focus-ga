@@ -1,6 +1,6 @@
 'use server'
 
-import { commentSchema, commentLikeSchema, ExtendId } from "@/utils/types";
+import { commentSchema, commentLikeSchema } from "@/utils/types";
 import CommentModel, { Comment } from "../models/CommentModel";
 import CommentLikeModel from "../models/CommentLikeModel";
 import dbConnect from "../dbConnect";
@@ -33,6 +33,7 @@ export async function editComment(id: string, comment: Partial<Comment>) {
     try {
         await dbConnect();
         const parsedData = commentSchema.partial().parse(comment);
+        await CommentModel.findByIdAndUpdate(id, parsedData);
     } catch (e) {
         throw e;
     }
@@ -52,7 +53,7 @@ export async function createCommentLike(userId: string, commentId: string) {
             throw new Error("User has already liked the comment");
         }
 
-        const newCommentLike = { user: userId, comment: commentId };
+        const newCommentLike = { user: new mongoose.Types.ObjectId(userId), comment: new mongoose.Types.ObjectId(commentId) };
         commentLikeSchema.parse(newCommentLike);
 
         await CommentLikeModel.create([newCommentLike], { session });
@@ -83,7 +84,7 @@ export async function deleteCommentLike(userId: string, commentId: string) {
 
         await CommentLikeModel.deleteOne({ user: userId, comment: commentId}, { session });
         await CommentModel.findByIdAndUpdate(commentId, {$inc: {likes: -1}}, { session });
-
+        
         await session.commitTransaction();
     } catch (e) {
         await session.abortTransaction();
