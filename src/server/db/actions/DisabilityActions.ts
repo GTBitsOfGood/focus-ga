@@ -1,3 +1,5 @@
+'use server'
+
 import { disabilitySchema, editDisabilitySchema, ExtendId } from "@/utils/types";
 import dbConnect from "../dbConnect";
 import DisabilityModel, { Disability } from "../models/DisabilityModel";

@@ -8,9 +8,6 @@ export async function getUser(id: string): Promise<ExtendId<User>> {
   await dbConnect();
 
   const user = await UserModel.findById(id);
-  if (!user) {
-    throw new Error(`User with ID ${id} not found`);
-  }
   return user;
 }
 

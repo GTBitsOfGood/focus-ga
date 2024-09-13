@@ -1,6 +1,8 @@
+'use server'
+
 import { editReportSchema, ExtendId, reportSchema } from "@/utils/types";
 import dbConnect from "../dbConnect";
-import ReportModel from "../models/ReportModel";
+import ReportModel, { Report } from "../models/ReportModel";
 
 export async function getReports(): Promise<ExtendId<Report>[]> {
   await dbConnect();
