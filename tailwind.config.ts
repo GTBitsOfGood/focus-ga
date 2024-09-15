@@ -18,9 +18,6 @@ const config: Config = {
         "med-gray": "#00000099",
       }
     },
-    fontFamily: {
-      "lato": ['Lato', 'serif'],
-    },
   },
   plugins: [],
 };
