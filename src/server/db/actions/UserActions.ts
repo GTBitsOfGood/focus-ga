@@ -1,7 +1,8 @@
 'use server'
 
 import { editUserSchema, ExtendId } from "@/utils/types";
-import UserModel, { User, UserInput } from "../models/UserModel";
+import { User, UserInput } from "@/utils/types";
+import UserModel from "../models/UserModel";
 import dbConnect from "../dbConnect";
 
 export async function getUser(id: string): Promise<ExtendId<User>> {

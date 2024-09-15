@@ -57,12 +57,18 @@ export const userSchema = z.object({
 
 export const editUserSchema = userSchema.partial();
 
+export type User = z.infer<typeof userSchema>;
+export type UserInput = z.input<typeof userSchema>;
+
 // Disability types
 export const disabilitySchema = z.object({
   name: z.string()
 });
 
 export const editDisabilitySchema = disabilitySchema.partial();
+
+export type Disability = z.infer<typeof disabilitySchema>;
+export type DisabilityInput = z.input<typeof disabilitySchema>;
 
 // Report types
 export const reportSchema = z.object({
@@ -77,3 +83,6 @@ export const reportSchema = z.object({
 });
 
 export const editReportSchema = reportSchema.partial();
+
+export type Report = z.infer<typeof reportSchema>;
+export type ReportInput = z.input<typeof reportSchema>;

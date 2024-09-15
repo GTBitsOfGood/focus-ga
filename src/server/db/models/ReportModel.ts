@@ -1,10 +1,6 @@
 import { ContentType, ReportReason } from "@/utils/constants";
-import { reportSchema } from "@/utils/types";
+import { Report } from "@/utils/types";
 import mongoose, { Schema } from "mongoose";
-import { z } from "zod";
-
-export type Report = z.infer<typeof reportSchema>;
-export type ReportInput = z.input<typeof reportSchema>;
 
 const ReportSchema = new Schema<Report>({
   reason: { type: String, enum: ReportReason, required: true },

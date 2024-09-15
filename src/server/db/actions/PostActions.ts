@@ -6,7 +6,6 @@ import PostSaveModel from "../models/PostSaveModel";
 import PostLikeModel from "../models/PostLikeModel";
 import { postSaveSchema, postLikeSchema } from "@/utils/types";
 import dbConnect from "../dbConnect";
-import { Types } from "mongoose";
 
 export async function createPost(post: PostInput): Promise<Post> {
   await dbConnect();

@@ -1,10 +1,10 @@
 'use server'
 
-import { disabilitySchema, editDisabilitySchema, ExtendId } from "@/utils/types";
+import { Disability, DisabilityInput, disabilitySchema, editDisabilitySchema, ExtendId } from "@/utils/types";
 import dbConnect from "../dbConnect";
-import DisabilityModel, { Disability } from "../models/DisabilityModel";
+import DisabilityModel from "../models/DisabilityModel";
 
-export async function createDisability(disability: Disability): Promise<void> {
+export async function createDisability(disability: DisabilityInput): Promise<void> {
   await dbConnect();
 
   const parsedData = disabilitySchema.parse(disability);
@@ -18,7 +18,7 @@ export async function getDisabilities(): Promise<ExtendId<Disability>[]> {
   return disabilities;
 }
 
-export async function editDisability(id: string, updated: Partial<Disability>): Promise<void> {
+export async function editDisability(id: string, updated: Partial<DisabilityInput>): Promise<void> {
   await dbConnect();
 
   const parsedData = editDisabilitySchema.parse(updated);

@@ -2,7 +2,8 @@
 
 import { editReportSchema, ExtendId, reportSchema } from "@/utils/types";
 import dbConnect from "../dbConnect";
-import ReportModel, { Report, ReportInput } from "../models/ReportModel";
+import ReportModel from "../models/ReportModel";
+import { Report, ReportInput } from "@/utils/types";
 
 export async function getReports(): Promise<ExtendId<Report>[]> {
   await dbConnect();
