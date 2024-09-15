@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Types } from "mongoose";
+import { ContentType, ReportReason } from "./constants";
 
 export type ExtendId<T> = T & { _id: string };
 
