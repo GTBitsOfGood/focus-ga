@@ -5,6 +5,7 @@ import { z } from "zod";
 const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
 export type User = z.infer<typeof userSchema>;
+export type UserInput = z.input<typeof userSchema>;
 
 const UserSchema = new Schema<User>({
   username: { type: String, required: true },

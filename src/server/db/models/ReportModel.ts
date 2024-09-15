@@ -4,11 +4,12 @@ import mongoose, { Schema } from "mongoose";
 import { z } from "zod";
 
 export type Report = z.infer<typeof reportSchema>;
+export type ReportInput = z.input<typeof reportSchema>;
 
 const ReportSchema = new Schema<Report>({
   reason: { type: String, enum: ReportReason, required: true },
   description: { type: String, required: false },
-  date: { type: Date, required: true },
+  date: { type: Date, default: new Date() },
   isResolved: { type: Boolean, default: false },
   reportedUser: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   sourceUser: { type: Schema.Types.ObjectId, ref: 'User', required: true },
