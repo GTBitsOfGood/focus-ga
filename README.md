@@ -11,8 +11,21 @@
   
   Then, to host the instance, you can use the command:
   ```sh
-  docker run --name mongodb -d -p 27017:27017 mongo
+  docker-compose up -d
   ```
+
+  To stop your Docker containers and remove their processes, run:
+
+  ```sh
+  docker-compose down
+  ```
+
+  Note: On linux-based operating systems, if you come across an entrypoint permission error (i.e. `process: exec: "./scripts/env-init.sh": permission denied: unknown` or `process: exec: "./scripts/rs-init.sh": permission denied: unknown`), run `chmod +x ./scripts/rs-init.sh` or `chmod +x ./web/scripts/env-init.sh` to make the shell files executables.
+
+  Windows Users: If you come across this error `exec ./scripts/rs-init.sh: no such file or directory` or `exec ./scripts/env-init.sh: no such file or directory` when running the docker-compose command, please follow this [Stackoverflow thread](https://stackoverflow.com/questions/40452508/docker-error-on-an-entrypoint-script-no-such-file-or-directory) to fix it.
+
+
+
 - In the root directory of the project, run:
 
   ```sh
