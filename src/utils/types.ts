@@ -39,6 +39,22 @@ export type PostInput = z.input<typeof postSchema>;
 export type PostSaveInput = z.input<typeof postSaveSchema>;
 export type PostLikeInput = z.input<typeof postLikeSchema>;
 
+// Comment Types
+export const commentSchema = z.object({
+    author: z.string().transform(id => new Types.ObjectId(id)),
+    post: z.string().transform(id => new Types.ObjectId(id)),
+    date: z.date().optional().default(new Date()),
+    content: z.string(),
+    likes: z.number().optional().default(0),
+    replyTo: z.string().transform(id => new Types.ObjectId(id)).optional(),
+});
+
+export const commentLikeSchema = z.object({
+    comment: z.string().transform(id => new Types.ObjectId(id)),
+    user: z.string().transform(id => new Types.ObjectId(id)),
+    date: z.date().default(new Date()),
+});
+
 // User Types
 export const userSchema = z.object({
   username: z.string(),
