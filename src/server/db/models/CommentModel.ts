@@ -1,9 +1,5 @@
-import { commentSchema } from "@/utils/types";
 import mongoose, { Schema } from "mongoose";
-import { z } from "zod";
-
-export type Comment = z.infer<typeof commentSchema>;
-export type CommentInput = z.input<typeof commentSchema>;
+import { Comment } from "@/utils/types/comment";
 
 const CommentSchema = new Schema<Comment>({
     author: { type: Schema.Types.ObjectId, ref: 'User', required: true },

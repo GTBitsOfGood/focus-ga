@@ -36,6 +36,9 @@ export default function Login() {
                         </i>
                         <input className="border-[1px] border-gray-300 pr-3.5 rounded-sm h-[51px] pl-10 w-[295px] placeholder-med-gray text-med-gray focus:outline-none focus:ring-2 focus:ring-blue-500" type="password" placeholder="Password" />
                     </div>
+                    {credentialsError && (
+                        <p className="text-red-500 text-sm mt-2">Invalid username or password. Please try again.</p>
+                    )}
                     <button onClick={handleLogin} className="rounded-sm h-[51px] mt-5 bg-blue text-white w-[295px]">Log in</button>
                     <a href="https://focus-ga.my.site.com/s/login/ForgotPassword" className="mt-8 text-left w-[295px]">Forgot your password?</a>
                 </div>

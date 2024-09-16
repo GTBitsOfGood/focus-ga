@@ -1,10 +1,11 @@
 'use server'
 
-import { postSchema, editPostSchema, ExtendId, Post, PostInput, PostSave, PostSaveInput, PostLike, PostLikeInput } from "@/utils/types";
+import { postSchema, editPostSchema, Post, PostInput, PostSave, PostSaveInput, PostLike, PostLikeInput } from "@/utils/types/post";
+import { ExtendId } from "@/utils/types/common";
 import PostModel from "../models/PostModel";
 import PostSaveModel from "../models/PostSaveModel";
 import PostLikeModel from "../models/PostLikeModel";
-import { postSaveSchema, postLikeSchema } from "@/utils/types";
+import { postSaveSchema, postLikeSchema } from "@/utils/types/post";
 import dbConnect from "../dbConnect";
 
 export async function createPost(post: PostInput): Promise<Post> {

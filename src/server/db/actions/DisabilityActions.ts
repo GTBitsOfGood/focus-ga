@@ -1,8 +1,9 @@
 'use server'
 
-import { Disability, DisabilityInput, disabilitySchema, editDisabilitySchema, ExtendId } from "@/utils/types";
+import { Disability, DisabilityInput, disabilitySchema, editDisabilitySchema } from "@/utils/types/disability";
 import dbConnect from "../dbConnect";
 import DisabilityModel from "../models/DisabilityModel";
+import { ExtendId } from "@/utils/types/common";
 
 export async function createDisability(disability: DisabilityInput): Promise<void> {
   await dbConnect();

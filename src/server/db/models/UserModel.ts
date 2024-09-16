@@ -1,4 +1,4 @@
-import { User } from "@/utils/types";
+import { User } from "@/utils/types/user";
 import mongoose, { Schema, Types } from "mongoose";
 
 const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;

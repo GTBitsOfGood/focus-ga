@@ -1,7 +1,7 @@
 'use server'
 
-import { commentSchema, commentLikeSchema } from "@/utils/types";
-import CommentModel, { CommentInput } from "../models/CommentModel";
+import { commentSchema, commentLikeSchema, CommentInput } from "@/utils/types/comment";
+import CommentModel from "../models/CommentModel";
 import CommentLikeModel from "../models/CommentLikeModel";
 import dbConnect from "../dbConnect";
 import mongoose from "mongoose";

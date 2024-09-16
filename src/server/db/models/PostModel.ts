@@ -1,7 +1,6 @@
-import { PostInput, Post } from "@/utils/types";
+import { Post } from "@/utils/types/post";
 import mongoose from "mongoose";
 import { Schema } from "mongoose";
-import { z } from "zod";
 
 const PostSchema = new Schema<Post>({
   author: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
@@ -18,4 +17,3 @@ const PostSchema = new Schema<Post>({
 const PostModel = mongoose.models?.Post ?? mongoose.model("Post", PostSchema);
 
 export default PostModel;
-

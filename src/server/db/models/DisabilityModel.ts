@@ -1,4 +1,4 @@
-import { Disability } from "@/utils/types";
+import { Disability } from "@/utils/types/disability";
 import mongoose, { Schema } from "mongoose";
 
 const DisabilitySchema = new Schema<Disability>({

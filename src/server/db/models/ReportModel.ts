@@ -1,5 +1,4 @@
-import { ContentType, ReportReason } from "@/utils/constants";
-import { Report } from "@/utils/types";
+import { Report, ReportReason, ContentType } from "@/utils/types/report";
 import mongoose, { Schema } from "mongoose";
 
 const ReportSchema = new Schema<Report>({

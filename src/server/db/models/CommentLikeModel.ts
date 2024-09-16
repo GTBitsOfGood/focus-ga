@@ -1,4 +1,4 @@
-import { commentLikeSchema } from "@/utils/types";
+import { commentLikeSchema } from "@/utils/types/comment";
 import mongoose from "mongoose";
 import { Schema } from "mongoose";
 import { z } from "zod";

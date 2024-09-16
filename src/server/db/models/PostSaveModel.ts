@@ -1,7 +1,6 @@
-import { PostSave } from "@/utils/types";
+import { PostSave } from "@/utils/types/post";
 import mongoose from "mongoose";
 import { Schema } from "mongoose";
-import { z } from "zod";
 
 const PostSaveSchema = new Schema<PostSave>({
   post: { type: Schema.Types.ObjectId, required: true, ref: 'Post' },
