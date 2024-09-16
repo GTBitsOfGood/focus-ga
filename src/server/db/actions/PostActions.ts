@@ -1,53 +1,116 @@
 'use server'
 
-import { postSchema, editPostSchema, Post, PostInput, PostSave, PostSaveInput, PostLike, PostLikeInput } from "@/utils/types/post";
+import { postSchema, editPostSchema, Post, PostInput, PostSaveInput, PostLikeInput, PostLike } from "@/utils/types/post";
 import { ExtendId } from "@/utils/types/common";
 import PostModel from "../models/PostModel";
 import PostSaveModel from "../models/PostSaveModel";
 import PostLikeModel from "../models/PostLikeModel";
 import { postSaveSchema, postLikeSchema } from "@/utils/types/post";
 import dbConnect from "../dbConnect";
+import mongoose from "mongoose";
 
+/**
+ * Creates a new post in the database.
+ * @param post - The post input data.
+ * @throws Will throw an error if the post creation fails.
+ * @returns The created post object.
+ */
 export async function createPost(post: PostInput): Promise<Post> {
   await dbConnect();
 
   const validatedPost = postSchema.parse(post);
-  const newPost = await PostModel.create(validatedPost);
-  return newPost.toObject();
+  const createdPost = await PostModel.create(validatedPost);
+  return createdPost.toObject();
 }
 
-export async function getPosts(): Promise<ExtendId<Post>[]> {
+/**
+ * Retrieves all posts from the database.
+ * @returns A promise that resolves to an array of post objects.
+ */
+export async function getPosts(): Promise<Post[]> {
   await dbConnect();
 
   const posts = await PostModel.find();
   return posts;
 }
 
-export async function editPost(id: string, post: Partial<PostInput>): Promise<Post | null> {
+/**
+ * Updates an existing post in the database.
+ * @param id - The ID of the post to update.
+ * @param post - The partial post input data for updating.
+ * @throws Will throw an error if the post update fails or if the post is not found.
+ * @returns The updated post object.
+ */
+export async function editPost(id: string, post: Partial<PostInput>): Promise<Post> {
   await dbConnect();
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new Error("Invalid post ID");
+  }
 
   const validatedPost = editPostSchema.parse(post);
   const updatedPost = await PostModel.findByIdAndUpdate(id, validatedPost, { new: true });
-  return updatedPost ? updatedPost.toObject() : null;
+  if (!updatedPost) {
+    throw new Error("Post not found");
+  }
+  return updatedPost;
 }
 
+/**
+ * Deletes a post from the database.
+ * @param id - The ID of the post to delete.
+ * @throws Will throw an error if the post deletion fails or if the post is not found.
+ */
 export async function deletePost(id: string): Promise<void> {
   await dbConnect();
 
-  await PostModel.findByIdAndDelete(id);
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new Error("Invalid post ID");
+  }
+
+  const deletedPost = await PostModel.findByIdAndDelete(id);
+  if (!deletedPost) {
+    throw new Error("Post not found");
+  }
 }
 
-export async function createPostSave(userId: string, postId: string): Promise<PostSave> {
+/**
+ * Creates a new post save record in the database.
+ * @param userId - The ID of the user saving the post.
+ * @param postId - The ID of the post being saved.
+ * @throws Will throw an error if the post save creation fails or if the post is already saved.
+ * @returns The created post save object.
+ */
+export async function createPostSave(userId: string, postId: string): Promise<PostSaveInput> {
   await dbConnect();
+
+  if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(postId)) {
+    throw new Error("Invalid user ID or post ID");
+  }
+
+  const existingSave = await PostSaveModel.findOne({ user: userId, post: postId });
+  if (existingSave) {
+    throw new Error("Post already saved by this user");
+  }
 
   const postSaveInput: PostSaveInput = { user: userId, post: postId };
   const validatedPostSave = postSaveSchema.parse(postSaveInput);
-  const newPostSave = await PostSaveModel.create(validatedPostSave);
-  return newPostSave.toObject();
+  const createdPostSave = await PostSaveModel.create(validatedPostSave);
+  return createdPostSave.toObject();
 }
 
+/**
+ * Retrieves all saved posts for a specific user.
+ * @param userId - The ID of the user whose saved posts are being retrieved.
+ * @returns A promise that resolves to an array of saved post objects.
+ * @throws Will throw an error if the user ID is invalid.
+ */
 export async function getSavedPosts(userId: string): Promise<Post[]> {
   await dbConnect();
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new Error("Invalid user ID");
+  }
 
   const savedPosts = await PostSaveModel.find({ user: userId })
     .sort({ date: -1 })
@@ -56,14 +119,38 @@ export async function getSavedPosts(userId: string): Promise<Post[]> {
   return savedPosts.map(save => save.post.toObject());
 }
 
+/**
+ * Deletes a post save record from the database.
+ * @param userId - The ID of the user unsaving the post.
+ * @param postId - The ID of the post being unsaved.
+ * @throws Will throw an error if the post save deletion fails or if the save is not found.
+ */
 export async function deletePostSave(userId: string, postId: string): Promise<void> {
   await dbConnect();
 
-  await PostSaveModel.findOneAndDelete({ user: userId, post: postId });
+  if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(postId)) {
+    throw new Error("Invalid user ID or post ID");
+  }
+
+  const deletedSave = await PostSaveModel.findOneAndDelete({ user: userId, post: postId });
+  if (!deletedSave) {
+    throw new Error("Post save not found");
+  }
 }
 
-export async function createPostLike(userId: string, postId: string): Promise<PostLike | null> {
+/**
+ * Creates a new post like record in the database.
+ * @param userId - The ID of the user liking the post.
+ * @param postId - The ID of the post being liked.
+ * @throws Will throw an error if the post like creation fails or if the post is already liked.
+ * @returns The created post like object and the updated post.
+ */
+export async function createPostLike(userId: string, postId: string): Promise<PostLike> {
   await dbConnect();
+
+  if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(postId)) {
+    throw new Error("Invalid user ID or post ID");
+  }
 
   const session = await PostModel.startSession();
   session.startTransaction();
@@ -72,17 +159,20 @@ export async function createPostLike(userId: string, postId: string): Promise<Po
     const existingLike = await PostLikeModel.findOne({ user: userId, post: postId });
     if (existingLike) {
       await session.abortTransaction();
-      return null;
+      throw new Error("Post already liked by this user");
     }
 
     const postLikeInput: PostLikeInput = { user: userId, post: postId };
     const validatedPostLike = postLikeSchema.parse(postLikeInput);
-    const newPostLike = await PostLikeModel.create([validatedPostLike], { session });
+    const createdPostLike = await PostLikeModel.create([validatedPostLike], { session });
 
-    await PostModel.findByIdAndUpdate(postId, { $inc: { likes: 1 } }, { session });
+    const updatedPost = await PostModel.findByIdAndUpdate(postId, { $inc: { likes: 1 } }, { session, new: true });
+    if (!updatedPost) {
+      throw new Error("Post not found");
+    }
 
     await session.commitTransaction();
-    return newPostLike[0].toObject();
+    return createdPostLike[0].toObject();
   } catch (error) {
     await session.abortTransaction();
     throw error;
@@ -91,8 +181,18 @@ export async function createPostLike(userId: string, postId: string): Promise<Po
   }
 }
 
+/**
+ * Deletes a post like record from the database.
+ * @param userId - The ID of the user unliking the post.
+ * @param postId - The ID of the post being unliked.
+ * @throws Will throw an error if the post like deletion fails or if the like is not found.
+ */
 export async function deletePostLike(userId: string, postId: string): Promise<void> {
   await dbConnect();
+
+  if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(postId)) {
+    throw new Error("Invalid user ID or post ID");
+  }
 
   const session = await PostModel.startSession();
   session.startTransaction();
@@ -101,10 +201,13 @@ export async function deletePostLike(userId: string, postId: string): Promise<vo
     const deletedLike = await PostLikeModel.findOneAndDelete({ user: userId, post: postId }, { session });
     if (!deletedLike) {
       await session.abortTransaction();
-      return;
+      throw new Error("Post like not found");
     }
 
-    await PostModel.findByIdAndUpdate(postId, { $inc: { likes: -1 } }, { session });
+    const updatedPost = await PostModel.findByIdAndUpdate(postId, { $inc: { likes: -1 } }, { session, new: true });
+    if (!updatedPost) {
+      throw new Error("Post not found");
+    }
 
     await session.commitTransaction();
   } catch (error) {

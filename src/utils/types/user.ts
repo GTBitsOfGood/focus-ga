@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Types } from "mongoose";
+import { ExtendId } from "./common";
 
 export const userSchema = z.object({
   username: z.string(),
@@ -18,5 +19,5 @@ export const userSchema = z.object({
 
 export const editUserSchema = userSchema.partial();
 
-export type User = z.infer<typeof userSchema>;
+export type User = ExtendId<z.infer<typeof userSchema>>;
 export type UserInput = z.input<typeof userSchema>;

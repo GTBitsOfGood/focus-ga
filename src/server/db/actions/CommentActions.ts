@@ -1,45 +1,102 @@
 'use server'
 
-import { commentSchema, commentLikeSchema, CommentInput } from "@/utils/types/comment";
+import { commentSchema, commentLikeSchema, CommentInput, Comment } from "@/utils/types/comment";
 import CommentModel from "../models/CommentModel";
-import CommentLikeModel from "../models/CommentLikeModel";
+import CommentLikeModel, { CommentLike } from "../models/CommentLikeModel";
 import dbConnect from "../dbConnect";
 import mongoose from "mongoose";
+import PostModel from "../models/PostModel";
 
-export async function createComment(comment: CommentInput) {
+/**
+ * Creates a new comment in the database.
+ * @param comment - The comment input data.
+ * @throws Will throw an error if the comment creation fails.
+ * @returns The created comment object.
+ */
+export async function createComment(comment: CommentInput): Promise<Comment> {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
         await dbConnect();
         const parsedData = commentSchema.parse(comment);
-        await CommentModel.create(parsedData);
+        const createdComment = await CommentModel.create([parsedData], { session });
+
+        await PostModel.findByIdAndUpdate(
+            parsedData.post,
+            { $inc: { comments: 1 } },
+            { session }
+        );
+
+        await session.commitTransaction();
+        return createdComment[0].toObject();
     } catch (e) {
-        throw e;
+        console.log(e);
+        await session.abortTransaction();
+        throw new Error("Failed to create comment");
+    } finally {
+        session.endSession();
     }
 }
 
-export async function deleteComment(id: string) {
+/**
+ * Deletes a comment from the database.
+ * @param id - The ID of the comment to delete.
+ * @throws Will throw an error if the comment doesn't exist or deletion fails.
+ */
+export async function deleteComment(id: string): Promise<void> {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
     try {
         await dbConnect();
-        const comment = await CommentModel.findByIdAndDelete(id);
+        const comment = await CommentModel.findByIdAndDelete(id, { session });
         if (!comment) {
             throw new Error("Comment does not exist");
         }
-        return comment;
+
+        await PostModel.findByIdAndUpdate(
+            comment.post,
+            { $inc: { comments: -1 } },
+            { session }
+        );
+
+        await session.commitTransaction();
     } catch (e) {
-        throw e;
+        await session.abortTransaction();
+        throw new Error("Failed to delete comment");
+    } finally {
+        session.endSession();
     }
 }
-
-export async function editComment(id: string, comment: Partial<CommentInput>) {
+/**
+ * Edits an existing comment in the database.
+ * @param id - The ID of the comment to edit.
+ * @param comment - The partial comment input data for updating.
+ * @throws Will throw an error if the comment update fails.
+ * @returns The updated comment object.
+ */
+export async function editComment(id: string, comment: Partial<CommentInput>): Promise<Comment> {
     try {
         await dbConnect();
         const parsedData = commentSchema.partial().parse(comment);
-        await CommentModel.findByIdAndUpdate(id, parsedData);
+        const updatedComment = await CommentModel.findByIdAndUpdate(id, parsedData, { new: true });
+        if (!updatedComment) {
+            throw new Error("Comment not found");
+        }
+        return updatedComment.toObject();
     } catch (e) {
-        throw e;
+        throw new Error("Failed to edit comment");
     }
 }
 
-export async function createCommentLike(userId: string, commentId: string) {
+/**
+ * Creates a new like for a comment.
+ * @param userId - The ID of the user liking the comment.
+ * @param commentId - The ID of the comment being liked.
+ * @throws Will throw an error if the like creation fails or if the user has already liked the comment.
+ */
+export async function createCommentLike(userId: string, commentId: string): Promise<CommentLike> {
     const session = await mongoose.startSession();
     session.startTransaction();
     
@@ -56,11 +113,13 @@ export async function createCommentLike(userId: string, commentId: string) {
         const newCommentLike = { user: userId, comment: commentId };
         commentLikeSchema.parse(newCommentLike);
 
-        await CommentLikeModel.create([newCommentLike], { session });
+        const createdCommentLike = await CommentLikeModel.create([newCommentLike], { session });
         await CommentModel.findByIdAndUpdate(commentId, {$inc: {likes: 1}}, { session });
-
+        
         await session.commitTransaction();
+        return createdCommentLike[0].toObject();
     } catch (e) {
+        console.log(e);
         await session.abortTransaction();
         throw e;
     } finally {
@@ -68,7 +127,13 @@ export async function createCommentLike(userId: string, commentId: string) {
     }
 }
 
-export async function deleteCommentLike(userId: string, commentId: string) {
+/**
+ * Deletes a like from a comment.
+ * @param userId - The ID of the user unliking the comment.
+ * @param commentId - The ID of the comment being unliked.
+ * @throws Will throw an error if the like deletion fails or if the user hasn't liked the comment.
+ */
+export async function deleteCommentLike(userId: string, commentId: string): Promise<void> {
     const session = await mongoose.startSession();
     session.startTransaction();
     

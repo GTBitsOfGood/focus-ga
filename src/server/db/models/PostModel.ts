@@ -8,6 +8,7 @@ const PostSchema = new Schema<Post>({
   title: { type: String, required: true },
   content: { type: String, required: true },
   likes: { type: Number, default: 0 },
+  comments: { type: Number, default: 0 },
   tags: [{ type: Schema.Types.ObjectId, required: true, ref: 'Disability' }],
   isPinned: { type: Boolean, default: false },
   isPrivate: { type: Boolean, default: false },

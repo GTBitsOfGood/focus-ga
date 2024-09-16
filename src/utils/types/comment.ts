@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Types } from "mongoose";
+import { ExtendId } from "./common";
 
 export const commentSchema = z.object({
   author: z.string().transform(id => new Types.ObjectId(id)),
@@ -16,8 +17,8 @@ export const commentLikeSchema = z.object({
   date: z.date().default(new Date()),
 });
 
-export type Comment = z.infer<typeof commentSchema>;
-export type CommentLike = z.infer<typeof commentLikeSchema>;
+export type Comment = ExtendId<z.infer<typeof commentSchema>>;
+export type CommentLike = ExtendId<z.infer<typeof commentLikeSchema>>;
 
 export type CommentInput = z.input<typeof commentSchema>;
 export type CommentLikeInput = z.input<typeof commentLikeSchema>;

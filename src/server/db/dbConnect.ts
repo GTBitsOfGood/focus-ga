@@ -38,6 +38,16 @@ async function dbConnect() {
     cached.promise = mongoose.connect(DB_URL, opts).then((mongoose) => {
       mongoose.set("debug", process.env.NODE_ENV === "development");
 
+      // Define global mongoose getter to convert ObjectId to string
+      mongoose.set('toObject', {
+        transform: (doc, ret) => {
+          if (ret._id && typeof ret._id === 'object' && ret._id.toString) {
+            ret._id = ret._id.toString();
+          }
+          return ret;
+        }
+      });
+
       return mongoose;
     });
   }

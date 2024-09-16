@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Types } from "mongoose";
+import { ExtendId } from "./common";
 
 export const postSchema = z.object({
   author: z.string().transform(id => new Types.ObjectId(id)),
@@ -7,6 +8,7 @@ export const postSchema = z.object({
   title: z.string(),
   content: z.string(),
   likes: z.number().default(0),
+  comments: z.number().default(0),
   tags: z.array(z.string()),
   isPinned: z.boolean().default(false),
   isPrivate: z.boolean().default(false),
@@ -27,9 +29,9 @@ export const postLikeSchema = z.object({
   date: z.date().default(() => new Date()),
 });
 
-export type Post = z.infer<typeof postSchema>;
-export type PostSave = z.infer<typeof postSaveSchema>;
-export type PostLike = z.infer<typeof postLikeSchema>;
+export type Post = ExtendId<z.infer<typeof postSchema>>;
+export type PostSave = ExtendId<z.infer<typeof postSaveSchema>>;
+export type PostLike = ExtendId<z.infer<typeof postLikeSchema>>;
 
 export type PostInput = z.input<typeof postSchema>;
 export type PostSaveInput = z.input<typeof postSaveSchema>;

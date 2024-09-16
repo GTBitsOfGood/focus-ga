@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { Types } from "mongoose";
+import { ExtendId } from "./common";
 
 export enum ReportReason {
   SPAM = 'Spam',
@@ -27,5 +28,5 @@ export const reportSchema = z.object({
 
 export const editReportSchema = reportSchema.partial();
 
-export type Report = z.infer<typeof reportSchema>;
+export type Report = ExtendId<z.infer<typeof reportSchema>>;
 export type ReportInput = z.input<typeof reportSchema>;
