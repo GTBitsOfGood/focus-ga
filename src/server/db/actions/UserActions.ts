@@ -12,7 +12,7 @@ export async function getUser(id: string): Promise<ExtendId<User>> {
   return user.toObject();
 }
 
-export async function updateUser(id: string, updated: Partial<UserInput>): Promise<void> {
+export async function editUser(id: string, updated: Partial<UserInput>): Promise<void> {
   await dbConnect();
 
   const parsedData = editUserSchema.parse(updated);
