@@ -3,7 +3,6 @@
 import { editUserSchema, User, UserInput } from "@/utils/types/user";
 import UserModel from "../models/UserModel";
 import dbConnect from "../dbConnect";
-import { ExtendId } from "@/utils/types/common";
 
 export async function createUser(user: UserInput): Promise<User> {
   await dbConnect();

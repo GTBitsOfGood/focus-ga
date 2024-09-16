@@ -1,7 +1,6 @@
 'use server'
 
 import { postSchema, editPostSchema, Post, PostInput, PostSaveInput, PostLikeInput, PostLike } from "@/utils/types/post";
-import { ExtendId } from "@/utils/types/common";
 import PostModel from "../models/PostModel";
 import PostSaveModel from "../models/PostSaveModel";
 import PostLikeModel from "../models/PostLikeModel";

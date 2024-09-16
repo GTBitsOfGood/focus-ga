@@ -3,7 +3,6 @@
 import { Disability, DisabilityInput, disabilitySchema, editDisabilitySchema } from "@/utils/types/disability";
 import dbConnect from "../dbConnect";
 import DisabilityModel from "../models/DisabilityModel";
-import { ExtendId } from "@/utils/types/common";
 import mongoose from "mongoose";
 
 /**
