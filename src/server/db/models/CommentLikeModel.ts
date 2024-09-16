@@ -8,7 +8,7 @@ export type CommentLike = z.infer<typeof commentLikeSchema>;
 const CommentLikeSchema = new Schema<CommentLike>({
     comment: { type: Schema.Types.ObjectId, ref: 'Comment', required: true },
     user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    date: { type: Date, default: Date.now },
+    date: { type: Date, default: Date.now() },
 });
 
 const CommentLikeModel = mongoose.models?.CommentLike ?? mongoose.model("CommentLike", CommentLikeSchema);

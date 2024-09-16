@@ -1,12 +1,12 @@
 'use server'
 
 import { commentSchema, commentLikeSchema } from "@/utils/types";
-import CommentModel, { Comment } from "../models/CommentModel";
+import CommentModel, { CommentInput } from "../models/CommentModel";
 import CommentLikeModel from "../models/CommentLikeModel";
 import dbConnect from "../dbConnect";
 import mongoose from "mongoose";
 
-export async function createComment(comment: Comment) {
+export async function createComment(comment: CommentInput) {
     try {
         await dbConnect();
         const parsedData = commentSchema.parse(comment);
@@ -29,7 +29,7 @@ export async function deleteComment(id: string) {
     }
 }
 
-export async function editComment(id: string, comment: Partial<Comment>) {
+export async function editComment(id: string, comment: Partial<CommentInput>) {
     try {
         await dbConnect();
         const parsedData = commentSchema.partial().parse(comment);
@@ -53,7 +53,7 @@ export async function createCommentLike(userId: string, commentId: string) {
             throw new Error("User has already liked the comment");
         }
 
-        const newCommentLike = { user: new mongoose.Types.ObjectId(userId), comment: new mongoose.Types.ObjectId(commentId) };
+        const newCommentLike = { user: userId, comment: commentId };
         commentLikeSchema.parse(newCommentLike);
 
         await CommentLikeModel.create([newCommentLike], { session });

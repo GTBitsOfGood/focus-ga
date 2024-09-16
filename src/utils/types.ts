@@ -2,17 +2,17 @@ import { z } from "zod";
 import { Types } from "mongoose";
 
 export const commentSchema = z.object({
-    author: z.instanceof(Types.ObjectId),
-    post: z.instanceof(Types.ObjectId),
-    date: z.date().default(new Date()),
+    author: z.string().transform(id => new Types.ObjectId(id)),
+    post: z.string().transform(id => new Types.ObjectId(id)),
+    date: z.date().optional().default(new Date()),
     content: z.string(),
-    likes: z.number().default(0),
-    replyTo: z.instanceof(Types.ObjectId).nullable().default(null),
+    likes: z.number().optional().default(0),
+    replyTo: z.string().transform(id => new Types.ObjectId(id)).optional(),
 });
 
 export const commentLikeSchema = z.object({
-    comment: z.instanceof(Types.ObjectId),
-    user: z.instanceof(Types.ObjectId),
+    comment: z.string().transform(id => new Types.ObjectId(id)),
+    user: z.string().transform(id => new Types.ObjectId(id)),
     date: z.date().default(new Date()),
 });
 
