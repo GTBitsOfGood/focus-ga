@@ -1,12 +1,19 @@
 'use server'
 
-import { editUserSchema, User, UserInput } from "@/utils/types/user";
+import { editUserSchema, User, UserInput, userSchema } from "@/utils/types/user";
 import UserModel from "../models/UserModel";
 import dbConnect from "../dbConnect";
 
+/**
+ * Creates a new user in the database.
+ * @param user - The user input data.
+ * @returns A promise that resolves to the user object with extended ID.
+ * @throws Will throw an error if the user creation fails.
+ */
 export async function createUser(user: UserInput): Promise<User> {
   await dbConnect();
-  const newUser = await UserModel.create(user);
+  const parsedData = userSchema.parse(user);
+  const newUser = await UserModel.create(parsedData);
   return newUser.toObject();
 }
 
