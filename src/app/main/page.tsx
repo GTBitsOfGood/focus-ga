@@ -7,7 +7,7 @@ export default function Main() {
     <div>
       <Navbar />
       <Sidebar />
-      <div className="ml-[237px] mt-[100px] p-4">
+      <div className="ml-[280px] mt-[100px] p-4">
         children
       </div>
     </div>
