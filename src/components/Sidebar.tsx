@@ -20,7 +20,7 @@ export default function Sidebar() {
       <ul className="text-[#636363] text-xl">
         <li>
           <button
-            className={sidebarButtonStyling + (urlRoute === "main" ? "bg-gray-100" : "")}
+            className={sidebarButtonStyling + (urlRoute === "main" ? "bg-gray-100 border-r-4 border-blue" : "")}
             onClick={() => router.push("/main")}
           >
             <Home className="w-8 h-8" /> Home Page

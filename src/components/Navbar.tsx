@@ -56,7 +56,7 @@ export default function Navbar() {
           {menuIsOpen ? <ChevronUp className="w-4 h-4" color="#7D7E82"/> : <ChevronDown className="w-4 h-4" color="#7D7E82"/>}
         </div>
         {menuIsOpen && (
-          <div className="absolute bottom-[-1px] left-0 w-full h-[6px] bg-blue"></div>
+          <div className="absolute bottom-[-1px] left-0 w-full h-[4px] bg-blue"></div>
         )}
       </div>
 
