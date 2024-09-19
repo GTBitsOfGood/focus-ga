@@ -8,7 +8,7 @@ export default function Main() {
       <Navbar />
       <Sidebar />
       <div className="ml-[280px] mt-[100px] p-4">
-        children
+        children {/** TODO: place main community page content here */}
       </div>
     </div>
   );

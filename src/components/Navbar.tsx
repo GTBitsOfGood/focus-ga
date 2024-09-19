@@ -23,20 +23,18 @@ export default function Navbar() {
 
   return (
     <div className="w-full h-[100px] bg-white flex items-center justify-between pl-6 fixed top-0 z-50 border-b border-gray-300">
-      {/* Logo */}
+      {/* Logo plus saerch bar*/}
       <Image src={focusLogo} width={121} height={58} alt="focus-logo" />
-
-      {/* Search Bar */}
       <div className="relative flex-grow mx-20">
         <input
           type="text"
           placeholder="Search for a post"
-          className="w-full h-11 px-12 rounded-xl bg-[#F3F3F3] tracking-wide pl-16  focus:outline-none"
+          className="w-full h-11 px-12 rounded-xl bg-[#F3F3F3] tracking-wide pl-16 focus:outline-none"
         />
         <Search strokeWidth={3} className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-500" />
       </div>
 
-      {/* Create Post Button */}
+      {/* Create Post*/}
       <button
         className="bg-blue text-xl text-white font-semibold w-[184px] h-[45px] rounded-[12px] gap-2 flex flex-row justify-center items-center hover:opacity-90"
         onClick={handleCreatePostOpen}
@@ -44,24 +42,19 @@ export default function Navbar() {
         <SquarePen color="#ffffff" /> Create Post
       </button>
 
-      {/* Profile Picture + Dropdown */}
+      {/* Profile Picture menu button */}
       <div
         className="flex items-center justify-center ml-4 w-[88px] h-full relative group hover:bg-gray-100 transition-colors duration-200 cursor-pointer m-1 pr-16 pl-12"
         onClick={toggleDropdown}
       >
-        {/* Profile Picture Circle */}
         <div className="border-l pl-4">
           <div className="w-[46px] h-[46px] bg-pink-300 rounded-full flex items-center justify-center cursor-pointer">
             <span className="text-black font-bold text-lg  select-none">D</span> {/** TODO: Change "D" to the initial of the family name */}
           </div>
         </div>
-
-        {/* Arrow Icon */}
         <div className="cursor-pointer ml-2">
           {menuIsOpen ? <ChevronUp className="w-4 h-4" color="#7D7E82"/> : <ChevronDown className="w-4 h-4" color="#7D7E82"/>}
         </div>
-
-        {/* Blue line when menu is open */}
         {menuIsOpen && (
           <div className="absolute bottom-[-1px] left-0 w-full h-[6px] bg-blue"></div>
         )}
