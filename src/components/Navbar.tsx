@@ -47,7 +47,7 @@ export default function Navbar() {
         className="flex items-center justify-center ml-4 w-[88px] h-full relative group hover:bg-gray-100 transition-colors duration-200 cursor-pointer m-1 pr-16 pl-12"
         onClick={toggleDropdown}
       >
-        <div className="border-l pl-4">
+        <div className="border-l pl-6">
           <div className="w-[46px] h-[46px] bg-pink-300 rounded-full flex items-center justify-center cursor-pointer">
             <span className="text-black font-bold text-lg  select-none">D</span> {/** TODO: Change "D" to the initial of the family name */}
           </div>
