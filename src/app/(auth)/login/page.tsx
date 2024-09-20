@@ -3,10 +3,10 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from 'next/image';
-import lock from "../../../public/lock.png";
-import user from "../../../public/user.png";
-import focusLogo from "../../../public/focus-logo.png";
-import transparencyBadge from "../../../public/transparency-badge.png";
+import lock from "../../../../public/lock.png";
+import user from "../../../../public/user.png";
+import focusLogo from "../../../../public/focus-logo.png";
+import transparencyBadge from "../../../../public/transparency-badge.png";
 
 export default function Login() {
   const router = useRouter();

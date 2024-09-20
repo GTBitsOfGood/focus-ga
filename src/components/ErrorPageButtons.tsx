@@ -6,7 +6,7 @@ export default function ErrorPageButtons() {
   return (
   <div className="flex flex-row justify-center space-x-16 mt-16">
     <button onClick={() => {
-      router.push("/main");
+      router.push("/");
     }} className="bg-blue text-white py-4 w-44 rounded-sm text-xl font-lato hover:opacity-90 transition-colors">
       Return Home
     </button>

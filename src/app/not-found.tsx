@@ -11,7 +11,7 @@ export default function NotFound() {
       <div className="mx-[24vw] flex flex-col justify-center items-center h-screen">
         <h1 className="text-8xl	text-center text-opacity-80 font-extrabold">404</h1>
         <p className="text-center text-3xl font-bold">Page not found</p>
-        <p className="text-2xl text-center mt-8 font-normal">Sorry, the page you are looking for doesn’t exist. If you think something is broken, report a problem to administration.</p>
+        <p className="text-2xl text-center mt-8 font-normal">Sorry, the page you are looking for doesn&apos;t exist. If you think something is broken, report a problem to administration.</p>
         <ErrorPageButtons />
       </div>
     </div>
