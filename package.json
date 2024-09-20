@@ -14,6 +14,7 @@
     "secrets:get": "npx bw sync && npx bw get item 75f3d8bf | npx fx .notes > \".env\""
   },
   "dependencies": {
+    "@heroicons/react": "^2.1.5",
     "@radix-ui/react-icons": "^1.3.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
