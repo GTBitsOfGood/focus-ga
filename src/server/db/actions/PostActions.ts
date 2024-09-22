@@ -34,6 +34,22 @@ export async function getPosts(): Promise<Post[]> {
 }
 
 /**
+ * Retrieves a single post from the database by its ID.
+ * @param id - The ID of the post to retrieve.
+ * @returns A promise that resolves to a post object.
+ * @throws Will throw an error if the post is not found.
+ */
+export async function getPost(id: string): Promise<Post> {
+  await dbConnect();
+
+  const post = await PostModel.findById(id);
+  if (!post) {
+    throw new Error("Post not found");
+  }
+  return post.toObject();
+}
+
+/**
  * Updates an existing post in the database.
  * @param id - The ID of the post to update.
  * @param post - The partial post input data for updating.

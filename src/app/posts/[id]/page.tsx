@@ -1,50 +1,20 @@
-'use client'
+'use server'
 
 import CommentComponent from "@/components/CommentComponent";
 import PostComponent from "@/components/PostComponent";
-import { Comment, commentSchema } from "@/utils/types/comment";
-import { Post, postSchema } from "@/utils/types/post";
+import { getPostComments } from "@/server/db/actions/CommentActions";
+import { getPost } from "@/server/db/actions/PostActions";
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
-import { useSearchParams } from "next/navigation";
 
-export default function PostPage() {
-  const params = useSearchParams();
-  const id = params.get('id') as string;
+type PostPageProps = {
+  params: { id: string }
+};
 
-  const dummyId = '000000000000000000000000';
+export default async function PostPage(props: PostPageProps) {
+  const id = props.params.id;
 
-  const post: Post = {
-    ...postSchema.parse({
-      author: dummyId,
-      title: 'Title of the post',
-      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam interdum ligula et dolor pellentesque sollicitudin. Nullam molestie imperdiet eros eu sodales. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nunc eleifend quam at ullamcorper sagittis. Nam ultricies ipsum non turpis tempus non turpis temp...',
-      date: new Date('September 19, 2024 11:55:12'),
-      tags: ['Autism', 'Cancer', 'Diabetes'],
-      likes: 11,
-      comments: 3
-    }),
-    _id: id
-  };
-
-  const firstComment: Comment = {
-    ...commentSchema.parse({
-      author: dummyId,
-      post: dummyId,
-      date: new Date('September 19, 2024 15:05:01'),
-      content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam interdum ligula et dolor pellentesque sollicitudin. Nullam molestie imperdiet eros eu sodales. Class aptent taciti sociosqu'
-    }),
-    _id: dummyId
-  };
-
-  const secondComment: Comment = {
-    ...commentSchema.parse({
-      author: dummyId,
-      post: dummyId,
-      date: new Date('September 19, 2024 17:06:05'),
-      content: 'This is a comment.'
-    }),
-    _id: dummyId
-  };
+  const post = await getPost(id);
+  const comments = await getPostComments(id);
 
   return (
     <>
@@ -54,12 +24,12 @@ export default function PostPage() {
         </a>
       </div>
       <div className="mx-32 p-4 flex flex-col items-stretch gap-4">
-        <PostComponent post={post} authorName={'Fake User 1'} />
-        <div className="bg-[#F3F3F3] text-[#A3A3A3] rounded-full px-5 py-2">
-          Add comment
-        </div>
-        <CommentComponent comment={firstComment} authorName={'Fake User 2'} />
-        <CommentComponent comment={secondComment} authorName={'Fake User 3'} />
+        <PostComponent post={post} authorName="Placeholder" />
+        <input
+          className="bg-[#F3F3F3] text-black rounded-full px-5 py-2"
+          placeholder="Add comment"
+        />
+        {comments.map(comment => <CommentComponent key={comment._id} comment={comment} authorName="Placeholder" />)}
       </div>
     </>
   );

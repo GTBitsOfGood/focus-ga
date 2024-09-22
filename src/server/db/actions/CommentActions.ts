@@ -158,3 +158,16 @@ export async function deleteCommentLike(userId: string, commentId: string): Prom
     session.endSession();
   }
 }
+
+/**
+ * Retrieves all comments under a post in descending order by date of creation.
+ * @param postId - The ID of the post whose comments are to be retrieved.
+ * @throws Will throw an error if the post is not found.
+ * @returns A promise that resolves to an array of comment objects.
+ */
+export async function getPostComments(postId: string): Promise<Comment[]> {
+  await dbConnect();
+
+  const comments = await CommentModel.find({ post: postId }).sort({ date: 'desc' });
+  return comments;
+}
