@@ -39,21 +39,23 @@ export default function PostComponent(props: PostComponentProps) {
         <p>{getDateDifferenceString(new Date(), date)}</p>
       </div>
       <div className="flex items-center justify-between py-0.5">
-        <h2 className="text-xl text-black font-bold">{title}</h2>
+        <h2 className="text-2xl text-black font-bold">{title}</h2>
         <button>
           <EllipsisHorizontalIcon className="w-6 h-6" />
         </button>
       </div>
-      <p className="leading-5">
+      <p className="leading-5 text-lg">
         {content}
       </p>
-      <div className="flex py-1 gap-3">
+      <div className={`flex gap-3 ${tags.length > 0 ? 'py-1' : '-my-1'}`}>
         {tags.map(tag => <Tag key={tag} text={tag} />)}
       </div>
       <div className="flex items-center pt-2 gap-6">
         {bottomRow.map((item, index) => (
           <div key={index} className="flex items-center gap-1.5 px-2">
-            <item.Icon className="w-6 h-6" />
+            <button>
+              <item.Icon className="w-6 h-6" />
+            </button>
             {item.label}
           </div>
         ))}

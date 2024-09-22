@@ -23,7 +23,7 @@ export default async function PostPage(props: PostPageProps) {
           <ChevronLeftIcon className="w-6 h-6" /> Back
         </a>
       </div>
-      <div className="mx-32 p-4 flex flex-col items-stretch gap-4">
+      <div className="mx-32 mb-16 p-4 flex flex-col items-stretch gap-4">
         <PostComponent post={post} authorName="Placeholder" />
         <input
           className="bg-[#F3F3F3] text-black rounded-full px-5 py-2"
