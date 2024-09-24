@@ -7,6 +7,7 @@ import { Comment, CommentInput, commentSchema } from "@/utils/types/comment";
 import { Post } from "@/utils/types/post";
 import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
 import { ChevronLeftIcon } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 type PostCommentsContainerProps = {
@@ -55,9 +56,9 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
   return (
     <>
       <div className="mx-16 my-4 text-lg text-[#686868]">
-        <a href="#" className="flex items-center gap-1">
+        <Link href={'/'} className="flex items-center gap-1">
           <ChevronLeftIcon className="w-6 h-6" /> Back
-        </a>
+        </Link>
       </div>
       <div className="mx-32 mb-16 p-4 flex flex-col items-stretch gap-4">
         <PostComponent post={post} authorName="Placeholder" />

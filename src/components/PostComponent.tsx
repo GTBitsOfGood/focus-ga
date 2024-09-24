@@ -4,16 +4,19 @@ import { Post } from "@/utils/types/post";
 import Tag from "./Tag";
 import { BookmarkIcon, ChatBubbleLeftEllipsisIcon, EllipsisHorizontalIcon, HeartIcon } from "@heroicons/react/24/outline";
 import { getDateDifferenceString } from "@/utils/dateUtils";
+import { useRouter } from "next/navigation";
 
 type PostComponentProps = {
   className?: string;
   post: Post;
   authorName: string;
+  clickable?: boolean
 };
 
 export default function PostComponent(props: PostComponentProps) {
-  const className = props.className || '';
-  const authorName = props.authorName;
+  const router = useRouter();
+
+  const { className = '', post, authorName, clickable = false } = props;
   const {
     title,
     content,
@@ -21,7 +24,7 @@ export default function PostComponent(props: PostComponentProps) {
     tags,
     likes,
     comments
-  } = props.post;
+  } = post;
 
   const bottomRow = [
     { label: likes.toString(), Icon: HeartIcon },
@@ -30,7 +33,10 @@ export default function PostComponent(props: PostComponentProps) {
   ];
 
   return (
-    <div className={`flex flex-col gap-2 text-[#636363] ${className}`}>
+    <div
+      className={`flex flex-col gap-2 text-[#636363] ${clickable ? 'cursor-pointer' : ''} ${className}`}
+      onClick={clickable ? () => router.push(`/posts/${post._id}`) : undefined}
+    >
       <div className="flex items-center justify-between text-sm">
         <div className="flex items-center gap-2">
           <span className="w-6 h-6 bg-[#D9D9D9] rounded-full inline-block"/>
