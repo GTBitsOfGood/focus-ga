@@ -2,7 +2,8 @@
 
 import CommentComponent from "@/components/CommentComponent";
 import PostComponent from "@/components/PostComponent";
-import { Comment } from "@/utils/types/comment";
+import { createComment } from "@/server/db/actions/CommentActions";
+import { Comment, CommentInput, commentSchema } from "@/utils/types/comment";
 import { Post } from "@/utils/types/post";
 import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
 import { ChevronLeftIcon } from "lucide-react";
@@ -16,13 +17,39 @@ type PostCommentsContainerProps = {
 export default function PostCommentsContainer(props: PostCommentsContainerProps) {
   const { post, initialComments } = props;
 
+  // TODO: this is just the ID of the post author; replace this with real
+  // logged-in ID (and/or other necessary changes) when auth is implemented
+  const userId = post.author.toString();
+
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [newCommentBody, setNewCommentBody] = useState<string>('');
+  const [addCommentLoading, setAddCommentLoading] = useState<boolean>(false);
 
-  function onNewCommentSubmit() {
-    // TODO
-    setComments([comments[0],  ...comments]);
-    setNewCommentBody('');
+  async function onNewCommentSubmit() {
+    if (addCommentLoading) {
+      return;
+    }
+    setAddCommentLoading(true);
+
+    const newCommentInput: CommentInput = {
+      author: userId,
+      content: newCommentBody,
+      post: post._id,
+      date: new Date()
+    };
+    const newComment: Comment = { ...commentSchema.parse(newCommentInput), _id: '' };
+    setComments(comments => [newComment, ...comments]);
+
+    try {
+      const newCommentServer = await createComment(newCommentInput);
+      setComments(comments => [newCommentServer, ...comments.slice(1)]);
+      setNewCommentBody('');
+    } catch (err) {
+      console.error('Failed to add comment:', err);
+      setComments(comments => comments.slice(1));
+    } finally {
+      setAddCommentLoading(false);
+    }
   }
 
   return (
@@ -40,7 +67,7 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
             placeholder="Add comment"
             value={newCommentBody}
             onChange={e => setNewCommentBody(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && onNewCommentSubmit()}
+            onKeyDown={e => e.key === 'Enter' && newCommentBody !== '' && onNewCommentSubmit()}
           />
           <button className={newCommentBody === '' ? 'hidden' : ''} onClick={onNewCommentSubmit}>
             <PaperAirplaneIcon className="w-6 h-6 text-blue mr-4" />

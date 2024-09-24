@@ -36,7 +36,7 @@ export default function PostComponent(props: PostComponentProps) {
           <span className="w-6 h-6 bg-[#D9D9D9] rounded-full inline-block"/>
           {authorName}
         </div>
-        <p>{getDateDifferenceString(new Date(), date)}</p>
+        <p suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
       </div>
       <div className="flex items-center justify-between py-0.5">
         <h2 className="text-2xl text-black font-bold">{title}</h2>

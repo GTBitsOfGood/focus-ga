@@ -33,7 +33,7 @@ export default function CommentComponent(props: CommentComponentProps) {
           <div className="font-bold text-black">
             {authorName}
           </div>
-          <p className="text-sm">{getDateDifferenceString(new Date(), date)}</p>
+          <p className="text-sm" suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
         </div>
         <p className="leading-5">
           {content}
