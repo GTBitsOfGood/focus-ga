@@ -10,7 +10,10 @@ import ReportModel from '@/server/db/models/ReportModel';
 import UserModel from '@/server/db/models/UserModel';
 import { createDisability } from '@/server/db/actions/DisabilityActions';
 import { createUser } from '@/server/db/actions/UserActions';
-import { createPost } from '@/server/db/actions/PostActions';
+import { createPost, createPostLike, createPostSave } from '@/server/db/actions/PostActions';
+import { createComment, createCommentLike } from '@/server/db/actions/CommentActions';
+import { createReport } from '@/server/db/actions/ReportActions';
+import { ReportReason, ContentType } from '@/utils/types/report';
 
 const disabilities = ["Cerebral Palsy", "Autism Spectrum Disorder", "Down Syndrome", "Spina Bifida", "Muscular Dystrophy", "Rett Syndrome", "Fragile X Syndrome", "Epilepsy", "ADHD", "Spinal Muscular Atrophy"];
 
@@ -18,26 +21,24 @@ export async function POST(request: Request) {
   await dbConnect();
 
   // clear the database
-  CommentLikeModel.deleteMany({});
-  CommentModel.deleteMany({});
-  DisabilityModel.deleteMany({});
-  PostLikeModel.deleteMany({});
-  PostModel.deleteMany({});
-  PostSaveModel.deleteMany({});
-  ReportModel.deleteMany({});
-  UserModel.deleteMany({});
-
+  await CommentLikeModel.deleteMany({});
+  await CommentModel.deleteMany({});
+  await DisabilityModel.deleteMany({});
+  await PostLikeModel.deleteMany({});
+  await PostModel.deleteMany({});
+  await PostSaveModel.deleteMany({});
+  await ReportModel.deleteMany({});
+  await UserModel.deleteMany({});
+  
   // create disabilities
   const disabilityIds = []
-  for (const disability in disabilities) {
+  for (const disability of disabilities) {
     const id = (await createDisability({ name: disability }))._id;
     disabilityIds.push(id);
   }
 
-
   // create users
   const users = [];
-  const userIds = [];
   for (let i = 0; i < 10; i++) {
     const randomDisabilityCount = Math.floor(Math.random() * 10) + 1;
     const availableDisabilities = [...disabilityIds];
@@ -49,10 +50,15 @@ export async function POST(request: Request) {
       availableDisabilities.splice(randomIndex, 1); // Remove selected number to avoid duplicates
     }
 
+    const firstName = faker.person.firstName();
+    const lastName = faker.person.lastName();
+    const username = faker.internet.userName({ firstName: firstName, lastName: lastName })
+    const email = faker.internet.email({ firstName: firstName, lastName: lastName });
+
     const userInfo = {
-      username: faker.internet.userName(),
-      lastName: faker.person.lastName(),
-      email: faker.internet.email(),
+      username: username,
+      lastName: lastName,
+      email: email,
       childAge: Math.floor(Math.random() * (20)) + 1, // generates random age between 1 and 20
       childDisabilities: selectedDisabilities,
       address: {
@@ -63,17 +69,14 @@ export async function POST(request: Request) {
       }
     }
 
-    users.push(userInfo);
-    const id = (await createUser(userInfo))._id;
-    userIds.push(id);
+    users.push((await createUser(userInfo)));
   }
-
 
   // create posts
   const posts = [];
-  const postIds = [];
-  for (const userId in userIds) {
-    const numberOfPosts = Math.floor(Math.random() * (16)) + 10;
+  for (const user of users) {
+    const userId = user._id;
+    const numberOfPosts = Math.floor(Math.random() * (6));
 
     for (let i = 0; i < numberOfPosts; i++) {
       const randomDisabilityCount = Math.floor(Math.random() * 10) + 1;
@@ -89,15 +92,106 @@ export async function POST(request: Request) {
       const postInfo = {
         author: userId, 
         date: Math.random() < 0.5 ? faker.date.past({ years: 4 }) : undefined,
-        title: faker.lorem.words({ min: 3, max: 14 }),
+        title: faker.word.words({count: { min: 3, max: 14 }}),
         content: faker.lorem.paragraph({ min: 3, max: 10 }),
         tags: selectedDisabilities,
+        isPinned: Math.random() < 0.5 ? true : false,
+        isPrivate: Math.random() < 0.5 ? true : false,
+        isFlagged: Math.random() < 0.5 ? true : false,
       }
 
-      posts.push(postInfo);
-      const id = ((await createPost(postInfo))._id);
-      postIds.push(id);
+      posts.push(((await createPost(postInfo))));
     }
+  }
+
+  // create comments
+  // TODO: make some comments replies
+  const comments = [];
+  for (let i = 0; i < posts.length; i++) {
+    const post = posts[i];
+    const numberOfComments = Math.floor(Math.random() * 6);
+
+    for (let j = 0; j < numberOfComments; j++) {
+      const commentInfo = {
+        author: users[Math.floor(Math.random() * users.length)]._id,
+        post: post._id,
+        date: faker.date.between({ from: post.date, to: new Date(), }),
+        content: faker.lorem.sentences(),
+      }
+      comments.push(await createComment(commentInfo));
+    }
+  }
+
+  // create liked and saved posts
+  for (const user of users) {
+    const numberOfLiked = Math.floor(Math.random() * 6);
+    let indexOptions = Array.from(posts.keys());
+
+    for (let i = 0; i < numberOfLiked; i++) {
+      const randomIndex = Math.floor(Math.random() * indexOptions.length);
+      const postIndex = indexOptions[randomIndex];
+      indexOptions.splice(randomIndex, 1);
+
+      await createPostLike(user._id, posts[postIndex]._id);
+    }
+
+    const numberOfSaved = 5 - numberOfLiked;
+    indexOptions = Array.from(posts.keys());
+    for (let i = 0; i < numberOfSaved; i++) {
+      const randomIndex = Math.floor(Math.random() * indexOptions.length);
+      const postIndex = indexOptions[randomIndex];
+      indexOptions.splice(randomIndex, 1);
+
+      await createPostSave(user._id, posts[postIndex]._id);
+    }
+  }
+
+  // create liked comments
+  for (const user of users) {
+    const numberOfLiked = Math.floor(Math.random() * 6);
+    let indexOptions = Array.from(comments.keys());
+
+    for (let i = 0; i < numberOfLiked; i++) {
+      const randomIndex = Math.floor(Math.random() * indexOptions.length);
+      const commentIndex = indexOptions[randomIndex];
+      indexOptions.splice(randomIndex, 1);
+
+      await createCommentLike(user._id, comments[commentIndex]._id);
+    }
+  }
+
+  // create reports
+  for (let i = 0; i < 10; i++) {
+    const reasons = Object.values(ReportReason);
+    const types = Object.values(ContentType);
+    const sourceUser = users[Math.floor(Math.random() * users.length)];
+
+    let reportedContent;
+    let reportedUser;
+    const reasonIndex = Math.floor(Math.random() * 4);
+    const typeIndex = Math.floor(Math.random() * 3);
+
+    if (typeIndex == 0) {
+      reportedContent = users[Math.floor(Math.random() * users.length)];
+      reportedUser = reportedContent._id;
+    } else if (typeIndex == 1) {
+      reportedContent = comments[Math.floor(Math.random() * comments.length)];
+      reportedUser = reportedContent.author;
+    } else {
+      reportedContent = posts[Math.floor(Math.random() * posts.length)];
+      reportedUser = reportedContent.author;
+    }
+
+    const reportInfo = {
+      reason: reasons[reasonIndex],
+      description: faker.lorem.sentences(),
+      reportedUser: reportedUser.toString(),
+      sourceUser: sourceUser._id.toString(),
+      reportedContent: reportedContent._id.toString(),
+      contentType: types[typeIndex],
+    }
+
+    await createReport(reportInfo);
   }
 
   return Response.json("success", { status: 200 })
