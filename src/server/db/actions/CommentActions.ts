@@ -6,6 +6,7 @@ import CommentLikeModel, { CommentLike } from "../models/CommentLikeModel";
 import dbConnect from "../dbConnect";
 import mongoose from "mongoose";
 import PostModel from "../models/PostModel";
+import UserModel from "../models/UserModel";
 
 /**
  * Creates a new comment in the database.
@@ -160,7 +161,7 @@ export async function deleteCommentLike(userId: string, commentId: string): Prom
 }
 
 /**
- * Retrieves all comments under a post in descending order by date of creation, with authors populated.
+ * Retrieves all comments under a post in descending order by date of creation, with authors populated and post and replyTo IDs nulled out.
  * @param postId - The ID of the post whose comments are to be retrieved.
  * @throws Will throw an error if the post is not found.
  * @returns A promise that resolves to an array of partially populated comment objects.
@@ -171,7 +172,12 @@ export async function getPostComments(postId: string): Promise<PopulatedComment[
   const comments = await CommentModel
     .find({ post: postId })
     .sort({ date: 'desc' })
-    .populate('author');
+    .populate({ path: 'author', model: UserModel });
 
-  return comments.map(comment => comment.toObject());
+  return comments.map(comment => {
+    const res = comment.toObject();
+    res.post = null;
+    res.replyTo = null;
+    return res;
+  });
 }

@@ -19,7 +19,7 @@ export const commentLikeSchema = z.object({
 });
 
 export type Comment = ExtendId<z.infer<typeof commentSchema>>;
-export type PopulatedComment = Omit<Comment, 'author'> & { author: User | null };
+export type PopulatedComment = Omit<Comment, 'author' | 'post' | 'replyTo'> & { author: User | null, post: null, replyTo: null };
 export type CommentLike = ExtendId<z.infer<typeof commentLikeSchema>>;
 
 export type CommentInput = z.input<typeof commentSchema>;

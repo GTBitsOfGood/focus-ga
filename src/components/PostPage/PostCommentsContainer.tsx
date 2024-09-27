@@ -3,8 +3,8 @@
 import CommentComponent from "@/components/CommentComponent";
 import PostComponent from "@/components/PostComponent";
 import { createComment } from "@/server/db/actions/CommentActions";
-import { Comment, CommentInput, commentSchema, PopulatedComment } from "@/utils/types/comment";
-import { PopulatedPost, Post } from "@/utils/types/post";
+import { CommentInput, commentSchema, PopulatedComment } from "@/utils/types/comment";
+import { PopulatedPost } from "@/utils/types/post";
 import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
 import { ChevronLeftIcon } from "lucide-react";
 import Link from "next/link";
@@ -36,11 +36,22 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
       post: post._id,
       date: new Date()
     };
-    const newComment: PopulatedComment = { ...commentSchema.parse(newCommentInput), _id: dummyId, author: post.author };
+    const newComment: PopulatedComment = {
+      ...commentSchema.parse(newCommentInput),
+      _id: dummyId,
+      author: post.author,
+      post: null,
+      replyTo: null
+    };
     setComments(comments => [newComment, ...comments]);
 
     try {
-      const newCommentServer: PopulatedComment = { ...await createComment(newCommentInput), author: post.author };
+      const newCommentServer: PopulatedComment = {
+        ...await createComment(newCommentInput),
+        author: post.author,
+        post: null,
+        replyTo: null
+      };
       setComments(comments => [newCommentServer, ...comments.slice(1)]);
       setNewCommentBody('');
     } catch (err) {

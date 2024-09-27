@@ -7,6 +7,8 @@ import PostLikeModel from "../models/PostLikeModel";
 import { postSaveSchema, postLikeSchema } from "@/utils/types/post";
 import dbConnect from "../dbConnect";
 import mongoose from "mongoose";
+import UserModel from "../models/UserModel";
+import DisabilityModel from "../models/DisabilityModel";
 
 /**
  * Creates a new post in the database.
@@ -60,8 +62,8 @@ export async function getPopulatedPost(id: string): Promise<PopulatedPost> {
 
   const post = await PostModel
     .findById(id)
-    .populate('author')
-    .populate('tags');
+    .populate({ path: 'author', model: UserModel })
+    .populate({ path: 'tags', model: DisabilityModel });
   
   if (!post) {
     throw new Error("Post not found");
