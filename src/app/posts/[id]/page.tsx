@@ -2,7 +2,7 @@
 
 import PostCommentsContainer from "@/components/PostPage/PostCommentsContainer";
 import { getPostComments } from "@/server/db/actions/CommentActions";
-import { getPost } from "@/server/db/actions/PostActions";
+import { getPopulatedPost } from "@/server/db/actions/PostActions";
 
 type PostPageProps = {
   params: { id: string }
@@ -11,7 +11,7 @@ type PostPageProps = {
 export default async function PostPage(props: PostPageProps) {
   const id = props.params.id;
 
-  const post = await getPost(id);
+  const post = await getPopulatedPost(id);
   const comments = await getPostComments(id);
 
   return <PostCommentsContainer post={post} initialComments={comments} />;

@@ -1,6 +1,6 @@
 'use server'
 
-import { commentSchema, commentLikeSchema, CommentInput, Comment } from "@/utils/types/comment";
+import { commentSchema, commentLikeSchema, CommentInput, Comment, PopulatedComment } from "@/utils/types/comment";
 import CommentModel from "../models/CommentModel";
 import CommentLikeModel, { CommentLike } from "../models/CommentLikeModel";
 import dbConnect from "../dbConnect";
@@ -160,14 +160,18 @@ export async function deleteCommentLike(userId: string, commentId: string): Prom
 }
 
 /**
- * Retrieves all comments under a post in descending order by date of creation.
+ * Retrieves all comments under a post in descending order by date of creation, with authors populated.
  * @param postId - The ID of the post whose comments are to be retrieved.
  * @throws Will throw an error if the post is not found.
- * @returns A promise that resolves to an array of comment objects.
+ * @returns A promise that resolves to an array of partially populated comment objects.
  */
-export async function getPostComments(postId: string): Promise<Comment[]> {
+export async function getPostComments(postId: string): Promise<PopulatedComment[]> {
   await dbConnect();
 
-  const comments = await CommentModel.find({ post: postId }).sort({ date: 'desc' });
-  return comments;
+  const comments = await CommentModel
+    .find({ post: postId })
+    .sort({ date: 'desc' })
+    .populate('author');
+
+  return comments.map(comment => comment.toObject());
 }

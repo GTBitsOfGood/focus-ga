@@ -1,6 +1,6 @@
 'use client'
 
-import { Post } from "@/utils/types/post";
+import { PopulatedPost, Post } from "@/utils/types/post";
 import Tag from "./Tag";
 import { BookmarkIcon, ChatBubbleLeftEllipsisIcon, EllipsisHorizontalIcon, HeartIcon } from "@heroicons/react/24/outline";
 import { getDateDifferenceString } from "@/utils/dateUtils";
@@ -8,17 +8,17 @@ import { useRouter } from "next/navigation";
 
 type PostComponentProps = {
   className?: string;
-  post: Post;
-  authorName: string;
-  clickable?: boolean
+  post: PopulatedPost;
+  clickable?: boolean;
 };
 
 export default function PostComponent(props: PostComponentProps) {
   const router = useRouter();
 
-  const { className = '', post, authorName, clickable = false } = props;
+  const { className = '', post, clickable = false } = props;
   const {
     title,
+    author,
     content,
     date,
     tags,
@@ -40,7 +40,7 @@ export default function PostComponent(props: PostComponentProps) {
       <div className="flex items-center justify-between text-sm">
         <div className="flex items-center gap-2">
           <span className="w-6 h-6 bg-[#D9D9D9] rounded-full inline-block"/>
-          {authorName}
+          {author ? `${author.username} ${author.lastName}` : 'Deleted User'}
         </div>
         <p suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
       </div>
@@ -54,7 +54,7 @@ export default function PostComponent(props: PostComponentProps) {
         {content}
       </p>
       <div className={`flex gap-3 ${tags.length > 0 ? 'py-1' : '-my-1'}`}>
-        {tags.map(tag => <Tag key={tag} text={tag} />)}
+        {tags.filter(tag => tag !== null).map(tag => <Tag key={tag._id} text={tag.name} />)}
       </div>
       <div className="flex items-center pt-2 gap-6">
         {bottomRow.map((item, index) => (

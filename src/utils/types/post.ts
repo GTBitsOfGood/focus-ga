@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { Types } from "mongoose";
 import { ExtendId } from "./common";
+import { User } from "./user";
+import { Disability } from "./disability";
 
 export const postSchema = z.object({
   author: z.string().transform(id => new Types.ObjectId(id)),
@@ -30,6 +32,7 @@ export const postLikeSchema = z.object({
 });
 
 export type Post = ExtendId<z.infer<typeof postSchema>>;
+export type PopulatedPost = Omit<Post, 'author' | 'tags'> & { author: User | null, tags: (Disability | null)[] };
 export type PostSave = ExtendId<z.infer<typeof postSaveSchema>>;
 export type PostLike = ExtendId<z.infer<typeof postLikeSchema>>;
 

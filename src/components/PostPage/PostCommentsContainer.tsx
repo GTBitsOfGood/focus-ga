@@ -3,26 +3,24 @@
 import CommentComponent from "@/components/CommentComponent";
 import PostComponent from "@/components/PostComponent";
 import { createComment } from "@/server/db/actions/CommentActions";
-import { Comment, CommentInput, commentSchema } from "@/utils/types/comment";
-import { Post } from "@/utils/types/post";
+import { Comment, CommentInput, commentSchema, PopulatedComment } from "@/utils/types/comment";
+import { PopulatedPost, Post } from "@/utils/types/post";
 import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
 import { ChevronLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
 type PostCommentsContainerProps = {
-  post: Post,
-  initialComments: Comment[]
+  post: PopulatedPost,
+  initialComments: PopulatedComment[]
 };
+
+const dummyId = '000000000000000000000000';
 
 export default function PostCommentsContainer(props: PostCommentsContainerProps) {
   const { post, initialComments } = props;
 
-  // TODO: this is just the ID of the post author; replace this with real
-  // logged-in ID (and/or other necessary changes) when auth is implemented
-  const userId = post.author.toString();
-
-  const [comments, setComments] = useState<Comment[]>(initialComments);
+  const [comments, setComments] = useState<PopulatedComment[]>(initialComments);
   const [newCommentBody, setNewCommentBody] = useState<string>('');
   const [addCommentLoading, setAddCommentLoading] = useState<boolean>(false);
 
@@ -33,16 +31,16 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
     setAddCommentLoading(true);
 
     const newCommentInput: CommentInput = {
-      author: userId,
+      author: post.author?._id || dummyId,
       content: newCommentBody,
       post: post._id,
       date: new Date()
     };
-    const newComment: Comment = { ...commentSchema.parse(newCommentInput), _id: '' };
+    const newComment: PopulatedComment = { ...commentSchema.parse(newCommentInput), _id: dummyId, author: post.author };
     setComments(comments => [newComment, ...comments]);
 
     try {
-      const newCommentServer = await createComment(newCommentInput);
+      const newCommentServer: PopulatedComment = { ...await createComment(newCommentInput), author: post.author };
       setComments(comments => [newCommentServer, ...comments.slice(1)]);
       setNewCommentBody('');
     } catch (err) {
@@ -61,7 +59,7 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
         </Link>
       </div>
       <div className="mx-32 mb-16 p-4 flex flex-col items-stretch gap-4">
-        <PostComponent post={post} authorName="Placeholder" />
+        <PostComponent post={post} />
         <div className="flex items-center bg-[#F3F3F3] rounded-full">
           <input
             className="flex-grow pl-5 pr-3 py-2 bg-transparent outline-none select-none text-black"
@@ -74,7 +72,7 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
             <PaperAirplaneIcon className="w-6 h-6 text-blue mr-4" />
           </button>
         </div>
-        {comments.map(comment => <CommentComponent key={comment._id} comment={comment} authorName="Placeholder" />)}
+        {comments.map(comment => <CommentComponent key={comment._id} comment={comment} />)}
       </div>
     </>
   );

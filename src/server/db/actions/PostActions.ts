@@ -1,6 +1,6 @@
 'use server'
 
-import { postSchema, editPostSchema, Post, PostInput, PostSaveInput, PostLikeInput, PostLike } from "@/utils/types/post";
+import { postSchema, editPostSchema, Post, PostInput, PostSaveInput, PostLikeInput, PostLike, PopulatedPost } from "@/utils/types/post";
 import PostModel from "../models/PostModel";
 import PostSaveModel from "../models/PostSaveModel";
 import PostLikeModel from "../models/PostLikeModel";
@@ -46,6 +46,27 @@ export async function getPost(id: string): Promise<Post> {
   if (!post) {
     throw new Error("Post not found");
   }
+  return post.toObject();
+}
+
+/**
+ * Retrieves a single post from the database by its ID with its author and disability fields populated.
+ * @param id - The ID of the post to retrieve.
+ * @returns A promise that resolves to a populated post object containing author and disability objects (or null if they are not found)
+ * @throws Will throw an error if the post is not found.
+ */
+export async function getPopulatedPost(id: string): Promise<PopulatedPost> {
+  await dbConnect();
+
+  const post = await PostModel
+    .findById(id)
+    .populate('author')
+    .populate('tags');
+  
+  if (!post) {
+    throw new Error("Post not found");
+  }
+
   return post.toObject();
 }
 
