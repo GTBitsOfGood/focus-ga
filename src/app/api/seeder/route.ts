@@ -14,6 +14,7 @@ import { createPost, createPostLike, createPostSave } from '@/server/db/actions/
 import { createComment, createCommentLike } from '@/server/db/actions/CommentActions';
 import { createReport } from '@/server/db/actions/ReportActions';
 import { ReportReason, ContentType } from '@/utils/types/report';
+import { CommentInput } from '@/utils/types/comment';
 
 export async function POST(request: Request) {
   try {
@@ -109,19 +110,27 @@ export async function POST(request: Request) {
     console.log("Successfully created posts");
 
     // create comments
-    // TODO: make some comments replies
     const comments = [];
     for (let i = 0; i < posts.length; i++) {
       const post = posts[i];
       const numberOfComments = Math.floor(Math.random() * 6);
 
       for (let j = 0; j < numberOfComments; j++) {
-        const commentInfo = {
+        
+        const commentInfo: CommentInput = {
           author: users[Math.floor(Math.random() * users.length)]._id,
           post: post._id,
           date: faker.date.between({ from: post.date, to: new Date(), }),
           content: faker.lorem.sentences(),
         }
+        
+        if (comments.length > 0) {
+          const randomIndex = Math.floor(Math.random() * comments.length);
+          if (commentInfo.date && comments[randomIndex].date < commentInfo.date) {
+            commentInfo.replyTo = comments[randomIndex]._id;
+          }
+        }
+
         comments.push(await createComment(commentInfo));
       }
     }
