@@ -1,3 +1,7 @@
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+@import '../../node_modules/@mdxeditor/editor/dist/style.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,4 +9,11 @@
   :root {
     --radius: 0.5rem
   }
+}
+
+.prose {
+  font-family: "Lato", sans-serif;
+}
+.prose strong {
+  font-weight: 600;
 }
