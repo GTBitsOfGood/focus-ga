@@ -63,7 +63,7 @@ export default function PostComponent(props: PostComponentProps) {
         markdown={content}
         parse={markdown => mdParser.render(markdown)}
       />
-      <div className={`flex gap-3 ${tags.length > 0 ? 'py-1' : '-my-1'}`}>
+      <div className={`flex flex-wrap gap-3 ${tags.length > 0 ? 'py-1' : '-my-1'}`}>
         {tags.filter(tag => tag !== null).map(tag => <Tag key={`${post._id}-${tag._id}`} text={tag.name} />)}
       </div>
       <div className="flex items-center pt-2 gap-6">
