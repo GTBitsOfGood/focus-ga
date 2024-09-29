@@ -16,7 +16,7 @@ import { createReport } from '@/server/db/actions/ReportActions';
 import { ReportReason, ContentType } from '@/utils/types/report';
 import { CommentInput } from '@/utils/types/comment';
 
-const disabilities = ["Cerebral Palsy", "Autism Spectrum Disorder", "Down Syndrome", "Spina Bifida", "Muscular Dystrophy", "Rett Syndrome", "Fragile X Syndrome", "Epilepsy", "ADHD", "Spinal Muscular Atrophy"];
+const DISABILITIES = ["Cerebral Palsy", "Autism Spectrum Disorder", "Down Syndrome", "Spina Bifida", "Muscular Dystrophy", "Rett Syndrome", "Fragile X Syndrome", "Epilepsy", "ADHD", "Spinal Muscular Atrophy"];
 const NUM_USERS = 10;
 const MAX_CHILD_AGE = 20;
 const MAX_POSTS_PER_USER = 5;
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     
     // create disabilities
     const disabilityIds = []
-    for (const disability of disabilities) {
+    for (const disability of DISABILITIES) {
       const id = (await createDisability({ name: disability }))._id;
       disabilityIds.push(id);
     }
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     // create users
     const users = [];
     for (let i = 0; i < NUM_USERS; i++) {
-      const randomDisabilityCount = Math.floor(Math.random() * disabilities.length) + 1;
+      const randomDisabilityCount = Math.floor(Math.random() * DISABILITIES.length) + 1;
       const availableDisabilities = [...disabilityIds];
       const selectedDisabilities: string[] = [];
 
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
       const numberOfPosts = Math.floor(Math.random() * (MAX_POSTS_PER_USER + 1));
 
       for (let i = 0; i < numberOfPosts; i++) {
-        const randomDisabilityCount = Math.floor(Math.random() * disabilities.length) + 1;
+        const randomDisabilityCount = Math.floor(Math.random() * DISABILITIES.length) + 1;
         const availableDisabilities = [...disabilityIds];
         const selectedDisabilities: string[] = [];
 
