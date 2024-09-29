@@ -1,8 +1,9 @@
 "use client";
 
-import { MDXEditor, MDXEditorMethods, headingsPlugin, listsPlugin, toolbarPlugin, UndoRedo, BoldItalicUnderlineToggles, ListsToggle } from "@mdxeditor/editor";
+import { MDXEditor, MDXEditorMethods, listsPlugin, toolbarPlugin, UndoRedo, BoldItalicUnderlineToggles, ListsToggle } from "@mdxeditor/editor";
 import { FC } from "react";
 import '@mdxeditor/editor/style.css'
+import { useRef } from "react";
 
 interface EditorProps {
   markdown: string;
@@ -15,23 +16,23 @@ interface EditorProps {
  * proxying the ref is necessary. Next.js dynamically imported components don't support refs.
  */
 const Editor: FC<EditorProps> = ({ markdown, editorRef, handleEditorChange }) => {
+  
   return (
-    <div className="h-full overflow-auto border border-gray-300 pb-2 rounded-md">
+    <div className="h-full flex flex-col overflow-auto border border-gray-300 pb-2 rounded-md">
       <MDXEditor
-        contentEditableClassName="prose prose-slate max-w-none"
+        contentEditableClassName="prose prose-slate max-w-none h-full"
         onChange={(e) => handleEditorChange(e)}
         ref={editorRef}
         markdown={markdown}
         plugins={[toolbarPlugin({
             toolbarContents: () => (
               <>
-                {' '}
                 <UndoRedo />
                 <BoldItalicUnderlineToggles />
                 <ListsToggle options={["bullet", "number"]}/>
               </>
             )
-          }), headingsPlugin(), listsPlugin()]}
+          }), listsPlugin()]}
       />
     </div>
     

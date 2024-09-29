@@ -5,7 +5,7 @@ import { Schema } from "mongoose";
 const PostSchema = new Schema<Post>({
   author: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
   date: { type: Date, default: Date.now() },
-  title: { type: String, required: true },
+  title: { type: String, required: true, maxLength: 100 },
   content: { type: String, required: true },
   likes: { type: Number, default: 0 },
   comments: { type: Number, default: 0 },

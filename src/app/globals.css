@@ -17,3 +17,15 @@
 .prose strong {
   font-weight: 600;
 }
+
+/* styles for editor component */
+._editorWrapper_uazmk_154 {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+._rootContentEditableWrapper_uazmk_1097 {
+  position: relative;
+  flex-grow: 1;
+}
