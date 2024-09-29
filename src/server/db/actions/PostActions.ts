@@ -32,7 +32,7 @@ export async function getPosts(): Promise<Post[]> {
   await dbConnect();
 
   const posts = await PostModel.find();
-  return posts;
+  return posts.map(post => post.toObject());
 }
 
 /**
