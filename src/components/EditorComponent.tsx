@@ -1,4 +1,4 @@
-"use client";
+"use  client";
 
 import { MDXEditor, MDXEditorMethods, listsPlugin, toolbarPlugin, UndoRedo, BoldItalicUnderlineToggles, ListsToggle } from "@mdxeditor/editor";
 import { FC } from "react";
