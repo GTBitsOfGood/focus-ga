@@ -34,7 +34,7 @@ export default function CommentComponent(props: CommentComponentProps) {
       <div className={`flex-grow flex flex-col gap-2 text-[#636363] ${className}`}>
         <div className="flex items-center justify-between">
           <div className="font-bold text-black">
-            {author ? `${author.username} ${author.lastName}` : 'Deleted User'}
+            {author ? `${author.lastName} Family` : 'Deleted User'}
           </div>
           <p className="text-sm" suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
         </div>
