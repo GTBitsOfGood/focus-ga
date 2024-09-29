@@ -39,8 +39,8 @@ export default function PostComponent(props: PostComponentProps) {
   return (
     <div
       className={cn(
-        'flex flex-col gap-2 text-[#636363] p-4 rounded-lg',
-        clickable && 'cursor-pointer hover:bg-gray-100',
+        'flex flex-col gap-2 text-[#636363] rounded-lg',
+        clickable && 'cursor-pointer hover:bg-gray-100 p-4',
         className
       )}
       onClick={clickable ? () => router.push(`/posts/${post._id}`) : undefined}
@@ -54,9 +54,13 @@ export default function PostComponent(props: PostComponentProps) {
       </div>
       <div className="flex items-center justify-between py-0.5">
         <h2 className="text-2xl text-black font-bold">{title}</h2>
-        <button>
-          <EllipsisHorizontalIcon className="w-6 h-6" />
-        </button>
+        {
+          !clickable && (
+            <button>
+              <EllipsisHorizontalIcon className="w-6 h-6" />
+            </button>
+          )
+        }
       </div>
       <MarkdownRenderer
         className="leading-5 text-lg"
