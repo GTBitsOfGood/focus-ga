@@ -1,6 +1,8 @@
 import { getDateDifferenceString } from "@/utils/dateUtils";
 import { PopulatedComment } from "@/utils/types/comment";
 import { ChatBubbleLeftEllipsisIcon, EllipsisHorizontalIcon, HeartIcon } from "@heroicons/react/24/outline";
+import MarkdownRenderer from "./MarkdownRenderer";
+import MarkdownIt from "markdown-it";
 
 type CommentComponentProps = {
   className?: string;
@@ -8,6 +10,8 @@ type CommentComponentProps = {
 };
 
 export default function CommentComponent(props: CommentComponentProps) {
+  const mdParser = new MarkdownIt();
+
   const { className = '', comment } = props;
   const {
     author,
@@ -34,9 +38,11 @@ export default function CommentComponent(props: CommentComponentProps) {
           </div>
           <p className="text-sm" suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
         </div>
-        <p className="leading-5">
-          {content}
-        </p>
+        <MarkdownRenderer
+          className="leading-5"
+          markdown={content}
+          parse={markdown => mdParser.render(markdown)}
+        />
         <div className="flex items-center pt-2 gap-6 text-sm">
           {bottomRow.map((item, index) => (
             <div key={index} className="flex items-center gap-1.5 px-1">

@@ -1,10 +1,12 @@
 'use client'
 
-import { PopulatedPost, Post } from "@/utils/types/post";
+import { PopulatedPost } from "@/utils/types/post";
 import Tag from "./Tag";
 import { BookmarkIcon, ChatBubbleLeftEllipsisIcon, EllipsisHorizontalIcon, HeartIcon } from "@heroicons/react/24/outline";
 import { getDateDifferenceString } from "@/utils/dateUtils";
 import { useRouter } from "next/navigation";
+import MarkdownIt from "markdown-it";
+import MarkdownRenderer from "./MarkdownRenderer";
 
 type PostComponentProps = {
   className?: string;
@@ -13,6 +15,7 @@ type PostComponentProps = {
 };
 
 export default function PostComponent(props: PostComponentProps) {
+  const mdParser = new MarkdownIt();
   const router = useRouter();
 
   const { className = '', post, clickable = false } = props;
@@ -50,9 +53,11 @@ export default function PostComponent(props: PostComponentProps) {
           <EllipsisHorizontalIcon className="w-6 h-6" />
         </button>
       </div>
-      <p className="leading-5 text-lg">
-        {content}
-      </p>
+      <MarkdownRenderer
+        className="leading-5 text-lg"
+        markdown={content}
+        parse={markdown => mdParser.render(markdown)}
+      />
       <div className={`flex gap-3 ${tags.length > 0 ? 'py-1' : '-my-1'}`}>
         {tags.filter(tag => tag !== null).map(tag => <Tag key={tag._id} text={tag.name} />)}
       </div>
