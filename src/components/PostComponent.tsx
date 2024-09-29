@@ -59,11 +59,11 @@ export default function PostComponent(props: PostComponentProps) {
         parse={markdown => mdParser.render(markdown)}
       />
       <div className={`flex gap-3 ${tags.length > 0 ? 'py-1' : '-my-1'}`}>
-        {tags.filter(tag => tag !== null).map(tag => <Tag key={tag._id} text={tag.name} />)}
+        {tags.filter(tag => tag !== null).map(tag => <Tag key={`${post._id}-${tag._id}`} text={tag.name} />)}
       </div>
       <div className="flex items-center pt-2 gap-6">
         {bottomRow.map((item, index) => (
-          <div key={index} className="flex items-center gap-1.5 px-2">
+          <div key={`${post._id}-${index}`} className="flex items-center gap-1.5 px-2">
             <button>
               <item.Icon className="w-6 h-6" />
             </button>
