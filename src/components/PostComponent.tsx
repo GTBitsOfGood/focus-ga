@@ -7,6 +7,7 @@ import { getDateDifferenceString } from "@/utils/dateUtils";
 import { useRouter } from "next/navigation";
 import MarkdownIt from "markdown-it";
 import MarkdownRenderer from "./MarkdownRenderer";
+import { cn } from "@/lib/utils";
 
 type PostComponentProps = {
   className?: string;
@@ -37,7 +38,11 @@ export default function PostComponent(props: PostComponentProps) {
 
   return (
     <div
-      className={`flex flex-col gap-2 text-[#636363] ${clickable ? 'cursor-pointer' : ''} ${className}`}
+      className={cn(
+        'flex flex-col gap-2 text-[#636363] p-4 rounded-lg',
+        clickable && 'cursor-pointer hover:bg-gray-100',
+        className
+      )}
       onClick={clickable ? () => router.push(`/posts/${post._id}`) : undefined}
     >
       <div className="flex items-center justify-between text-sm">
