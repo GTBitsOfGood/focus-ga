@@ -16,6 +16,17 @@ import { createReport } from '@/server/db/actions/ReportActions';
 import { ReportReason, ContentType } from '@/utils/types/report';
 import { CommentInput } from '@/utils/types/comment';
 
+const disabilities = ["Cerebral Palsy", "Autism Spectrum Disorder", "Down Syndrome", "Spina Bifida", "Muscular Dystrophy", "Rett Syndrome", "Fragile X Syndrome", "Epilepsy", "ADHD", "Spinal Muscular Atrophy"];
+const NUM_USERS = 10;
+const MAX_CHILD_AGE = 20;
+const MAX_POSTS_PER_USER = 5;
+const MAX_COMMENTS_PER_POST = 5;
+const MAX_LIKED_SAVED_POSTS_PER_USER = 5;
+const MAX_LIKED_COMMENTS_PER_USER = 5;
+const NUM_REPORTS = 10;
+const NUM_REPORT_REASONS = 4;
+const NUM_CONTENT_TYPES = 3;
+
 export async function POST(request: Request) {
   try {
     await dbConnect();
@@ -32,7 +43,6 @@ export async function POST(request: Request) {
     console.log("Successfully cleared database.");
     
     // create disabilities
-    const disabilities = ["Cerebral Palsy", "Autism Spectrum Disorder", "Down Syndrome", "Spina Bifida", "Muscular Dystrophy", "Rett Syndrome", "Fragile X Syndrome", "Epilepsy", "ADHD", "Spinal Muscular Atrophy"];
     const disabilityIds = []
     for (const disability of disabilities) {
       const id = (await createDisability({ name: disability }))._id;
@@ -42,15 +52,15 @@ export async function POST(request: Request) {
 
     // create users
     const users = [];
-    for (let i = 0; i < 10; i++) {
-      const randomDisabilityCount = Math.floor(Math.random() * 10) + 1;
+    for (let i = 0; i < NUM_USERS; i++) {
+      const randomDisabilityCount = Math.floor(Math.random() * disabilities.length) + 1;
       const availableDisabilities = [...disabilityIds];
       const selectedDisabilities: string[] = [];
 
       for (let i = 0; i < randomDisabilityCount; i++) {
         const randomIndex = Math.floor(Math.random() * availableDisabilities.length);
         selectedDisabilities.push(disabilityIds[randomIndex]);
-        availableDisabilities.splice(randomIndex, 1); // Remove selected number to avoid duplicates
+        availableDisabilities.splice(randomIndex, 1);
       }
 
       const firstName = faker.person.firstName();
@@ -62,7 +72,7 @@ export async function POST(request: Request) {
         username: username,
         lastName: lastName,
         email: email,
-        childAge: Math.floor(Math.random() * (20)) + 1, // generates random age between 1 and 20
+        childAge: Math.floor(Math.random() * (MAX_CHILD_AGE)),
         childDisabilities: selectedDisabilities,
         address: {
           street: faker.location.streetAddress(),
@@ -80,17 +90,17 @@ export async function POST(request: Request) {
     const posts = [];
     for (const user of users) {
       const userId = user._id;
-      const numberOfPosts = Math.floor(Math.random() * (6));
+      const numberOfPosts = Math.floor(Math.random() * (MAX_POSTS_PER_USER + 1));
 
       for (let i = 0; i < numberOfPosts; i++) {
-        const randomDisabilityCount = Math.floor(Math.random() * 10) + 1;
+        const randomDisabilityCount = Math.floor(Math.random() * disabilities.length) + 1;
         const availableDisabilities = [...disabilityIds];
         const selectedDisabilities: string[] = [];
 
         for (let j = 0; j < randomDisabilityCount; j++) {
           const randomIndex = Math.floor(Math.random() * availableDisabilities.length);
           selectedDisabilities.push(disabilityIds[randomIndex]);
-          availableDisabilities.splice(randomIndex, 1); // Remove selected number to avoid duplicates
+          availableDisabilities.splice(randomIndex, 1);
         }
 
         const postInfo = {
@@ -113,10 +123,9 @@ export async function POST(request: Request) {
     const comments = [];
     for (let i = 0; i < posts.length; i++) {
       const post = posts[i];
-      const numberOfComments = Math.floor(Math.random() * 6);
+      const numberOfComments = Math.floor(Math.random() * (MAX_COMMENTS_PER_POST + 1));
 
       for (let j = 0; j < numberOfComments; j++) {
-        
         const commentInfo: CommentInput = {
           author: users[Math.floor(Math.random() * users.length)]._id,
           post: post._id,
@@ -138,7 +147,7 @@ export async function POST(request: Request) {
 
     // create liked and saved posts
     for (const user of users) {
-      const numberOfLiked = Math.floor(Math.random() * 6);
+      const numberOfLiked = Math.floor(Math.random() * (MAX_LIKED_SAVED_POSTS_PER_USER + 1));
       let indexOptions = Array.from(posts.keys());
 
       for (let i = 0; i < numberOfLiked; i++) {
@@ -149,7 +158,7 @@ export async function POST(request: Request) {
         await createPostLike(user._id, posts[postIndex]._id);
       }
 
-      const numberOfSaved = 5 - numberOfLiked;
+      const numberOfSaved = MAX_LIKED_SAVED_POSTS_PER_USER - numberOfLiked;
       indexOptions = Array.from(posts.keys());
       for (let i = 0; i < numberOfSaved; i++) {
         const randomIndex = Math.floor(Math.random() * indexOptions.length);
@@ -163,7 +172,7 @@ export async function POST(request: Request) {
 
     // create liked comments
     for (const user of users) {
-      const numberOfLiked = Math.floor(Math.random() * 6);
+      const numberOfLiked = Math.floor(Math.random() * (MAX_LIKED_COMMENTS_PER_USER + 1));
       let indexOptions = Array.from(comments.keys());
 
       for (let i = 0; i < numberOfLiked; i++) {
@@ -177,23 +186,23 @@ export async function POST(request: Request) {
     console.log("Sucessfully created liked comments.");
 
     // create reports
-    for (let i = 0; i < 10; i++) {
-      const reasons = Object.values(ReportReason);
-      const types = Object.values(ContentType);
+    const reasons = Object.values(ReportReason);
+    const types = Object.values(ContentType);
+    for (let i = 0; i < NUM_REPORTS; i++) {
       const sourceUser = users[Math.floor(Math.random() * users.length)];
 
       let reportedContent;
       let reportedUser;
-      const reasonIndex = Math.floor(Math.random() * 4);
-      const typeIndex = Math.floor(Math.random() * 3);
+      const reasonIndex = Math.floor(Math.random() * NUM_REPORT_REASONS);
+      const typeIndex = Math.floor(Math.random() * NUM_CONTENT_TYPES);
 
-      if (typeIndex == 0) {
+      if (typeIndex == 0) { // report user
         reportedContent = users[Math.floor(Math.random() * users.length)];
         reportedUser = reportedContent._id;
-      } else if (typeIndex == 1) {
+      } else if (typeIndex == 1) { // report comment
         reportedContent = comments[Math.floor(Math.random() * comments.length)];
         reportedUser = reportedContent.author;
-      } else {
+      } else { // report post
         reportedContent = posts[Math.floor(Math.random() * posts.length)];
         reportedUser = reportedContent.author;
       }
