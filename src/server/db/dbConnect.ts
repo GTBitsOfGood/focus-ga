@@ -44,6 +44,12 @@ async function dbConnect() {
           if (ret._id && typeof ret._id === 'object' && ret._id.toString) {
             ret._id = ret._id.toString();
           }
+          // Convert arrays of ObjectIds to arrays of strings
+          for (const key in ret) {
+            if (Array.isArray(ret[key]) && ret[key].length > 0 && ret[key][0] instanceof mongoose.Types.ObjectId) {
+              ret[key] = ret[key].map((id: mongoose.Types.ObjectId) => id.toString());
+            }
+          }
           return ret;
         }
       });
