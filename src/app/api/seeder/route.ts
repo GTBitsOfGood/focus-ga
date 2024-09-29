@@ -99,7 +99,7 @@ export async function POST(request: Request) {
 
         for (let j = 0; j < randomDisabilityCount; j++) {
           const randomIndex = Math.floor(Math.random() * availableDisabilities.length);
-          selectedDisabilities.push(disabilityIds[randomIndex]);
+          selectedDisabilities.push(availableDisabilities[randomIndex]);
           availableDisabilities.splice(randomIndex, 1);
         }
 
