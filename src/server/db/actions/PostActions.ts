@@ -9,6 +9,7 @@ import dbConnect from "../dbConnect";
 import mongoose from "mongoose";
 import UserModel from "../models/UserModel";
 import DisabilityModel from "../models/DisabilityModel";
+import { revalidatePath } from "next/cache";
 
 /**
  * Creates a new post in the database.
@@ -16,12 +17,14 @@ import DisabilityModel from "../models/DisabilityModel";
  * @throws Will throw an error if the post creation fails.
  * @returns The created post object.
  */
-export async function createPost(post: PostInput): Promise<Post> {
+export async function createPost(post: PostInput): Promise<string> {
   await dbConnect();
 
   const validatedPost = postSchema.parse(post);
   const createdPost = await PostModel.create(validatedPost);
-  return createdPost.toObject();
+
+  revalidatePath("/");
+  return createdPost._id.toString();
 }
 
 /**

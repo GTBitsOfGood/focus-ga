@@ -26,3 +26,7 @@
   position: relative;
   flex-grow: 1;
 }
+
+._toolbarRoot_uazmk_160 {
+  border-radius: 0 !important;
+}

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useEffect, useState, Suspense } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { createPost } from "@/server/db/actions/PostActions";
 import { getDisabilities } from "@/server/db/actions/DisabilityActions";
 import { Disability } from "@/utils/types/disability";
@@ -15,10 +15,11 @@ import {
 } from "@/components/ui/popover"
 import { useToast } from "@/hooks/use-toast";
 import { Types } from "mongoose";
+import { useRouter } from "next/navigation";
 
 const EditorComp = dynamic(() => import('./EditorComponent'), { ssr: false })
 
-type Props = {
+type CreatePostModalProps = {
   isOpen: boolean;
   openModal: () => void;
   closeModal: () => void;
@@ -30,7 +31,7 @@ type PostData = {
   tags: Disability[];
 }
 
-export default function CreatePostModal( props: Props ) {
+export default function CreatePostModal( props: CreatePostModalProps ) {
   const [postData, setPostData] = useState<PostData>({
     title: "",
     content: "",
@@ -41,25 +42,14 @@ export default function CreatePostModal( props: Props ) {
   const [showDisabilities, setShowDisabilities] = useState(false);
   const [disabilities, setDisabilities] = useState<Disability[]>([]);
   const [mouseDownOnBackground, setMouseDownOnBackground] = useState(false);
-  const triggerRef = useRef<HTMLDivElement>(null);
-  const [dropdownWidth, setDropdownWidth] = useState<number | undefined>();
   const { toast } = useToast();
-
-  useEffect(() => {
-    console.log(dropdownWidth)
-    if (triggerRef.current) {
-      setDropdownWidth(triggerRef.current.offsetWidth);
-    }
-  }, [triggerRef]);
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchDisabilities = async () => {
-      try {
-        const disabilityList = await getDisabilities();
-        setDisabilities(disabilityList);
-      } catch (error) {
-        console.error("failed to fetch disabilities")
-      }
+      const disabilityList = await getDisabilities();
+      setDisabilities(disabilityList);
     }
     fetchDisabilities();
   }, [])
@@ -102,6 +92,7 @@ export default function CreatePostModal( props: Props ) {
   const handleSubmit = async () => {
     try {
       if (validateSubmission()) {
+        setIsSubmitting(true);
         const formattedData = {
           author: (new Types.ObjectId()).toString(), // TODO: replace with actual userid 
           title: postData.title,
@@ -109,11 +100,10 @@ export default function CreatePostModal( props: Props ) {
           tags: postData.tags.map((tag) => tag._id)
         }
 
-        console.log(formattedData.content)
-
         await createPost(formattedData);
         props.closeModal();
         notifySuccess();
+
         setPostData({
           title: "",
           content: "",
@@ -122,6 +112,8 @@ export default function CreatePostModal( props: Props ) {
       }
     } catch (error) {
       notifyFailure();
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -139,7 +131,6 @@ export default function CreatePostModal( props: Props ) {
   }
 
   const handleEditorChange = (text: string) => {
-    console.log(text)
     const textLength = countNonMarkdownCharacters(text);
     if (textLength <= MAX_POST_CONTENT_LEN) {
       setPostData({ ... postData, content: text });
@@ -174,8 +165,11 @@ export default function CreatePostModal( props: Props ) {
     setMouseDownOnBackground(false);
   };
 
+  if (!props.isOpen) {
+    return null;
+  }
+
   return (
-    props.isOpen ? 
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}>
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl h-full max-h-[70%] relative z-50 flex flex-col justify-between overflow-y-auto">
         <div className="flex justify-between items-center mb-2">
@@ -205,12 +199,12 @@ export default function CreatePostModal( props: Props ) {
           {showTitleError ? <div className="text-[#ff4e4e] text-sm font-normal">Required Field</div> : null }
         </div>
         
-        <div className="relative mb-4 h-[50%]">
+        <div className="relative mb-10">
           <label htmlFor="title" className="block text-sm font-bold text-gray-700">
             Body
             <span className="text-[#ff4e4e] text-base font-medium">*</span>
           </label>
-          <div className={`mt-1 rounded-lg h-[85%] border ${showBodyError ? 'border-red-300 border-2' : ''}`}>
+          <div className={`mt-1 rounded-lg h-full border ${showBodyError ? 'border-red-300 border-2' : ''}`}>
             <Suspense fallback={null}>
               <EditorComp markdown={postData.content} handleEditorChange={handleEditorChange} />
             </Suspense>
@@ -227,7 +221,7 @@ export default function CreatePostModal( props: Props ) {
           </label>
           <div className="relative w-full">
             <Popover>
-              <PopoverTrigger asChild className="w-full" onClick={() => {console.log("w"), setShowDisabilities(!showDisabilities)}}>
+              <PopoverTrigger asChild className="w-full" onClick={() => setShowDisabilities(!showDisabilities)}>
                 <div className="relative flex items-center p-3 border border-gray-300 rounded-md cursor-pointer">
                   <div className="flex items-center w-full">
                     {postData.tags.length === 0 ? (
@@ -285,12 +279,12 @@ export default function CreatePostModal( props: Props ) {
           </button>
           <button 
             onClick={handleSubmit}
-            className="h-[38px] px-[25px] py-2 bg-[#475cc6] rounded-lg justify-center items-center gap-2.5 inline-flex">
-            <div className="bg-blue-600 text-white rounded-md hover:bg-blue-700 font-bold">Post</div>
+            disabled={isSubmitting}
+            className={`h-[38px] px-[25px] py-2 bg-[#475cc6] rounded-lg justify-center items-center gap-2.5 inline-flex ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}>
+            <div className="text-white font-bold">{isSubmitting ? 'Posting...' : 'Post'}</div>
           </button>
         </div>
       </div> 
     </div> 
-    : null
   );
 }

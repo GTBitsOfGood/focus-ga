@@ -3,7 +3,6 @@
 import { MDXEditor, MDXEditorMethods, listsPlugin, toolbarPlugin, UndoRedo, BoldItalicUnderlineToggles, ListsToggle } from "@mdxeditor/editor";
 import { FC } from "react";
 import '@mdxeditor/editor/style.css'
-import { useRef } from "react";
 
 interface EditorProps {
   markdown: string;
@@ -31,7 +30,8 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, handleEditorChange }) =>
                 <BoldItalicUnderlineToggles />
                 <ListsToggle options={["bullet", "number"]}/>
               </>
-            )
+            ),
+            
           }), listsPlugin()]}
       />
     </div>

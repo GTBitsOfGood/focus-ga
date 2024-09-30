@@ -32,7 +32,7 @@ export async function getDisabilities(): Promise<Disability[]> {
   try {
     await dbConnect();
     const disabilities = await DisabilityModel.find();
-    return disabilities;
+    return disabilities.map(disability => disability.toObject());
   } catch (error) {
     console.error("Failed to retrieve disabilities:", error);
     throw new Error("Failed to retrieve disabilities");
