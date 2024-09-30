@@ -1,3 +1,7 @@
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+@import '../../node_modules/@mdxeditor/editor/dist/style.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,4 +9,20 @@
   :root {
     --radius: 0.5rem
   }
+}
+
+.prose strong {
+  font-weight: 600;
+}
+
+/* styles for editor component */
+._editorWrapper_uazmk_154 {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+._rootContentEditableWrapper_uazmk_1097 {
+  position: relative;
+  flex-grow: 1;
 }

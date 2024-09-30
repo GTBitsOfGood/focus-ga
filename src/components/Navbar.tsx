@@ -8,17 +8,16 @@ import { Search } from "lucide-react";
 import { ChevronDown } from "lucide-react";
 import { ChevronUp } from "lucide-react";
 
-export default function Navbar() {
+interface Props {
+  openModal: () => void;
+}
+
+export default function Navbar( props: Props ) {
   const router = useRouter();
   const [menuIsOpen, setMenuIsOpen] = useState(false);
-  const [createPostModalIsOpen, setCreatePostModalIsOpen] = useState(false);
 
   const toggleDropdown = () => {
     setMenuIsOpen(!menuIsOpen);
-  };
-
-  const handleCreatePostOpen = () => { //TODO: Move logic to parent class to give modal control of opening/closing itself to, not just then navbar (i.e. pressing an "x" button or  the background of the modal)
-    setCreatePostModalIsOpen(!createPostModalIsOpen);
   };
 
   return (
@@ -37,7 +36,7 @@ export default function Navbar() {
       {/* Create Post*/}
       <button
         className="bg-blue text-xl text-white font-semibold w-[184px] h-[45px] rounded-[12px] gap-2 flex flex-row justify-center items-center hover:opacity-90"
-        onClick={handleCreatePostOpen}
+        onClick={() => props.openModal()}
       >
         <SquarePen color="#ffffff" /> Create Post
       </button>

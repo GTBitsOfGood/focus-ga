@@ -5,7 +5,7 @@ import { ReactNode } from "react";
 
 const lato = Lato({
   subsets: ['latin'],
-  weight: ['100', '300', '400', '700', '900'], // All possible weights
+  weight: ['100', '300', '400', '700', '900'],
 });
 
 export const metadata: Metadata = {
@@ -20,8 +20,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      {/* <body>{children}</body> */}
-      <body className={lato.className}>{children}</body>
+      <body className={lato.className}>
+        {children} 
+      </body>
     </html>
   );
 }

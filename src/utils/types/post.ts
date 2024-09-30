@@ -7,7 +7,7 @@ import { Disability } from "./disability";
 export const postSchema = z.object({
   author: z.string().transform(id => new Types.ObjectId(id)),
   date: z.date().default(() => new Date()),
-  title: z.string(),
+  title: z.string().max(100, "Title must be at most 100 characters."),
   content: z.string(),
   likes: z.number().default(0),
   comments: z.number().default(0),
