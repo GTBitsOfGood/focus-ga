@@ -78,6 +78,10 @@ export async function getPost(id: string): Promise<Post> {
 export async function getPopulatedPost(id: string): Promise<PopulatedPost> {
   await dbConnect();
 
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new Error("Invalid post ID");
+  }
+  
   const post = await PostModel
     .findById(id)
     .populate({ path: 'author', model: UserModel })
