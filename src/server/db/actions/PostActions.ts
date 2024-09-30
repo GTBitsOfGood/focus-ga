@@ -17,14 +17,14 @@ import { revalidatePath } from "next/cache";
  * @throws Will throw an error if the post creation fails.
  * @returns The created post object.
  */
-export async function createPost(post: PostInput): Promise<string> {
+export async function createPost(post: PostInput): Promise<Post> {
   await dbConnect();
 
   const validatedPost = postSchema.parse(post);
   const createdPost = await PostModel.create(validatedPost);
 
   revalidatePath("/");
-  return createdPost._id.toString();
+  return createdPost.toObject();
 }
 
 /**
