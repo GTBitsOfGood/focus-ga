@@ -6,7 +6,6 @@ import { getDisabilities } from "@/server/db/actions/DisabilityActions";
 import { Disability } from "@/utils/types/disability";
 import Tag from "./Tag";
 import dynamic from 'next/dynamic'
-import { Types } from "mongoose";
 import { MAX_POST_TITLE_LEN, MAX_POST_CONTENT_LEN, MAX_POST_DISABILITY_TAGS } from "@/utils/consts";
 import { ChevronDown, Check, X, ChevronUp } from "lucide-react";
 import {
@@ -14,12 +13,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { useToast } from "@/hooks/use-toast";
+import { Types } from "mongoose";
 
 const EditorComp = dynamic(() => import('./EditorComponent'), { ssr: false })
 
 type Props = {
-  notifySuccess: () => void;
-  notifyFailure: () => void;
   isOpen: boolean;
   openModal: () => void;
   closeModal: () => void;
@@ -44,6 +43,7 @@ export default function CreatePostModal( props: Props ) {
   const [mouseDownOnBackground, setMouseDownOnBackground] = useState(false);
   const triggerRef = useRef<HTMLDivElement>(null);
   const [dropdownWidth, setDropdownWidth] = useState<number | undefined>();
+  const { toast } = useToast();
 
   useEffect(() => {
     console.log(dropdownWidth)
@@ -64,9 +64,18 @@ export default function CreatePostModal( props: Props ) {
     fetchDisabilities();
   }, [])
 
-  
-  const generateObjectId = (): string => {
-    return (new Types.ObjectId()).toString();
+  const notifySuccess = () => {
+    toast({
+      title: "Post successfully added",
+      description: "Your post has been successfully added to the community.",
+    });
+  };
+
+  const notifyFailure = () => {
+    toast({
+      title: "Failed to add post",
+      description: "There was an error adding your post. Please try again.",
+    });
   };
 
   const validateSubmission = (): boolean => {
@@ -94,7 +103,7 @@ export default function CreatePostModal( props: Props ) {
     try {
       if (validateSubmission()) {
         const formattedData = {
-          author: generateObjectId(), // TODO: replace with actual userid 
+          author: (new Types.ObjectId()).toString(), // TODO: replace with actual userid 
           title: postData.title,
           content: postData.content.trim(),
           tags: postData.tags.map((tag) => tag._id)
@@ -104,7 +113,7 @@ export default function CreatePostModal( props: Props ) {
 
         await createPost(formattedData);
         props.closeModal();
-        props.notifySuccess();
+        notifySuccess();
         setPostData({
           title: "",
           content: "",
@@ -112,7 +121,7 @@ export default function CreatePostModal( props: Props ) {
         });
       }
     } catch (error) {
-      props.notifyFailure();
+      notifyFailure();
     }
   }
 
