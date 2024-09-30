@@ -107,7 +107,7 @@ export async function POST(request: Request) {
         const postInfo = {
           author: userId, 
           date: Math.random() < 0.5 ? faker.date.past({ years: 4 }) : undefined,
-          title: faker.word.words({count: { min: 3, max: 14 }}),
+          title: faker.word.words({count: { min: 3, max: 10 }}),
           content: faker.lorem.paragraph({ min: 3, max: 10 }),
           tags: selectedDisabilities,
           isPinned: Math.random() < 0.5 ? true : false,
