@@ -7,6 +7,7 @@ import { SquarePen } from "lucide-react";
 import { Search } from "lucide-react";
 import { ChevronDown } from "lucide-react";
 import { ChevronUp } from "lucide-react";
+import Link from "next/link";
 
 interface Props {
   openModal: () => void;
@@ -66,42 +67,22 @@ export default function Navbar( props: Props ) {
             <span className="text-black font-bold text-3xl">D</span>
           </div>
 
-          <ul className="p-2 text-center">
-            <li
-              className="py-1 px-4 hover:bg-gray-100 cursor-pointer transition-colors"
-              onClick={() => {
-                router.push("/profile");
-              }}
-            >
+          <div className="p-2 text-center">
+            <Link href="/profile" className="block py-1 px-4 hover:bg-gray-100 cursor-pointer transition-colors">
               Profile
-            </li>
-            <li
-              className="py-1 px-4 hover:bg-gray-100 cursor-pointer transition-colors"
-              onClick={() => {
-                router.push("/saved-posts");
-              }}
-            >
+            </Link>
+            <Link href="/saved-posts" className="block py-1 px-4 hover:bg-gray-100 cursor-pointer transition-colors">
               Saved Posts
-            </li>
-            <li
-              className="py-1 px-4 hover:bg-gray-100 cursor-pointer transition-colors"
-              onClick={() => {
-                router.push("/profile/settings");
-              }}
-            >
+            </Link>
+            <Link href="/profile/settings" className="block py-1 px-4 hover:bg-gray-100 cursor-pointer transition-colors">
               Settings
-            </li>
-            <li className="py-[16px] mx-6 cursor-pointer border-t mt-2 font-bold">
-              <button
-                className="w-full py-[2px] px-4 text-gray-700 bg-gray-100 border border-gray-300 rounded-sm hover:bg-gray-200"
-                onClick={() => {
-                  router.push("/login");
-                }}
-              >
+            </Link>
+            <Link href="/login" className="block py-[16px] mx-6 cursor-pointer border-t mt-2 font-bold">
+              <button className="w-full py-[2px] px-4 text-gray-700 bg-gray-100 border border-gray-300 rounded-sm hover:bg-gray-200">
                 Log Out
               </button>
-            </li>
-          </ul>
+            </Link>
+          </div>
         </div>
       )}
     </div>
