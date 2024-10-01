@@ -10,6 +10,7 @@ export const userSchema = z.object({
   childAge: z.number().min(0),
   childDisabilities: z.string().array().transform(ids => ids.map(id => new Types.ObjectId(id))),
   county: z.string(),
+  bio: z.string().optional(),
 });
 
 export const editUserSchema = userSchema.partial();

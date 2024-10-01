@@ -12,12 +12,8 @@ const UserSchema = new Schema<User>({
   }},
   childAge: { type: Number, min: 0, required: true },
   childDisabilities: [{ type: Schema.Types.ObjectId, ref: 'Disability', required: true }],
-  address: {
-    street: { type: String, required: true },
-    city: { type: String, required: true },
-    state: { type: String, required: true },
-    zipCode: { type: String, required: true }
-  }
+  county: { type: String, required: true },
+  bio: { type: String },
 });
 
 const UserModel = mongoose.models?.User ?? mongoose.model('User', UserSchema);
