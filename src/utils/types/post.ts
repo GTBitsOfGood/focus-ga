@@ -3,12 +3,20 @@ import { Types } from "mongoose";
 import { ExtendId } from "./common";
 import { User } from "./user";
 import { Disability } from "./disability";
+import { countNonMarkdownCharacters } from "@/lib/utils";
+import { MAX_POST_CONTENT_LEN, MAX_POST_TITLE_LEN } from "../consts";
 
 export const postSchema = z.object({
   author: z.string().transform(id => new Types.ObjectId(id)),
   date: z.date().default(() => new Date()),
-  title: z.string().max(100, "Title must be at most 100 characters."),
-  content: z.string(),
+  title: z.string().max(
+    MAX_POST_TITLE_LEN, 
+    `Title must be at most ${MAX_POST_TITLE_LEN} characters.`
+  ),
+  content: z.string().refine(
+    content => countNonMarkdownCharacters(content) <= MAX_POST_CONTENT_LEN,
+    `Content must be at most ${MAX_POST_CONTENT_LEN} characters.`
+  ),
   likes: z.number().default(0),
   comments: z.number().default(0),
   tags: z.array(z.string()),

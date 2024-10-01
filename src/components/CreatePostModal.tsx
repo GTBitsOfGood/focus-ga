@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useEffect, useState, Suspense, useRef } from "react";
 import { createPost } from "@/server/db/actions/PostActions";
 import { getDisabilities } from "@/server/db/actions/DisabilityActions";
 import { Disability } from "@/utils/types/disability";
@@ -15,7 +15,8 @@ import {
 } from "@/components/ui/popover"
 import { useToast } from "@/hooks/use-toast";
 import { Types } from "mongoose";
-import { useRouter } from "next/navigation";
+import { MDXEditorMethods } from "@mdxeditor/editor";
+import { cn, countNonMarkdownCharacters } from "@/lib/utils";
 
 const EditorComp = dynamic(() => import('./EditorComponent'), { ssr: false })
 
@@ -43,8 +44,8 @@ export default function CreatePostModal( props: CreatePostModalProps ) {
   const [disabilities, setDisabilities] = useState<Disability[]>([]);
   const [mouseDownOnBackground, setMouseDownOnBackground] = useState(false);
   const { toast } = useToast();
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const editorRef = useRef<MDXEditorMethods | null>(null);
 
   useEffect(() => {
     const fetchDisabilities = async () => {
@@ -69,24 +70,13 @@ export default function CreatePostModal( props: CreatePostModalProps ) {
   };
 
   const validateSubmission = (): boolean => {
-    if (postData.title.length == 0 && postData.content.length == 0) {
-      setBodyError(true);
-      setTitleError(true);
-      return false;
-    }
-    if (postData.title.length == 0) {
-      setTitleError(true);
-      return false;
-    } else {
-      setTitleError(false);
-    }
-    if (postData.content.length == 0) {
-      setBodyError(true);
-      return false;
-    } else {
-      setTitleError(false);
-    }
-    return true;
+    const isTitleValid = postData.title.length > 0;
+    const isContentValid = postData.content.length > 0;
+
+    setTitleError(!isTitleValid);
+    setBodyError(!isContentValid);
+
+    return isTitleValid && isContentValid;
   }
 
   const handleSubmit = async () => {
@@ -123,17 +113,12 @@ export default function CreatePostModal( props: CreatePostModalProps ) {
     setTitleError(false);
   }
 
-  function countNonMarkdownCharacters(content: string): number {
-    // Remove markdown-related characters such as formatting symbols for bold/italic/underline and lists
-    const cleanedContent = content.replace(/(\*\*|__|\*|_|~~|`|\[.*?\]\(.*?\)|<.*?>|#|>|-|\+|\d+\.)/g, '')
-                .replace(/\s+/g, '');
-    return cleanedContent.length;
-  }
-
   const handleEditorChange = (text: string) => {
     const textLength = countNonMarkdownCharacters(text);
     if (textLength <= MAX_POST_CONTENT_LEN) {
       setPostData({ ... postData, content: text });
+    } else {
+      editorRef.current?.setMarkdown(postData.content);
     }
   }
 
@@ -171,13 +156,13 @@ export default function CreatePostModal( props: CreatePostModalProps ) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}>
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl h-full max-h-[70%] relative z-50 flex flex-col justify-between overflow-y-auto">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl relative z-50 flex flex-col max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-2">
           <div className="text-black text-xl font-bold">Create New Post</div>
           <X className="w-6 h-6 cursor-pointer" onClick={handleClose} />
         </div>
         
-        <div className="relative mb-4">
+        <div className="relative mb-6">
           <label htmlFor="title" className="block text-sm font-bold text-gray-700">
             Title
             <span className="text-[#ff4e4e] text-base font-medium">*</span>
@@ -199,14 +184,14 @@ export default function CreatePostModal( props: CreatePostModalProps ) {
           {showTitleError ? <div className="text-[#ff4e4e] text-sm font-normal">Required Field</div> : null }
         </div>
         
-        <div className="relative mb-10">
+        <div className="relative mb-6">
           <label htmlFor="title" className="block text-sm font-bold text-gray-700">
             Body
             <span className="text-[#ff4e4e] text-base font-medium">*</span>
           </label>
           <div className={`mt-1 rounded-lg h-full border ${showBodyError ? 'border-red-300 border-2' : ''}`}>
             <Suspense fallback={null}>
-              <EditorComp markdown={postData.content} handleEditorChange={handleEditorChange} />
+              <EditorComp editorRef={editorRef} markdown={postData.content} handleEditorChange={handleEditorChange} />
             </Suspense>
           </div>
           <div className="flex justify-between">
@@ -215,11 +200,11 @@ export default function CreatePostModal( props: CreatePostModalProps ) {
           </div>
         </div>
 
-        <div className="relative mb-4">
+        <div className="relative mb-6">
           <label htmlFor="title" className="block text-sm font-bold text-gray-700">
             Disability Tags
           </label>
-          <div className="relative w-full">
+          <div className="relative w-full mt-1">
             <Popover>
               <PopoverTrigger asChild className="w-full" onClick={() => setShowDisabilities(!showDisabilities)}>
                 <div className="relative flex items-center p-3 border border-gray-300 rounded-md cursor-pointer">
@@ -273,16 +258,23 @@ export default function CreatePostModal( props: CreatePostModalProps ) {
         <div className="flex justify-end space-x-4">
           <button
             onClick={handleClose}
-            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 font-bold"
+            className="w-20 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 font-bold"
           >
             Cancel
           </button>
-          <button 
+            <button 
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className={`h-[38px] px-[25px] py-2 bg-[#475cc6] rounded-lg justify-center items-center gap-2.5 inline-flex ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}>
+            className={cn(
+              "min-w-20 py-2 px-4 bg-[#475cc6] rounded-lg justify-center items-center gap-2.5 inline-flex",
+              {
+              "opacity-50 cursor-not-allowed": isSubmitting,
+              "hover:bg-blue-900": !isSubmitting,
+              }
+            )}
+            >
             <div className="text-white font-bold">{isSubmitting ? 'Posting...' : 'Post'}</div>
-          </button>
+            </button>
         </div>
       </div> 
     </div> 
