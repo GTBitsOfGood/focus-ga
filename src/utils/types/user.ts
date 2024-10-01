@@ -9,12 +9,7 @@ export const userSchema = z.object({
   email: z.string().email(),
   childAge: z.number().min(0),
   childDisabilities: z.string().array().transform(ids => ids.map(id => new Types.ObjectId(id))),
-  address: z.object({
-    street: z.string(),
-    city: z.string(),
-    state: z.string(),
-    zipCode: z.string()
-  })
+  county: z.string(),
 });
 
 export const editUserSchema = userSchema.partial();
