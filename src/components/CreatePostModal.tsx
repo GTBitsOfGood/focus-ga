@@ -208,7 +208,7 @@ export default function CreatePostModal( props: CreatePostModalProps ) {
             <Popover>
               <PopoverTrigger asChild className="w-full" onClick={() => setShowDisabilities(!showDisabilities)}>
                 <div className="relative flex items-center p-3 border border-gray-300 rounded-md cursor-pointer">
-                  <div className="flex items-center w-full">
+                  <div className="flex items-center w-full h-6">
                     {postData.tags.length === 0 ? (
                       <div className="text-neutral-400 text-sm font-normal">
                       Add disability tags (up to five)
