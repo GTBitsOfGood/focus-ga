@@ -1,10 +1,8 @@
-"use client";
-
 import ErrorPageButtons from "@/components/ErrorPageButtons";
 import Image from 'next/image';
 import focusLogo from "../../public/focus-logo.png";
 
-export default function NotFound() {
+export default async function NotFound() {
   return (
     <div className="bg-[url('/Portal_Background.avif')] bg-cover bg-no-repeat h-screen w-screen">
       <a href="https://focus-ga.org/"><Image src={focusLogo} width={181} height={87} alt="focus-logo" className="mt-6	ml-[60px] fixed" /></a>
