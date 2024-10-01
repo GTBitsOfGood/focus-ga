@@ -16,7 +16,9 @@ type PostComponentProps = {
 };
 
 export default function PostComponent(props: PostComponentProps) {
-  const mdParser = new MarkdownIt();
+  const mdParser = new MarkdownIt({
+    html: true,
+  });
   const router = useRouter();
 
   const { className = '', post, clickable = false } = props;
