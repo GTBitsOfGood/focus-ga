@@ -5,6 +5,8 @@ import Sidebar from "@/components/Sidebar";
 import CreatePostModal from "@/components/CreatePostModal";
 import React, { useState } from "react";
 import { Toaster } from "@/components/ui/toaster"
+import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
+import config from "../../../tailwind.config";
 
 type CommunityLayoutProps = {
   children: React.ReactNode;
@@ -25,6 +27,7 @@ export default function CommunityLayout({ children }: CommunityLayoutProps) {
           {children}
           <Toaster />
         </div>
+        <ProgressBar height="3px" color="#475CC6" shallowRouting/>
       </body>
     </html>
   );

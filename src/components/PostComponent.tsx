@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import MarkdownIt from "markdown-it";
 import MarkdownRenderer from "./MarkdownRenderer";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 type PostComponentProps = {
   className?: string;
@@ -19,7 +20,6 @@ export default function PostComponent(props: PostComponentProps) {
   const mdParser = new MarkdownIt({
     html: true,
   });
-  const router = useRouter();
 
   const { className = '', post, clickable = false } = props;
   const {
@@ -38,15 +38,8 @@ export default function PostComponent(props: PostComponentProps) {
     { label: 'Save Post', Icon: BookmarkIcon }
   ];
 
-  return (
-    <div
-      className={cn(
-        'flex flex-col gap-2 text-[#636363] rounded-lg',
-        clickable && 'cursor-pointer hover:bg-gray-100 p-4',
-        className
-      )}
-      onClick={clickable ? () => router.push(`/posts/${post._id}`) : undefined}
-    >
+  const reactContent = (
+    <>
       <div className="flex items-center justify-between text-sm">
         <div className="flex items-center gap-2">
           <span className="w-6 h-6 bg-[#D9D9D9] rounded-full inline-block"/>
@@ -82,6 +75,27 @@ export default function PostComponent(props: PostComponentProps) {
           </div>
         ))}
       </div>
-    </div>
+    </>
   );
+
+  const classes = cn(
+    'flex flex-col gap-2 text-[#636363] rounded-lg',
+    clickable && 'cursor-pointer hover:bg-gray-100 p-4',
+    className
+  );
+
+  return (
+    clickable ? (
+      <Link
+        className={classes}
+        href={`/posts/${post._id}`}
+      >
+      {reactContent}
+      </Link>
+    ) : (
+      <div className={classes}>
+        {reactContent}
+      </div>
+    )
+  )
 }

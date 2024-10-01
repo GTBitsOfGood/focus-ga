@@ -39,6 +39,7 @@
     "markdown-it-task-lists": "^2.1.1",
     "mongoose": "^8.6.0",
     "next": "14.2.5",
+    "next-nprogress-bar": "^2.3.13",
     "react": "^18",
     "react-dom": "^18.3.1",
     "react-markdown": "^9.0.1",
