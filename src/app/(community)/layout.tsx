@@ -27,7 +27,7 @@ export default function CommunityLayout({ children }: CommunityLayoutProps) {
           {children}
           <Toaster />
         </div>
-        <ProgressBar height="3px" color="#475CC6" shallowRouting/>
+        <ProgressBar height="3px" color="#475CC6" shallowRouting options={{ showSpinner: false }} />
       </body>
     </html>
   );
