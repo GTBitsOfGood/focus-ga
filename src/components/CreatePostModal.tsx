@@ -262,19 +262,19 @@ export default function CreatePostModal( props: CreatePostModalProps ) {
           >
             Cancel
           </button>
-            <button 
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className={cn(
-              "min-w-20 py-2 px-4 bg-[#475cc6] rounded-lg justify-center items-center gap-2.5 inline-flex",
-              {
-              "opacity-50 cursor-not-allowed": isSubmitting,
-              "hover:bg-blue-900": !isSubmitting,
-              }
-            )}
-            >
-            <div className="text-white font-bold">{isSubmitting ? 'Posting...' : 'Post'}</div>
-            </button>
+          <button 
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          className={cn(
+            "min-w-20 py-2 px-4 bg-[#475cc6] rounded-lg justify-center items-center gap-2.5 inline-flex",
+            {
+            "opacity-50 cursor-not-allowed": isSubmitting,
+            "hover:bg-blue-900": !isSubmitting,
+            }
+          )}
+          >
+          <div className="text-white font-bold">{isSubmitting ? 'Posting...' : 'Post'}</div>
+          </button>
         </div>
       </div> 
     </div> 
