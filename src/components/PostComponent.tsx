@@ -58,7 +58,7 @@ export default function PostComponent(props: PostComponentProps) {
         }
       </div>
       <MarkdownRenderer
-        className="leading-5 text-lg"
+        className={cn("leading-5 text-lg", {"max-h-36 overflow-hidden": clickable})}
         markdown={content}
         parse={markdown => mdParser.render(markdown)}
       />

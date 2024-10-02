@@ -30,3 +30,8 @@
 ._toolbarRoot_uazmk_160 {
   border-radius: 0 !important;
 }
+
+.prose :where(p):not(:where([class~="not-prose"],[class~="not-prose"] *)) {
+  margin-bottom: 0;
+  margin-top: 0;
+}
