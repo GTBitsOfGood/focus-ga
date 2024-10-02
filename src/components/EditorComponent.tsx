@@ -19,7 +19,7 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, handleEditorChange }) =>
   return (
     <div className="h-full flex flex-col overflow-auto border border-gray-300 pb-2 rounded-md">
       <MDXEditor
-        contentEditableClassName="prose prose-slate max-w-none h-full min-h-20"
+        contentEditableClassName="prose prose-slate max-w-none h-full min-h-32"
         onChange={(e) => handleEditorChange(e)}
         ref={editorRef}
         markdown={markdown}
