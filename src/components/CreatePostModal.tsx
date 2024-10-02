@@ -99,6 +99,7 @@ export default function CreatePostModal( props: CreatePostModalProps ) {
           content: "",
           tags: []
         });
+        editorRef.current?.setMarkdown("");
       }
     } catch (error) {
       notifyFailure();
