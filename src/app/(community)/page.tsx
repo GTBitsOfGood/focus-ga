@@ -1,5 +1,3 @@
-'use server'
-
 import { getPopulatedPosts } from "@/server/db/actions/PostActions";
 import PostComponent from "@/components/PostComponent";
 
