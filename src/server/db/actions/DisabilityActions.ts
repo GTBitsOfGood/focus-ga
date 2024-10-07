@@ -40,6 +40,23 @@ export async function getDisabilities(): Promise<Disability[]> {
 }
 
 /**
+ * Retrieves a disability object with the inputted id.
+ * @param id The id of the disability to return.
+ * @returns A promist that resolves to a disbility object.
+ * @throws  Will throw an error if the database connection fails or disability is not found.
+ */
+export async function getDisability(id: String): Promise<Disability> {
+  try {
+    await dbConnect();
+    const disability = await DisabilityModel.findById(id);
+    return disability.toObject();
+  } catch (error) {
+    console.error("Failed to retrieve disability: ", error);
+    throw new Error("Failed to retrieve disability");
+  }
+}
+
+/**
  * Updates an existing disability record in the database.
  * @param id - The ID of the disability to update.
  * @param updated - The partial disability input data for updating.

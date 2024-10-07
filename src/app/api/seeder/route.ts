@@ -75,7 +75,8 @@ export async function POST(request: Request) {
         email: email,
         childAge: Math.floor(Math.random() * (MAX_CHILD_AGE)),
         childDisabilities: selectedDisabilities,
-        county: faker.location.county(),
+        city: faker.location.city(),
+        bio: faker.lorem.paragraph({ min: 1, max: 6 }),
       }
 
       users.push((await createUser(userInfo)));
