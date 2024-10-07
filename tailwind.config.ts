@@ -15,7 +15,8 @@ const config: Config = {
   		},
   		colors: {
   			'blue': '#475CC6',
-  			'med-gray': '#00000099'
+  			'med-gray': '#00000099',
+        'focus-gray': '#636363',
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
