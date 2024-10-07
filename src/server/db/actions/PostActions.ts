@@ -42,12 +42,14 @@ export async function getPosts(): Promise<Post[]> {
  * Retrieves all posts from the database with their author and disability fields populated.
  * @returns A promise that resolves to an array of populated post objects.
  */
-export async function getPopulatedPosts(): Promise<PopulatedPost[]> {
+export async function getPopulatedPosts(offset: number, limit: number): Promise<PopulatedPost[]> {
   await dbConnect();
 
   const posts = await PostModel
     .find()
     .sort({ date: -1 })  // Sort by date in descending order (newest first)
+    .skip(offset)
+    .limit(limit)
     .populate({ path: 'author', model: UserModel })
     .populate({ path: 'tags', model: DisabilityModel });
   return posts.map(post => post.toObject());
