@@ -1,6 +1,6 @@
 "use  client";
 
-import { MDXEditor, MDXEditorMethods, listsPlugin, toolbarPlugin, UndoRedo, BoldItalicUnderlineToggles, ListsToggle } from "@mdxeditor/editor";
+import { MDXEditor, MDXEditorMethods, listsPlugin, toolbarPlugin, UndoRedo, BoldItalicUnderlineToggles, ListsToggle, linkPlugin, linkDialogPlugin, CreateLink } from "@mdxeditor/editor";
 import { FC } from "react";
 import '@mdxeditor/editor/style.css'
 
@@ -23,21 +23,25 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, handleEditorChange }) =>
         onChange={(e) => handleEditorChange(e)}
         ref={editorRef}
         markdown={markdown}
-        plugins={[toolbarPlugin({
+        plugins={[
+          toolbarPlugin({
             toolbarContents: () => (
               <>
                 <UndoRedo />
                 <BoldItalicUnderlineToggles />
+                <CreateLink />
                 <ListsToggle options={["bullet", "number"]}/>
               </>
             ),
-            
-          }), listsPlugin()]}
+          }),
+          listsPlugin(),
+          linkPlugin(),
+          linkDialogPlugin()
+        ]}
       />
     </div>
     
   );
 };
-
 export default Editor;
 
