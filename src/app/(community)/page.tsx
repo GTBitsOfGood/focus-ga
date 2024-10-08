@@ -6,6 +6,9 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { PopulatedPost } from "@/utils/types/post";
 import { LoaderCircle } from "lucide-react";
 import FilterComponent from "@/components/FilterComponent";
+import { Disability } from "@/utils/types/disability";
+import { getDisabilities } from "@/server/db/actions/DisabilityActions";
+import { Filter } from "@/utils/consts";
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +18,54 @@ export default function Home() {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
   const limit = 5;
+  
+  const [disabilities, setDisabilities] = useState<Disability[]>([]);
+  const [selectedDisabilities, setSelectedDisabilities] = useState<Disability[]>([]);
+
+  useEffect(() => {
+    const fetchDisabilities = async () => {
+      const disabilityList = await getDisabilities();
+      setDisabilities(disabilityList);
+    };
+    fetchDisabilities();
+  }, []);
+
+  const handleDisabilitySelected = (selected: Disability) => {
+    setSelectedDisabilities((prevSelected) => {
+      if (prevSelected.some((item) => item._id === selected._id)) {
+        return prevSelected.filter((item) => item._id !== selected._id);
+      } else {
+        return [...prevSelected, selected];
+      }
+    });
+  };
+
+  const disabilityFilter: Filter<Disability> = {
+    label: "Disability",
+    data: disabilities,
+    selected: selectedDisabilities,
+    setSelected: handleDisabilitySelected
+  };
+
+  //TODO: update once locations are added
+  const locationFilter: Filter<any> = {
+    label: "Location",
+    data: [],
+    selected: [],
+    setSelected: (selected) => {
+      console.log("location selected")
+    }
+  };
+
+  //TODO: update once demographics are added
+  const demographicFilter: Filter<any> = {
+    label: "Other Demographics",
+    data: [],
+    selected: [],
+    setSelected: (selected) => {
+      console.log("demographic selected")
+    }
+  };
 
   // Fetch posts when page changes
   const fetchPosts = useCallback(async () => {
@@ -63,7 +114,7 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center px-16">
       <div className="w-full max-w-4xl space-y-8">
-        <FilterComponent />
+        <FilterComponent filters={[disabilityFilter, locationFilter, demographicFilter]}/>
         <div>
           {posts.map((post, index) => {
             if (posts.length <= index + 2) {
