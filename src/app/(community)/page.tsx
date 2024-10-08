@@ -8,7 +8,8 @@ import { LoaderCircle } from "lucide-react";
 import FilterComponent from "@/components/FilterComponent";
 import { Disability } from "@/utils/types/disability";
 import { getDisabilities } from "@/server/db/actions/DisabilityActions";
-import { Filter } from "@/utils/consts";
+import { Filter } from "@/utils/types/common";
+import { PAGINATION_LIMIT } from "@/utils/consts";
 
 export const dynamic = 'force-dynamic';
 
@@ -17,7 +18,6 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
-  const limit = 5;
   
   const [disabilities, setDisabilities] = useState<Disability[]>([]);
   const [selectedDisabilities, setSelectedDisabilities] = useState<Disability[]>([]);
@@ -73,7 +73,7 @@ export default function Home() {
 
     setLoading(true);
     try {
-      const newPosts = await getPopulatedPosts(page * limit, limit);
+      const newPosts = await getPopulatedPosts(page * PAGINATION_LIMIT, PAGINATION_LIMIT);
       if (newPosts.length > 0) {
         setPosts((prevPosts) => {
           return [...prevPosts, ...newPosts];
@@ -86,7 +86,7 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }, [page, limit, hasMore, loading]);
+  }, [page, hasMore, loading]);
 
   useEffect(() => {
     fetchPosts();
@@ -130,7 +130,7 @@ export default function Home() {
           })}
           {loading && 
             <div className="flex items-center justify-center">
-              <LoaderCircle className="animate-spin text-blue-500" size={32}/>
+              <LoaderCircle className="animate-spin" size={32}/>
             </div>
           }
         </div>

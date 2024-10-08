@@ -7,18 +7,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Filter } from "@/utils/consts"
+import { Filter } from "@/utils/types/common"
 
 type DropdownProps = {
   filter: Filter<any>;
 };
 
-export default function DropdownComponent<T extends { _id: string; name: string }>(
+export default function DropdownComponent (
   props: DropdownProps
 ) {
   const [showData, setShowData] = useState(false);
 
-  const handleItemClick = (item: T) => {
+  const handleItemClick = (item: any) => {
     props.filter.setSelected(item);
   };
 
@@ -27,7 +27,7 @@ export default function DropdownComponent<T extends { _id: string; name: string 
       <PopoverTrigger
         asChild
       >
-        <div className="relative flex items-center justify-center rounded-full cursor-pointer bg-gray py-2 px-4">
+        <div className="relative flex items-center justify-center rounded-full cursor-pointer bg-dropdown-gray py-2 px-4">
           <div className="text-black text-sm font-normal">
               {props.filter.label}
           </div>
@@ -52,7 +52,7 @@ export default function DropdownComponent<T extends { _id: string; name: string 
               className="flex items-center p-2 cursor-pointer rounded-lg hover:bg-gray-100 h-10"
             >
               {props.filter.selected.some((item) => item._id === d._id) && (
-                <Check className="w-4 h-4 mr-2" color="#7D7E82" />
+                <Check className="w-4 h-4 mr-2" color="black" />
               )}
               {d.name}
             </li>
