@@ -161,7 +161,7 @@ export async function deleteCommentLike(userId: string, commentId: string): Prom
 }
 
 /**
- * Retrieves all comments under a post in descending order by date of creation, with authors populated and post and replyTo IDs nulled out.
+ * Retrieves all comments under a post in descending order by date of creation, with authors populated and post and replyTo IDs converted to strings.
  * @param postId - The ID of the post whose comments are to be retrieved.
  * @throws Will throw an error if the post is not found.
  * @returns A promise that resolves to an array of partially populated comment objects.
@@ -176,8 +176,8 @@ export async function getPostComments(postId: string): Promise<PopulatedComment[
 
   return comments.map(comment => {
     const res = comment.toObject();
-    res.post = null;
-    res.replyTo = null;
+    res.post = res.post.toString();
+    res.replyTo = res.replyTo?.toString() || null;
     return res;
   });
 }
