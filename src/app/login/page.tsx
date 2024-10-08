@@ -7,12 +7,18 @@ import lock from "../../../public/lock.png";
 import user from "../../../public/user.png";
 import focusLogo from "../../../public/focus-logo.png";
 import transparencyBadge from "../../../public/transparency-badge.png";
+// import { signIn } from "next-auth/react";
+import { signIn, providerMap } from '../../auth'
 
 export default function Login() {
   const router = useRouter();
   const [credentialsError, setCredentialsError] = useState(false);
 
   const handleLogin = () => {}
+
+  const handleSalesforceLogin = async () => {
+    await signIn("salesforce");
+  };
 
   return (
     <div className="bg-[url('/Portal_Background.avif')] bg-cover bg-no-repeat h-screen w-screen">
@@ -40,6 +46,7 @@ export default function Login() {
             <p className="text-red-500 text-sm mt-2">Invalid username or password. Please try again.</p>
           )}
           <button onClick={handleLogin} className="rounded-sm h-[51px] mt-5 bg-blue text-white w-[295px]">Log in</button>
+          <button onClick={handleSalesforceLogin} className="rounded-sm h-[51px] mt-5 bg-blue text-white w-[295px]">Log in with Salesforce</button>
           <a href="https://focus-ga.my.site.com/s/login/ForgotPassword" className="mt-8 text-left w-[295px]">Forgot your password?</a>
         </div>
         <div className="flex flex-row justify-between mx-[17vw] mt-12 mb-0 items-center">
