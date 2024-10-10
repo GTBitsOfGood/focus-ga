@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import "./globals.css";
+import "@/app/globals.css";
 import { ReactNode } from "react";
 import { FOCUS_FONT } from "@/utils/consts";
 

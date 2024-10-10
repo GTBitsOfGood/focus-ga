@@ -6,7 +6,7 @@ import CreatePostModal from "@/components/CreatePostModal";
 import React, { useState } from "react";
 import { Toaster } from "@/components/ui/toaster"
 import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
-import config from "../../../tailwind.config";
+import { FOCUS_FONT } from "@/utils/consts";
 
 type CommunityLayoutProps = {
   children: React.ReactNode;
@@ -19,7 +19,7 @@ export default function CommunityLayout({ children }: CommunityLayoutProps) {
 
   return (
     <html lang='en'>
-      <body>
+      <body className={FOCUS_FONT.className}>
         <Navbar openModal={openCreatePostModal}/>
         <CreatePostModal isOpen={isCreatePostModalOpen} openModal={openCreatePostModal} closeModal={closeCreatePostModal}/>
         <Sidebar />

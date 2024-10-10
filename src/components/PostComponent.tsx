@@ -4,7 +4,6 @@ import { PopulatedPost } from "@/utils/types/post";
 import Tag from "./Tag";
 import { BookmarkIcon, ChatBubbleLeftEllipsisIcon, EllipsisHorizontalIcon, HeartIcon } from "@heroicons/react/24/outline";
 import { getDateDifferenceString } from "@/utils/dateUtils";
-import { useRouter } from "next/navigation";
 import MarkdownIt from "markdown-it";
 import MarkdownRenderer from "./MarkdownRenderer";
 import { cn } from "@/lib/utils";
@@ -90,7 +89,7 @@ export default function PostComponent(props: PostComponentProps) {
         className={classes}
         href={`/posts/${post._id}`}
       >
-      {reactContent}
+        {reactContent}
       </Link>
     ) : (
       <div className={classes}>
