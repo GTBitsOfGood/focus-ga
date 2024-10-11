@@ -2,7 +2,7 @@
 
 import { getPopulatedPosts } from "@/server/db/actions/PostActions";
 import PostComponent from "@/components/PostComponent";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, use } from "react";
 import { PopulatedPost } from "@/utils/types/post";
 import { LoaderCircle } from "lucide-react";
 import FilterComponent from "@/components/FilterComponent";
@@ -18,10 +18,12 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
+  const [filter, setFilter] = useState({});
   
   const [disabilities, setDisabilities] = useState<Disability[]>([]);
   const [selectedDisabilities, setSelectedDisabilities] = useState<Disability[]>([]);
 
+  // fetch disabilities on page load
   useEffect(() => {
     const fetchDisabilities = async () => {
       const disabilityList = await getDisabilities();
@@ -67,17 +69,36 @@ export default function Home() {
     }
   };
 
-  // Fetch posts when page changes
-  const fetchPosts = useCallback(async () => {
-    if (loading || !hasMore) return;
+  // update filter when selectedDisabilities changes
+  useEffect(() => {
+    if (selectedDisabilities.length > 0) {
+      setFilter({
+        tags: { $in: selectedDisabilities.map((d) => d._id) },
+      });
+    } else {
+      setFilter({});
+    }
+  }, [selectedDisabilities])
 
+  // fetch posts when filter changes
+  useEffect(() => {
+    fetchPosts(true);
+  }, [filter])
+
+  // Fetch posts when page changes
+  const fetchPosts = async (clear: boolean = false) => {
+    if (clear) {
+      setPage(0);
+      setHasMore(true);
+      setPosts([]);
+    }
+
+    if (loading || !hasMore) return;
     setLoading(true);
     try {
-      const newPosts = await getPopulatedPosts(page * PAGINATION_LIMIT, PAGINATION_LIMIT);
+      const newPosts = await getPopulatedPosts(page * PAGINATION_LIMIT, PAGINATION_LIMIT, filter);
       if (newPosts.length > 0) {
-        setPosts((prevPosts) => {
-          return [...prevPosts, ...newPosts];
-        });
+        setPosts(clear ? newPosts : [...posts, ...newPosts]);
       } else {
         setHasMore(false);
       }
@@ -86,7 +107,7 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }, [page, hasMore, loading]);
+  }
 
   useEffect(() => {
     fetchPosts();
