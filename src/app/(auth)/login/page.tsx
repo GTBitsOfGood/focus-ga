@@ -39,7 +39,7 @@ export default function Login() {
           {credentialsError && (
             <p className="text-red-500 text-sm mt-2">Invalid username or password. Please try again.</p>
           )}
-          <button onClick={handleLogin} className="rounded-sm h-[51px] mt-5 bg-blue text-white w-[295px]">Log in</button>
+          <button onClick={handleLogin} className="rounded-sm h-[51px] mt-5 bg-theme-blue text-white w-[295px]">Log in</button>
           <a href="https://focus-ga.my.site.com/s/login/ForgotPassword" className="mt-8 text-left w-[295px]">Forgot your password?</a>
         </div>
         <div className="flex flex-row justify-between mx-[17vw] mt-12 mb-0 items-center">
@@ -59,7 +59,7 @@ export default function Login() {
           <div className="flex flex-col justify-center items-center w-[33%] ">
             <button onClick={() => {
               router.push("https://focus-ga.org/donate/");
-            }} className="bg-blue text-white w-[171px] h-[57px] rounded-sm">Donate</button>
+            }} className="bg-theme-blue text-white w-[171px] h-[57px] rounded-sm">Donate</button>
             <p className="text-center mt-6">FOCUS (Families of Children Under Stress) is a 501(c)(3) nonprofit organization with tax ID&nbsp;
               <span className="whitespace-nowrap">#58-1577602</span>.
             </p>

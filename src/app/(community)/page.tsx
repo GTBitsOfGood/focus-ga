@@ -93,10 +93,12 @@ export default function Home() {
       setPosts([]);
     }
 
-    if (loading || !hasMore) return;
+    if (loading || !(hasMore || clear)) return;
     setLoading(true);
     try {
-      const newPosts = await getPopulatedPosts(page * PAGINATION_LIMIT, PAGINATION_LIMIT, filter);
+      const newPage = clear ? 0 : page;
+
+      const newPosts = await getPopulatedPosts(newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, filter);
       if (newPosts.length > 0) {
         setPosts(clear ? newPosts : [...posts, ...newPosts]);
       } else {

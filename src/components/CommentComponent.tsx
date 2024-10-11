@@ -31,7 +31,7 @@ export default function CommentComponent(props: CommentComponentProps) {
       <div>
         <span className="w-6 h-6 bg-[#D9D9D9] rounded-full inline-block"/>
       </div>
-      <div className={`flex-grow flex flex-col gap-2 text-[#636363] ${className}`}>
+      <div className={`flex-grow flex flex-col gap-2 text-theme-gray ${className}`}>
         <div className="flex items-center justify-between">
           <div className="font-bold text-black">
             {author ? `${author.lastName} Family` : 'Deleted User'}

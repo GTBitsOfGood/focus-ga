@@ -36,7 +36,7 @@ export default function Navbar( props: Props ) {
 
       {/* Create Post*/}
       <button
-        className="bg-blue text-xl text-white font-semibold w-[184px] h-[45px] rounded-[12px] gap-2 flex flex-row justify-center items-center hover:opacity-90"
+        className="bg-theme-blue text-xl text-white font-semibold w-[184px] h-[45px] rounded-[12px] gap-2 flex flex-row justify-center items-center hover:opacity-90"
         onClick={() => props.openModal()}
       >
         <SquarePen color="#ffffff" /> Create Post
@@ -56,7 +56,7 @@ export default function Navbar( props: Props ) {
           {menuIsOpen ? <ChevronUp className="w-4 h-4" color="#7D7E82"/> : <ChevronDown className="w-4 h-4" color="#7D7E82"/>}
         </div>
         {menuIsOpen && (
-          <div className="absolute bottom-[-1px] left-0 w-full h-[4px] bg-blue"></div>
+          <div className="absolute bottom-[-1px] left-0 w-full h-[4px] bg-theme-blue"></div>
         )}
       </div>
 

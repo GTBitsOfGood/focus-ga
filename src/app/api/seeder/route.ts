@@ -26,7 +26,7 @@ const MAX_LIKED_COMMENTS_PER_USER = 5;
 const NUM_REPORTS = 10;
 const NUM_REPORT_REASONS = 4;
 const NUM_CONTENT_TYPES = 3;
-const MAX_POST_TAGS = 5;
+const MAX_POST_TAGS = 2;
 
 export async function POST(request: Request) {
   try {

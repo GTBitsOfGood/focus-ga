@@ -83,7 +83,7 @@ export default function PostComponent({post, className = '', clickable = false}:
   );
 
   const classes = cn(
-    'flex flex-col gap-2 text-[#636363] rounded-lg',
+    'flex flex-col gap-2 text-theme-gray rounded-lg',
     clickable && 'cursor-pointer hover:bg-gray-100 p-4',
     className
   );
