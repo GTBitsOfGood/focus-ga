@@ -10,17 +10,22 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 type PostComponentProps = {
-  className?: string;
   post: PopulatedPost;
+  className?: string;
   clickable?: boolean;
 };
 
-export default function PostComponent(props: PostComponentProps) {
+export default function PostComponent({post, className = '', clickable = false}: PostComponentProps) {
   const mdParser = new MarkdownIt({
     html: true,
   });
 
-  const { className = '', post, clickable = false } = props;
+  // don't render links for clickable components to avoid nested a tags
+  if (clickable) {
+    mdParser.renderer.rules.link_open = () => '<span class="underline text-gray-900">';
+    mdParser.renderer.rules.link_close = () => '</span>';
+  }
+
   const {
     title,
     author,
