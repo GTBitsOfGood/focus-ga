@@ -6,6 +6,11 @@ import { User } from "@/utils/types/user";
 import { useEffect, useState } from "react";
 import { getDisability } from "@/server/db/actions/DisabilityActions";
 import Tag from "../Tag";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { getPopulatedUserPosts } from "@/server/db/actions/PostActions";
+import { PopulatedPost } from "@/utils/types/post";
+import PostComponent from "../PostComponent";
+
 
 type ProfileContainerProps = {
   user: User;
@@ -14,10 +19,15 @@ type ProfileContainerProps = {
 export default function ProfileContainer({user}: ProfileContainerProps) {
   const router = useRouter();
   const [disabilities, setDisabilities] = useState<string[]>([]);
+  const [userPosts, setUserPosts] = useState<PopulatedPost[]>([]);
   console.log(user);
 
   useEffect(() => {
     const fetchDisabilities = async () => {
+      if (!user || !user._id) {
+        return;
+      }
+
       try {
         const disabilitiesData = await Promise.all(
           user.childDisabilities.map(async (disability) => {
@@ -33,6 +43,17 @@ export default function ProfileContainer({user}: ProfileContainerProps) {
   
     fetchDisabilities();
   }, [user.childDisabilities]);
+
+  useEffect(() => {
+    const fetchUserPosts = async () => {
+      if (!user || !user._id) {
+        return;
+      }
+      setUserPosts(await getPopulatedUserPosts(user._id));
+    };
+
+    fetchUserPosts(); 
+  }, [user._id]);
 
   const handleBack = () => {
     router.push("/");
@@ -70,6 +91,20 @@ export default function ProfileContainer({user}: ProfileContainerProps) {
           <p className="text-lg text-focus-gray">{user.bio}</p>
         </div>
         <Separator className="bg-focus-gray my-6" />
+        <Tabs defaultValue="my-posts" className="w-[400px]">
+          <TabsList>
+            <TabsTrigger value="my-posts">My Posts</TabsTrigger>
+            <TabsTrigger value="saved-posts">Saved Posts</TabsTrigger>
+          </TabsList>
+          <TabsContent value="my-posts">
+            {
+              userPosts.map((post) => {
+                return <PostComponent key={post._id} post={post} clickable={true} />
+              })
+            }
+          </TabsContent>
+          <TabsContent value="saved-posts">Saved posts here.</TabsContent>
+        </Tabs>
       </div>
     </div>
   )

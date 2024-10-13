@@ -70,6 +70,28 @@ export async function getPost(id: string): Promise<Post> {
 }
 
 /**
+ * 
+ * @param userId 
+ * @returns 
+ */
+export async function getPopulatedUserPosts(userId: string): Promise<PopulatedPost[]> {
+  await dbConnect();
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new Error("Invalid user ID");
+  }
+
+  const posts = await PostModel
+    .find({ author: userId })
+    .populate({ path: 'author', model: UserModel })
+    .populate({ path: 'tags', model: DisabilityModel });
+
+  const plainPosts = posts ? posts.map(post => post.toObject()) : [];
+
+  return plainPosts;
+}
+
+/**
  * Retrieves a single post from the database by its ID with its author and disability fields populated.
  * @param id - The ID of the post to retrieve.
  * @returns A promise that resolves to a populated post object containing author and disability objects (or null if they are not found)
