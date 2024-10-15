@@ -3,17 +3,17 @@ import CommentComponent from "../CommentComponent";
 import CommentInputComponent from "./CommentInputComponent";
 import { useState } from "react";
 import { createComment } from "@/server/db/actions/CommentActions";
-
-const dummyId = '000000000000000000000000';
+import { User } from "@/utils/types/user";
 
 type CommentTreeContainerProps = {
-  postId: string,
-  parentComment: PopulatedComment,
-  childComments: PopulatedComment[]
+  postId: string;
+  parentComment: PopulatedComment;
+  childComments: PopulatedComment[];
+  authUser: User;
 };
 
 export default function CommentTreeContainer(props: CommentTreeContainerProps) {
-  const { postId, parentComment: initialParentComment, childComments: initialChildComments } = props;
+  const { postId, parentComment: initialParentComment, childComments: initialChildComments, authUser } = props;
   const [parentComment, setParentComment] = useState<PopulatedComment>(initialParentComment);
   const [childComments, setChildComments] = useState<PopulatedComment[]>(initialChildComments);
   const [showReplyInput, setShowReplyInput] = useState<boolean>(false);
@@ -24,7 +24,7 @@ export default function CommentTreeContainer(props: CommentTreeContainerProps) {
 
   async function onReplySubmit(replyBody: string) {
     const replyInput: CommentInput = {
-      author: parentComment.author?._id || dummyId,
+      author: authUser._id,
       content: replyBody,
       post: postId,
       date: new Date(),
@@ -32,8 +32,8 @@ export default function CommentTreeContainer(props: CommentTreeContainerProps) {
     };
     const reply: PopulatedComment = {
       ...commentSchema.parse(replyInput),
-      _id: dummyId,
-      author: parentComment.author,
+      _id: '',
+      author: authUser,
       post: postId,
       replyTo: parentComment._id
     };
@@ -42,7 +42,7 @@ export default function CommentTreeContainer(props: CommentTreeContainerProps) {
     try {
       const replyServer: PopulatedComment = {
         ...await createComment(replyInput),
-        author: parentComment.author,
+        author: authUser,
         post: postId,
         replyTo: parentComment._id
       };

@@ -9,8 +9,7 @@ import Link from "next/link";
 import { useState } from "react";
 import CommentInputComponent from "./CommentInputComponent";
 import CommentTreeContainer from "./CommentTreeContainer";
-
-const dummyId = '000000000000000000000000';
+import { User } from "@/utils/types/user";
 
 function buildChildCommentsMap(comments: PopulatedComment[]) {
   const map = new Map<string, PopulatedComment[]>();
@@ -25,12 +24,13 @@ function buildChildCommentsMap(comments: PopulatedComment[]) {
 }
 
 type PostCommentsContainerProps = {
-  post: PopulatedPost,
-  initialComments: PopulatedComment[]
+  post: PopulatedPost;
+  initialComments: PopulatedComment[];
+  authUser: User;
 };
 
 export default function PostCommentsContainer(props: PostCommentsContainerProps) {
-  const { post, initialComments } = props;
+  const { post, initialComments, authUser } = props;
 
   const [parentComments, setParentComments] = useState<PopulatedComment[]>(
     initialComments.filter(comment => comment.replyTo === null)
@@ -41,15 +41,15 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
 
   async function onNewCommentSubmit(newCommentBody: string) {
     const newCommentInput: CommentInput = {
-      author: post.author?._id || dummyId,
+      author: authUser._id,
       content: newCommentBody,
       post: post._id,
       date: new Date()
     };
     const newComment: PopulatedComment = {
       ...commentSchema.parse(newCommentInput),
-      _id: dummyId,
-      author: post.author,
+      _id: '',
+      author: authUser,
       post: post._id,
       replyTo: null
     };
@@ -58,7 +58,7 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
     try {
       const newCommentServer: PopulatedComment = {
         ...await createComment(newCommentInput),
-        author: post.author,
+        author: authUser,
         post: post._id,
         replyTo: null
       };
@@ -90,6 +90,7 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
             postId={post._id}
             parentComment={comment}
             childComments={childComments.get(comment._id) || []}
+            authUser={authUser}
           />
         ))}
       </div>
