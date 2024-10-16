@@ -49,7 +49,7 @@ export default function Navbar( props: Props ) {
       >
         <div className="border-l pl-6">
           <div className="w-[46px] h-[46px] bg-pink-300 rounded-full flex items-center justify-center cursor-pointer">
-            <span className="text-black font-bold text-lg  select-none">D</span> {/** TODO: Change "D" to the initial of the family name */}
+            <span className="text-black font-bold text-lg  select-none">U</span> {/** TODO: Change "D" to the initial of the family name */}
           </div>
         </div>
         <div className="cursor-pointer ml-2">
