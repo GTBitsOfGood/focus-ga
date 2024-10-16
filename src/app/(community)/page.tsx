@@ -151,9 +151,9 @@ export default function Home() {
               return <PostComponent key={post._id} post={post} clickable={true} />;
             }
           })}
-          {loading && 
+          {loading &&
             <div className="flex items-center justify-center">
-              <LoaderCircle className="animate-spin" size={32}/>
+              <LoaderCircle className="animate-spin" size={32} color="#475CC6"/>
             </div>
           }
         </div>
