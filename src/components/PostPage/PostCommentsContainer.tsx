@@ -1,64 +1,73 @@
 'use client'
 
-import CommentComponent from "@/components/CommentComponent";
 import PostComponent from "@/components/PostComponent";
 import { createComment } from "@/server/db/actions/CommentActions";
 import { CommentInput, commentSchema, PopulatedComment } from "@/utils/types/comment";
 import { PopulatedPost } from "@/utils/types/post";
-import { PaperAirplaneIcon } from "@heroicons/react/24/solid";
 import { ChevronLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import CommentInputComponent from "./CommentInputComponent";
+import CommentTreeContainer from "./CommentTreeContainer";
+import { User } from "@/utils/types/user";
+
+function buildChildCommentsMap(comments: PopulatedComment[]) {
+  const map = new Map<string, PopulatedComment[]>();
+  comments.forEach(comment => {
+    if (!comment.replyTo) return;
+    if (!map.has(comment.replyTo)) {
+      map.set(comment.replyTo, []);
+    }
+    map.get(comment.replyTo)?.push(comment);
+  });
+  return map;
+}
 
 type PostCommentsContainerProps = {
-  post: PopulatedPost,
-  initialComments: PopulatedComment[]
+  post: PopulatedPost;
+  initialComments: PopulatedComment[];
+  authUser: User;
 };
 
-const dummyId = '000000000000000000000000';
-
 export default function PostCommentsContainer(props: PostCommentsContainerProps) {
-  const { post, initialComments } = props;
+  const { post, initialComments, authUser } = props;
 
-  const [comments, setComments] = useState<PopulatedComment[]>(initialComments);
-  const [newCommentBody, setNewCommentBody] = useState<string>('');
-  const [addCommentLoading, setAddCommentLoading] = useState<boolean>(false);
+  const [parentComments, setParentComments] = useState<PopulatedComment[]>(
+    initialComments.filter(comment => comment.replyTo === null)
+  );
+  const [childComments, setChildComments] = useState<Map<string, PopulatedComment[]>>(
+    buildChildCommentsMap(initialComments)
+  );
 
-  async function onNewCommentSubmit() {
-    if (addCommentLoading) {
-      return;
-    }
-    setAddCommentLoading(true);
-
+  async function onNewCommentSubmit(newCommentBody: string) {
     const newCommentInput: CommentInput = {
-      author: post.author?._id || dummyId,
+      author: authUser._id,
       content: newCommentBody,
       post: post._id,
       date: new Date()
     };
     const newComment: PopulatedComment = {
       ...commentSchema.parse(newCommentInput),
-      _id: dummyId,
-      author: post.author,
-      post: null,
+      _id: '',
+      author: authUser,
+      post: post._id,
       replyTo: null
     };
-    setComments(comments => [newComment, ...comments]);
+    setParentComments(comments => [newComment, ...comments]);
 
     try {
       const newCommentServer: PopulatedComment = {
         ...await createComment(newCommentInput),
-        author: post.author,
-        post: null,
+        author: authUser,
+        post: post._id,
         replyTo: null
       };
-      setComments(comments => [newCommentServer, ...comments.slice(1)]);
-      setNewCommentBody('');
+      setParentComments(comments => [newCommentServer, ...comments.slice(1)]);
+      return true;
     } catch (err) {
       console.error('Failed to add comment:', err);
-      setComments(comments => comments.slice(1));
-    } finally {
-      setAddCommentLoading(false);
+      setParentComments(comments => comments.slice(1));
+      return false;
     }
   }
 
@@ -71,19 +80,19 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
       </div>
       <div className="mx-32 mb-16 p-4 flex flex-col items-stretch gap-4">
         <PostComponent post={post} />
-        <div className="flex items-center bg-[#F3F3F3] rounded-full">
-          <input
-            className="flex-grow pl-5 pr-3 py-2 bg-transparent outline-none select-none text-black"
-            placeholder="Add comment"
-            value={newCommentBody}
-            onChange={e => setNewCommentBody(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && newCommentBody !== '' && onNewCommentSubmit()}
+        <CommentInputComponent
+          placeholder="Add comment"
+          onSubmit={onNewCommentSubmit}
+        />
+        {parentComments.map(comment => (
+          <CommentTreeContainer
+            key={comment._id}
+            postId={post._id}
+            parentComment={comment}
+            childComments={childComments.get(comment._id) || []}
+            authUser={authUser}
           />
-          <button className={newCommentBody === '' ? 'hidden' : ''} onClick={onNewCommentSubmit}>
-            <PaperAirplaneIcon className="w-6 h-6 text-blue mr-4" />
-          </button>
-        </div>
-        {comments.map(comment => <CommentComponent key={comment._id} comment={comment} />)}
+        ))}
       </div>
     </>
   );
