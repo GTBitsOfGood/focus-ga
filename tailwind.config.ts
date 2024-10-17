@@ -16,6 +16,7 @@ const config: Config = {
       colors: {
         'theme-blue': '#475CC6',
         'theme-gray': '#636363',
+        'theme-lightgray': '#C7C7C7',
         'med-gray': '#00000099',
         'dropdown-gray': '#f2f2f2'
       },
