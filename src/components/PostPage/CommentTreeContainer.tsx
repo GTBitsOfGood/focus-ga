@@ -2,7 +2,7 @@ import { CommentInput, commentSchema, PopulatedComment } from "@/utils/types/com
 import CommentComponent from "../CommentComponent";
 import CommentInputComponent from "./CommentInputComponent";
 import { useState } from "react";
-import { createComment } from "@/server/db/actions/CommentActions";
+import { createComment, createCommentLike, deleteCommentLike } from "@/server/db/actions/CommentActions";
 import { User } from "@/utils/types/user";
 
 type CommentTreeContainerProps = {
@@ -35,7 +35,8 @@ export default function CommentTreeContainer(props: CommentTreeContainerProps) {
       _id: '',
       author: authUser,
       post: postId,
-      replyTo: parentComment._id
+      replyTo: parentComment._id,
+      liked: false
     };
     setChildComments(childComments => [reply, ...childComments]);
 
@@ -44,15 +45,23 @@ export default function CommentTreeContainer(props: CommentTreeContainerProps) {
         ...await createComment(replyInput),
         author: authUser,
         post: postId,
-        replyTo: parentComment._id
+        replyTo: parentComment._id,
+        liked: false
       };
       setChildComments(childComments => [replyServer, ...childComments.slice(1)]);
       setShowReplyInput(false);
-      return true;
     } catch (err) {
       console.error('Failed to add comment:', err);
       setChildComments(childComments => childComments.slice(1));
-      return false;
+      throw err;
+    }
+  }
+
+  async function onLikeClick(commentId: string, liked: boolean) {
+    if (liked) {
+      await deleteCommentLike(authUser._id, commentId);
+    } else {
+      await createCommentLike(authUser._id, commentId);
     }
   }
 
@@ -60,6 +69,7 @@ export default function CommentTreeContainer(props: CommentTreeContainerProps) {
     <CommentComponent
       comment={parentComment}
       onReplyClick={onReplyClick}
+      onLikeClick={liked => onLikeClick(parentComment._id, liked)}
       nestedContent={(
         <div className="mt-2 flex flex-col gap-2">
           {showReplyInput && <CommentInputComponent
@@ -67,7 +77,11 @@ export default function CommentTreeContainer(props: CommentTreeContainerProps) {
             placeholder="Reply to comment"
             onSubmit={onReplySubmit}
           />}
-          {childComments.map(comment => <CommentComponent key={comment._id} comment={comment} />)}
+          {childComments.map(comment => <CommentComponent
+            key={comment._id}
+            comment={comment}
+            onLikeClick={liked => onLikeClick(comment._id, liked)}
+          />)}
         </div>
       )}
     />

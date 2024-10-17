@@ -40,9 +40,14 @@ export const postLikeSchema = z.object({
 });
 
 export type Post = ExtendId<z.infer<typeof postSchema>>;
-export type PopulatedPost = Omit<Post, 'author' | 'tags'> & { author: User | null, tags: (Disability | null)[] };
 export type PostSave = ExtendId<z.infer<typeof postSaveSchema>>;
 export type PostLike = ExtendId<z.infer<typeof postLikeSchema>>;
+
+export type PopulatedPost = Omit<Post, 'author' | 'tags'> & {
+  author: User | null,
+  tags: (Disability | null)[],
+  liked: boolean
+};
 
 export type PostInput = z.input<typeof postSchema>;
 export type PostSaveInput = z.input<typeof postSaveSchema>;

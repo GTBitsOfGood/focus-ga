@@ -15,16 +15,8 @@ type PostPageProps = {
 
 export default async function PostPage(props: PostPageProps) {
   const id = props.params.id;
-  let post;
   let authUser;
-
-  try {
-    post = await getPopulatedPost(id);
-  } catch (e) {}
-
-  if (!post) {
-    notFound();
-  }
+  let post;
 
   try {
     authUser = await getUser(USER_ID);
@@ -33,7 +25,15 @@ export default async function PostPage(props: PostPageProps) {
     return 'User matching USER_ID constant not found';
   }
 
-  const comments = await getPostComments(id);
+  try {
+    post = await getPopulatedPost(id, authUser._id);
+  } catch (e) {}
 
-  return <PostCommentsContainer post={post} initialComments={comments} authUser={authUser} />;
+  if (!post) {
+    notFound();
+  }
+
+  const comments = await getPostComments(id, authUser._id);
+
+  return <PostCommentsContainer post={post} comments={comments} authUser={authUser} />;
 }

@@ -4,7 +4,7 @@ import { useState } from "react";
 type CommentInputComponentProps = {
   className?: string;
   placeholder?: string;
-  onSubmit: (value: string) => Promise<boolean>;
+  onSubmit: (value: string) => Promise<void>;
 }; 
 
 export default function CommentInputComponent(props: CommentInputComponentProps) {
@@ -15,10 +15,12 @@ export default function CommentInputComponent(props: CommentInputComponentProps)
   async function handleSubmit() {
     if (loading) return;
     setLoading(true);
-    const success = await onSubmit(value);
-    if (success) {
+
+    try {
+      await onSubmit(value);
       setValue('');
-    }
+    } catch (err) {}
+
     setLoading(false);
   }
 

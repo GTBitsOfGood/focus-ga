@@ -1,13 +1,15 @@
 import { getDateDifferenceString } from "@/utils/dateUtils";
 import { PopulatedComment } from "@/utils/types/comment";
 import { ChatBubbleLeftEllipsisIcon, EllipsisHorizontalIcon, HeartIcon } from "@heroicons/react/24/outline";
+import { HeartIcon as FilledHeartIcon } from "@heroicons/react/24/solid";
 import MarkdownRenderer from "./MarkdownRenderer";
 import MarkdownIt from "markdown-it";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 
 type CommentComponentProps = {
   className?: string;
   comment: PopulatedComment;
+  onLikeClick?: (liked: boolean) => Promise<void>;
   onReplyClick?: () => void;
   nestedContent?: ReactNode;
 };
@@ -18,6 +20,7 @@ export default function CommentComponent(props: CommentComponentProps) {
   const {
     className = '',
     comment,
+    onLikeClick,
     onReplyClick,
     nestedContent
   } = props;
@@ -26,11 +29,39 @@ export default function CommentComponent(props: CommentComponentProps) {
     author,
     content,
     date,
-    likes
+    likes: initialLikes,
+    liked: initialLiked
   } = comment;
 
+  const [likes, setLikes] = useState<number>(initialLikes);
+  const [liked, setLiked] = useState<boolean>(initialLiked);
+  const [likeLoading, setLikeLoading] = useState<boolean>(false);
+
+  async function handleLikeClick() {
+    if (likeLoading) return;
+
+    if (liked) {
+      setLikes(likes => likes - 1);
+    } else {
+      setLikes(likes => likes + 1);
+    }
+    setLiked(liked => !liked);
+
+    if (onLikeClick) {
+      setLikeLoading(true);
+      try {
+        await onLikeClick(liked);
+      } catch (err) {
+        setLikes(likes);
+        setLiked(liked);
+      } finally {
+        setLikeLoading(false);
+      }
+    }
+  }
+
   const bottomRow = [
-    { label: likes.toString(), Icon: HeartIcon, onClick: () => {} },
+    { label: likes.toString(), Icon: liked ? FilledHeartIcon : HeartIcon, onClick: handleLikeClick },
     { label: 'Reply', Icon: ChatBubbleLeftEllipsisIcon, onClick: onReplyClick },
     { label: '', Icon: EllipsisHorizontalIcon, onClick: () => {} }
   ];

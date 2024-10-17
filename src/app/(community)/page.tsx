@@ -3,8 +3,11 @@ import PostComponent from "@/components/PostComponent";
 
 export const dynamic = 'force-dynamic';
 
+// Dummy ID to be replaced with authenticated user when auth is implemented
+const USER_ID = '66e26a641737b310a1b2774c';
+
 export default async function Home() {
-  const posts = await getPopulatedPosts();
+  const posts = await getPopulatedPosts(USER_ID);
 
   return (
     <main className="flex min-h-screen flex-col items-center p-16">

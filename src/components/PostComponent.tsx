@@ -3,17 +3,19 @@
 import { PopulatedPost } from "@/utils/types/post";
 import Tag from "./Tag";
 import { BookmarkIcon, ChatBubbleLeftEllipsisIcon, EllipsisHorizontalIcon, HeartIcon } from "@heroicons/react/24/outline";
+import { HeartIcon as FilledHeartIcon } from "@heroicons/react/24/solid";
 import { getDateDifferenceString } from "@/utils/dateUtils";
-import { useRouter } from "next/navigation";
 import MarkdownIt from "markdown-it";
 import MarkdownRenderer from "./MarkdownRenderer";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useState } from "react";
 
 type PostComponentProps = {
   className?: string;
   post: PopulatedPost;
   clickable?: boolean;
+  onLikeClick?: (liked: boolean) => Promise<void>;
 };
 
 export default function PostComponent(props: PostComponentProps) {
@@ -21,19 +23,53 @@ export default function PostComponent(props: PostComponentProps) {
     html: true,
   });
 
-  const { className = '', post, clickable = false } = props;
+  const {
+    className = '',
+    post,
+    clickable = false,
+    onLikeClick
+  } = props;
+
   const {
     title,
     author,
     content,
     date,
     tags,
-    likes,
+    likes: initialLikes,
+    liked: initialLiked,
     comments
   } = post;
 
+  const [likes, setLikes] = useState<number>(initialLikes);
+  const [liked, setLiked] = useState<boolean>(initialLiked);
+  const [likeLoading, setLikeLoading] = useState<boolean>(false);
+
+  async function handleLikeClick() {
+    if (likeLoading) return;
+
+    if (liked) {
+      setLikes(likes => likes - 1);
+    } else {
+      setLikes(likes => likes + 1);
+    }
+    setLiked(liked => !liked);
+
+    if (onLikeClick) {
+      setLikeLoading(true);
+      try {
+        await onLikeClick(liked);
+      } catch (err) {
+        setLikes(likes);
+        setLiked(liked);
+      } finally {
+        setLikeLoading(false);
+      }
+    }
+  }
+
   const bottomRow = [
-    { label: likes.toString(), Icon: HeartIcon },
+    { label: likes.toString(), Icon: liked ? FilledHeartIcon : HeartIcon, onClick: handleLikeClick },
     { label: comments.toString(), Icon: ChatBubbleLeftEllipsisIcon },
     { label: 'Save Post', Icon: BookmarkIcon }
   ];
@@ -68,7 +104,7 @@ export default function PostComponent(props: PostComponentProps) {
       <div className="flex items-center pt-2 gap-6">
         {bottomRow.map((item, index) => (
           <div key={`${post._id}-${index}`} className="flex items-center gap-1.5 px-2">
-            <button>
+            <button onClick={item.onClick}>
               <item.Icon className="w-6 h-6" />
             </button>
             {item.label}

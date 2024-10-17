@@ -39,10 +39,11 @@ export async function getPosts(): Promise<Post[]> {
 }
 
 /**
- * Retrieves all posts from the database with their author and disability fields populated.
+ * Retrieves all posts from the database with their author and disability fields populated and like status specified.
+ * @param authUserId - The ID of the currently authenticated user, to determine whether they have liked each post.
  * @returns A promise that resolves to an array of populated post objects.
  */
-export async function getPopulatedPosts(): Promise<PopulatedPost[]> {
+export async function getPopulatedPosts(authUserId: string): Promise<PopulatedPost[]> {
   await dbConnect();
 
   const posts = await PostModel
@@ -50,7 +51,15 @@ export async function getPopulatedPosts(): Promise<PopulatedPost[]> {
     .sort({ date: -1 })  // Sort by date in descending order (newest first)
     .populate({ path: 'author', model: UserModel })
     .populate({ path: 'tags', model: DisabilityModel });
-  return posts.map(post => post.toObject());
+  
+  const likes = await PostLikeModel.find({ user: authUserId });
+  const likedIds = new Set(likes.map(like => like.post.toString()));
+  
+  return posts.map(post => {
+    const res = post.toObject();
+    res.liked = likedIds.has(post._id.toString());
+    return res;
+  });
 }
 
 /**
@@ -70,12 +79,13 @@ export async function getPost(id: string): Promise<Post> {
 }
 
 /**
- * Retrieves a single post from the database by its ID with its author and disability fields populated.
+ * Retrieves a single post from the database by its ID with its author and disability fields populated and like status specified.
  * @param id - The ID of the post to retrieve.
+ * @param authUserId - The ID of the currently authenticated user, to determine whether they have liked each post.
  * @returns A promise that resolves to a populated post object containing author and disability objects (or null if they are not found)
  * @throws Will throw an error if the post is not found.
  */
-export async function getPopulatedPost(id: string): Promise<PopulatedPost> {
+export async function getPopulatedPost(id: string, authUserId: string): Promise<PopulatedPost> {
   await dbConnect();
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -91,7 +101,14 @@ export async function getPopulatedPost(id: string): Promise<PopulatedPost> {
     throw new Error("Post not found");
   }
 
-  return post.toObject();
+  const like = await PostLikeModel.exists({
+    user: authUserId,
+    post: post._id
+  });
+
+  const res = post.toObject();
+  res.liked = !!like;
+  return res;
 }
 
 /**

@@ -161,23 +161,33 @@ export async function deleteCommentLike(userId: string, commentId: string): Prom
 }
 
 /**
- * Retrieves all comments under a post in descending order by date of creation, with authors populated and post and replyTo IDs converted to strings.
+ * Retrieves all comments under a post in descending order by date of creation, with authors populated, 
+ * post and replyTo IDs converted to strings, and like status specified.
  * @param postId - The ID of the post whose comments are to be retrieved.
+ * @param authUserId - The ID of the currently authenticated user, to determine whether they have liked each comment.
  * @throws Will throw an error if the post is not found.
  * @returns A promise that resolves to an array of partially populated comment objects.
  */
-export async function getPostComments(postId: string): Promise<PopulatedComment[]> {
+export async function getPostComments(postId: string, authUserId: string): Promise<PopulatedComment[]> {
   await dbConnect();
 
   const comments = await CommentModel
     .find({ post: postId })
     .sort({ date: 'desc' })
     .populate({ path: 'author', model: UserModel });
+  const commentIds = comments.map(comment => comment._id);
+
+  const likes = await CommentLikeModel.find({
+    user: authUserId,
+    comment: { $in: commentIds }
+  });
+  const likedIds = new Set(likes.map(like => like.comment.toString()));
 
   return comments.map(comment => {
     const res = comment.toObject();
     res.post = res.post.toString();
     res.replyTo = res.replyTo?.toString() || null;
+    res.liked = likedIds.has(comment._id.toString());
     return res;
   });
 }

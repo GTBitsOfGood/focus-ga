@@ -10,6 +10,7 @@ import { useState } from "react";
 import CommentInputComponent from "./CommentInputComponent";
 import CommentTreeContainer from "./CommentTreeContainer";
 import { User } from "@/utils/types/user";
+import { createPostLike, deletePostLike } from "@/server/db/actions/PostActions";
 
 function buildChildCommentsMap(comments: PopulatedComment[]) {
   const map = new Map<string, PopulatedComment[]>();
@@ -25,12 +26,12 @@ function buildChildCommentsMap(comments: PopulatedComment[]) {
 
 type PostCommentsContainerProps = {
   post: PopulatedPost;
-  initialComments: PopulatedComment[];
+  comments: PopulatedComment[];
   authUser: User;
 };
 
 export default function PostCommentsContainer(props: PostCommentsContainerProps) {
-  const { post, initialComments, authUser } = props;
+  const { post, comments: initialComments, authUser } = props;
 
   const [parentComments, setParentComments] = useState<PopulatedComment[]>(
     initialComments.filter(comment => comment.replyTo === null)
@@ -51,7 +52,8 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
       _id: '',
       author: authUser,
       post: post._id,
-      replyTo: null
+      replyTo: null,
+      liked: false
     };
     setParentComments(comments => [newComment, ...comments]);
 
@@ -60,14 +62,22 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
         ...await createComment(newCommentInput),
         author: authUser,
         post: post._id,
-        replyTo: null
+        replyTo: null,
+        liked: false
       };
       setParentComments(comments => [newCommentServer, ...comments.slice(1)]);
-      return true;
     } catch (err) {
       console.error('Failed to add comment:', err);
       setParentComments(comments => comments.slice(1));
-      return false;
+      throw err;
+    }
+  }
+
+  async function onPostLikeClick(liked: boolean) {
+    if (liked) {
+      await deletePostLike(authUser._id, post._id);
+    } else {
+      await createPostLike(authUser._id, post._id);
     }
   }
 
@@ -79,7 +89,10 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
         </Link>
       </div>
       <div className="mx-32 mb-16 p-4 flex flex-col items-stretch gap-4">
-        <PostComponent post={post} />
+        <PostComponent
+          post={post}
+          onLikeClick={onPostLikeClick}
+        />
         <CommentInputComponent
           placeholder="Add comment"
           onSubmit={onNewCommentSubmit}
