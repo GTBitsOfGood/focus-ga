@@ -2,14 +2,14 @@
 
 import { PopulatedPost } from "@/utils/types/post";
 import Tag from "./Tag";
-import { BookmarkIcon, ChatBubbleLeftEllipsisIcon, EllipsisHorizontalIcon, HeartIcon } from "@heroicons/react/24/outline";
-import { HeartIcon as FilledHeartIcon } from "@heroicons/react/24/solid";
+import { Bookmark, MessageSquare, Ellipsis, Heart } from "lucide-react";
 import { getDateDifferenceString } from "@/utils/dateUtils";
 import MarkdownIt from "markdown-it";
 import MarkdownRenderer from "./MarkdownRenderer";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useState } from "react";
+import colors from "tailwindcss/colors";
 
 type PostComponentProps = {
   className?: string;
@@ -69,9 +69,9 @@ export default function PostComponent(props: PostComponentProps) {
   }
 
   const bottomRow = [
-    { label: likes.toString(), Icon: liked ? FilledHeartIcon : HeartIcon, onClick: handleLikeClick },
-    { label: comments.toString(), Icon: ChatBubbleLeftEllipsisIcon },
-    { label: 'Save Post', Icon: BookmarkIcon }
+    { label: likes.toString(), icon: liked ? <Heart className="text-red-500" fill={colors.red[500]} /> : <Heart />, onClick: handleLikeClick },
+    { label: comments.toString(), icon: <MessageSquare /> },
+    { label: 'Save Post', icon: <Bookmark /> }
   ];
 
   const reactContent = (
@@ -88,7 +88,7 @@ export default function PostComponent(props: PostComponentProps) {
         {
           !clickable && (
             <button>
-              <EllipsisHorizontalIcon className="w-6 h-6" />
+              <Ellipsis className="w-6 h-6" />
             </button>
           )
         }
@@ -105,7 +105,9 @@ export default function PostComponent(props: PostComponentProps) {
         {bottomRow.map((item, index) => (
           <div key={`${post._id}-${index}`} className="flex items-center gap-1.5 px-2">
             <button onClick={item.onClick}>
-              <item.Icon className="w-6 h-6" />
+              <div className="w-6 h-6 [&>*]:w-full [&>*]:h-full">
+                {item.icon}
+              </div>
             </button>
             {item.label}
           </div>

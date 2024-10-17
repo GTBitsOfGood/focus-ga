@@ -1,10 +1,11 @@
 import { getDateDifferenceString } from "@/utils/dateUtils";
 import { PopulatedComment } from "@/utils/types/comment";
-import { ChatBubbleLeftEllipsisIcon, EllipsisHorizontalIcon, HeartIcon } from "@heroicons/react/24/outline";
+import { MessageSquare, Ellipsis, Heart } from "lucide-react";
 import { HeartIcon as FilledHeartIcon } from "@heroicons/react/24/solid";
 import MarkdownRenderer from "./MarkdownRenderer";
 import MarkdownIt from "markdown-it";
 import { ReactNode, useState } from "react";
+import colors from "tailwindcss/colors";
 
 type CommentComponentProps = {
   className?: string;
@@ -61,9 +62,9 @@ export default function CommentComponent(props: CommentComponentProps) {
   }
 
   const bottomRow = [
-    { label: likes.toString(), Icon: liked ? FilledHeartIcon : HeartIcon, onClick: handleLikeClick },
-    { label: 'Reply', Icon: ChatBubbleLeftEllipsisIcon, onClick: onReplyClick },
-    { label: '', Icon: EllipsisHorizontalIcon, onClick: () => {} }
+    { label: likes.toString(), icon: liked ? <Heart className="text-red-500" fill={colors.red[500]} /> : <Heart />, onClick: handleLikeClick },
+    { label: 'Reply', icon: <MessageSquare />, onClick: onReplyClick },
+    { label: '', icon: <Ellipsis />, onClick: () => {} }
   ];
 
   return (
@@ -87,7 +88,9 @@ export default function CommentComponent(props: CommentComponentProps) {
           {bottomRow.map((item, index) => item.onClick && (
             <div key={index} className="flex items-center gap-1.5 px-1">
               <button onClick={item.onClick}>
-                <item.Icon className="w-5 h-5" />
+                <div className="w-5 h-5 [&>*]:w-full [&>*]:h-full">
+                  {item.icon}
+                </div>
               </button>
               {item.label}
             </div>
