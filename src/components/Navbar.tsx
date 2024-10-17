@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import focusLogo from "@/../public/focus-logo.png";
 import Image from "next/image";
@@ -8,6 +8,7 @@ import { Search } from "lucide-react";
 import { ChevronDown } from "lucide-react";
 import { ChevronUp } from "lucide-react";
 import Link from "next/link";
+import useClickOff from "@/hooks/useClickOff";
 
 interface Props {
   openModal: () => void;
@@ -16,6 +17,10 @@ interface Props {
 export default function Navbar( props: Props ) {
   const router = useRouter();
   const [menuIsOpen, setMenuIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownButtonRef = useRef<HTMLDivElement>(null);
+
+  useClickOff(dropdownRef, () => setMenuIsOpen(false), [dropdownRef, dropdownButtonRef]);
 
   const toggleDropdown = () => {
     setMenuIsOpen(!menuIsOpen);
@@ -46,6 +51,7 @@ export default function Navbar( props: Props ) {
       <div
         className="flex items-center justify-center ml-4 w-[88px] h-full relative group hover:bg-gray-100 transition-colors duration-200 cursor-pointer m-1 pr-16 pl-12"
         onClick={toggleDropdown}
+        ref={dropdownButtonRef}
       >
         <div className="border-l pl-6">
           <div className="w-[46px] h-[46px] bg-pink-300 rounded-full flex items-center justify-center cursor-pointer">
@@ -62,7 +68,7 @@ export default function Navbar( props: Props ) {
 
       {/* Dropdown Menu */}
       {menuIsOpen && (
-        <div className="absolute right-0 top-[100px] w-[218px] h-[307] bg-white z-10 border border-gray-300">
+        <div className="absolute right-0 top-[100px] w-[218px] h-[307] bg-white z-10 border border-gray-300"  ref={dropdownRef}>
           <div className="w-[64px] h-[64px] bg-pink-300 rounded-full flex items-center justify-center m-auto mt-[21px]">
             <span className="text-black font-bold text-3xl">U</span>
           </div>
