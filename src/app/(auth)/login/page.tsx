@@ -7,12 +7,43 @@ import lock from "../../../../public/lock.png";
 import user from "../../../../public/user.png";
 import focusLogo from "../../../../public/focus-logo.png";
 import transparencyBadge from "../../../../public/transparency-badge.png";
+import { deflateRawSync } from "zlib";
 
 export default function Login() {
   const router = useRouter();
   const [credentialsError, setCredentialsError] = useState(false);
 
   const handleLogin = () => {}
+
+  function generateEncodedRequest() {
+    const request = `
+    <samlp:AuthnRequest
+      xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
+      xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
+      ID="_${Math.random().toString(36).substring(2)}"
+      Version="2.0"
+      IssueInstant="${new Date().toISOString()}"
+      AssertionConsumerServiceURL="https://southface.netlify.app/api/user/sso/callback"
+      Destination="https://focus-ga--bitsofgood.sandbox.my.site.com/idp/login"
+    >
+      <saml:Issuer>http://localhost:3000/</saml:Issuer>
+      <samlp:NameIDPolicy
+        Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"
+        AllowCreate="true"
+      />
+    </samlp:AuthnRequest>
+  `.trim();
+  
+    const deflated = deflateRawSync(request);
+    const b64Encoded = Buffer.from(deflated).toString("base64");
+    const uriEncoded = encodeURIComponent(b64Encoded);
+  
+    return uriEncoded;
+  }
+
+  const handleSalesforceLogin = () => {
+    window.location.href = `https://focus-ga--bitsofgood.sandbox.my.site.com/idp/login?app=0spEa0000000c8X&SAMLRequest=${generateEncodedRequest()}`; // Replace with actual Salesforce login URL
+  }
 
   return (
     <div className="bg-[url('/Portal_Background.avif')] bg-cover bg-no-repeat h-screen w-screen">
@@ -40,6 +71,7 @@ export default function Login() {
             <p className="text-red-500 text-sm mt-2">Invalid username or password. Please try again.</p>
           )}
           <button onClick={handleLogin} className="rounded-sm h-[51px] mt-5 bg-theme-blue text-white w-[295px]">Log in</button>
+          <button onClick={handleSalesforceLogin} className="rounded-sm h-[51px] mt-2 bg-green-500 text-white w-[295px]">Log in with Salesforce</button>
           <a href="https://focus-ga.my.site.com/s/login/ForgotPassword" className="mt-8 text-left w-[295px]">Forgot your password?</a>
         </div>
         <div className="flex flex-row justify-between mx-[17vw] mt-12 mb-0 items-center">
