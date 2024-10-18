@@ -11,7 +11,6 @@ import { loginUser } from "@/server/db/actions/UserActions"; // Import the creat
 
 export default function Login() {
   const router = useRouter();
-  // const { user, login } = useUser(); // Get user context
   const [credentialsError, setCredentialsError] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");

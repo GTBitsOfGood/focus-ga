@@ -71,10 +71,22 @@ export async function editUser(id: string, updated: Partial<UserInput>): Promise
   return updatedUser.toObject();
 }
 
+/**
+ * Logs in a user by their username. If the user does not exist, a new user is created with default values.
+ * @param username - The username of the user attempting to log in.
+ * @returns A promise that resolves to an object indicating the success of the login operation.
+ */
 export async function loginUser(username: string) {
   let user = await getUserByUsername(username);
   if (!user) {
-    user = await createUser({ username, "lastName" : "dummy", "childAge" : 10, "childDisabilities" : [], "email" : "test@gmail.com", "county" : "fulton" }); // Adjust this to match your user schema
+    user = await createUser({ 
+      username, 
+      "lastName": "dummy", 
+      "childAge": 10, 
+      "childDisabilities": [], 
+      "email": "test@gmail.com", 
+      "county": "fulton" 
+    });
   }
 
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
@@ -86,6 +98,10 @@ export async function loginUser(username: string) {
   return { success: true };
 }
 
+/**
+ * Signs out the current user by destroying their session.
+ * @returns A promise that resolves to an object indicating the success of the sign-out operation.
+ */
 export async function signOut() {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
   
