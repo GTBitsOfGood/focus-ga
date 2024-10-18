@@ -11,6 +11,80 @@ import UserModel from "../models/UserModel";
 import DisabilityModel from "../models/DisabilityModel";
 import { revalidatePath } from "next/cache";
 
+// A MongoDB aggregation pipeline that efficiently populates a post
+const postPopulationPipeline = (authUserId: string, postId?: string) => [
+  // Match specific post ID if given
+  ... postId ? [{ $match: { _id: new mongoose.Types.ObjectId(postId) } }] : [],
+
+  // Populate author field
+  { $lookup: {
+    from: UserModel.collection.name,
+    localField: 'author',
+    foreignField: '_id',
+    pipeline: [{ $addFields: { _id: { $toString: '$_id' } } }],
+    as: 'author'
+  } },
+  { $unwind: { path: '$author', preserveNullAndEmptyArrays: true } },
+
+  // Populate tags
+  { $lookup: {
+    from: DisabilityModel.collection.name,
+    localField: 'tags',
+    foreignField: '_id',
+    pipeline: [{ $addFields: { _id: { $toString: '$_id' } } }],
+    as: 'tags'
+  } },
+
+  // Replace author and tags with default values if necessary
+  { $addFields: {
+    author: { $ifNull: ['$author', null] },
+    tags: { $ifNull: ['$tags', []] }
+  } },
+
+  // Determine whether user has liked post
+  { $lookup: {
+    from: PostLikeModel.collection.name,
+    let: { postId: '$_id'  },
+    pipeline: [
+      { $match: {
+        $expr: {
+          $and: [
+            { $eq: ['$post', '$$postId'] },
+            { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
+          ]
+        }
+      } }
+    ],
+    as: 'liked'
+  } },
+  { $addFields: {
+    liked: { $gt: [{ $size: '$liked' }, 0] }
+  } },
+
+  // Determine whether user has saved post
+  { $lookup: {
+    from: PostSaveModel.collection.name,
+    let: { postId: '$_id'  },
+    pipeline: [
+      {
+        $match: {
+          $expr: {
+            $and: [
+              { $eq: ['$post', '$$postId'] },
+              { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
+            ]
+          }
+        }
+      }
+    ],
+    as: 'saved'
+  } },
+  { $addFields: {
+    saved: { $gt: [{ $size: '$saved' }, 0] },
+    _id: { $toString: '$_id' }
+  } }
+];
+
 /**
  * Creates a new post in the database.
  * @param post - The post input data.
@@ -46,23 +120,8 @@ export async function getPosts(): Promise<Post[]> {
 export async function getPopulatedPosts(authUserId: string): Promise<PopulatedPost[]> {
   await dbConnect();
 
-  const posts = await PostModel
-    .find()
-    .sort({ date: -1 })  // Sort by date in descending order (newest first)
-    .populate({ path: 'author', model: UserModel })
-    .populate({ path: 'tags', model: DisabilityModel });
-  
-  const likes = await PostLikeModel.find({ user: authUserId });
-  const likedIds = new Set(likes.map(like => like.post.toString()));
-  const saves = await PostSaveModel.find({ user: authUserId });
-  const savedIds = new Set(saves.map(save => save.post.toString()));
-  
-  return posts.map(post => {
-    const res = post.toObject();
-    res.liked = likedIds.has(post._id.toString());
-    res.saved = savedIds.has(post._id.toString());
-    return res;
-  });
+  const posts = await PostModel.aggregate(postPopulationPipeline(authUserId));
+  return posts;
 }
 
 /**
@@ -94,29 +153,12 @@ export async function getPopulatedPost(id: string, authUserId: string): Promise<
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new Error("Invalid post ID");
   }
-  
-  const post = await PostModel
-    .findById(id)
-    .populate({ path: 'author', model: UserModel })
-    .populate({ path: 'tags', model: DisabilityModel });
-  
+
+  const [post] = await PostModel.aggregate(postPopulationPipeline(authUserId, id));
   if (!post) {
     throw new Error("Post not found");
   }
-
-  const like = await PostLikeModel.exists({
-    user: authUserId,
-    post: post._id
-  });
-  const save = await PostSaveModel.exists({
-    user: authUserId,
-    post: post._id
-  });
-
-  const res = post.toObject();
-  res.liked = !!like;
-  res.saved = !!save;
-  return res;
+  return post;
 }
 
 /**

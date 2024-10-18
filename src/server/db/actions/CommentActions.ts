@@ -171,23 +171,51 @@ export async function deleteCommentLike(userId: string, commentId: string): Prom
 export async function getPostComments(postId: string, authUserId: string): Promise<PopulatedComment[]> {
   await dbConnect();
 
-  const comments = await CommentModel
-    .find({ post: postId })
-    .sort({ date: 'desc' })
-    .populate({ path: 'author', model: UserModel });
-  const commentIds = comments.map(comment => comment._id);
+  const comments = await CommentModel.aggregate([
+    // Match post ID
+    { $match: { post: new mongoose.Types.ObjectId(postId) } },
 
-  const likes = await CommentLikeModel.find({
-    user: authUserId,
-    comment: { $in: commentIds }
-  });
-  const likedIds = new Set(likes.map(like => like.comment.toString()));
+    // Sort by date in descending order
+    { $sort: { date: -1 } },
 
-  return comments.map(comment => {
-    const res = comment.toObject();
-    res.post = res.post.toString();
-    res.replyTo = res.replyTo?.toString() || null;
-    res.liked = likedIds.has(comment._id.toString());
-    return res;
-  });
+    // Populate author field
+    { $lookup: {
+      from: UserModel.collection.name,
+      localField: 'author',
+      foreignField: '_id',
+      pipeline: [{ $addFields: { _id: { $toString: '$_id' } } }],
+      as: 'author'
+    } },
+    { $unwind: { path: '$author', preserveNullAndEmptyArrays: true } },
+
+    // Determine whether user has liked comment
+    { $lookup: {
+      from: CommentLikeModel.collection.name,
+      let: { commentId: '$_id' },
+      pipeline: [
+        { $match: {
+          $expr: {
+            $and: [
+              { $eq: ['$comment', '$$commentId'] },
+              { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
+            ]
+          }
+        } }
+      ],
+      as: 'liked'
+    } },
+    { $addFields: {
+      liked: { $gt: [{ $size: '$liked' }, 0] },
+    } },
+
+    // Convert ObjectIds to strings and insert default author value if necessary
+    { $addFields: {
+      _id: { $toString: '$_id' },
+      post: { $toString: '$post' },
+      replyTo: { $toString: '$replyTo' },
+      author: { $ifNull: ['$author', null] }
+    } }
+  ]);
+  
+  return comments;
 }
