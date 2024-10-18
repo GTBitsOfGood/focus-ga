@@ -1,18 +1,31 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from 'next/image';
 import lock from "../../../../public/lock.png";
 import user from "../../../../public/user.png";
 import focusLogo from "../../../../public/focus-logo.png";
 import transparencyBadge from "../../../../public/transparency-badge.png";
+import { loginUser } from "@/server/db/actions/UserActions"; // Import the createUser function
 
 export default function Login() {
   const router = useRouter();
+  // const { user, login } = useUser(); // Get user context
   const [credentialsError, setCredentialsError] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleLogin = () => {}
+  const handleLogin = async () => {
+    try {
+      const result = await loginUser(username);
+      if (result.success) {
+        router.push("/");
+      }
+    } catch (error) {
+      setCredentialsError(true);
+    }
+  };
 
   return (
     <div className="bg-[url('/Portal_Background.avif')] bg-cover bg-no-repeat h-screen w-screen">
@@ -26,7 +39,13 @@ export default function Login() {
               <i className="fa fa-user"></i>
             </i>
             
-            <input className="border-[1px] border-gray-300 rounded-sm pr-3.5 pl-10 h-[51px] w-[295px] placeholder-med-gray text-med-gray focus:outline-none focus:ring-2 focus:ring-blue-500" type="email" placeholder="Username" />
+            <input
+              className="border-[1px] border-gray-300 rounded-sm pr-3.5 pl-10 h-[51px] w-[295px] placeholder-med-gray text-med-gray focus:outline-none focus:ring-2 focus:ring-blue-500"
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)} // Update username state
+            />
           </div>
 
           <div className="relative mt-4">

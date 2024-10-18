@@ -9,6 +9,7 @@ import { ChevronDown } from "lucide-react";
 import { ChevronUp } from "lucide-react";
 import Link from "next/link";
 import useClickOff from "@/hooks/useClickOff";
+import { signOut } from "@/server/db/actions/UserActions";
 
 interface Props {
   openModal: () => void;
@@ -84,9 +85,14 @@ export default function Navbar( props: Props ) {
               Settings & Preferences
             </Link>
             <div className="w-44 border-theme-lightgray border-t border-sm mt-[18px] mx-auto"/>
-            <Link href="/profile/settings" className="text-theme-blue mt-2 mb-2 block ml-4 py-1 hover:underline cursor-pointer transition-colors text-left">
+            <button 
+              onClick={async () => {
+                await signOut();
+              }} 
+              className="text-theme-blue mt-2 mb-2 block ml-4 py-1 hover:underline cursor-pointer transition-colors text-left"
+            >
               Sign out
-            </Link>
+            </button>
           </div>
         </div>
       )}
