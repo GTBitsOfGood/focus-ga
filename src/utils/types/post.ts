@@ -46,7 +46,8 @@ export type PostLike = ExtendId<z.infer<typeof postLikeSchema>>;
 export type PopulatedPost = Omit<Post, 'author' | 'tags'> & {
   author: User | null,
   tags: (Disability | null)[],
-  liked: boolean
+  liked: boolean,
+  saved: boolean
 };
 
 export type PostInput = z.input<typeof postSchema>;

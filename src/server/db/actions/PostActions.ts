@@ -54,10 +54,13 @@ export async function getPopulatedPosts(authUserId: string): Promise<PopulatedPo
   
   const likes = await PostLikeModel.find({ user: authUserId });
   const likedIds = new Set(likes.map(like => like.post.toString()));
+  const saves = await PostSaveModel.find({ user: authUserId });
+  const savedIds = new Set(saves.map(save => save.post.toString()));
   
   return posts.map(post => {
     const res = post.toObject();
     res.liked = likedIds.has(post._id.toString());
+    res.saved = savedIds.has(post._id.toString());
     return res;
   });
 }
@@ -79,9 +82,9 @@ export async function getPost(id: string): Promise<Post> {
 }
 
 /**
- * Retrieves a single post from the database by its ID with its author and disability fields populated and like status specified.
+ * Retrieves a single post from the database by its ID with its author and disability fields populated and like and save statuses specified.
  * @param id - The ID of the post to retrieve.
- * @param authUserId - The ID of the currently authenticated user, to determine whether they have liked each post.
+ * @param authUserId - The ID of the currently authenticated user, to determine whether they have liked and/or saved each post.
  * @returns A promise that resolves to a populated post object containing author and disability objects (or null if they are not found)
  * @throws Will throw an error if the post is not found.
  */
@@ -105,9 +108,14 @@ export async function getPopulatedPost(id: string, authUserId: string): Promise<
     user: authUserId,
     post: post._id
   });
+  const save = await PostSaveModel.exists({
+    user: authUserId,
+    post: post._id
+  });
 
   const res = post.toObject();
   res.liked = !!like;
+  res.saved = !!save;
   return res;
 }
 

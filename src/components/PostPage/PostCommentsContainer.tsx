@@ -10,7 +10,7 @@ import { useState } from "react";
 import CommentInputComponent from "./CommentInputComponent";
 import CommentTreeContainer from "./CommentTreeContainer";
 import { User } from "@/utils/types/user";
-import { createPostLike, deletePostLike } from "@/server/db/actions/PostActions";
+import { createPostLike, createPostSave, deletePostLike, deletePostSave } from "@/server/db/actions/PostActions";
 
 function buildChildCommentsMap(comments: PopulatedComment[]) {
   const map = new Map<string, PopulatedComment[]>();
@@ -81,6 +81,14 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
     }
   }
 
+  async function onPostSaveClick(saved: boolean) {
+    if (saved) {
+      await deletePostSave(authUser._id, post._id);
+    } else {
+      await createPostSave(authUser._id, post._id);
+    }
+  }
+
   return (
     <>
       <div className="mx-16 my-4 text-lg text-[#686868]">
@@ -92,6 +100,7 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
         <PostComponent
           post={post}
           onLikeClick={onPostLikeClick}
+          onSaveClick={onPostSaveClick}
         />
         <CommentInputComponent
           placeholder="Add comment"

@@ -16,6 +16,7 @@ type PostComponentProps = {
   post: PopulatedPost;
   clickable?: boolean;
   onLikeClick?: (liked: boolean) => Promise<void>;
+  onSaveClick?: (saved: boolean) => Promise<void>;
 };
 
 export default function PostComponent(props: PostComponentProps) {
@@ -27,7 +28,8 @@ export default function PostComponent(props: PostComponentProps) {
     className = '',
     post,
     clickable = false,
-    onLikeClick
+    onLikeClick,
+    onSaveClick
   } = props;
 
   const {
@@ -38,12 +40,15 @@ export default function PostComponent(props: PostComponentProps) {
     tags,
     likes: initialLikes,
     liked: initialLiked,
+    saved: initialSaved,
     comments
   } = post;
 
   const [likes, setLikes] = useState<number>(initialLikes);
   const [liked, setLiked] = useState<boolean>(initialLiked);
   const [likeLoading, setLikeLoading] = useState<boolean>(false);
+  const [saved, setSaved] = useState<boolean>(initialSaved);
+  const [saveLoading, setSaveLoading] = useState<boolean>(false);
 
   async function handleLikeClick() {
     if (likeLoading) return;
@@ -68,10 +73,26 @@ export default function PostComponent(props: PostComponentProps) {
     }
   }
 
+  async function handleSaveClick() {
+    if (saveLoading) return;
+    setSaved(saved => !saved);
+
+    if (onSaveClick) {
+      setSaveLoading(true);
+      try {
+        await onSaveClick(saved);
+      } catch (err) {
+        setSaved(saved);
+      } finally {
+        setSaveLoading(false);
+      }
+    }
+  }
+
   const bottomRow = [
     { label: likes.toString(), icon: liked ? <Heart className="text-red-500" fill={colors.red[500]} /> : <Heart />, onClick: handleLikeClick },
     { label: comments.toString(), icon: <MessageSquare /> },
-    { label: 'Save Post', icon: <Bookmark /> }
+    { label: saved ? 'Saved Post' : 'Save Post', icon: saved ? <Bookmark fill={'#636363'} /> : <Bookmark />, onClick: handleSaveClick }
   ];
 
   const reactContent = (
