@@ -16,11 +16,11 @@ type PipelineArgs = {
   authUserId: string,
   offset?: number,
   limit?: number,
-  filter?: any,
+  tags?: Array<string>,
   postId?: string,
 }
 
-function postPopulationPipeline({authUserId, offset, limit, filter, postId}: PipelineArgs): mongoose.PipelineStage[] {
+function postPopulationPipeline({authUserId, offset, limit, tags, postId}: PipelineArgs): mongoose.PipelineStage[] {
   return [
     // Match specific post ID if given, otherwise sort by date in descending order
     ... postId ? [
@@ -29,8 +29,8 @@ function postPopulationPipeline({authUserId, offset, limit, filter, postId}: Pip
       { $sort: { date: -1 as const } }
     ],
 
-    // filter
-    ...(filter ? [{ $match: filter }] : []),
+    // filter by tags
+    ...(tags && tags.length ? [{ $match: { tags: { $in: tags.map((t) => new mongoose.Types.ObjectId(t)) } } }] : []),
 
     // Skip and limit for pagination
     ...(offset ? [{ $skip: offset }] : []),
@@ -136,10 +136,11 @@ export async function getPosts(): Promise<Post[]> {
  * @param authUserId - The ID of the currently authenticated user, to determine whether they have liked each post.
  * @returns A promise that resolves to an array of populated post objects.
  */
-export async function getPopulatedPosts(authUserId: string, offset: number, limit: number, filter?: any): Promise<PopulatedPost[]> {
+export async function getPopulatedPosts(authUserId: string, offset: number, limit: number, tags?: Array<string>): Promise<PopulatedPost[]> {
   await dbConnect();
 
-  const posts = await PostModel.aggregate(postPopulationPipeline({authUserId, offset, limit, filter}));
+  const posts = await PostModel.aggregate(postPopulationPipeline({authUserId, offset, limit, tags}));
+  console.log(posts);
   return posts;
 }
 

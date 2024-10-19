@@ -70,21 +70,10 @@ export default function Home() {
     }
   };
 
-  // update filter when selectedDisabilities changes
-  useEffect(() => {
-    if (selectedDisabilities.length > 0) {
-      setFilter({
-        tags: { $in: selectedDisabilities.map((d) => d._id) },
-      });
-    } else {
-      setFilter({});
-    }
-  }, [selectedDisabilities])
-
   // fetch posts when filter changes
   useEffect(() => {
     fetchPosts(true);
-  }, [filter])
+  }, [selectedDisabilities])
 
   // Fetch posts when page changes
   const fetchPosts = async (clear: boolean = false) => {
@@ -99,7 +88,9 @@ export default function Home() {
     try {
       const newPage = clear ? 0 : page;
 
-      const newPosts = await getPopulatedPosts(USER_ID, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, filter);
+      const tags = selectedDisabilities.map((disability) => disability._id);
+
+      const newPosts = await getPopulatedPosts(USER_ID, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, tags);
       if (newPosts.length > 0) {
         setPosts(clear ? newPosts : [...posts, ...newPosts]);
       } else {
