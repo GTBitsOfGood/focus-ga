@@ -10,7 +10,7 @@ import { Disability } from "@/utils/types/disability";
 import { getDisabilities } from "@/server/db/actions/DisabilityActions";
 import { Filter } from "@/utils/types/common";
 import { PAGINATION_LIMIT } from "@/utils/consts";
-import { USER_ID } from "@/utils/consts";
+import { useUser } from "@/hooks/user";
 
 export const dynamic = 'force-dynamic';
 
@@ -19,7 +19,8 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
-  const [filter, setFilter] = useState({});
+  const user = useUser();
+  console.log(user);
   
   const [disabilities, setDisabilities] = useState<Disability[]>([]);
   const [selectedDisabilities, setSelectedDisabilities] = useState<Disability[]>([]);
@@ -77,6 +78,8 @@ export default function Home() {
 
   // Fetch posts when page changes
   const fetchPosts = async (clear: boolean = false) => {
+    if (!user) return;
+
     if (clear) {
       setPage(0);
       setHasMore(true);
@@ -90,7 +93,7 @@ export default function Home() {
 
       const tags = selectedDisabilities.map((disability) => disability._id);
 
-      const newPosts = await getPopulatedPosts(USER_ID, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, tags);
+      const newPosts = await getPopulatedPosts(user._id, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, tags);
       if (newPosts.length > 0) {
         setPosts(clear ? newPosts : [...posts, ...newPosts]);
       } else {
@@ -105,7 +108,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchPosts();
-  }, [page]);
+  }, [page, user]);
 
   // Handle infinite scrolling using IntersectionObserver
   const observer = useRef<IntersectionObserver | null>(null);
@@ -125,6 +128,10 @@ export default function Home() {
     },
     [loading, hasMore]
   );
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <main className="flex min-h-screen flex-col items-center px-16">

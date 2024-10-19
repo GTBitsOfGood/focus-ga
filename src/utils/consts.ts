@@ -10,6 +10,3 @@ export const FOCUS_FONT = Lato({
   subsets: ['latin'],
   weight: ['100', '300', '400', '700', '900'],
 });
-
-// TODO: Remove this when auth is properly implemented
-export const USER_ID = '66e26a641737b310a1b2774c';
