@@ -294,7 +294,7 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
         <div className="flex justify-end space-x-4">
           <button
             onClick={handleClose}
-            className="w-20 py-2 bg-light-gray text-focus-gray rounded-md hover:bg-zinc-300 font-bold"
+            className="w-20 py-2 bg-light-gray text-theme-gray rounded-md hover:bg-zinc-300 font-bold"
           >
             Cancel
           </button>

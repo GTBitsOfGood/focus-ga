@@ -86,11 +86,12 @@ export async function loginUser(email: string) {
   if (!user) {
     user = await createUser({ 
       email,
-      username: "Test",
+      username: "12738718",
       lastName: "BoG", 
       childAge: 10, 
       childDisabilities: [],
-      city: "Fulton" 
+      city: "Fulton",
+      bio: "Hello World!"
     });
   }
 

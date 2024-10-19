@@ -6,6 +6,7 @@ import MarkdownIt from "markdown-it";
 import { ReactNode, useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
+import Link from "next/link";
 
 type CommentComponentProps = {
   className?: string;
@@ -85,14 +86,14 @@ export default function CommentComponent(props: CommentComponentProps) {
 
   return (
     <div className="flex gap-2.5">
-      <div>
+      <Link href={`/family/${author?._id}`}>
         <span className="w-6 h-6 bg-theme-gray rounded-full inline-block"/>
-      </div>
+      </Link>
       <div className={`flex-grow flex flex-col gap-2 text-theme-gray ${className}`}>
         <div className="flex items-center justify-between">
-          <div className="font-bold text-black">
+          <Link className="font-bold text-black" href={`/family/${author?._id}`}>
             {author ? `${author.lastName} Family` : 'Deleted User'}
-          </div>
+          </Link>
           <p className="text-sm" suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
         </div>
         <MarkdownRenderer

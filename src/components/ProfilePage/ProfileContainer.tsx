@@ -2,7 +2,7 @@
 
 import { ChevronLeftIcon, Pencil } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { PopulatedUser } from "@/utils/types/user";
+import { PopulatedUser, User } from "@/utils/types/user";
 import { useEffect, useState } from "react";
 import Tag from "../Tag";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -15,11 +15,11 @@ import Link from "next/link";
 
 type ProfileContainerProps = {
   user: PopulatedUser;
+  currUser: User;
 }
 
-export default function ProfileContainer({ user }: ProfileContainerProps) {
+export default function ProfileContainer({ user, currUser }: ProfileContainerProps) {
   const [userPosts, setUserPosts] = useState<PopulatedPost[]>([]);
-  const CURR_USER = user._id;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const openModal = () => setIsModalOpen(true);
@@ -37,7 +37,7 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
 
   return (
     <div>
-    <div className="mx-16 my-4 text-lg text-focus-gray">
+    <div className="mx-16 my-4 text-lg text-theme-gray">
         <Link href={'/'} className="flex items-center gap-1">
           <ChevronLeftIcon className="w-6 h-6" /> Back
         </Link>
@@ -50,14 +50,14 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
               <span className="text-6xl font-medium text-black">{user.lastName.charAt(0).toUpperCase()}</span>
             </div>
             <div className="flex flex-col justify-center">
-              <p className="text-2xl font-bold">{user.lastName} Household</p>
+              <p className="text-2xl font-bold">{user.lastName} Family</p>
               <p className="text-lg font-normal">{user.email}</p>
             </div>
           </div>
           {
-            CURR_USER === user._id 
+            currUser._id === user._id 
             ? (
-              <button onClick={() => setIsModalOpen(true)} className="bg-light-gray hover:bg-zinc-300 text-focus-gray text-lg font-bold px-4 py-2 rounded-lg">
+              <button onClick={() => setIsModalOpen(true)} className="bg-light-gray hover:bg-zinc-300 text-theme-gray text-lg font-bold px-4 py-2 rounded-lg">
                 <div className="flex flex-row items-center space-x-2.5">
                   <Pencil color="#636363" className="w-6 h-6" />
                   <p>Edit</p>
@@ -79,7 +79,7 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
         <div>
           <p className="text-lg mb-4">
             <span className="font-semibold">Location: </span>
-            <span className="text-focus-gray">{user.city}, GA</span>
+            <span className="text-theme-gray">{user.city}, GA</span>
           </p>
           <div className="flex flex-row mb-4">
             <p className="text-lg font-semibold mr-3">Disabilities: </p>
@@ -92,13 +92,13 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
             </div>
           </div>
           <p className="font-semibold text-lg">Bio</p>
-          <p className="text-lg text-focus-gray">{user.bio}</p>
+          <p className="text-lg text-theme-gray">{user.bio}</p>
         </div>
-        <Separator className="bg-focus-gray my-6" />
+        <Separator className="bg-theme-gray my-6" />
         <Tabs defaultValue="my-posts">
           <TabsList className="mb-4">
-            <TabsTrigger value="my-posts">{CURR_USER === user._id ? 'My Posts' : 'Posts'}</TabsTrigger>
-            {CURR_USER === user._id && <TabsTrigger value="saved-posts">Saved Posts</TabsTrigger>}
+            <TabsTrigger value="my-posts">{currUser._id === user._id ? 'My Posts' : 'Posts'}</TabsTrigger>
+            {currUser._id === user._id && <TabsTrigger value="saved-posts">Saved Posts</TabsTrigger>}
           </TabsList>
           <TabsContent value="my-posts">
             <div className="space-y-6">
