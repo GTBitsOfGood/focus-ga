@@ -325,6 +325,7 @@ export async function createPostLike(userId: string, postId: string): Promise<Po
     throw error;
   } finally {
     session.endSession();
+    revalidatePath(`/posts/${postId}`);
   }
 }
 
@@ -362,5 +363,6 @@ export async function deletePostLike(userId: string, postId: string): Promise<vo
     throw error;
   } finally {
     session.endSession();
+    revalidatePath(`/posts/${postId}`);
   }
 }
