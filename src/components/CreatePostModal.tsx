@@ -14,9 +14,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { useToast } from "@/hooks/use-toast";
-import { Types } from "mongoose";
 import { MDXEditorMethods } from "@mdxeditor/editor";
 import { cn, countNonMarkdownCharacters } from "@/lib/utils";
+import { User } from "@/utils/types/user";
 
 const EditorComp = dynamic(() => import('./EditorComponent'), { ssr: false })
 
@@ -24,6 +24,7 @@ type CreatePostModalProps = {
   isOpen: boolean;
   openModal: () => void;
   closeModal: () => void;
+  user: User;
 }
 
 type PostData = {
@@ -84,7 +85,7 @@ export default function CreatePostModal( props: CreatePostModalProps ) {
       if (validateSubmission()) {
         setIsSubmitting(true);
         const formattedData = {
-          author: (new Types.ObjectId()).toString(), // TODO: replace with actual userid 
+          author: props.user._id,
           title: postData.title,
           content: postData.content.trim(),
           tags: postData.tags.map((tag) => tag._id)

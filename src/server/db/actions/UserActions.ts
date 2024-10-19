@@ -38,14 +38,14 @@ export async function getUser(id: string): Promise<User> {
 
 /**
  * Retrieves a user from the database by their username.
- * @param username - The username of the user to retrieve.
+ * @param email - The email of the user to retrieve.
  * @returns A promise that resolves to the user object with extended ID.
  * @throws Will throw an error if the user is not found.
  */
-export async function getUserByUsername(username: string): Promise<User | null> {
+export async function getUserByEmail(email: string): Promise<User | null> {
   await dbConnect();
 
-  const user = await UserModel.findOne({ username });
+  const user = await UserModel.findOne({ email });
   if (!user) {
     return null;
   }
@@ -76,16 +76,16 @@ export async function editUser(id: string, updated: Partial<UserInput>): Promise
  * @param username - The username of the user attempting to log in.
  * @returns A promise that resolves to an object indicating the success of the login operation.
  */
-export async function loginUser(username: string) {
-  let user = await getUserByUsername(username);
+export async function loginUser(email: string) {
+  let user = await getUserByEmail(email);
   if (!user) {
     user = await createUser({ 
-      username, 
-      "lastName": "dummy", 
-      "childAge": 10, 
-      "childDisabilities": [], 
-      "email": "test@gmail.com", 
-      "county": "fulton" 
+      email,
+      username: "Test",
+      lastName: "BoG", 
+      childAge: 10, 
+      childDisabilities: [],
+      county: "Fulton" 
     });
   }
 

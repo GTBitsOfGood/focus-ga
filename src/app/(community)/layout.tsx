@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import { Toaster } from "@/components/ui/toaster"
 import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
 import { FOCUS_FONT } from "@/utils/consts";
+import { useUser } from "@/hooks/user";
 
 type CommunityLayoutProps = {
   children: React.ReactNode;
@@ -16,12 +17,15 @@ export default function CommunityLayout({ children }: CommunityLayoutProps) {
   const [isCreatePostModalOpen, setCreatePostModal] = useState(false);
   const openCreatePostModal = () => setCreatePostModal(true);
   const closeCreatePostModal = () => setCreatePostModal(false);
+  const user = useUser();
+
+  if (!user) return null;
 
   return (
     <html lang='en'>
       <body className={FOCUS_FONT.className}>
-        <Navbar openModal={openCreatePostModal}/>
-        <CreatePostModal isOpen={isCreatePostModalOpen} openModal={openCreatePostModal} closeModal={closeCreatePostModal}/>
+        <Navbar openModal={openCreatePostModal} user={user}/>
+        <CreatePostModal isOpen={isCreatePostModalOpen} openModal={openCreatePostModal} closeModal={closeCreatePostModal} user={user}/>
         <Sidebar />
         <div className="ml-[280px] mt-[100px] p-4">
           {children}

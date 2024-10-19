@@ -12,12 +12,12 @@ import { loginUser } from "@/server/db/actions/UserActions"; // Import the creat
 export default function Login() {
   const router = useRouter();
   const [credentialsError, setCredentialsError] = useState(false);
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
     try {
-      const result = await loginUser(username);
+      const result = await loginUser(email);
       if (result.success) {
         router.push("/");
       }
@@ -33,7 +33,7 @@ export default function Login() {
         <div className="mx-[24vw] flex flex-col justify-center items-center mt-[16vh]">
           <Image src={focusLogo} width={295} height={145} alt="focus-logo" />
           <div className="relative mt-3">
-            <i className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"> {/* Replace with your icon */}
+            <i className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">
               <Image src={user} width={17} alt="user-icon" />
               <i className="fa fa-user"></i>
             </i>
@@ -41,14 +41,14 @@ export default function Login() {
             <input
               className="border-[1px] border-gray-300 rounded-sm pr-3.5 pl-10 h-[51px] w-[295px] placeholder-med-gray text-med-gray focus:outline-none focus:ring-2 focus:ring-blue-500"
               type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)} // Update username state
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
           <div className="relative mt-4">
-            <i className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"> {/* Replace with your icon */}
+            <i className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">
               <Image src={lock} width={17} alt="lock-icon" />
               <i className="fa fa-lock"></i>
             </i>
