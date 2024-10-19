@@ -7,6 +7,7 @@ import dbConnect from "../dbConnect";
 import mongoose from "mongoose";
 import PostModel from "../models/PostModel";
 import UserModel from "../models/UserModel";
+import { revalidatePath } from "next/cache";
 
 /**
  * Creates a new comment in the database.
@@ -37,6 +38,7 @@ export async function createComment(comment: CommentInput): Promise<Comment> {
     throw new Error("Failed to create comment");
   } finally {
     session.endSession();
+    revalidatePath(`/posts/${comment.post}`);
   }
 }
 
@@ -161,23 +163,61 @@ export async function deleteCommentLike(userId: string, commentId: string): Prom
 }
 
 /**
- * Retrieves all comments under a post in descending order by date of creation, with authors populated and post and replyTo IDs nulled out.
+ * Retrieves all comments under a post in descending order by date of creation, with authors populated, 
+ * post and replyTo IDs converted to strings, and like status specified.
  * @param postId - The ID of the post whose comments are to be retrieved.
+ * @param authUserId - The ID of the currently authenticated user, to determine whether they have liked each comment.
  * @throws Will throw an error if the post is not found.
  * @returns A promise that resolves to an array of partially populated comment objects.
  */
-export async function getPostComments(postId: string): Promise<PopulatedComment[]> {
+export async function getPostComments(postId: string, authUserId: string): Promise<PopulatedComment[]> {
   await dbConnect();
 
-  const comments = await CommentModel
-    .find({ post: postId })
-    .sort({ date: 'desc' })
-    .populate({ path: 'author', model: UserModel });
+  const comments = await CommentModel.aggregate([
+    // Match post ID
+    { $match: { post: new mongoose.Types.ObjectId(postId) } },
 
-  return comments.map(comment => {
-    const res = comment.toObject();
-    res.post = null;
-    res.replyTo = null;
-    return res;
-  });
+    // Sort by date in descending order
+    { $sort: { date: -1 } },
+
+    // Populate author field
+    { $lookup: {
+      from: UserModel.collection.name,
+      localField: 'author',
+      foreignField: '_id',
+      pipeline: [{ $addFields: { _id: { $toString: '$_id' } } }],
+      as: 'author'
+    } },
+    { $unwind: { path: '$author', preserveNullAndEmptyArrays: true } },
+
+    // Determine whether user has liked comment
+    { $lookup: {
+      from: CommentLikeModel.collection.name,
+      let: { commentId: '$_id' },
+      pipeline: [
+        { $match: {
+          $expr: {
+            $and: [
+              { $eq: ['$comment', '$$commentId'] },
+              { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
+            ]
+          }
+        } }
+      ],
+      as: 'liked'
+    } },
+    { $addFields: {
+      liked: { $gt: [{ $size: '$liked' }, 0] },
+    } },
+
+    // Convert ObjectIds to strings and insert default author value if necessary
+    { $addFields: {
+      _id: { $toString: '$_id' },
+      post: { $toString: '$post' },
+      replyTo: { $toString: '$replyTo' },
+      author: { $ifNull: ['$author', null] }
+    } }
+  ]);
+  
+  return comments;
 }

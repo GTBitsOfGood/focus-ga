@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import focusLogo from "@/../public/focus-logo.png";
 import Image from "next/image";
@@ -8,14 +8,22 @@ import { Search } from "lucide-react";
 import { ChevronDown } from "lucide-react";
 import { ChevronUp } from "lucide-react";
 import Link from "next/link";
+import useClickOff from "@/hooks/useClickOff";
+import { signOut } from "@/server/db/actions/UserActions";
+import { User } from "@/utils/types/user";
 
-interface Props {
+interface NavbarProps {
   openModal: () => void;
+  user: User;
 }
 
-export default function Navbar( props: Props ) {
+export default function Navbar({ openModal, user }: NavbarProps) {
   const router = useRouter();
   const [menuIsOpen, setMenuIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownButtonRef = useRef<HTMLDivElement>(null);
+
+  useClickOff(dropdownRef, () => setMenuIsOpen(false), [dropdownRef, dropdownButtonRef]);
 
   const toggleDropdown = () => {
     setMenuIsOpen(!menuIsOpen);
@@ -36,8 +44,8 @@ export default function Navbar( props: Props ) {
 
       {/* Create Post*/}
       <button
-        className="bg-blue text-xl text-white font-semibold w-[184px] h-[45px] rounded-[12px] gap-2 flex flex-row justify-center items-center hover:opacity-90"
-        onClick={() => props.openModal()}
+        className="bg-theme-blue text-xl text-white font-semibold w-[184px] h-[45px] rounded-[12px] gap-2 flex flex-row justify-center items-center hover:opacity-90"
+        onClick={() => openModal()}
       >
         <SquarePen color="#ffffff" /> Create Post
       </button>
@@ -46,42 +54,48 @@ export default function Navbar( props: Props ) {
       <div
         className="flex items-center justify-center ml-4 w-[88px] h-full relative group hover:bg-gray-100 transition-colors duration-200 cursor-pointer m-1 pr-16 pl-12"
         onClick={toggleDropdown}
+        ref={dropdownButtonRef}
       >
         <div className="border-l pl-6">
           <div className="w-[46px] h-[46px] bg-pink-300 rounded-full flex items-center justify-center cursor-pointer">
-            <span className="text-black font-bold text-lg  select-none">D</span> {/** TODO: Change "D" to the initial of the family name */}
+            <span className="text-black font-bold text-lg  select-none">{user.lastName.charAt(0).toUpperCase()}</span>
           </div>
         </div>
         <div className="cursor-pointer ml-2">
           {menuIsOpen ? <ChevronUp className="w-4 h-4" color="#7D7E82"/> : <ChevronDown className="w-4 h-4" color="#7D7E82"/>}
         </div>
         {menuIsOpen && (
-          <div className="absolute bottom-[-1px] left-0 w-full h-[4px] bg-blue"></div>
+          <div className="absolute bottom-[-1px] left-0 w-full h-[4px] bg-theme-blue"></div>
         )}
       </div>
 
       {/* Dropdown Menu */}
       {menuIsOpen && (
-        <div className="absolute right-0 top-[100px] w-[180px] bg-white rounded-md z-10 border border-gray-300">
-          <div className="w-[60px] h-[60px] bg-pink-300 rounded-full flex items-center justify-center m-auto mt-2">
-            <span className="text-black font-bold text-3xl">D</span>
+        <div className="absolute right-0 top-[100px] w-[218px] h-[307] bg-white z-10 border border-gray-300"  ref={dropdownRef}>
+          <div className="w-[64px] h-[64px] bg-pink-300 rounded-full flex items-center justify-center m-auto mt-[21px]">
+            <span className="text-black font-bold text-3xl">{user.lastName.charAt(0).toUpperCase()}</span>
           </div>
 
-          <div className="p-2 text-center">
-            <Link href="/profile" className="block py-1 px-4 hover:bg-gray-100 cursor-pointer transition-colors">
-              Profile
+          <div className="p-2 text-center text-theme-gray">
+            <p className="text-lg">{user.lastName} Household</p>
+            <p className="text-sm">{user.email}</p>
+            <div className="w-44 border-theme-lightgray border-t border-sm mt-[18px] mx-auto"/>
+            <Link href="/profile" className="block mt-4 ml-4 py-1 hover:underline cursor-pointer transition-colors text-left">
+              My Profile
             </Link>
-            <Link href="/saved-posts" className="block py-1 px-4 hover:bg-gray-100 cursor-pointer transition-colors">
-              Saved Posts
+            <Link href="/profile/settings" className="block mt-2 ml-4 py-1 hover:underline cursor-pointer transition-colors text-left">
+              Settings & Preferences
             </Link>
-            <Link href="/profile/settings" className="block py-1 px-4 hover:bg-gray-100 cursor-pointer transition-colors">
-              Settings
-            </Link>
-            <Link href="/login" className="block py-[16px] mx-6 cursor-pointer border-t mt-2 font-bold">
-              <button className="w-full py-[2px] px-4 text-gray-700 bg-gray-100 border border-gray-300 rounded-sm hover:bg-gray-200">
-                Log Out
-              </button>
-            </Link>
+            <div className="w-44 border-theme-lightgray border-t border-sm mt-[18px] mx-auto"/>
+            <button 
+              onClick={async () => {
+                router.push("/login");
+                await signOut();
+              }} 
+              className="text-theme-blue mt-2 mb-2 block ml-4 py-1 hover:underline cursor-pointer transition-colors text-left"
+            >
+              Sign out
+            </button>
           </div>
         </div>
       )}

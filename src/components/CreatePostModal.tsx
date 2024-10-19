@@ -14,13 +14,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { useToast } from "@/hooks/use-toast";
-import { Types } from "mongoose";
 import { MDXEditorMethods } from "@mdxeditor/editor";
 import { cn, countNonMarkdownCharacters } from "@/lib/utils";
+import { User } from "@/utils/types/user";
 
 const EditorComp = dynamic(() => import('./EditorComponent'), { ssr: false })
 
 type CreatePostModalProps = {
+  user: User;
   isOpen: boolean;
   openModal: () => void;
   closeModal: () => void;
@@ -32,7 +33,7 @@ type PostData = {
   tags: Disability[];
 }
 
-export default function CreatePostModal( props: CreatePostModalProps ) {
+export default function CreatePostModal({user, isOpen, openModal, closeModal}: CreatePostModalProps) {
   const [postData, setPostData] = useState<PostData>({
     title: "",
     content: "",
@@ -84,14 +85,14 @@ export default function CreatePostModal( props: CreatePostModalProps ) {
       if (validateSubmission()) {
         setIsSubmitting(true);
         const formattedData = {
-          author: (new Types.ObjectId()).toString(), // TODO: replace with actual userid 
+          author: user._id,
           title: postData.title,
           content: postData.content.trim(),
           tags: postData.tags.map((tag) => tag._id)
         }
 
         await createPost(formattedData);
-        props.closeModal();
+        closeModal();
         notifySuccess();
 
         setPostData({
@@ -109,7 +110,7 @@ export default function CreatePostModal( props: CreatePostModalProps ) {
   }
 
   const handleClose = () => {
-    props.closeModal();
+    closeModal();
     setBodyError(false);
     setTitleError(false);
   }
@@ -152,7 +153,7 @@ export default function CreatePostModal( props: CreatePostModalProps ) {
   };
 
   return (
-    <div className={cn("fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50", { hidden: !props.isOpen })} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}>
+    <div className={cn("fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50", { hidden: !isOpen })} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}>
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl relative z-50 flex flex-col max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-2">
           <div className="text-black text-xl font-bold">Create New Post</div>
@@ -263,7 +264,7 @@ export default function CreatePostModal( props: CreatePostModalProps ) {
           onClick={handleSubmit}
           disabled={isSubmitting}
           className={cn(
-            "min-w-20 py-2 px-4 bg-blue rounded-lg justify-center items-center gap-2.5 inline-flex",
+            "min-w-20 py-2 px-4 bg-theme-blue rounded-lg justify-center items-center gap-2.5 inline-flex",
             {
             "opacity-50 cursor-not-allowed": isSubmitting,
             "hover:bg-blue-900": !isSubmitting,

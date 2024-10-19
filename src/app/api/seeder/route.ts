@@ -27,7 +27,7 @@ const MAX_LIKED_COMMENTS_PER_USER = 5;
 const NUM_REPORTS = 10;
 const NUM_REPORT_REASONS = 4;
 const NUM_CONTENT_TYPES = 3;
-const MAX_POST_TAGS = 5;
+const MAX_POST_TAGS = 2;
 
 export async function POST(request: Request) {
   try {
@@ -123,6 +123,7 @@ export async function POST(request: Request) {
     for (let i = 0; i < posts.length; i++) {
       const post = posts[i];
       const numberOfComments = Math.floor(Math.random() * (MAX_COMMENTS_PER_POST + 1));
+      const postComments = [];
 
       for (let j = 0; j < numberOfComments; j++) {
         const commentInfo: CommentInput = {
@@ -132,14 +133,15 @@ export async function POST(request: Request) {
           content: faker.lorem.sentences(),
         }
         
-        if (comments.length > 0) {
-          const randomIndex = Math.floor(Math.random() * comments.length);
-          if (commentInfo.date && comments[randomIndex].date < commentInfo.date) {
-            commentInfo.replyTo = comments[randomIndex]._id;
+        if (postComments.length > 0) {
+          const randomIndex = Math.floor(Math.random() * postComments.length);
+          if (commentInfo.date && postComments[randomIndex].date < commentInfo.date) {
+            commentInfo.replyTo = postComments[randomIndex]._id;
           }
         }
-
-        comments.push(await createComment(commentInfo));
+        const newComment = await createComment(commentInfo);
+        postComments.push(newComment);
+        comments.push(newComment);
       }
     }
     console.log("Successfully created comments");
