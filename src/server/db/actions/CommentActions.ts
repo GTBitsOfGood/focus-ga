@@ -7,6 +7,7 @@ import dbConnect from "../dbConnect";
 import mongoose from "mongoose";
 import PostModel from "../models/PostModel";
 import UserModel from "../models/UserModel";
+import { revalidatePath } from "next/cache";
 
 /**
  * Creates a new comment in the database.
@@ -37,6 +38,7 @@ export async function createComment(comment: CommentInput): Promise<Comment> {
     throw new Error("Failed to create comment");
   } finally {
     session.endSession();
+    revalidatePath(`/posts/${comment.post}`);
   }
 }
 

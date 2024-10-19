@@ -14,7 +14,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { useToast } from "@/hooks/use-toast";
-import { Types } from "mongoose";
 import { MDXEditorMethods } from "@mdxeditor/editor";
 import { cn, countNonMarkdownCharacters } from "@/lib/utils";
 
