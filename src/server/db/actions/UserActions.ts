@@ -1,8 +1,9 @@
 'use server'
 
-import { editUserSchema, User, UserInput, userSchema } from "@/utils/types/user";
+import { editUserSchema, PopulatedUser, User, UserInput, userSchema } from "@/utils/types/user";
 import UserModel from "../models/UserModel";
 import dbConnect from "../dbConnect";
+import { revalidatePath } from "next/cache";
 
 /**
  * Creates a new user in the database.
@@ -23,10 +24,12 @@ export async function createUser(user: UserInput): Promise<User> {
  * @returns A promise that resolves to the user object with extended ID.
  * @throws Will throw an error if the user is not found.
  */
-export async function getUser(id: string): Promise<User> {
+export async function getUser(id: string): Promise<PopulatedUser> {
   await dbConnect();
 
-  const user = await UserModel.findById(id);
+  const user = await UserModel
+    .findById(id)
+    .populate({ path: 'childDisabilities', model: 'Disability' });
   if (!user) {
     throw new Error("User not found");
   }
@@ -48,5 +51,7 @@ export async function editUser(id: string, updated: Partial<UserInput>): Promise
   if (!updatedUser) {
     throw new Error("User not found");
   }
+
+  revalidatePath(`/family/${id}`)
   return updatedUser.toObject();
 }

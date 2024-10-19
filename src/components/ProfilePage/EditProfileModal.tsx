@@ -17,7 +17,6 @@ import { cn } from "@/lib/utils";
 import { cities } from "@/utils/cities";
 import { editUser } from "@/server/db/actions/UserActions";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
-import { useRouter } from "next/navigation";
 
 const EditorComp = dynamic(() => import('../EditorComponent'), { ssr: false })
 
@@ -46,7 +45,6 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
 
   const [showLocations, setShowLocations] = useState(false);
   const [showLocationError, setLocationError] = useState(false);
-  const [search, setSearch] = React.useState("")
 
   const [allDisabilities, setAllDisabilities] = useState<Disability[]>([]);
   const [originalDisabilities, setOriginalDisabilities] = useState<Disability[]>([]);
@@ -57,7 +55,6 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const editorRef = useRef<MDXEditorMethods | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     const fetchDisabilities = async () => {
@@ -65,15 +62,15 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
       setAllDisabilities(disabilityList);
     }
     fetchDisabilities();
-  }, [])
+  }, []);
 
   useEffect(() => {
-    const originalDisabilitiesData = allDisabilities.filter((disability) => 
-      props.originalDisabilities.some(tag => tag._id === disability._id)
+    const originalDisabilitiesData = allDisabilities.filter((disability) =>
+      props.originalDisabilities.some(tag => tag._id.toString() === disability._id.toString())
     );
     setOriginalDisabilities(originalDisabilitiesData);
     setUserData({ location: props.originalLocation, tags: originalDisabilitiesData, bio: props.originalBio ? props.originalBio : "" });
-  }, [props.originalLocation, props.originalDisabilities, props.originalBio]);
+  }, [props.originalLocation, props.originalDisabilities, props.originalBio, allDisabilities]);
 
   useEffect(() => {
     if (editorRef.current && props.isOpen) {
@@ -115,18 +112,12 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
         props.closeModal();
         notifySuccess();
 
-        setUserData({
-          location: "",
-          tags: [],
-          bio: "",
-        });
         editorRef.current?.setMarkdown("");
       }
     } catch (error) {
       notifyFailure();
     } finally {
       setIsSubmitting(false);
-      window.location.reload();
     }
   }
 
@@ -243,20 +234,20 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
                   <div className="flex items-center w-full h-6">
                     {userData.tags.length === 0 ? (
                       <div className="text-neutral-400 text-sm font-normal">
-                      Add disability tags
+                        Add disability tags
                       </div>
                     ) : (
                       userData.tags.map((disability, index) => (
-                      <div
-                        key={disability._id}
-                        onClick={(e) => {
-                        e.stopPropagation();
-                        toggleDisability(disability);
-                        }}
-                        className="mr-2"
-                      >
-                        <Tag text={disability.name} isClickable={true} key={index} />
-                      </div>
+                        <div
+                          key={disability._id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleDisability(disability);
+                          }}
+                          className="mr-2"
+                        >
+                          <Tag text={disability.name} isClickable={true} key={index} />
+                        </div>
                       ))
                     )}
                   </div>

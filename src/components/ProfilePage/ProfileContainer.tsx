@@ -2,9 +2,8 @@
 
 import { ChevronLeftIcon, Pencil } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { User } from "@/utils/types/user";
+import { PopulatedUser } from "@/utils/types/user";
 import { useEffect, useState } from "react";
-import { getDisability } from "@/server/db/actions/DisabilityActions";
 import Tag from "../Tag";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getPopulatedUserPosts } from "@/server/db/actions/PostActions";
@@ -12,50 +11,27 @@ import { PopulatedPost } from "@/utils/types/post";
 import PostComponent from "../PostComponent";
 import EditProfileModal from "./EditProfileModal";
 import Link from "next/link";
-import { Disability } from "@/utils/types/disability";
 
 
 type ProfileContainerProps = {
-  user: User;
+  user: PopulatedUser;
 }
 
-export default function ProfileContainer({user}: ProfileContainerProps) {
-  const [disabilities, setDisabilities] = useState<Disability[]>([]);
-  const [disabilityNames, setDisabilityNames] = useState<string[]>([]);
+export default function ProfileContainer({ user }: ProfileContainerProps) {
   const [userPosts, setUserPosts] = useState<PopulatedPost[]>([]);
   const CURR_USER = user._id;
-  const [lastInitial, setLastInitial] = useState("");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
   useEffect(() => {
-    const fetchDisabilities = async () => {
-      try {
-        const disabilitiesData = await Promise.all(
-          user.childDisabilities.map(async (disabilityId) => {
-            return await getDisability(disabilityId.toString());
-          })
-        );
-        
-        const disabilityNames = disabilitiesData.map(disability => disability.name);
-        
-        setDisabilities(disabilitiesData);
-        setDisabilityNames(disabilityNames);
-      } catch (error) {
-        console.error("Error fetching disabilities: ", error);
-      }
-    };
-
     const fetchUserPosts = async () => {
       setUserPosts(await getPopulatedUserPosts(user._id));
     };
 
     if (user) {
-      fetchDisabilities();
       fetchUserPosts(); 
-      setLastInitial(user.lastName[0]);
     }
   }, [user]);
 
@@ -71,7 +47,7 @@ export default function ProfileContainer({user}: ProfileContainerProps) {
         <div className="flex flex-row mb-6 items-start justify-between">
           <div className="flex flex-row space-x-6">
             <div className="flex items-center justify-center w-[108px] h-[108px] rounded-full bg-profile-pink">
-              <span className="text-6xl font-medium text-black">{lastInitial}</span>
+              <span className="text-6xl font-medium text-black">{user.lastName.charAt(0).toUpperCase()}</span>
             </div>
             <div className="flex flex-col justify-center">
               <p className="text-2xl font-bold">{user.lastName} Household</p>
@@ -94,7 +70,7 @@ export default function ProfileContainer({user}: ProfileContainerProps) {
         <EditProfileModal
           id={user._id}
           originalLocation={user.city}
-          originalDisabilities={disabilities}
+          originalDisabilities={user.childDisabilities}
           originalBio={user.bio}
           isOpen={isModalOpen}
           openModal={openModal}
@@ -107,10 +83,10 @@ export default function ProfileContainer({user}: ProfileContainerProps) {
           </p>
           <div className="flex flex-row mb-4">
             <p className="text-lg font-semibold mr-3">Disabilities: </p>
-            <div className={`flex flex-row gap-2 flex-wrap gap-3 ${disabilityNames.length > 0 ? 'py-1' : '-my-1'}`}>
+            <div className={`flex flex-row gap-2 flex-wrap gap-3 ${user.childDisabilities.length > 0 ? 'py-1' : '-my-1'}`}>
               {
-                disabilityNames.map((disability, index) => {
-                  return <Tag text={disability} key={index} />
+                user.childDisabilities.map((disability, index) => {
+                  return <Tag text={disability.name} key={index} />
                 })
               }
             </div>
@@ -121,8 +97,8 @@ export default function ProfileContainer({user}: ProfileContainerProps) {
         <Separator className="bg-focus-gray my-6" />
         <Tabs defaultValue="my-posts">
           <TabsList className="mb-4">
-            <TabsTrigger value="my-posts">My Posts</TabsTrigger>
-            <TabsTrigger value="saved-posts">Saved Posts</TabsTrigger>
+            <TabsTrigger value="my-posts">{CURR_USER === user._id ? 'My Posts' : 'Posts'}</TabsTrigger>
+            {CURR_USER === user._id && <TabsTrigger value="saved-posts">Saved Posts</TabsTrigger>}
           </TabsList>
           <TabsContent value="my-posts">
             <div className="space-y-6">
