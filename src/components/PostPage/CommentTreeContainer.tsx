@@ -65,11 +65,16 @@ export default function CommentTreeContainer(props: CommentTreeContainerProps) {
     }
   }
 
+  async function onDeleteClick(commentId: string) {
+    // TODO
+  }
+
   return (
     <CommentComponent
       comment={parentComment}
       onReplyClick={onReplyClick}
       onLikeClick={liked => onLikeClick(parentComment._id, liked)}
+      onDeleteClick={parentComment.author?._id === authUser._id ? () => onDeleteClick(parentComment._id) : undefined}
       nestedContent={(
         <div className="mt-2 flex flex-col gap-2">
           {showReplyInput && <CommentInputComponent
@@ -81,6 +86,7 @@ export default function CommentTreeContainer(props: CommentTreeContainerProps) {
             key={comment._id}
             comment={comment}
             onLikeClick={liked => onLikeClick(comment._id, liked)}
+            onDeleteClick={comment.author?._id === authUser._id ? () => onDeleteClick(comment._id) : undefined}
           />)}
         </div>
       )}

@@ -132,7 +132,7 @@ export default function PostComponent(props: PostComponentProps) {
                 <Ellipsis className="w-6 h-6" />
               </DropdownMenuTrigger>
               <DropdownMenuContent side="bottom" align="end">
-                { onDeleteClick && <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem> }
+                {onDeleteClick && <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem>}
               </DropdownMenuContent>
             </DropdownMenu>
           )

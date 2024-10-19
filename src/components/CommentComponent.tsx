@@ -6,12 +6,15 @@ import MarkdownRenderer from "./MarkdownRenderer";
 import MarkdownIt from "markdown-it";
 import { ReactNode, useState } from "react";
 import colors from "tailwindcss/colors";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 
 type CommentComponentProps = {
   className?: string;
   comment: PopulatedComment;
   onLikeClick?: (liked: boolean) => Promise<void>;
   onReplyClick?: () => void;
+  onDeleteClick?: () => Promise<void>;
   nestedContent?: ReactNode;
 };
 
@@ -23,6 +26,7 @@ export default function CommentComponent(props: CommentComponentProps) {
     comment,
     onLikeClick,
     onReplyClick,
+    onDeleteClick,
     nestedContent
   } = props;
   
@@ -37,6 +41,8 @@ export default function CommentComponent(props: CommentComponentProps) {
   const [likes, setLikes] = useState<number>(initialLikes);
   const [liked, setLiked] = useState<boolean>(initialLiked);
   const [likeLoading, setLikeLoading] = useState<boolean>(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
+  const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
   async function handleLikeClick() {
     if (likeLoading) return;
@@ -61,43 +67,77 @@ export default function CommentComponent(props: CommentComponentProps) {
     }
   }
 
+  async function handleDeleteClick() {
+
+  }
+
   const bottomRow = [
     { label: likes.toString(), icon: liked ? <Heart className="text-red-500" fill={colors.red[500]} /> : <Heart />, onClick: handleLikeClick },
-    { label: 'Reply', icon: <MessageSquare />, onClick: onReplyClick },
-    { label: '', icon: <Ellipsis />, onClick: () => {} }
+    { label: 'Reply', icon: <MessageSquare />, onClick: onReplyClick }
   ];
 
   return (
-    <div className="flex gap-2.5">
-      <div>
-        <span className="w-6 h-6 bg-[#D9D9D9] rounded-full inline-block"/>
-      </div>
-      <div className={`flex-grow flex flex-col gap-2 text-[#636363] ${className}`}>
-        <div className="flex items-center justify-between">
-          <div className="font-bold text-black">
-            {author ? `${author.lastName} Family` : 'Deleted User'}
-          </div>
-          <p className="text-sm" suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
+    <>
+      <div className="flex gap-2.5">
+        <div>
+          <span className="w-6 h-6 bg-[#D9D9D9] rounded-full inline-block"/>
         </div>
-        <MarkdownRenderer
-          className="leading-5"
-          markdown={content}
-          parse={markdown => mdParser.render(markdown)}
-        />
-        <div className="flex items-center pt-2 gap-6 text-sm">
-          {bottomRow.map((item, index) => item.onClick && (
-            <div key={index} className="flex items-center gap-1.5 px-1">
-              <button onClick={item.onClick}>
-                <div className="w-5 h-5 [&>*]:w-full [&>*]:h-full">
-                  {item.icon}
-                </div>
-              </button>
-              {item.label}
+        <div className={`flex-grow flex flex-col gap-2 text-[#636363] ${className}`}>
+          <div className="flex items-center justify-between">
+            <div className="font-bold text-black">
+              {author ? `${author.lastName} Family` : 'Deleted User'}
             </div>
-          ))}
+            <p className="text-sm" suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
+          </div>
+          <MarkdownRenderer
+            className="leading-5"
+            markdown={content}
+            parse={markdown => mdParser.render(markdown)}
+          />
+          <div className="flex items-center pt-2 gap-6 text-sm">
+            {bottomRow.map((item, index) => item.onClick && (
+              <div key={index} className="flex items-center gap-1.5 px-1">
+                <button onClick={item.onClick}>
+                  <div className="w-5 h-5 [&>*]:w-full [&>*]:h-full">
+                    {item.icon}
+                  </div>
+                </button>
+                {item.label}
+              </div>
+            ))}
+            <div className="flex items-center gap-1.5 px-1">
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger>
+                  <Ellipsis className="w-5 h-5" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent side="bottom" align="start">
+                  {onDeleteClick ? <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem> : undefined}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+          {nestedContent}
         </div>
-        {nestedContent}
       </div>
-    </div>
+      <AlertDialog open={showDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Comment</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this comment?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteLoading}
+              onClick={handleDeleteClick}
+            >
+              {deleteLoading ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
