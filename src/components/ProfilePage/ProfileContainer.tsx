@@ -4,7 +4,7 @@ import { ChevronLeftIcon, Pencil } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { User } from "@/utils/types/user";
 import { useEffect, useState } from "react";
-import { getDisabilities, getDisability } from "@/server/db/actions/DisabilityActions";
+import { getDisability } from "@/server/db/actions/DisabilityActions";
 import Tag from "../Tag";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getPopulatedUserPosts } from "@/server/db/actions/PostActions";

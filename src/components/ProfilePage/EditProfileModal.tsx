@@ -4,8 +4,7 @@ import React, { useEffect, useState, Suspense, useRef } from "react";
 import { getDisabilities } from "@/server/db/actions/DisabilityActions";
 import { Disability } from "@/utils/types/disability";
 import Tag from "../Tag";
-import dynamic from 'next/dynamic'
-import { MAX_POST_CONTENT_LEN } from "@/utils/consts";
+import dynamic from 'next/dynamic';
 import { ChevronDown, Check, X, ChevronUp } from "lucide-react";
 import {
   Popover,
@@ -14,11 +13,10 @@ import {
 } from "@/components/ui/popover"
 import { useToast } from "@/hooks/use-toast";
 import { MDXEditorMethods } from "@mdxeditor/editor";
-import { cn, countNonMarkdownCharacters } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { cities } from "@/utils/cities";
 import { editUser } from "@/server/db/actions/UserActions";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
-import { Button } from "../ui/button";
 
 const EditorComp = dynamic(() => import('../EditorComponent'), { ssr: false })
 
@@ -143,12 +141,7 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
   };
 
   const handleEditorChange = (text: string) => {
-    const textLength = countNonMarkdownCharacters(text);
-    if (textLength <= MAX_POST_CONTENT_LEN) {
-      setUserData({ ... userData, bio: text });
-    } else {
-      editorRef.current?.setMarkdown(userData.bio);
-    }
+    setUserData({ ... userData, bio: text });
   }
 
   const toggleDisability = (name: Disability) => {
