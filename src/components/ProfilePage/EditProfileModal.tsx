@@ -36,7 +36,7 @@ type PostData = {
   bio: string;
 }
 
-export default function CreatePostModal( props: EditProfileModalProps ) {
+export default function EditProfileModal( props: EditProfileModalProps ) {
   const [postData, setPostData] = useState<PostData>({
     location: "",
     tags: [],
@@ -62,10 +62,12 @@ export default function CreatePostModal( props: EditProfileModalProps ) {
       setSelectedDisabilities(disabilityList);
     }
     fetchDisabilities();
+  }, [])
+
+  useEffect(() => {
     setSelectedLocation(props.originalLocation);
     setSelectedDisabilities(props.originalDisabilities);
-    console.log(props.originalBio);
-  }, [])
+  }, [props.originalLocation, props.originalDisabilities])
 
   useEffect(() => {
     if (editorRef.current && props.isOpen) {
@@ -205,7 +207,7 @@ export default function CreatePostModal( props: EditProfileModalProps ) {
               </PopoverTrigger>
 
               <PopoverContent align="start" className="max-h-40 overflow-y-auto p-2">
-                {cities.map((city) => (
+                {cities.map((city: string) => (
                   <div key={city} onClick={(e) => e.stopPropagation()} className="w-full">
                     <li
                       onClick={() => handleLocationSelect(city)} 
@@ -240,7 +242,7 @@ export default function CreatePostModal( props: EditProfileModalProps ) {
                       Add disability tags
                       </div>
                     ) : (
-                      postData.tags.map((disability) => (
+                      postData.tags.map((disability, index) => (
                       <div
                         key={disability._id}
                         onClick={(e) => {
@@ -249,7 +251,7 @@ export default function CreatePostModal( props: EditProfileModalProps ) {
                         }}
                         className="mr-2"
                       >
-                        <Tag text={disability.name} isClickable={true}/>
+                        <Tag text={disability.name} isClickable={true} key={index} />
                       </div>
                       ))
                     )}
@@ -262,7 +264,7 @@ export default function CreatePostModal( props: EditProfileModalProps ) {
               </PopoverTrigger>
 
               <PopoverContent align="start" className="max-h-40 overflow-y-auto p-2">
-                {selectedDisabilities.map((disability) => ( // TODO: what happened here
+                {selectedDisabilities.map((disability) => ( 
                   <div key={disability._id} onClick={(e) => { e.stopPropagation(), toggleDisability(disability)} } className="w-full">
                     <li
                       key={disability._id}

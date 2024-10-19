@@ -1,7 +1,6 @@
 "use client";
 
 import { ChevronLeftIcon, Pencil } from "lucide-react";
-import { useRouter } from 'next/navigation';
 import { Separator } from "@/components/ui/separator";
 import { User } from "@/utils/types/user";
 import { useEffect, useState } from "react";
@@ -21,12 +20,11 @@ type ProfileContainerProps = {
 }
 
 export default function ProfileContainer({user}: ProfileContainerProps) {
-  const router = useRouter();
-  const [disabilities, setDisabilities] = useState<string[]>([]);
+  const [disabilities, setDisabilities] = useState<Disability[]>([]);
+  const [disabilityNames, setDisabilityNames] = useState<string[]>([]);
   const [userPosts, setUserPosts] = useState<PopulatedPost[]>([]);
   const CURR_USER = user._id;
   const [lastInitial, setLastInitial] = useState("");
-  const [disabilityNames, setDisabilityNames] = useState<Disability[]>([])
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const openModal = () => setIsModalOpen(true);
@@ -38,12 +36,15 @@ export default function ProfileContainer({user}: ProfileContainerProps) {
     const fetchDisabilities = async () => {
       try {
         const disabilitiesData = await Promise.all(
-          user.childDisabilities.map(async (disability) => {
-            const disabilityData = await getDisability(disability.toString());
-            return disabilityData.name;
+          user.childDisabilities.map(async (disabilityId) => {
+            return await getDisability(disabilityId.toString());
           })
         );
+        
+        const disabilityNames = disabilitiesData.map(disability => disability.name);
+        
         setDisabilities(disabilitiesData);
+        setDisabilityNames(disabilityNames);
       } catch (error) {
         console.error("Error fetching disabilities: ", error);
       }
@@ -53,16 +54,10 @@ export default function ProfileContainer({user}: ProfileContainerProps) {
       setUserPosts(await getPopulatedUserPosts(user._id));
     };
 
-    const fetchDisabilityNames = async () => {
-      // TODO: complete this
-    }
-
-
     if (user) {
       fetchDisabilities();
       fetchUserPosts(); 
       setLastInitial(user.lastName[0]);
-      fetchDisabilityNames();
     }
   }, [user]);
 
@@ -101,7 +96,7 @@ export default function ProfileContainer({user}: ProfileContainerProps) {
         <EditProfileModal
           id={user._id}
           originalLocation={user.city}
-          originalDisabilities={disabilityNames}
+          originalDisabilities={disabilities}
           originalBio={user.bio}
           isOpen={isModalOpen}
           openModal={openModal}
@@ -114,9 +109,9 @@ export default function ProfileContainer({user}: ProfileContainerProps) {
           </p>
           <div className="flex flex-row mb-4">
             <p className="text-lg font-semibold mr-3">Disabilities: </p>
-            <div className={`flex flex-row gap-2 flex-wrap gap-3 ${disabilities.length > 0 ? 'py-1' : '-my-1'}`}>
+            <div className={`flex flex-row gap-2 flex-wrap gap-3 ${disabilityNames.length > 0 ? 'py-1' : '-my-1'}`}>
               {
-                disabilities.map((disability, index) => {
+                disabilityNames.map((disability, index) => {
                   return <Tag text={disability} key={index} />
                 })
               }
