@@ -27,7 +27,23 @@ export async function createUser(user: UserInput): Promise<User> {
  * @returns A promise that resolves to the user object with extended ID.
  * @throws Will throw an error if the user is not found.
  */
-export async function getUser(id: string): Promise<PopulatedUser> {
+export async function getUser(id: string): Promise<User> {
+  await dbConnect();
+
+  const user = await UserModel.findById(id)
+  if (!user) {
+    throw new Error("User not found");
+  }
+  return user.toObject();
+}
+
+/**
+ * Retrieves a user from the database by their ID with child disabilities populated.
+ * @param id - The ID of the user to retrieve.
+ * @returns A promise that resolves to the populated user object.
+ * @throws Will throw an error if the user is not found.
+ */
+export async function getPopulatedUser(id: string): Promise<PopulatedUser> {
   await dbConnect();
 
   const user = await UserModel

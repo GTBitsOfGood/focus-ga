@@ -16,12 +16,12 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { MDXEditorMethods } from "@mdxeditor/editor";
 import { cn, countNonMarkdownCharacters } from "@/lib/utils";
-import { PopulatedUser } from "@/utils/types/user";
+import { User } from "@/utils/types/user";
 
 const EditorComp = dynamic(() => import('./EditorComponent'), { ssr: false })
 
 type CreatePostModalProps = {
-  user: PopulatedUser;
+  user: User;
   isOpen: boolean;
   openModal: () => void;
   closeModal: () => void;
