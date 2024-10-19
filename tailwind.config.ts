@@ -16,8 +16,8 @@ const config: Config = {
       colors: {
         'theme-blue': '#475CC6',
         'theme-gray': '#636363',
-        'theme-lightgray': '#C7C7C7',
-        'med-gray': '#00000099',
+        'theme-med-gray': '#00000099',
+        'theme-lightgray': '#F3F3F3',
         'dropdown-gray': '#f2f2f2'
       },
       borderRadius: {

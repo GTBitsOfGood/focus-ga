@@ -6,10 +6,103 @@ import PostSaveModel from "../models/PostSaveModel";
 import PostLikeModel from "../models/PostLikeModel";
 import { postSaveSchema, postLikeSchema } from "@/utils/types/post";
 import dbConnect from "../dbConnect";
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 import UserModel from "../models/UserModel";
 import DisabilityModel from "../models/DisabilityModel";
 import { revalidatePath } from "next/cache";
+
+// A MongoDB aggregation pipeline that efficiently populates a post
+type PipelineArgs = {
+  authUserId: string,
+  offset?: number,
+  limit?: number,
+  tags?: Array<string>,
+  postId?: string,
+}
+
+function postPopulationPipeline({authUserId, offset, limit, tags, postId}: PipelineArgs): mongoose.PipelineStage[] {
+  return [
+    // Match specific post ID if given, otherwise sort by date in descending order
+    ... postId ? [
+      { $match: { _id: new mongoose.Types.ObjectId(postId) } }
+    ] : [
+      { $sort: { date: -1 as const } }
+    ],
+
+    // filter by tags
+    ...(tags && tags.length ? [{ $match: { tags: { $in: tags.map((t) => new mongoose.Types.ObjectId(t)) } } }] : []),
+
+    // Skip and limit for pagination
+    ...(offset ? [{ $skip: offset }] : []),
+    ...(limit ? [{ $limit: limit }] : []),
+
+    // Populate author field
+    { $lookup: {
+      from: UserModel.collection.name,
+      localField: 'author',
+      foreignField: '_id',
+      pipeline: [{ $addFields: { _id: { $toString: '$_id' } } }],
+      as: 'author'
+    } },
+    { $unwind: { path: '$author', preserveNullAndEmptyArrays: true } },
+
+    // Populate tags
+    { $lookup: {
+      from: DisabilityModel.collection.name,
+      localField: 'tags',
+      foreignField: '_id',
+      pipeline: [{ $addFields: { _id: { $toString: '$_id' } } }],
+      as: 'tags'
+    } },
+
+    // Replace author and tags with default values if necessary
+    { $addFields: {
+      author: { $ifNull: ['$author', null] },
+      tags: { $ifNull: ['$tags', []] }
+    } },
+
+    // Determine whether user has liked post
+    { $lookup: {
+      from: PostLikeModel.collection.name,
+      let: { postId: '$_id'  },
+      pipeline: [
+        { $match: {
+          $expr: {
+            $and: [
+              { $eq: ['$post', '$$postId'] },
+              { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
+            ]
+          }
+        } }
+      ],
+      as: 'liked'
+    } },
+    { $addFields: {
+      liked: { $gt: [{ $size: '$liked' }, 0] }
+    } },
+
+    // Determine whether user has saved post
+    { $lookup: {
+      from: PostSaveModel.collection.name,
+      let: { postId: '$_id'  },
+      pipeline: [
+        { $match: {
+          $expr: {
+            $and: [
+              { $eq: ['$post', '$$postId'] },
+              { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
+            ]
+          }
+        } }
+      ],
+      as: 'saved'
+    } },
+    { $addFields: {
+      saved: { $gt: [{ $size: '$saved' }, 0] },
+      _id: { $toString: '$_id' }
+    } }
+  ];
+}
 
 /**
  * Creates a new post in the database.
@@ -39,20 +132,16 @@ export async function getPosts(): Promise<Post[]> {
 }
 
 /**
- * Retrieves all posts from the database with their author and disability fields populated.
+ * Retrieves all posts from the database with their author and disability fields populated and like status specified.
+ * @param authUserId - The ID of the currently authenticated user, to determine whether they have liked each post.
  * @returns A promise that resolves to an array of populated post objects.
  */
-export async function getPopulatedPosts(offset: number, limit: number, filter?: any): Promise<PopulatedPost[]> {
+export async function getPopulatedPosts(authUserId: string, offset: number, limit: number, tags?: Array<string>): Promise<PopulatedPost[]> {
   await dbConnect();
 
-  const posts = await PostModel
-    .find(filter)
-    .sort({ date: -1 })  // Sort by date in descending order (newest first)
-    .skip(offset)
-    .limit(limit)
-    .populate({ path: 'author', model: UserModel })
-    .populate({ path: 'tags', model: DisabilityModel });
-  return posts.map(post => post.toObject());
+  const posts = await PostModel.aggregate(postPopulationPipeline({authUserId, offset, limit, tags}));
+  console.log(posts);
+  return posts;
 }
 
 /**
@@ -72,28 +161,24 @@ export async function getPost(id: string): Promise<Post> {
 }
 
 /**
- * Retrieves a single post from the database by its ID with its author and disability fields populated.
+ * Retrieves a single post from the database by its ID with its author and disability fields populated and like and save statuses specified.
  * @param id - The ID of the post to retrieve.
+ * @param authUserId - The ID of the currently authenticated user, to determine whether they have liked and/or saved each post.
  * @returns A promise that resolves to a populated post object containing author and disability objects (or null if they are not found)
  * @throws Will throw an error if the post is not found.
  */
-export async function getPopulatedPost(id: string): Promise<PopulatedPost> {
+export async function getPopulatedPost(id: string, authUserId: string): Promise<PopulatedPost> {
   await dbConnect();
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new Error("Invalid post ID");
   }
-  
-  const post = await PostModel
-    .findById(id)
-    .populate({ path: 'author', model: UserModel })
-    .populate({ path: 'tags', model: DisabilityModel });
-  
+
+  const [post] = await PostModel.aggregate(postPopulationPipeline({authUserId, postId: id}));
   if (!post) {
     throw new Error("Post not found");
   }
-
-  return post.toObject();
+  return post;
 }
 
 /**
@@ -240,6 +325,7 @@ export async function createPostLike(userId: string, postId: string): Promise<Po
     throw error;
   } finally {
     session.endSession();
+    revalidatePath(`/posts/${postId}`);
   }
 }
 
@@ -277,5 +363,6 @@ export async function deletePostLike(userId: string, postId: string): Promise<vo
     throw error;
   } finally {
     session.endSession();
+    revalidatePath(`/posts/${postId}`);
   }
 }
