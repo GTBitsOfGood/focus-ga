@@ -6,7 +6,7 @@ import { getDisabilities } from "@/server/db/actions/DisabilityActions";
 import { Disability } from "@/utils/types/disability";
 import Tag from "./Tag";
 import dynamic from 'next/dynamic'
-import { MAX_POST_TITLE_LEN, MAX_POST_CONTENT_LEN, MAX_POST_DISABILITY_TAGS } from "@/utils/consts";
+import { MAX_POST_TITLE_LEN, MAX_POST_CONTENT_LEN, MAX_POST_DISABILITY_TAGS, USER_ID } from "@/utils/consts";
 import { ChevronDown, Check, X, ChevronUp } from "lucide-react";
 import {
   Popover,
