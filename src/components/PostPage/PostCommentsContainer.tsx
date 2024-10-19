@@ -12,6 +12,7 @@ import CommentTreeContainer from "./CommentTreeContainer";
 import { User } from "@/utils/types/user";
 import { createPostLike, createPostSave, deletePost, deletePostLike, deletePostSave } from "@/server/db/actions/PostActions";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 function buildChildCommentsMap(comments: PopulatedComment[]) {
   const map = new Map<string, PopulatedComment[]>();
@@ -35,6 +36,7 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
   const { post, comments: initialComments, authUser } = props;
 
   const router = useRouter();
+  const { toast } = useToast();
 
   const [parentComments, setParentComments] = useState<PopulatedComment[]>(
     initialComments.filter(comment => comment.replyTo === null)
@@ -106,6 +108,10 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
     try {
       await deletePost(post._id);
       router.push('/');
+      toast({
+        title: "Post successfully deleted",
+        description: "Your post has been successfully deleted from the community."
+      });
     } catch (err) {
       console.error('Failed to delete post:', err);
       throw err;
