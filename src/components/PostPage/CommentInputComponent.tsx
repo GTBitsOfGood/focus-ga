@@ -25,7 +25,7 @@ export default function CommentInputComponent(props: CommentInputComponentProps)
   }
 
   return (
-    <div className={`flex items-center bg-[#F3F3F3] rounded-full ${className}`}>
+    <div className={`flex items-center bg-focus-light-gray rounded-full ${className}`}>
       <input
         className="flex-grow pl-5 pr-3 py-2 bg-transparent outline-none select-none text-black"
         placeholder={placeholder}

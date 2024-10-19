@@ -9,7 +9,6 @@ import MarkdownRenderer from "./MarkdownRenderer";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useState } from "react";
-import colors from "tailwindcss/colors";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 
@@ -109,16 +108,27 @@ export default function PostComponent(props: PostComponentProps) {
   }
 
   const bottomRow = [
-    { label: likes.toString(), icon: liked ? <Heart className="text-red-500" fill={colors.red[500]} /> : <Heart />, onClick: handleLikeClick },
-    { label: comments.toString(), icon: <MessageSquare /> },
-    { label: saved ? 'Saved Post' : 'Save Post', icon: saved ? <Bookmark fill={'#636363'} /> : <Bookmark />, onClick: handleSaveClick }
+    {
+      label: likes.toString(),
+      icon: liked ? <Heart className="text-red-500 fill-red-500" /> : <Heart />,
+      onClick: likeLoading ? undefined : handleLikeClick
+    },
+    {
+      label: comments.toString(),
+      icon: <MessageSquare />
+    },
+    {
+      label: saved ? 'Saved Post' : 'Save Post',
+      icon: saved ? <Bookmark className="fill-focus-gray" /> : <Bookmark />,
+      onClick: saveLoading ? undefined : handleSaveClick
+    }
   ];
 
   const reactContent = (
     <>
       <div className="flex items-center justify-between text-sm">
         <div className="flex items-center gap-2">
-          <span className="w-6 h-6 bg-[#D9D9D9] rounded-full inline-block"/>
+          <span className="w-6 h-6 bg-focus-med-gray rounded-full inline-block"/>
           {author ? `${author.lastName} Family` : 'Deleted User'}
         </div>
         <p suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
@@ -149,7 +159,7 @@ export default function PostComponent(props: PostComponentProps) {
       <div className="flex items-center pt-2 gap-6">
         {bottomRow.map((item, index) => (
           <div key={`${post._id}-${index}`} className="flex items-center gap-1.5 px-2">
-            <button onClick={item.onClick}>
+            <button disabled={!item.onClick} onClick={item.onClick}>
               <div className="w-6 h-6 [&>*]:w-full [&>*]:h-full">
                 {item.icon}
               </div>
@@ -181,7 +191,7 @@ export default function PostComponent(props: PostComponentProps) {
   );
 
   const classes = cn(
-    'flex flex-col gap-2 text-[#636363] rounded-lg',
+    'flex flex-col gap-2 text-focus-gray rounded-lg',
     clickable && 'cursor-pointer hover:bg-gray-100 p-4',
     className
   );

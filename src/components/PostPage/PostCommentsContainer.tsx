@@ -77,18 +77,28 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
   }
 
   async function onPostLikeClick(liked: boolean) {
-    if (liked) {
-      await deletePostLike(authUser._id, post._id);
-    } else {
-      await createPostLike(authUser._id, post._id);
+    try {
+      if (liked) {
+        await deletePostLike(authUser._id, post._id);
+      } else {
+        await createPostLike(authUser._id, post._id);
+      }
+    } catch (err) {
+      console.error(`Failed to ${liked ? 'dislike' : 'like'} post:`, err);
+      throw err;
     }
   }
 
   async function onPostSaveClick(saved: boolean) {
-    if (saved) {
-      await deletePostSave(authUser._id, post._id);
-    } else {
-      await createPostSave(authUser._id, post._id);
+    try {
+      if (saved) {
+        await deletePostSave(authUser._id, post._id);
+      } else {
+        await createPostSave(authUser._id, post._id);
+      }
+    } catch (err) {
+      console.error(`Failed to ${saved ? 'unsave' : 'save'} post`, err);
+      throw err;
     }
   }
 

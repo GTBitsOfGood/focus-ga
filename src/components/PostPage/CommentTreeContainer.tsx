@@ -58,10 +58,15 @@ export default function CommentTreeContainer(props: CommentTreeContainerProps) {
   }
 
   async function onLikeClick(commentId: string, liked: boolean) {
-    if (liked) {
-      await deleteCommentLike(authUser._id, commentId);
-    } else {
-      await createCommentLike(authUser._id, commentId);
+    try {
+      if (liked) {
+        await deleteCommentLike(authUser._id, commentId);
+      } else {
+        await createCommentLike(authUser._id, commentId);
+      }
+    } catch (err) {
+      console.error(`Failed to ${liked ? 'dislike' : 'like'} comment:`, err);
+      throw err;
     }
   }
 
