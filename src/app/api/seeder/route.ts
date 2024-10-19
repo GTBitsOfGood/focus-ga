@@ -15,6 +15,7 @@ import { createComment, createCommentLike } from '@/server/db/actions/CommentAct
 import { createReport } from '@/server/db/actions/ReportActions';
 import { ReportReason, ContentType } from '@/utils/types/report';
 import { CommentInput } from '@/utils/types/comment';
+import { cities } from "@/utils/cities";
 
 const DISABILITIES = ["Cerebral Palsy", "Autism Spectrum Disorder", "Down Syndrome", "Spina Bifida", "Muscular Dystrophy", "Rett Syndrome", "Fragile X Syndrome", "Epilepsy", "ADHD", "Spinal Muscular Atrophy"];
 const NUM_USERS = 10;
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
 
       for (let i = 0; i < randomDisabilityCount; i++) {
         const randomIndex = Math.floor(Math.random() * availableDisabilities.length);
-        selectedDisabilities.push(disabilityIds[randomIndex]);
+        selectedDisabilities.push(availableDisabilities[randomIndex]);
         availableDisabilities.splice(randomIndex, 1);
       }
 
@@ -68,6 +69,7 @@ export async function POST(request: Request) {
       const lastName = faker.person.lastName();
       const username = faker.internet.userName({ firstName: firstName, lastName: lastName })
       const email = faker.internet.email({ firstName: firstName, lastName: lastName });
+      const cityIndex = Math.floor(Math.random() * cities.length);
 
       const userInfo = {
         username: username,
@@ -75,7 +77,8 @@ export async function POST(request: Request) {
         email: email,
         childAge: Math.floor(Math.random() * (MAX_CHILD_AGE)),
         childDisabilities: selectedDisabilities,
-        county: faker.location.county(),
+        city: cities[cityIndex],
+        bio: faker.lorem.paragraph({ min: 1, max: 6 }),
       }
 
       users.push((await createUser(userInfo)));

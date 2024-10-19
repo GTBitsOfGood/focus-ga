@@ -18,7 +18,14 @@ const config: Config = {
         'theme-gray': '#636363',
         'theme-med-gray': '#00000099',
         'theme-lightgray': '#F3F3F3',
-        'dropdown-gray': '#f2f2f2'
+        'dropdown-gray': '#f2f2f2',
+        'profile-orange': '#FFBFBF',
+        'profile-yellow': '#FFFA96',
+        'profile-green': '#90C399',
+        'profile-teal': '#7BBAD1',
+        'profile-indigo': '#778EFF',
+        'profile-pink': '#F8A5FF',
+        'error-red': '#ff4e4e',
       },
       borderRadius: {
         lg: 'var(--radius)',

@@ -20,7 +20,6 @@ export default function Home() {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
   const user = useUser();
-  console.log(user);
   
   const [disabilities, setDisabilities] = useState<Disability[]>([]);
   const [selectedDisabilities, setSelectedDisabilities] = useState<Disability[]>([]);

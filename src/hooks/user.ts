@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { User } from '@/utils/types/user'
+import {  User } from '@/utils/types/user'
 import { getAuthenticatedUser } from '@/server/db/actions/AuthActions'
 
 export const useUser = () => {
