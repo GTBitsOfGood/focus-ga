@@ -1,12 +1,11 @@
 'use client'
 
 import React, { useEffect, useState, Suspense, useRef } from "react";
-import { createPost } from "@/server/db/actions/PostActions";
-import { getDisabilities } from "@/server/db/actions/DisabilityActions";
+import { getDisabilities, getDisability } from "@/server/db/actions/DisabilityActions";
 import { Disability } from "@/utils/types/disability";
 import Tag from "../Tag";
 import dynamic from 'next/dynamic'
-import { MAX_POST_TITLE_LEN, MAX_POST_CONTENT_LEN, MAX_POST_DISABILITY_TAGS } from "@/utils/consts";
+import { MAX_POST_CONTENT_LEN } from "@/utils/consts";
 import { ChevronDown, Check, X, ChevronUp } from "lucide-react";
 import {
   Popover,
@@ -14,34 +13,44 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { useToast } from "@/hooks/use-toast";
-import { Types } from "mongoose";
 import { MDXEditorMethods } from "@mdxeditor/editor";
 import { cn, countNonMarkdownCharacters } from "@/lib/utils";
+import { cities } from "@/utils/cities";
+import { editUser } from "@/server/db/actions/UserActions";
 
 const EditorComp = dynamic(() => import('../EditorComponent'), { ssr: false })
 
 type EditProfileModalProps = {
+  id: string;
+  originalLocation: string;
+  originalDisabilities: Disability[];
+  originalBio: string | undefined;
   isOpen: boolean;
   openModal: () => void;
   closeModal: () => void;
 }
 
 type PostData = {
-  title: string;
-  content: string;
+  location: string;
   tags: Disability[];
+  bio: string;
 }
 
 export default function CreatePostModal( props: EditProfileModalProps ) {
   const [postData, setPostData] = useState<PostData>({
-    title: "",
-    content: "",
-    tags: []
+    location: "",
+    tags: [],
+    bio: "",
   });
-  const [showTitleError, setTitleError] = useState(false);
-  const [showBodyError, setBodyError] = useState(false);
+
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [showLocations, setShowLocations] = useState(false);
+  const [showLocationError, setLocationError] = useState(false);
+
+  const [selectedDisabilities, setSelectedDisabilities] = useState<Disability[]>([]);
   const [showDisabilities, setShowDisabilities] = useState(false);
-  const [disabilities, setDisabilities] = useState<Disability[]>([]);
+  const [showDisabilitiesError, setDisabilitiesError] = useState(false);
+
   const [mouseDownOnBackground, setMouseDownOnBackground] = useState(false);
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,10 +59,19 @@ export default function CreatePostModal( props: EditProfileModalProps ) {
   useEffect(() => {
     const fetchDisabilities = async () => {
       const disabilityList = await getDisabilities();
-      setDisabilities(disabilityList);
+      setSelectedDisabilities(disabilityList);
     }
     fetchDisabilities();
+    setSelectedLocation(props.originalLocation);
+    setSelectedDisabilities(props.originalDisabilities);
+    console.log(props.originalBio);
   }, [])
+
+  useEffect(() => {
+    if (editorRef.current && props.isOpen) {
+      editorRef.current.setMarkdown(props.originalBio ? props.originalBio : ""); 
+    }
+  }, [editorRef, props.isOpen])
 
   const notifySuccess = () => {
     toast({
@@ -70,13 +88,11 @@ export default function CreatePostModal( props: EditProfileModalProps ) {
   };
 
   const validateSubmission = (): boolean => {
-    const isTitleValid = postData.title.length > 0;
-    const isContentValid = postData.content.length > 0;
+    const isLocationValid = postData.location.length > 0;
 
-    setTitleError(!isTitleValid);
-    setBodyError(!isContentValid);
+    setLocationError(!isLocationValid);
 
-    return isTitleValid && isContentValid;
+    return isLocationValid;
   }
 
   const handleSubmit = async () => {
@@ -84,20 +100,19 @@ export default function CreatePostModal( props: EditProfileModalProps ) {
       if (validateSubmission()) {
         setIsSubmitting(true);
         const formattedData = {
-          author: (new Types.ObjectId()).toString(), // TODO: replace with actual userid 
-          title: postData.title,
-          content: postData.content.trim(),
-          tags: postData.tags.map((tag) => tag._id)
+          city: postData.location,
+          childDisabilities: postData.tags.map((tag) => tag._id),
+          bio: postData.bio,
         }
 
-        await createPost(formattedData);
+        await editUser(props.id, formattedData);
         props.closeModal();
         notifySuccess();
 
         setPostData({
-          title: "",
-          content: "",
-          tags: []
+          location: "",
+          tags: [],
+          bio: "",
         });
         editorRef.current?.setMarkdown("");
       }
@@ -110,30 +125,34 @@ export default function CreatePostModal( props: EditProfileModalProps ) {
 
   const handleClose = () => {
     props.closeModal();
-    setBodyError(false);
-    setTitleError(false);
+    setLocationError(false);
+    setDisabilitiesError(false);
+    setSelectedLocation(props.originalLocation);
+    setSelectedDisabilities(props.originalDisabilities);
+    editorRef.current?.setMarkdown(props.originalBio ? props.originalBio : "");
   }
+
+  const handleLocationSelect = (location: string) => {
+    setSelectedLocation(location);
+    setShowLocations(false);
+    setPostData({ ...postData, location: location });
+  };
 
   const handleEditorChange = (text: string) => {
     const textLength = countNonMarkdownCharacters(text);
     if (textLength <= MAX_POST_CONTENT_LEN) {
-      setPostData({ ... postData, content: text });
+      setPostData({ ... postData, bio: text });
     } else {
-      editorRef.current?.setMarkdown(postData.content);
+      editorRef.current?.setMarkdown(postData.bio);
     }
   }
 
   const toggleDisability = (name: Disability) => {
-    if (postData.tags.length < MAX_POST_DISABILITY_TAGS) {
-      const newTags = postData.tags.includes(name)
-      ? postData.tags.filter((d) => d !== name)
-      : [...postData.tags, name];
-    
-      setPostData({ ...postData, tags: newTags });
-    } else if (postData.tags.length == MAX_POST_DISABILITY_TAGS) {
-      const newTags = postData.tags.filter((d) => d !== name)
-      setPostData({ ...postData, tags: newTags });
-    }
+    const newTags = postData.tags.includes(name)
+    ? postData.tags.filter((d) => d !== name)
+    : [...postData.tags, name];
+  
+    setPostData({ ...postData, tags: newTags });
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -160,55 +179,65 @@ export default function CreatePostModal( props: EditProfileModalProps ) {
         </div>
         
         <div className="relative mb-6">
-          <label htmlFor="title" className="block text-sm font-bold text-gray-700">
+          <label htmlFor="location" className="block text-sm font-bold text-gray-700">
             Location
-            <span className="text-[#ff4e4e] text-base font-medium">*</span>
+            <span className="text-error-red text-base font-medium">*</span>
           </label>
-          <div className={`w-full mt-1 p-3 border ${showTitleError ? 'border-[#ff4e4e]' : 'border-gray-300'} rounded-md flex justify-between items-center`}>
-            <input
-              id="title"
-              value={postData.title}
-              maxLength={100}
-              placeholder="Enter post title"
-              onChange={(event) => setPostData({ ...postData, title: event.target.value })}
-              className="focus:outline-none w-[89%]"
-            />
-            <div className="text-gray-400 text-sm">
-              {postData.title.length}/{MAX_POST_TITLE_LEN}
-            </div>
+          <div className="relative w-full mt-1">
+            <Popover>
+              <PopoverTrigger asChild className="w-full" onClick={() => setShowLocations(!showLocations)}>
+                <div className={`relative flex items-center p-3 border ${showLocationError ? 'border-error-red' : 'border-gray-300'} rounded-md cursor-pointer`}>
+                  <div className="flex items-center w-full h-6">
+                    {selectedLocation ? (
+                      <span className="text-black text-sm font-medium">{selectedLocation}</span>
+                    ) : (
+                      <div className="text-neutral-400 text-sm font-normal">
+                        Search for location
+                      </div>
+                    )}
+                  </div>
+                  {showLocations ? (
+                    <ChevronUp className="w-4 h-4" color="#7D7E82" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4" color="#7D7E82" />
+                  )}
+                </div>
+              </PopoverTrigger>
+
+              <PopoverContent align="start" className="max-h-40 overflow-y-auto p-2">
+                {cities.map((city) => (
+                  <div key={city} onClick={(e) => e.stopPropagation()} className="w-full">
+                    <li
+                      onClick={() => handleLocationSelect(city)} 
+                      className={`flex items-center p-2 cursor-pointer rounded-lg hover:bg-gray-100 h-10`}
+                    >
+                      {selectedLocation === city && ( 
+                        <Check className="w-4 h-4 mr-2" color="#7D7E82" />
+                      )}
+                      {city}
+                    </li>
+                  </div>
+                ))}
+              </PopoverContent>
+            </Popover>
           </div>
-          
-          {showTitleError ? <div className="text-[#ff4e4e] text-sm font-normal">Required Field</div> : null }
-        </div>
-        
-        <div className="relative mb-6">
-          <label htmlFor="title" className="block text-sm font-bold text-gray-700">
-            Bio
-            <span className="text-[#ff4e4e] text-base font-medium">*</span>
-          </label>
-          <div className={`mt-1 rounded-lg h-full border ${showBodyError ? 'border-red-300 border-2' : ''}`}>
-            <Suspense fallback={null}>
-              <EditorComp editorRef={editorRef} markdown={postData.content} handleEditorChange={handleEditorChange} />
-            </Suspense>
-          </div>
-          <div className="flex justify-between">
-            {showBodyError ? <div className="text-[#ff4e4e] text-sm font-normal">Required Field</div> : <div></div> }
-            <p className="text-sm text-gray-400 text-right">{countNonMarkdownCharacters(postData.content)}/{MAX_POST_CONTENT_LEN}</p>
-          </div>
+
+          {showLocationError ? <div className="text-error-red text-sm font-normal">Required Field</div> : null }
         </div>
 
         <div className="relative mb-6">
-          <label htmlFor="title" className="block text-sm font-bold text-gray-700">
+          <label htmlFor="tags" className="block text-sm font-bold text-gray-700">
             Disability Tags
+            <span className="text-error-red text-base font-medium">*</span>
           </label>
           <div className="relative w-full mt-1">
             <Popover>
               <PopoverTrigger asChild className="w-full" onClick={() => setShowDisabilities(!showDisabilities)}>
-                <div className="relative flex items-center p-3 border border-gray-300 rounded-md cursor-pointer">
+                <div className={`relative flex items-center p-3 border ${showDisabilitiesError ? 'border-error-red' : 'border-gray-300'} rounded-md cursor-pointer`}>
                   <div className="flex items-center w-full h-6">
                     {postData.tags.length === 0 ? (
                       <div className="text-neutral-400 text-sm font-normal">
-                      Add disability tags (up to five)
+                      Add disability tags
                       </div>
                     ) : (
                       postData.tags.map((disability) => (
@@ -226,14 +255,14 @@ export default function CreatePostModal( props: EditProfileModalProps ) {
                     )}
                   </div>
 
-                  {showDisabilities ? <ChevronDown className="w-4 h-4" color="#7D7E82" /> : <ChevronUp className="w-4 h-4" color="#7D7E82" /> }
+                  {showDisabilities ? <ChevronUp className="w-4 h-4" color="#7D7E82" /> : <ChevronDown className="w-4 h-4" color="#7D7E82" /> }
 
                 </div>
                 
               </PopoverTrigger>
 
               <PopoverContent align="start" className="max-h-40 overflow-y-auto p-2">
-                {disabilities.map((disability) => (
+                {selectedDisabilities.map((disability) => ( // TODO: what happened here
                   <div key={disability._id} onClick={(e) => { e.stopPropagation(), toggleDisability(disability)} } className="w-full">
                     <li
                       key={disability._id}
@@ -250,12 +279,25 @@ export default function CreatePostModal( props: EditProfileModalProps ) {
               </PopoverContent>
             </Popover>
           </div>
+
+          {showDisabilitiesError ? <div className="text-error-red text-sm font-normal">Required Field</div> : null }
+        </div>
+        
+        <div className="relative mb-6">
+          <label htmlFor="bio" className="block text-sm font-bold text-gray-700">
+            Bio
+          </label>
+          <div className={`mt-1 rounded-lg h-full border`}>
+            <Suspense fallback={null}>
+              <EditorComp editorRef={editorRef} markdown={postData.bio} handleEditorChange={handleEditorChange} />
+            </Suspense>
+          </div>
         </div>
 
         <div className="flex justify-end space-x-4">
           <button
             onClick={handleClose}
-            className="w-20 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 font-bold"
+            className="w-20 py-2 bg-light-gray text-focus-gray rounded-md hover:bg-zinc-300 font-bold"
           >
             Cancel
           </button>
@@ -270,7 +312,7 @@ export default function CreatePostModal( props: EditProfileModalProps ) {
             }
           )}
           >
-          <div className="text-white font-bold">{isSubmitting ? 'Posting...' : 'Post'}</div>
+          <div className="text-white font-bold">{isSubmitting ? 'Saving...' : 'Save'}</div>
           </button>
         </div>
       </div> 

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, Pencil } from "lucide-react";
+import { ChevronLeftIcon, Pencil } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { Separator } from "@/components/ui/separator";
 import { User } from "@/utils/types/user";
@@ -12,6 +12,8 @@ import { getPopulatedUserPosts } from "@/server/db/actions/PostActions";
 import { PopulatedPost } from "@/utils/types/post";
 import PostComponent from "../PostComponent";
 import EditProfileModal from "./EditProfileModal";
+import Link from "next/link";
+import { Disability } from "@/utils/types/disability";
 
 
 type ProfileContainerProps = {
@@ -23,6 +25,8 @@ export default function ProfileContainer({user}: ProfileContainerProps) {
   const [disabilities, setDisabilities] = useState<string[]>([]);
   const [userPosts, setUserPosts] = useState<PopulatedPost[]>([]);
   const CURR_USER = user._id;
+  const [lastInitial, setLastInitial] = useState("");
+  const [disabilityNames, setDisabilityNames] = useState<Disability[]>([])
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const openModal = () => setIsModalOpen(true);
@@ -32,10 +36,6 @@ export default function ProfileContainer({user}: ProfileContainerProps) {
 
   useEffect(() => {
     const fetchDisabilities = async () => {
-      if (!user || !user._id) {
-        return;
-      }
-
       try {
         const disabilitiesData = await Promise.all(
           user.childDisabilities.map(async (disability) => {
@@ -48,42 +48,48 @@ export default function ProfileContainer({user}: ProfileContainerProps) {
         console.error("Error fetching disabilities: ", error);
       }
     };
-  
-    fetchDisabilities();
-  }, [user.childDisabilities]);
 
-  useEffect(() => {
     const fetchUserPosts = async () => {
-      if (!user || !user._id) {
-        return;
-      }
       setUserPosts(await getPopulatedUserPosts(user._id));
     };
 
-    fetchUserPosts(); 
-  }, [user._id]);
+    const fetchDisabilityNames = async () => {
+      // TODO: complete this
+    }
 
-  const handleBack = () => {
-    router.push("/");
-  }
+
+    if (user) {
+      fetchDisabilities();
+      fetchUserPosts(); 
+      setLastInitial(user.lastName[0]);
+      fetchDisabilityNames();
+    }
+  }, [user]);
 
   return (
-    <div className="mx-4 my-4">
-      <div className="flex flex-row items-center hover:cursor-pointer" onClick={handleBack}>
-        <ChevronLeft color="#636363" />
-        <p className="text-focus-gray">Back</p>
+    <div>
+    <div className="mx-16 my-4 text-lg text-focus-gray">
+        <Link href={'/'} className="flex items-center gap-1">
+          <ChevronLeftIcon className="w-6 h-6" /> Back
+        </Link>
       </div>
+    <div className="mx-16 my-4">
       <div className="mx-20 mt-8">
-        <div className="flex flex-row mb-6 items-center justify-between">
-          <div className="flex flex-col">
-            <p className="text-2xl font-bold">{user.lastName} Household</p>
-            <p className="text-lg font-normal">{user.email}</p>
+        <div className="flex flex-row mb-6 items-start justify-between">
+          <div className="flex flex-row space-x-6">
+            <div className="flex items-center justify-center w-[108px] h-[108px] rounded-full bg-profile-pink">
+              <span className="text-6xl font-medium text-black">{lastInitial}</span>
+            </div>
+            <div className="flex flex-col justify-center">
+              <p className="text-2xl font-bold">{user.lastName} Household</p>
+              <p className="text-lg font-normal">{user.email}</p>
+            </div>
           </div>
           {
             CURR_USER === user._id 
             ? (
-              <button onClick={() => setIsModalOpen(true)} className="bg-[#EAEAEA] text-focus-gray text-lg font-bold px-4 py-2 rounded-lg">
-                <div className="flex flex-row items-center space-x-1.5">
+              <button onClick={() => setIsModalOpen(true)} className="bg-light-gray hover:bg-zinc-300 text-focus-gray text-lg font-bold px-4 py-2 rounded-lg">
+                <div className="flex flex-row items-center space-x-2.5">
                   <Pencil color="#636363" className="w-6 h-6" />
                   <p>Edit</p>
                 </div>
@@ -92,7 +98,15 @@ export default function ProfileContainer({user}: ProfileContainerProps) {
             : null
           }
         </div>
-        <EditProfileModal isOpen={isModalOpen} openModal={openModal} closeModal={closeModal} />
+        <EditProfileModal
+          id={user._id}
+          originalLocation={user.city}
+          originalDisabilities={disabilityNames}
+          originalBio={user.bio}
+          isOpen={isModalOpen}
+          openModal={openModal}
+          closeModal={closeModal}
+        />
         <div>
           <p className="text-lg mb-4">
             <span className="font-semibold">Location: </span>
@@ -100,7 +114,7 @@ export default function ProfileContainer({user}: ProfileContainerProps) {
           </p>
           <div className="flex flex-row mb-4">
             <p className="text-lg font-semibold mr-3">Disabilities: </p>
-            <div className="flex flex-row space-x-3">
+            <div className={`flex flex-row gap-2 flex-wrap gap-3 ${disabilities.length > 0 ? 'py-1' : '-my-1'}`}>
               {
                 disabilities.map((disability, index) => {
                   return <Tag text={disability} key={index} />
@@ -113,20 +127,23 @@ export default function ProfileContainer({user}: ProfileContainerProps) {
         </div>
         <Separator className="bg-focus-gray my-6" />
         <Tabs defaultValue="my-posts">
-          <TabsList>
+          <TabsList className="mb-4">
             <TabsTrigger value="my-posts">My Posts</TabsTrigger>
             <TabsTrigger value="saved-posts">Saved Posts</TabsTrigger>
           </TabsList>
           <TabsContent value="my-posts">
-            {
-              userPosts.map((post) => {
-                return <PostComponent key={post._id} post={post} clickable={true} />
-              })
-            }
+            <div className="space-y-6">
+              {
+                userPosts.map((post) => {
+                  return <PostComponent key={post._id} post={post} clickable={true} />
+                })
+              }
+            </div>
           </TabsContent>
           <TabsContent value="saved-posts">Saved posts here.</TabsContent>
         </Tabs>
       </div>
+    </div>
     </div>
   )
 }
