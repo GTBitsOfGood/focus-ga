@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useState } from "react";
 import colors from "tailwindcss/colors";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 
 type PostComponentProps = {
   className?: string;
@@ -17,6 +19,7 @@ type PostComponentProps = {
   clickable?: boolean;
   onLikeClick?: (liked: boolean) => Promise<void>;
   onSaveClick?: (saved: boolean) => Promise<void>;
+  onDeleteClick?: () => Promise<void>;
 };
 
 export default function PostComponent(props: PostComponentProps) {
@@ -29,7 +32,8 @@ export default function PostComponent(props: PostComponentProps) {
     post,
     clickable = false,
     onLikeClick,
-    onSaveClick
+    onSaveClick,
+    onDeleteClick
   } = props;
 
   const {
@@ -49,6 +53,8 @@ export default function PostComponent(props: PostComponentProps) {
   const [likeLoading, setLikeLoading] = useState<boolean>(false);
   const [saved, setSaved] = useState<boolean>(initialSaved);
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
+  const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
   async function handleLikeClick() {
     if (likeLoading) return;
@@ -89,6 +95,19 @@ export default function PostComponent(props: PostComponentProps) {
     }
   }
 
+  async function handleDeleteClick() {
+    if (deleteLoading) return;
+    
+    if (onDeleteClick) {
+      setDeleteLoading(true);
+      try {
+        await onDeleteClick();
+      } catch (err) {
+        setDeleteLoading(false);
+      }
+    }
+  }
+
   const bottomRow = [
     { label: likes.toString(), icon: liked ? <Heart className="text-red-500" fill={colors.red[500]} /> : <Heart />, onClick: handleLikeClick },
     { label: comments.toString(), icon: <MessageSquare /> },
@@ -108,9 +127,14 @@ export default function PostComponent(props: PostComponentProps) {
         <h2 className="text-2xl text-black font-bold">{title}</h2>
         {
           !clickable && (
-            <button>
-              <Ellipsis className="w-6 h-6" />
-            </button>
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger>
+                <Ellipsis className="w-6 h-6" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="bottom" align="end">
+                { onDeleteClick && <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem> }
+              </DropdownMenuContent>
+            </DropdownMenu>
           )
         }
       </div>
@@ -134,6 +158,25 @@ export default function PostComponent(props: PostComponentProps) {
           </div>
         ))}
       </div>
+      <AlertDialog open={showDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Post</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this post?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteLoading}
+              onClick={handleDeleteClick}
+            >
+              {deleteLoading ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 

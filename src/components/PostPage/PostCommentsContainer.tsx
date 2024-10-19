@@ -10,7 +10,8 @@ import { useState } from "react";
 import CommentInputComponent from "./CommentInputComponent";
 import CommentTreeContainer from "./CommentTreeContainer";
 import { User } from "@/utils/types/user";
-import { createPostLike, createPostSave, deletePostLike, deletePostSave } from "@/server/db/actions/PostActions";
+import { createPostLike, createPostSave, deletePost, deletePostLike, deletePostSave } from "@/server/db/actions/PostActions";
+import { useRouter } from "next/navigation";
 
 function buildChildCommentsMap(comments: PopulatedComment[]) {
   const map = new Map<string, PopulatedComment[]>();
@@ -32,6 +33,8 @@ type PostCommentsContainerProps = {
 
 export default function PostCommentsContainer(props: PostCommentsContainerProps) {
   const { post, comments: initialComments, authUser } = props;
+
+  const router = useRouter();
 
   const [parentComments, setParentComments] = useState<PopulatedComment[]>(
     initialComments.filter(comment => comment.replyTo === null)
@@ -89,6 +92,16 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
     }
   }
 
+  async function onPostDeleteClick() {
+    try {
+      await deletePost(post._id);
+      router.push('/');
+    } catch (err) {
+      console.error('Failed to delete post:', err);
+      throw err;
+    }
+  }
+
   return (
     <>
       <div className="mx-16 my-4 text-lg text-[#686868]">
@@ -101,6 +114,7 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
           post={post}
           onLikeClick={onPostLikeClick}
           onSaveClick={onPostSaveClick}
+          onDeleteClick={post.author?._id === authUser._id ? onPostDeleteClick : undefined}
         />
         <CommentInputComponent
           placeholder="Add comment"

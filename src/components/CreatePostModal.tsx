@@ -6,7 +6,7 @@ import { getDisabilities } from "@/server/db/actions/DisabilityActions";
 import { Disability } from "@/utils/types/disability";
 import Tag from "./Tag";
 import dynamic from 'next/dynamic'
-import { MAX_POST_TITLE_LEN, MAX_POST_CONTENT_LEN, MAX_POST_DISABILITY_TAGS } from "@/utils/consts";
+import { MAX_POST_TITLE_LEN, MAX_POST_CONTENT_LEN, MAX_POST_DISABILITY_TAGS, USER_ID } from "@/utils/consts";
 import { ChevronDown, Check, X, ChevronUp } from "lucide-react";
 import {
   Popover,
@@ -84,7 +84,7 @@ export default function CreatePostModal( props: CreatePostModalProps ) {
       if (validateSubmission()) {
         setIsSubmitting(true);
         const formattedData = {
-          author: (new Types.ObjectId()).toString(), // TODO: replace with actual userid 
+          author: USER_ID, // TODO: replace with actual userid 
           title: postData.title,
           content: postData.content.trim(),
           tags: postData.tags.map((tag) => tag._id)

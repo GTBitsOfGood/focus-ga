@@ -1,10 +1,8 @@
 import { getPopulatedPosts } from "@/server/db/actions/PostActions";
 import PostComponent from "@/components/PostComponent";
+import { USER_ID } from "@/utils/consts";
 
 export const dynamic = 'force-dynamic';
-
-// Dummy ID to be replaced with authenticated user when auth is implemented
-const USER_ID = '66e26a641737b310a1b2774c';
 
 export default async function Home() {
   const posts = await getPopulatedPosts(USER_ID);

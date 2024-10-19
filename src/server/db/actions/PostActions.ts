@@ -6,15 +6,19 @@ import PostSaveModel from "../models/PostSaveModel";
 import PostLikeModel from "../models/PostLikeModel";
 import { postSaveSchema, postLikeSchema } from "@/utils/types/post";
 import dbConnect from "../dbConnect";
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 import UserModel from "../models/UserModel";
 import DisabilityModel from "../models/DisabilityModel";
 import { revalidatePath } from "next/cache";
 
 // A MongoDB aggregation pipeline that efficiently populates a post
-const postPopulationPipeline = (authUserId: string, postId?: string) => [
-  // Match specific post ID if given
-  ... postId ? [{ $match: { _id: new mongoose.Types.ObjectId(postId) } }] : [],
+const postPopulationPipeline = (authUserId: string, postId?: string): mongoose.PipelineStage[] => [
+  // Match specific post ID if given, otherwise sort by date in descending order
+  ... postId ? [
+    { $match: { _id: new mongoose.Types.ObjectId(postId) } }
+  ] : [
+    { $sort: { date: -1 as const } }
+  ],
 
   // Populate author field
   { $lookup: {
@@ -66,16 +70,14 @@ const postPopulationPipeline = (authUserId: string, postId?: string) => [
     from: PostSaveModel.collection.name,
     let: { postId: '$_id'  },
     pipeline: [
-      {
-        $match: {
-          $expr: {
-            $and: [
-              { $eq: ['$post', '$$postId'] },
-              { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
-            ]
-          }
+      { $match: {
+        $expr: {
+          $and: [
+            { $eq: ['$post', '$$postId'] },
+            { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
+          ]
         }
-      }
+      } }
     ],
     as: 'saved'
   } },
