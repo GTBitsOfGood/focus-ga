@@ -26,7 +26,7 @@ export default function Login() {
               <i className="fa fa-user"></i>
             </i>
             
-            <input className="border-[1px] border-gray-300 rounded-sm pr-3.5 pl-10 h-[51px] w-[295px] placeholder-med-gray text-med-gray focus:outline-none focus:ring-2 focus:ring-blue-500" type="email" placeholder="Username" />
+            <input className="border-[1px] border-gray-300 rounded-sm pr-3.5 pl-10 h-[51px] w-[295px] placeholder-theme-med-gray text-theme-med-gray focus:outline-none focus:ring-2 focus:ring-blue-500" type="email" placeholder="Username" />
           </div>
 
           <div className="relative mt-4">
@@ -34,7 +34,7 @@ export default function Login() {
               <Image src={lock} width={17} alt="lock-icon" />
               <i className="fa fa-lock"></i>
             </i>
-            <input className="border-[1px] border-gray-300 pr-3.5 rounded-sm h-[51px] pl-10 w-[295px] placeholder-med-gray text-med-gray focus:outline-none focus:ring-2 focus:ring-blue-500" type="password" placeholder="Password" />
+            <input className="border-[1px] border-gray-300 pr-3.5 rounded-sm h-[51px] pl-10 w-[295px] placeholder-theme-med-gray text-theme-med-gray focus:outline-none focus:ring-2 focus:ring-blue-500" type="password" placeholder="Password" />
           </div>
           {credentialsError && (
             <p className="text-red-500 text-sm mt-2">Invalid username or password. Please try again.</p>

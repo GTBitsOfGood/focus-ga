@@ -86,7 +86,7 @@ export default function CommentComponent(props: CommentComponentProps) {
   return (
     <div className="flex gap-2.5">
       <div>
-        <span className="w-6 h-6 bg-[#D9D9D9] rounded-full inline-block"/>
+        <span className="w-6 h-6 bg-theme-gray rounded-full inline-block"/>
       </div>
       <div className={`flex-grow flex flex-col gap-2 text-theme-gray ${className}`}>
         <div className="flex items-center justify-between">
@@ -95,42 +95,34 @@ export default function CommentComponent(props: CommentComponentProps) {
           </div>
           <p className="text-sm" suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
         </div>
-        <div className={`flex-grow flex flex-col gap-2 text-focus-gray ${className}`}>
-          <div className="flex items-center justify-between">
-            <div className="font-bold text-black">
-              {author ? `${author.lastName} Family` : 'Deleted User'}
+        <MarkdownRenderer
+          className="leading-5"
+          markdown={content}
+          parse={markdown => mdParser.render(markdown)}
+        />
+        <div className="flex items-center pt-2 gap-6 text-sm">
+          {bottomRow.map((item, index) => (
+            <div key={index} className="flex items-center gap-1.5 px-1">
+              <button disabled={!item.onClick} onClick={item.onClick}>
+                <div className="w-5 h-5 [&>*]:w-full [&>*]:h-full">
+                  {item.icon}
+                </div>
+              </button>
+              {item.label}
             </div>
-            <p className="text-sm" suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
+          ))}
+          <div className="flex items-center gap-1.5 px-1">
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger>
+                <Ellipsis className="w-5 h-5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="bottom" align="start">
+                {onDeleteClick ? <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem> : undefined}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-          <MarkdownRenderer
-            className="leading-5"
-            markdown={content}
-            parse={markdown => mdParser.render(markdown)}
-          />
-          <div className="flex items-center pt-2 gap-6 text-sm">
-            {bottomRow.map((item, index) => (
-              <div key={index} className="flex items-center gap-1.5 px-1">
-                <button disabled={!item.onClick} onClick={item.onClick}>
-                  <div className="w-5 h-5 [&>*]:w-full [&>*]:h-full">
-                    {item.icon}
-                  </div>
-                </button>
-                {item.label}
-              </div>
-            ))}
-            <div className="flex items-center gap-1.5 px-1">
-              <DropdownMenu modal={false}>
-                <DropdownMenuTrigger>
-                  <Ellipsis className="w-5 h-5" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="bottom" align="start">
-                  {onDeleteClick ? <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem> : undefined}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-          {nestedContent}
         </div>
+        {nestedContent}
       </div>
       <AlertDialog open={showDeleteDialog}>
         <AlertDialogContent>

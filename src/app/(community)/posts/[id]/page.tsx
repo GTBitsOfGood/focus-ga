@@ -1,5 +1,3 @@
-'use server'
-
 import PostCommentsContainer from "@/components/PostPage/PostCommentsContainer";
 import { getPostComments } from "@/server/db/actions/CommentActions";
 import { getPopulatedPost } from "@/server/db/actions/PostActions";
@@ -10,6 +8,8 @@ import { notFound } from 'next/navigation';
 type PostPageProps = {
   params: { id: string }
 };
+
+export const dynamic = 'force-dynamic';
 
 export default async function PostPage(props: PostPageProps) {
   const id = props.params.id;

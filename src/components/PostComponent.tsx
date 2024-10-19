@@ -134,7 +134,7 @@ export default function PostComponent(props: PostComponentProps) {
     <>
       <div className="flex items-center justify-between text-sm">
         <div className="flex items-center gap-2">
-          <span className="w-6 h-6 bg-focus-med-gray rounded-full inline-block"/>
+          <span className="w-6 h-6 bg-theme-med-gray rounded-full inline-block"/>
           {author ? `${author.lastName} Family` : 'Deleted User'}
         </div>
         <p suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
