@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { cities } from "@/utils/cities";
 import { editUser } from "@/server/db/actions/UserActions";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
+import { useRouter } from "next/navigation";
 
 const EditorComp = dynamic(() => import('../EditorComponent'), { ssr: false })
 
@@ -56,6 +57,7 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const editorRef = useRef<MDXEditorMethods | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchDisabilities = async () => {
@@ -124,6 +126,7 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
       notifyFailure();
     } finally {
       setIsSubmitting(false);
+      window.location.reload();
     }
   }
 
