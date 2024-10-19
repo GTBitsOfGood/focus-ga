@@ -56,7 +56,7 @@ export default function PostComponent(props: PostComponentProps) {
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
   async function handleLikeClick() {
-    if (likeLoading) return;
+    if (likeLoading || clickable) return;
 
     if (liked) {
       setLikes(likes => likes - 1);
@@ -79,7 +79,7 @@ export default function PostComponent(props: PostComponentProps) {
   }
 
   async function handleSaveClick() {
-    if (saveLoading) return;
+    if (saveLoading || clickable) return;
     setSaved(saved => !saved);
 
     if (onSaveClick) {
