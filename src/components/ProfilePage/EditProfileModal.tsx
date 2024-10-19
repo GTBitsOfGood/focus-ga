@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState, Suspense, useRef } from "react";
-import { getDisabilities, getDisability } from "@/server/db/actions/DisabilityActions";
+import { getDisabilities } from "@/server/db/actions/DisabilityActions";
 import { Disability } from "@/utils/types/disability";
 import Tag from "../Tag";
 import dynamic from 'next/dynamic'
@@ -17,6 +17,8 @@ import { MDXEditorMethods } from "@mdxeditor/editor";
 import { cn, countNonMarkdownCharacters } from "@/lib/utils";
 import { cities } from "@/utils/cities";
 import { editUser } from "@/server/db/actions/UserActions";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
+import { Button } from "../ui/button";
 
 const EditorComp = dynamic(() => import('../EditorComponent'), { ssr: false })
 
@@ -30,24 +32,25 @@ type EditProfileModalProps = {
   closeModal: () => void;
 }
 
-type PostData = {
+type userData = {
   location: string;
   tags: Disability[];
   bio: string;
 }
 
 export default function EditProfileModal( props: EditProfileModalProps ) {
-  const [postData, setPostData] = useState<PostData>({
+  const [userData, setUserData] = useState<userData>({
     location: "",
     tags: [],
     bio: "",
   });
 
-  const [selectedLocation, setSelectedLocation] = useState("");
   const [showLocations, setShowLocations] = useState(false);
   const [showLocationError, setLocationError] = useState(false);
+  const [search, setSearch] = React.useState("")
 
-  const [selectedDisabilities, setSelectedDisabilities] = useState<Disability[]>([]);
+  const [allDisabilities, setAllDisabilities] = useState<Disability[]>([]);
+  const [originalDisabilities, setOriginalDisabilities] = useState<Disability[]>([]);
   const [showDisabilities, setShowDisabilities] = useState(false);
   const [showDisabilitiesError, setDisabilitiesError] = useState(false);
 
@@ -59,15 +62,18 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
   useEffect(() => {
     const fetchDisabilities = async () => {
       const disabilityList = await getDisabilities();
-      setSelectedDisabilities(disabilityList);
+      setAllDisabilities(disabilityList);
     }
     fetchDisabilities();
   }, [])
 
   useEffect(() => {
-    setSelectedLocation(props.originalLocation);
-    setSelectedDisabilities(props.originalDisabilities);
-  }, [props.originalLocation, props.originalDisabilities])
+    const originalDisabilitiesData = allDisabilities.filter((disability) => 
+      props.originalDisabilities.some(tag => tag._id === disability._id)
+    );
+    setOriginalDisabilities(originalDisabilitiesData);
+    setUserData({ location: props.originalLocation, tags: originalDisabilitiesData, bio: props.originalBio ? props.originalBio : "" });
+  }, [props.originalLocation, props.originalDisabilities, props.originalBio]);
 
   useEffect(() => {
     if (editorRef.current && props.isOpen) {
@@ -77,23 +83,21 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
 
   const notifySuccess = () => {
     toast({
-      title: "Post successfully added",
-      description: "Your post has been successfully added to the community.",
+      title: "User profile successfully edited",
+      description: "Your profile has been successfully edited.",
     });
   };
 
   const notifyFailure = () => {
     toast({
-      title: "Failed to add post",
-      description: "There was an error adding your post. Please try again.",
+      title: "Failed to edit user profile",
+      description: "There was an error editing your profile. Please try again.",
     });
   };
 
   const validateSubmission = (): boolean => {
-    const isLocationValid = postData.location.length > 0;
-
+    const isLocationValid = userData.location.length > 0;
     setLocationError(!isLocationValid);
-
     return isLocationValid;
   }
 
@@ -102,16 +106,16 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
       if (validateSubmission()) {
         setIsSubmitting(true);
         const formattedData = {
-          city: postData.location,
-          childDisabilities: postData.tags.map((tag) => tag._id),
-          bio: postData.bio,
+          city: userData.location,
+          childDisabilities: userData.tags.map((tag) => tag._id),
+          bio: userData.bio,
         }
 
         await editUser(props.id, formattedData);
         props.closeModal();
         notifySuccess();
 
-        setPostData({
+        setUserData({
           location: "",
           tags: [],
           bio: "",
@@ -129,32 +133,30 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
     props.closeModal();
     setLocationError(false);
     setDisabilitiesError(false);
-    setSelectedLocation(props.originalLocation);
-    setSelectedDisabilities(props.originalDisabilities);
     editorRef.current?.setMarkdown(props.originalBio ? props.originalBio : "");
+    setUserData({ location: props.originalLocation, tags: originalDisabilities, bio: props.originalBio ? props.originalBio : "" });
   }
 
   const handleLocationSelect = (location: string) => {
-    setSelectedLocation(location);
     setShowLocations(false);
-    setPostData({ ...postData, location: location });
+    setUserData({ ...userData, location: location });
   };
 
   const handleEditorChange = (text: string) => {
     const textLength = countNonMarkdownCharacters(text);
     if (textLength <= MAX_POST_CONTENT_LEN) {
-      setPostData({ ... postData, bio: text });
+      setUserData({ ... userData, bio: text });
     } else {
-      editorRef.current?.setMarkdown(postData.bio);
+      editorRef.current?.setMarkdown(userData.bio);
     }
   }
 
   const toggleDisability = (name: Disability) => {
-    const newTags = postData.tags.includes(name)
-    ? postData.tags.filter((d) => d !== name)
-    : [...postData.tags, name];
+    const newTags = userData.tags.includes(name)
+    ? userData.tags.filter((d) => d !== name)
+    : [...userData.tags, name];
   
-    setPostData({ ...postData, tags: newTags });
+    setUserData({ ...userData, tags: newTags });
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -186,12 +188,12 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
             <span className="text-error-red text-base font-medium">*</span>
           </label>
           <div className="relative w-full mt-1">
-            <Popover>
+            <Popover open={showLocations} onOpenChange={setShowLocations}>
               <PopoverTrigger asChild className="w-full" onClick={() => setShowLocations(!showLocations)}>
                 <div className={`relative flex items-center p-3 border ${showLocationError ? 'border-error-red' : 'border-gray-300'} rounded-md cursor-pointer`}>
                   <div className="flex items-center w-full h-6">
-                    {selectedLocation ? (
-                      <span className="text-black text-sm font-medium">{selectedLocation}</span>
+                    {userData.location ? (
+                      <span className="text-black text-sm font-medium">{userData.location}</span>
                     ) : (
                       <div className="text-neutral-400 text-sm font-normal">
                         Search for location
@@ -206,20 +208,26 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
                 </div>
               </PopoverTrigger>
 
-              <PopoverContent align="start" className="max-h-40 overflow-y-auto p-2">
-                {cities.map((city: string) => (
-                  <div key={city} onClick={(e) => e.stopPropagation()} className="w-full">
-                    <li
-                      onClick={() => handleLocationSelect(city)} 
-                      className={`flex items-center p-2 cursor-pointer rounded-lg hover:bg-gray-100 h-10`}
-                    >
-                      {selectedLocation === city && ( 
-                        <Check className="w-4 h-4 mr-2" color="#7D7E82" />
-                      )}
-                      {city}
-                    </li>
-                  </div>
-                ))}
+              <PopoverContent align="start" className="overflow-visible p-2">
+                <Command>
+                  <CommandInput placeholder="Search for location" />
+                  <CommandList className="max-h-32 overflow-y-auto">
+                    <CommandEmpty>No city found.</CommandEmpty>
+                    <CommandGroup>
+                      {cities.map((city: string) => (
+                        <CommandItem key={city} onSelect={() => {
+                          handleLocationSelect(city)}
+                        }
+                        className={`flex items-center p-2 cursor-pointer rounded-lg hover:bg-gray-100 h-10`}>
+                          {userData.location === city && (
+                            <Check className="w-4 h-4 mr-2" color="#7D7E82" />
+                          )}
+                          {city}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
               </PopoverContent>
             </Popover>
           </div>
@@ -237,12 +245,12 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
               <PopoverTrigger asChild className="w-full" onClick={() => setShowDisabilities(!showDisabilities)}>
                 <div className={`relative flex items-center p-3 border ${showDisabilitiesError ? 'border-error-red' : 'border-gray-300'} rounded-md cursor-pointer`}>
                   <div className="flex items-center w-full h-6">
-                    {postData.tags.length === 0 ? (
+                    {userData.tags.length === 0 ? (
                       <div className="text-neutral-400 text-sm font-normal">
                       Add disability tags
                       </div>
                     ) : (
-                      postData.tags.map((disability, index) => (
+                      userData.tags.map((disability, index) => (
                       <div
                         key={disability._id}
                         onClick={(e) => {
@@ -264,14 +272,14 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
               </PopoverTrigger>
 
               <PopoverContent align="start" className="max-h-40 overflow-y-auto p-2">
-                {selectedDisabilities.map((disability) => ( 
+                {allDisabilities.map((disability) => ( 
                   <div key={disability._id} onClick={(e) => { e.stopPropagation(), toggleDisability(disability)} } className="w-full">
                     <li
                       key={disability._id}
                       onClick={(e) => { e.stopPropagation(), toggleDisability(disability)} }
                       className={`flex items-center p-2 cursor-pointer rounded-lg hover:bg-gray-100 h-10`}
                     >
-                    { postData.tags.includes(disability) ? 
+                    {userData.tags.includes(disability) ? 
                     <Check className="w-4 h-4 mr-2" color="#7D7E82" />
                     : null}
                     {disability.name}
@@ -291,7 +299,7 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
           </label>
           <div className={`mt-1 rounded-lg h-full border`}>
             <Suspense fallback={null}>
-              <EditorComp editorRef={editorRef} markdown={postData.bio} handleEditorChange={handleEditorChange} />
+              <EditorComp editorRef={editorRef} markdown={userData.bio} handleEditorChange={handleEditorChange} />
             </Suspense>
           </div>
         </div>
