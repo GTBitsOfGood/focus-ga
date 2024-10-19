@@ -3,8 +3,9 @@
 import { cookies } from 'next/headers';
 import { getIronSession } from 'iron-session';
 import { SessionData, sessionOptions } from "@/lib/session";
-import { getUser } from './UserActions';
+import { getUser, signOut } from './UserActions';
 import { User } from '@/utils/types/user';
+import { redirect } from 'next/navigation';
 
 /**
  * Retrieves the authenticated user from the session.
@@ -18,7 +19,11 @@ export async function getAuthenticatedUser(): Promise<User | null> {
     return null;
   }
 
-  const user = await getUser(session.userId);
-
-  return user;
+  try {
+    const user = await getUser(session.userId);
+    return user;
+  } catch (e) {
+    await signOut();
+    redirect('/login');
+  }
 }
