@@ -4,9 +4,9 @@ import { cookies } from 'next/headers';
 import { getIronSession } from 'iron-session';
 import { SessionData, sessionOptions } from "@/lib/session";
 import { getUser } from './UserActions';
-import { User } from '@/utils/types/user';
+import { PopulatedUser } from '@/utils/types/user';
 
-export async function getAuthenticatedUser(): Promise<User | null> {
+export async function getAuthenticatedUser(): Promise<PopulatedUser | null> {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
   if (!session.isLoggedIn) {

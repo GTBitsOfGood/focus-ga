@@ -15,7 +15,7 @@ import Link from "next/link";
 
 type ProfileContainerProps = {
   user: PopulatedUser;
-  currUser: User;
+  currUser: PopulatedUser;
 }
 
 export default function ProfileContainer({ user, currUser }: ProfileContainerProps) {

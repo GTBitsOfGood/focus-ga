@@ -10,11 +10,11 @@ import { ChevronUp } from "lucide-react";
 import Link from "next/link";
 import useClickOff from "@/hooks/useClickOff";
 import { signOut } from "@/server/db/actions/UserActions";
-import { User } from "@/utils/types/user";
+import { PopulatedUser } from "@/utils/types/user";
 
 interface NavbarProps {
   openModal: () => void;
-  user: User;
+  user: PopulatedUser;
 }
 
 export default function Navbar({ openModal, user }: NavbarProps) {
