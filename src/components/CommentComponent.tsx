@@ -84,10 +84,16 @@ export default function CommentComponent(props: CommentComponentProps) {
   ];
 
   return (
-    <>
-      <div className="flex gap-2.5">
-        <div>
-          <span className="w-6 h-6 bg-focus-med-gray rounded-full inline-block"/>
+    <div className="flex gap-2.5">
+      <div>
+        <span className="w-6 h-6 bg-[#D9D9D9] rounded-full inline-block"/>
+      </div>
+      <div className={`flex-grow flex flex-col gap-2 text-theme-gray ${className}`}>
+        <div className="flex items-center justify-between">
+          <div className="font-bold text-black">
+            {author ? `${author.lastName} Family` : 'Deleted User'}
+          </div>
+          <p className="text-sm" suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
         </div>
         <div className={`flex-grow flex flex-col gap-2 text-focus-gray ${className}`}>
           <div className="flex items-center justify-between">
@@ -145,6 +151,6 @@ export default function CommentComponent(props: CommentComponentProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </div>
   );
 }

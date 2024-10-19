@@ -13,8 +13,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 
 type PostComponentProps = {
-  className?: string;
   post: PopulatedPost;
+  className?: string;
   clickable?: boolean;
   onLikeClick?: (liked: boolean) => Promise<void>;
   onSaveClick?: (saved: boolean) => Promise<void>;
@@ -34,6 +34,12 @@ export default function PostComponent(props: PostComponentProps) {
     onSaveClick,
     onDeleteClick
   } = props;
+  
+  // don't render links for clickable components to avoid nested a tags
+  if (clickable) {
+    mdParser.renderer.rules.link_open = () => '<span class="underline text-gray-900">';
+    mdParser.renderer.rules.link_close = () => '</span>';
+  }
 
   const {
     title,
@@ -119,7 +125,7 @@ export default function PostComponent(props: PostComponentProps) {
     },
     {
       label: saved ? 'Saved Post' : 'Save Post',
-      icon: saved ? <Bookmark className="fill-focus-gray" /> : <Bookmark />,
+      icon: saved ? <Bookmark className="fill-theme-gray" /> : <Bookmark />,
       onClick: saveLoading ? undefined : handleSaveClick
     }
   ];
@@ -191,7 +197,7 @@ export default function PostComponent(props: PostComponentProps) {
   );
 
   const classes = cn(
-    'flex flex-col gap-2 text-focus-gray rounded-lg',
+    'flex flex-col gap-2 text-theme-gray rounded-lg',
     clickable && 'cursor-pointer hover:bg-gray-100 p-4',
     className
   );
@@ -202,7 +208,7 @@ export default function PostComponent(props: PostComponentProps) {
         className={classes}
         href={`/posts/${post._id}`}
       >
-      {reactContent}
+        {reactContent}
       </Link>
     ) : (
       <div className={classes}>

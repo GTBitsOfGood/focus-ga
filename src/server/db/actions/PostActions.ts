@@ -12,80 +12,97 @@ import DisabilityModel from "../models/DisabilityModel";
 import { revalidatePath } from "next/cache";
 
 // A MongoDB aggregation pipeline that efficiently populates a post
-const postPopulationPipeline = (authUserId: string, postId?: string): mongoose.PipelineStage[] => [
-  // Match specific post ID if given, otherwise sort by date in descending order
-  ... postId ? [
-    { $match: { _id: new mongoose.Types.ObjectId(postId) } }
-  ] : [
-    { $sort: { date: -1 as const } }
-  ],
+type PipelineArgs = {
+  authUserId: string,
+  offset?: number,
+  limit?: number,
+  filter?: any,
+  postId?: string,
+}
 
-  // Populate author field
-  { $lookup: {
-    from: UserModel.collection.name,
-    localField: 'author',
-    foreignField: '_id',
-    pipeline: [{ $addFields: { _id: { $toString: '$_id' } } }],
-    as: 'author'
-  } },
-  { $unwind: { path: '$author', preserveNullAndEmptyArrays: true } },
-
-  // Populate tags
-  { $lookup: {
-    from: DisabilityModel.collection.name,
-    localField: 'tags',
-    foreignField: '_id',
-    pipeline: [{ $addFields: { _id: { $toString: '$_id' } } }],
-    as: 'tags'
-  } },
-
-  // Replace author and tags with default values if necessary
-  { $addFields: {
-    author: { $ifNull: ['$author', null] },
-    tags: { $ifNull: ['$tags', []] }
-  } },
-
-  // Determine whether user has liked post
-  { $lookup: {
-    from: PostLikeModel.collection.name,
-    let: { postId: '$_id'  },
-    pipeline: [
-      { $match: {
-        $expr: {
-          $and: [
-            { $eq: ['$post', '$$postId'] },
-            { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
-          ]
-        }
-      } }
+function postPopulationPipeline({authUserId, offset, limit, filter, postId}: PipelineArgs): mongoose.PipelineStage[] {
+  return [
+    // Match specific post ID if given, otherwise sort by date in descending order
+    ... postId ? [
+      { $match: { _id: new mongoose.Types.ObjectId(postId) } }
+    ] : [
+      { $sort: { date: -1 as const } }
     ],
-    as: 'liked'
-  } },
-  { $addFields: {
-    liked: { $gt: [{ $size: '$liked' }, 0] }
-  } },
 
-  // Determine whether user has saved post
-  { $lookup: {
-    from: PostSaveModel.collection.name,
-    let: { postId: '$_id'  },
-    pipeline: [
-      { $match: {
-        $expr: {
-          $and: [
-            { $eq: ['$post', '$$postId'] },
-            { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
-          ]
-        }
-      } }
-    ],
-    as: 'saved'
-  } },
-  { $addFields: {
-    saved: { $gt: [{ $size: '$saved' }, 0] },
-    _id: { $toString: '$_id' }
-  } }
-];
+    // filter
+    ...(filter ? [{ $match: filter }] : []),
+
+    // Skip and limit for pagination
+    ...(offset ? [{ $skip: offset }] : []),
+    ...(limit ? [{ $limit: limit }] : []),
+
+    // Populate author field
+    { $lookup: {
+      from: UserModel.collection.name,
+      localField: 'author',
+      foreignField: '_id',
+      pipeline: [{ $addFields: { _id: { $toString: '$_id' } } }],
+      as: 'author'
+    } },
+    { $unwind: { path: '$author', preserveNullAndEmptyArrays: true } },
+
+    // Populate tags
+    { $lookup: {
+      from: DisabilityModel.collection.name,
+      localField: 'tags',
+      foreignField: '_id',
+      pipeline: [{ $addFields: { _id: { $toString: '$_id' } } }],
+      as: 'tags'
+    } },
+
+    // Replace author and tags with default values if necessary
+    { $addFields: {
+      author: { $ifNull: ['$author', null] },
+      tags: { $ifNull: ['$tags', []] }
+    } },
+
+    // Determine whether user has liked post
+    { $lookup: {
+      from: PostLikeModel.collection.name,
+      let: { postId: '$_id'  },
+      pipeline: [
+        { $match: {
+          $expr: {
+            $and: [
+              { $eq: ['$post', '$$postId'] },
+              { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
+            ]
+          }
+        } }
+      ],
+      as: 'liked'
+    } },
+    { $addFields: {
+      liked: { $gt: [{ $size: '$liked' }, 0] }
+    } },
+
+    // Determine whether user has saved post
+    { $lookup: {
+      from: PostSaveModel.collection.name,
+      let: { postId: '$_id'  },
+      pipeline: [
+        { $match: {
+          $expr: {
+            $and: [
+              { $eq: ['$post', '$$postId'] },
+              { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
+            ]
+          }
+        } }
+      ],
+      as: 'saved'
+    } },
+    { $addFields: {
+      saved: { $gt: [{ $size: '$saved' }, 0] },
+      _id: { $toString: '$_id' }
+    } }
+  ];
+}
 
 /**
  * Creates a new post in the database.
@@ -119,10 +136,10 @@ export async function getPosts(): Promise<Post[]> {
  * @param authUserId - The ID of the currently authenticated user, to determine whether they have liked each post.
  * @returns A promise that resolves to an array of populated post objects.
  */
-export async function getPopulatedPosts(authUserId: string): Promise<PopulatedPost[]> {
+export async function getPopulatedPosts(authUserId: string, offset: number, limit: number, filter?: any): Promise<PopulatedPost[]> {
   await dbConnect();
 
-  const posts = await PostModel.aggregate(postPopulationPipeline(authUserId));
+  const posts = await PostModel.aggregate(postPopulationPipeline({authUserId, offset, limit, filter}));
   return posts;
 }
 
@@ -156,7 +173,7 @@ export async function getPopulatedPost(id: string, authUserId: string): Promise<
     throw new Error("Invalid post ID");
   }
 
-  const [post] = await PostModel.aggregate(postPopulationPipeline(authUserId, id));
+  const [post] = await PostModel.aggregate(postPopulationPipeline({authUserId, postId: id}));
   if (!post) {
     throw new Error("Post not found");
   }

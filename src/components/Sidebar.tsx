@@ -18,7 +18,7 @@ function SidebarButton({ children, path }: SidebarProps) {
   const active = pathName === path;
   return (
     <button
-      className={cn("w-full text-left text-blue-600 hover:bg-gray-100 py-6 px-8 transition-colors flex gap-2 flex-row items-center", { "bg-gray-100 border-r-4 border-blue": active })}
+      className={cn("w-full text-left hover:bg-gray-100 py-6 px-8 transition-colors flex gap-2 flex-row items-center", { "bg-gray-100 border-r-4 border-theme-blue": active })}
       onClick={() => router.push(path)}
     >
       {children}
@@ -29,7 +29,7 @@ function SidebarButton({ children, path }: SidebarProps) {
 export default function Sidebar() {
   return (
     <div className="fixed top-[100px] left-0 w-[280px] border-r border-gray-300 pt-2 flex flex-col justify-between h-[calc(100vh-100px)]">
-      <ul className="text-[#636363] text-xl space-y-1">
+      <ul className="text-theme-gray text-xl space-y-1">
         <li>
           <SidebarButton path="/">
             <Home className="w-8 h-8" /> Home Page
@@ -48,7 +48,7 @@ export default function Sidebar() {
       </ul>
       <a
         href="https://focus-ga.org/contact-us/"
-        className="m-10 text-lg text-blue font-bold"
+        className="m-10 text-lg text-theme-blue font-bold"
       >
         Contact FOCUS
       </a>
