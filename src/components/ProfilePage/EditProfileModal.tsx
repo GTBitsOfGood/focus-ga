@@ -302,7 +302,7 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
           onClick={handleSubmit}
           disabled={isSubmitting}
           className={cn(
-            "min-w-20 py-2 px-4 bg-blue rounded-lg justify-center items-center gap-2.5 inline-flex",
+            "min-w-20 py-2 px-4 bg-theme-blue rounded-lg justify-center items-center gap-2.5 inline-flex",
             {
             "opacity-50 cursor-not-allowed": isSubmitting,
             "hover:bg-blue-900": !isSubmitting,
