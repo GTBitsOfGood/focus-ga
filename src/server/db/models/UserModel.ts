@@ -12,7 +12,7 @@ const UserSchema = new Schema<User>({
   }},
   childAge: { type: Number, min: 0, required: true },
   childDisabilities: [{ type: Schema.Types.ObjectId, ref: 'Disability', required: true }],
-  county: { type: String, required: true },
+  city: { type: String, required: true },
   bio: { type: String },
 });
 

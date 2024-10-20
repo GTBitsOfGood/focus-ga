@@ -1,8 +1,9 @@
 'use server'
 
-import { editUserSchema, User, UserInput, userSchema } from "@/utils/types/user";
+import { editUserSchema, PopulatedUser, User, UserInput, userSchema } from "@/utils/types/user";
 import UserModel from "../models/UserModel";
 import dbConnect from "../dbConnect";
+import { revalidatePath } from "next/cache";
 import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions } from "@/lib/session";
 import { cookies } from "next/headers";
@@ -29,7 +30,25 @@ export async function createUser(user: UserInput): Promise<User> {
 export async function getUser(id: string): Promise<User> {
   await dbConnect();
 
-  const user = await UserModel.findById(id);
+  const user = await UserModel.findById(id)
+  if (!user) {
+    throw new Error("User not found");
+  }
+  return user.toObject();
+}
+
+/**
+ * Retrieves a user from the database by their ID with child disabilities populated.
+ * @param id - The ID of the user to retrieve.
+ * @returns A promise that resolves to the populated user object.
+ * @throws Will throw an error if the user is not found.
+ */
+export async function getPopulatedUser(id: string): Promise<PopulatedUser> {
+  await dbConnect();
+
+  const user = await UserModel
+    .findById(id)
+    .populate({ path: 'childDisabilities', model: 'Disability' });
   if (!user) {
     throw new Error("User not found");
   }
@@ -68,6 +87,8 @@ export async function editUser(id: string, updated: Partial<UserInput>): Promise
   if (!updatedUser) {
     throw new Error("User not found");
   }
+
+  revalidatePath(`/family/${id}`)
   return updatedUser.toObject();
 }
 
@@ -81,11 +102,12 @@ export async function loginUser(email: string) {
   if (!user) {
     user = await createUser({ 
       email,
-      username: "Test",
+      username: "12738718",
       lastName: "BoG", 
       childAge: 10, 
       childDisabilities: [],
-      county: "Fulton" 
+      city: "Fulton",
+      bio: "Hello World!"
     });
   }
 
