@@ -12,7 +12,7 @@ import { getDisabilities } from "@/server/db/actions/DisabilityActions";
 import { Filter } from "@/utils/types/common";
 import { PAGINATION_LIMIT } from "@/utils/consts";
 import { useUser } from "@/hooks/user";
-import { LOCATIONS } from "@/utils/consts";
+import { GEORGIA_CITIES } from "@/utils/cities";
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +26,7 @@ export default function Home() {
   const [disabilities, setDisabilities] = useState<Disability[]>([]);
   const [selectedDisabilities, setSelectedDisabilities] = useState<Disability[]>([]);
 
-  const [locations, setLocations] = useState<Location[]>([]);
+  const locations = GEORGIA_CITIES.map(city => ({ name: city, _id: city }));
   const [selectedLocations, setSelectedLocations] = useState<Location[]>([]);
 
   // fetch disabilities on page load
@@ -36,8 +36,6 @@ export default function Home() {
       setDisabilities(disabilityList);
     };
     fetchDisabilities();
-
-    setLocations(LOCATIONS.map(city => ({ name: city, _id: city })))
   }, []);
 
   const handleSelected = <T extends { _id: string }>(
@@ -81,6 +79,10 @@ export default function Home() {
   useEffect(() => {
     fetchPosts(true);
   }, [selectedDisabilities])
+
+  useEffect(() => {
+    console.log(selectedLocations);
+  }, [selectedLocations]);
 
   // Fetch posts when page changes
   const fetchPosts = async (clear: boolean = false) => {

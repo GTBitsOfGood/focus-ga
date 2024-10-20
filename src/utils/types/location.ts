@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { ExtendId } from "./common";
+import { GEORGIA_CITIES } from "../cities";
 
 export const locationSchema = z.object({
-  name: z.string()
+  name: z.enum(GEORGIA_CITIES),
 });
 
 export const editLocationSchema = locationSchema.partial();
