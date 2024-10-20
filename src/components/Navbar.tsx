@@ -80,7 +80,7 @@ export default function Navbar({ openModal, user }: NavbarProps) {
             <p className="text-lg">{user.lastName} Family</p>
             <p className="text-sm">{user.email}</p>
             <div className="w-44 border-theme-lightgray border-t border-sm mt-[18px] mx-auto"/>
-            <Link href="/profile" className="block mt-4 ml-4 py-1 hover:underline cursor-pointer transition-colors text-left">
+            <Link href={`/family/${user._id}`} className="block mt-4 ml-4 py-1 hover:underline cursor-pointer transition-colors text-left">
               My Profile
             </Link>
             <Link href="/profile/settings" className="block mt-2 ml-4 py-1 hover:underline cursor-pointer transition-colors text-left">
