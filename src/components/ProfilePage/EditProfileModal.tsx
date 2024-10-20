@@ -14,7 +14,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { MDXEditorMethods } from "@mdxeditor/editor";
 import { cn } from "@/lib/utils";
-import { cities } from "@/utils/cities";
+import { GEORGIA_CITIES } from "@/utils/cities";
 import { editUser } from "@/server/db/actions/UserActions";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
 
@@ -201,7 +201,7 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
                   <CommandList className="max-h-32 overflow-y-auto">
                     <CommandEmpty>No city found.</CommandEmpty>
                     <CommandGroup>
-                      {cities.map((city: string) => (
+                      {GEORGIA_CITIES.map((city: string) => (
                         <CommandItem key={city} onSelect={() => {
                           handleLocationSelect(city)}
                         }
