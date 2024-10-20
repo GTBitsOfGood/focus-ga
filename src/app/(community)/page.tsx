@@ -7,10 +7,12 @@ import { PopulatedPost } from "@/utils/types/post";
 import { LoaderCircle } from "lucide-react";
 import FilterComponent from "@/components/FilterComponent";
 import { Disability } from "@/utils/types/disability";
+import { Location } from "@/utils/types/location";
 import { getDisabilities } from "@/server/db/actions/DisabilityActions";
 import { Filter } from "@/utils/types/common";
 import { PAGINATION_LIMIT } from "@/utils/consts";
 import { useUser } from "@/hooks/user";
+import { LOCATIONS } from "@/utils/consts";
 
 export const dynamic = 'force-dynamic';
 
@@ -20,10 +22,12 @@ export default function Home() {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
   const user = useUser();
-  console.log(user);
   
   const [disabilities, setDisabilities] = useState<Disability[]>([]);
   const [selectedDisabilities, setSelectedDisabilities] = useState<Disability[]>([]);
+
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [selectedLocations, setSelectedLocations] = useState<Location[]>([]);
 
   // fetch disabilities on page load
   useEffect(() => {
@@ -32,10 +36,15 @@ export default function Home() {
       setDisabilities(disabilityList);
     };
     fetchDisabilities();
+
+    setLocations(LOCATIONS.map(city => ({ name: city, _id: city })))
   }, []);
 
-  const handleDisabilitySelected = (selected: Disability) => {
-    setSelectedDisabilities((prevSelected) => {
+  const handleSelected = <T extends { _id: string }>(
+    selected: T, 
+    setSelected: React.Dispatch<React.SetStateAction<T[]>>
+  ) => {
+    setSelected((prevSelected) => {
       if (prevSelected.some((item) => item._id === selected._id)) {
         return prevSelected.filter((item) => item._id !== selected._id);
       } else {
@@ -48,17 +57,14 @@ export default function Home() {
     label: "Disability",
     data: disabilities,
     selected: selectedDisabilities,
-    setSelected: handleDisabilitySelected
+    setSelected: (selected: Disability) => handleSelected(selected, setSelectedDisabilities)
   };
 
-  //TODO: update once locations are added
-  const locationFilter: Filter<any> = {
+  const locationFilter: Filter<Location> = {
     label: "Location",
-    data: [],
-    selected: [],
-    setSelected: (selected) => {
-      console.log("location selected")
-    }
+    data: locations,
+    selected: selectedLocations,
+    setSelected: (selected: Location) => handleSelected(selected, setSelectedLocations)
   };
 
   //TODO: update once demographics are added

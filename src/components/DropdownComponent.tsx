@@ -8,6 +8,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Filter } from "@/utils/types/common"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
 
 type DropdownProps = {
   filter: Filter<any>;
@@ -40,24 +48,30 @@ export default function DropdownComponent (
         </div>
       </PopoverTrigger>
 
-      <PopoverContent align="start" className="max-h-40 overflow-y-auto p-2">
-        <ul>
-          {props.filter.data.map((d) => (
-            <li
-              key={d._id}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleItemClick(d);
-              }}
-              className="flex items-center p-2 cursor-pointer rounded-lg hover:bg-gray-100 h-10"
-            >
-              {props.filter.selected.some((item) => item._id === d._id) && (
-                <Check className="w-4 h-4 mr-2" color="black" />
-              )}
-              {d.name}
-            </li>
-          ))}
-        </ul>
+      <PopoverContent align="start" className="p-2">
+        <Command>
+          <CommandInput placeholder={`Search ${props.filter.label.toLowerCase()}`} />
+          <CommandList>
+            <CommandEmpty>No {props.filter.label.toLowerCase()} found.</CommandEmpty>
+            <CommandGroup>
+              {props.filter.data.map((d) => (
+                <CommandItem
+                  key={d._id}
+                  value={d.name}
+                  onSelect={() => {
+                    handleItemClick(d);
+                  }}
+                  className="flex items-center p-2 cursor-pointer rounded-lg hover:bg-gray-100 h-10"
+                >
+                  {props.filter.selected.some((item) => item._id === d._id) && (
+                    <Check className="w-4 h-4 mr-2" color="black" />
+                  )}
+                  {d.name}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
       </PopoverContent>
     </Popover>
   );
