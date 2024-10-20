@@ -17,6 +17,14 @@ import { useToast } from "@/hooks/use-toast";
 import { MDXEditorMethods } from "@mdxeditor/editor";
 import { cn, countNonMarkdownCharacters } from "@/lib/utils";
 import { User } from "@/utils/types/user";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
 
 const EditorComp = dynamic(() => import('./EditorComponent'), { ssr: false })
 
@@ -233,21 +241,30 @@ export default function CreatePostModal({user, isOpen, openModal, closeModal}: C
                 
               </PopoverTrigger>
 
-              <PopoverContent align="start" className="max-h-40 overflow-y-auto p-2">
-                {disabilities.map((disability) => (
-                  <div key={disability._id} onClick={(e) => { e.stopPropagation(), toggleDisability(disability)} } className="w-full">
-                    <li
-                      key={disability._id}
-                      onClick={(e) => { e.stopPropagation(), toggleDisability(disability)} }
-                      className={`flex items-center p-2 cursor-pointer rounded-lg hover:bg-gray-100 h-10`}
-                    >
-                    { postData.tags.includes(disability) ? 
-                    <Check className="w-4 h-4 mr-2" color="#7D7E82" />
-                    : null}
-                    {disability.name}
-                    </li>
-                  </div>
-                ))}
+              <PopoverContent align="start" className="p-2">
+                <Command>
+                  <CommandInput placeholder={`Search disabilities`} />
+                  <CommandList>
+                    <CommandEmpty>No disability found.</CommandEmpty>
+                    <CommandGroup>
+                      {disabilities.map((d) => (
+                        <CommandItem
+                          key={d._id}
+                          value={d.name}
+                          onSelect={() => {
+                            toggleDisability(d);
+                          }}
+                          className="flex items-center p-2 cursor-pointer rounded-lg hover:bg-gray-100 h-10"
+                        >
+                          { postData.tags.includes(d) ? 
+                          <Check className="w-4 h-4 mr-2" color="#7D7E82" />
+                          : null}
+                          {d.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
               </PopoverContent>
             </Popover>
           </div>
