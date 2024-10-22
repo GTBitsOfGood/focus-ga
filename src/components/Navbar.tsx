@@ -44,7 +44,7 @@ export default function Navbar({ openModal, user }: NavbarProps) {
 
       {/* Create Post*/}
       <button
-        className="bg-theme-blue text-xl text-white font-semibold w-[184px] h-[45px] rounded-[12px] gap-2 flex flex-row justify-center items-center hover:opacity-90"
+        className="bg-theme-blue text-xl px-6 text-white font-semibold w-[184px] h-[45px] rounded-[12px] gap-2 flex flex-row justify-center items-center hover:opacity-90 whitespace-nowrap"
         onClick={() => openModal()}
       >
         <SquarePen color="#ffffff" /> Create Post
