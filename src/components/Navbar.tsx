@@ -87,16 +87,15 @@ export default function Navbar({ openModal, user }: NavbarProps) {
               Settings & Preferences
             </Link>
             <div className="w-44 border-theme-lightgray border-t border-sm mt-[18px] mx-auto"/>
-            <button 
+            <Link
+              href="/login"
               onClick={async () => {
-                toggleDropdown();
-                router.push("/login");
                 await signOut();
               }} 
               className="text-theme-blue mt-2 mb-2 block ml-4 py-1 hover:underline cursor-pointer transition-colors text-left"
             >
               Sign out
-            </button>
+            </Link>
           </div>
         </div>
       )}
