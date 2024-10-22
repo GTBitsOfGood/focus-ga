@@ -37,8 +37,8 @@ export default function ProfileContainer({ user, currUser }: ProfileContainerPro
 
   return (
     <div>
-    <div className="mx-16 my-4 text-lg text-theme-gray">
-        <Link href={'/'} className="flex items-center gap-1">
+      <div className="mx-16 my-4 text-lg text-theme-gray">
+        <Link href={'/'} className="flex items-center gap-1 w-min p-2">
           <ChevronLeftIcon className="w-6 h-6" /> Back
         </Link>
       </div>

@@ -121,7 +121,7 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
   return (
     <>
       <div className="mx-16 my-4 text-lg text-[#686868]">
-        <Link href={'/'} className="flex items-center gap-1">
+        <Link href={'/'} className="flex items-center gap-1 w-min p-2">
           <ChevronLeftIcon className="w-6 h-6" /> Back
         </Link>
       </div>
