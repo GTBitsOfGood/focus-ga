@@ -121,7 +121,7 @@ export default function PostComponent(props: PostComponentProps) {
     },
     {
       label: comments.toString(),
-      icon: <MessageSquare />
+      icon: <MessageSquare className={cn({"transform transition-transform hover:scale-110 cursor-pointer" : clickable})} />
     },
     {
       label: saved ? 'Saved Post' : 'Save Post',
