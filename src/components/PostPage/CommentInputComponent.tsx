@@ -33,8 +33,11 @@ export default function CommentInputComponent(props: CommentInputComponentProps)
         onChange={e => setValue(e.target.value)}
         onKeyDown={e => e.key === 'Enter' && value !== '' && handleSubmit()}
       />
-      <button className={value === '' ? 'hidden' : ''} onClick={handleSubmit}>
-        <PaperAirplaneIcon className="w-6 h-6 text-blue mr-4" />
+      <button onClick={handleSubmit}>
+        <PaperAirplaneIcon
+          className="w-6 h-6 mr-4"
+          color={value === '' ? '#C7C7C7' : '#475CC6'}
+        />
       </button>
     </div>
   );
