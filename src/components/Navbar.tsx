@@ -30,14 +30,14 @@ export default function Navbar({ openModal, user }: NavbarProps) {
   };
 
   return (
-    <div className="w-full h-[100px] bg-white flex items-center justify-between pl-6 fixed top-0 z-50 border-b border-gray-300">
+    <div className="w-full h-[100px] bg-white flex items-center justify-between fixed top-0 z-50 border-b border-gray-300">
       {/* Logo plus saerch bar*/}
-      <Image src={focusLogo} width={121} height={58} alt="focus-logo" />
+      <Image src={focusLogo} width={121} height={58} alt="focus-logo" className="mx-20 mb-2"/>
       <div className="relative flex-grow mx-20">
         <input
           type="text"
           placeholder="Search for a post"
-          className="w-full h-11 px-12 rounded-xl bg-[#F3F3F3] tracking-wide pl-16 focus:outline-none"
+          className="w-full h-11 px-12 rounded-[20px] bg-[#F3F3F3] tracking-wide pl-16 focus:outline-none"
         />
         <Search strokeWidth={3} className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-500" />
       </div>
@@ -52,7 +52,7 @@ export default function Navbar({ openModal, user }: NavbarProps) {
 
       {/* Profile Picture menu button */}
       <div
-        className="flex items-center justify-center ml-4 w-[88px] h-full relative group hover:bg-gray-100 transition-colors duration-200 cursor-pointer m-1 pr-16 pl-12"
+        className="flex items-center justify-center mx-6 mr-2 w-[88px] h-full relative group hover:bg-gray-100 transition-colors duration-200 cursor-pointer m-1 pr-16 pl-12"
         onClick={toggleDropdown}
         ref={dropdownButtonRef}
       >
@@ -71,7 +71,7 @@ export default function Navbar({ openModal, user }: NavbarProps) {
 
       {/* Dropdown Menu */}
       {menuIsOpen && (
-        <div className="absolute right-0 top-[100px] w-[218px] h-[307] bg-white z-10 border border-gray-300"  ref={dropdownRef}>
+        <div className="absolute right-[10px] top-[110px] w-[218px] h-[307] bg-white z-10 border border-gray-300 rounded-lg" ref={dropdownRef}>
           <div className="w-[64px] h-[64px] bg-pink-300 rounded-full flex items-center justify-center m-auto mt-[21px]">
             <span className="text-black font-bold text-3xl">{user.lastName.charAt(0).toUpperCase()}</span>
           </div>
@@ -80,15 +80,16 @@ export default function Navbar({ openModal, user }: NavbarProps) {
             <p className="text-lg">{user.lastName} Family</p>
             <p className="text-sm">{user.email}</p>
             <div className="w-44 border-theme-lightgray border-t border-sm mt-[18px] mx-auto"/>
-            <Link href={`/family/${user._id}`} className="block mt-4 ml-4 py-1 hover:underline cursor-pointer transition-colors text-left">
+            <Link href={`/family/${user._id}`} onClick={toggleDropdown} className="block mt-4 ml-4 py-1 hover:underline cursor-pointer transition-colors text-left">
               My Profile
             </Link>
-            <Link href="/profile/settings" className="block mt-2 ml-4 py-1 hover:underline cursor-pointer transition-colors text-left">
+            <Link href="/profile/settings" onClick={toggleDropdown} className="block mt-2 ml-4 py-1 hover:underline cursor-pointer transition-colors text-left">
               Settings & Preferences
             </Link>
             <div className="w-44 border-theme-lightgray border-t border-sm mt-[18px] mx-auto"/>
             <button 
               onClick={async () => {
+                toggleDropdown();
                 router.push("/login");
                 await signOut();
               }} 
