@@ -54,7 +54,7 @@ export default function Sidebar({ user }: SidebarProps) {
       </ul>
       <a
         href="https://focus-ga.org/contact-us/"
-        className="m-10 text-lg text-theme-blue font-bold"
+        className="m-10 text-lg text-theme-blue font-bold hover:underline"
       >
         Contact FOCUS
       </a>

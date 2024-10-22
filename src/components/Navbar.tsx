@@ -57,8 +57,8 @@ export default function Navbar({ openModal, user }: NavbarProps) {
         ref={dropdownButtonRef}
       >
         <div className="border-l pl-6">
-          <div className="w-[46px] h-[46px] bg-pink-300 rounded-full flex items-center justify-center cursor-pointer">
-            <span className="text-black font-bold text-lg  select-none">{user.lastName.charAt(0).toUpperCase()}</span>
+          <div className="w-[46px] h-[46px] bg-profile-pink rounded-full flex items-center justify-center cursor-pointer">  {/** Change to whatever color is chosen */}
+            <span className="text-black font-bold text-lg select-none">{user.lastName.charAt(0).toUpperCase()}</span>
           </div>
         </div>
         <div className="cursor-pointer ml-2">

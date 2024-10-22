@@ -46,7 +46,7 @@ export default function ProfileContainer({ user, currUser }: ProfileContainerPro
       <div className="mx-20 mt-8">
         <div className="flex flex-row mb-6 items-start justify-between">
           <div className="flex flex-row space-x-6">
-            <div className="flex items-center justify-center w-[108px] h-[108px] rounded-full bg-profile-pink">
+            <div className="flex items-center justify-center w-[108px] h-[108px] rounded-full bg-profile-pink"> {/** Change to whatever color is chosen */}
               <span className="text-6xl select-none font-medium text-black">{user.lastName.charAt(0).toUpperCase()}</span>
             </div>
             <div className="flex flex-col justify-center">
@@ -57,7 +57,7 @@ export default function ProfileContainer({ user, currUser }: ProfileContainerPro
           {
             currUser._id === user._id 
             ? (
-              <button onClick={() => setIsModalOpen(true)} className="bg-light-gray hover:bg-zinc-300 text-theme-gray text-lg font-bold px-4 py-2 rounded-lg">
+              <button onClick={() => setIsModalOpen(true)} className="bg-light-gray hover:bg-zinc-300 transition text-theme-gray text-lg font-bold px-4 py-2 rounded-lg">
                 <div className="flex flex-row items-center space-x-2.5">
                   <Pencil color="#636363" className="w-6 h-6" />
                   <p>Edit</p>
