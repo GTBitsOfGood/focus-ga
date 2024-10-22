@@ -140,7 +140,6 @@ export async function getPopulatedPosts(authUserId: string, offset: number, limi
   await dbConnect();
 
   const posts = await PostModel.aggregate(postPopulationPipeline({authUserId, offset, limit, tags}));
-  console.log(posts);
   return posts;
 }
 
