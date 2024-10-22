@@ -47,7 +47,7 @@ export default function ProfileContainer({ user, currUser }: ProfileContainerPro
         <div className="flex flex-row mb-6 items-start justify-between">
           <div className="flex flex-row space-x-6">
             <div className="flex items-center justify-center w-[108px] h-[108px] rounded-full bg-profile-pink">
-              <span className="text-6xl font-medium text-black">{user.lastName.charAt(0).toUpperCase()}</span>
+              <span className="text-6xl select-none font-medium text-black">{user.lastName.charAt(0).toUpperCase()}</span>
             </div>
             <div className="flex flex-col justify-center">
               <p className="text-2xl font-bold">{user.lastName} Family</p>
@@ -91,8 +91,10 @@ export default function ProfileContainer({ user, currUser }: ProfileContainerPro
               }
             </div>
           </div>
-          <p className="font-semibold text-lg">Bio</p>
-          <p className="text-lg text-theme-gray">{user.bio}</p>
+          <div className="flex flex-row gap-2">
+            <p className="font-semibold text-lg">Bio:</p>
+            <p className="text-lg text-theme-gray break-words overflow-hidden">{user.bio}</p>
+          </div>
         </div>
         <Separator className="bg-theme-gray my-6" />
         <Tabs defaultValue="my-posts">

@@ -28,7 +28,7 @@ function SidebarButton({ children, path }: SidebarProps) {
 
 export default function Sidebar() {
   return (
-    <div className="fixed top-[100px] left-0 w-[280px] border-r border-gray-300 pt-2 flex flex-col justify-between h-[calc(100vh-100px)]">
+    <div className="fixed top-[100px] left-0 w-[280px] border-r border-gray-300 pt-2 flex flex-col justify-between h-[calc(100vh-100px)] bg-white">
       <ul className="text-theme-gray text-lg space-y-1">
         <li>
           <SidebarButton path="/">
