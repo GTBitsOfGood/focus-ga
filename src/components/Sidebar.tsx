@@ -5,13 +5,19 @@ import { CornerUpLeft } from "lucide-react";
 import { Bookmark } from "lucide-react";
 import { Home } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { User } from "@/utils/types/user";
 
-type SidebarProps = {
+type SidebarButtonProps = {
   children: React.ReactNode;
   path: string;
+  user?: User;
 };
 
-function SidebarButton({ children, path }: SidebarProps) {
+interface SidebarProps {
+  user: User;
+}
+
+function SidebarButton({ children, path, user }: SidebarButtonProps) {
   const pathName = usePathname();
   const router = useRouter();
 
@@ -26,17 +32,17 @@ function SidebarButton({ children, path }: SidebarProps) {
   )
 }
 
-export default function Sidebar() {
+export default function Sidebar({ user }: SidebarProps) {
   return (
-    <div className="fixed top-[100px] left-0 w-[280px] border-r border-gray-300 pt-2 flex flex-col justify-between h-[calc(100vh-100px)]">
-      <ul className="text-theme-gray text-xl space-y-1">
+    <div className="fixed top-[100px] left-0 w-[280px] border-r border-gray-300 pt-2 flex flex-col justify-between h-[calc(100vh-100px)] bg-white">
+      <ul className="text-theme-gray text-lg space-y-1">
         <li>
           <SidebarButton path="/">
             <Home className="w-8 h-8" /> Home Page
           </SidebarButton>
         </li>
         <li>
-          <SidebarButton path="/saved-posts">
+          <SidebarButton path={`/family/${user._id}`}>
             <Bookmark className="w-8 h-8" /> Saved Posts
           </SidebarButton>
         </li>
@@ -48,7 +54,7 @@ export default function Sidebar() {
       </ul>
       <a
         href="https://focus-ga.org/contact-us/"
-        className="m-10 text-lg text-theme-blue font-bold"
+        className="m-10 text-lg text-theme-blue font-bold hover:underline"
       >
         Contact FOCUS
       </a>

@@ -74,12 +74,12 @@ export default function CommentComponent(props: CommentComponentProps) {
   const bottomRow = [
     {
       label: likes.toString(),
-      icon: liked ? <Heart className="text-red-500 fill-red-500" /> : <Heart />,
+      icon: liked ? <Heart className="text-red-500 fill-red-500 transform transition-transform hover:scale-110" /> : <Heart className="transform transition-transform hover:scale-110" />,
       onClick: likeLoading ? undefined : handleLikeClick
     },
     ... replyTo ? [] : [{ 
       label: 'Reply',
-      icon: <MessageSquare />,
+      icon: <MessageSquare className="transform transition-transform hover:scale-110"/>,
       onClick: onReplyClick
     }]
   ];
@@ -109,7 +109,9 @@ export default function CommentComponent(props: CommentComponentProps) {
                   {item.icon}
                 </div>
               </button>
-              {item.label}
+              <button disabled={!item.onClick} onClick={item.onClick}>
+                {item.label}
+              </button>
             </div>
           ))}
           <div className="flex items-center gap-1.5 px-1">

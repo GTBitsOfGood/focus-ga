@@ -37,8 +37,8 @@ export default function ProfileContainer({ user, currUser }: ProfileContainerPro
 
   return (
     <div>
-    <div className="mx-16 my-4 text-lg text-theme-gray">
-        <Link href={'/'} className="flex items-center gap-1">
+      <div className="mx-16 my-4 text-lg text-theme-gray">
+        <Link href={'/'} className="flex items-center gap-1 w-min p-2">
           <ChevronLeftIcon className="w-6 h-6" /> Back
         </Link>
       </div>
@@ -46,8 +46,8 @@ export default function ProfileContainer({ user, currUser }: ProfileContainerPro
       <div className="mx-20 mt-8">
         <div className="flex flex-row mb-6 items-start justify-between">
           <div className="flex flex-row space-x-6">
-            <div className="flex items-center justify-center w-[108px] h-[108px] rounded-full bg-profile-pink">
-              <span className="text-6xl font-medium text-black">{user.lastName.charAt(0).toUpperCase()}</span>
+            <div className="flex items-center justify-center w-[108px] h-[108px] rounded-full bg-profile-pink"> {/** Change to whatever color is chosen */}
+              <span className="text-6xl select-none font-medium text-black">{user.lastName.charAt(0).toUpperCase()}</span>
             </div>
             <div className="flex flex-col justify-center">
               <p className="text-2xl font-bold">{user.lastName} Family</p>
@@ -57,7 +57,7 @@ export default function ProfileContainer({ user, currUser }: ProfileContainerPro
           {
             currUser._id === user._id 
             ? (
-              <button onClick={() => setIsModalOpen(true)} className="bg-light-gray hover:bg-zinc-300 text-theme-gray text-lg font-bold px-4 py-2 rounded-lg">
+              <button onClick={() => setIsModalOpen(true)} className="bg-light-gray hover:bg-zinc-300 transition text-theme-gray text-lg font-bold px-4 py-2 rounded-lg">
                 <div className="flex flex-row items-center space-x-2.5">
                   <Pencil color="#636363" className="w-6 h-6" />
                   <p>Edit</p>
@@ -79,7 +79,7 @@ export default function ProfileContainer({ user, currUser }: ProfileContainerPro
         <div>
           <p className="text-lg mb-4">
             <span className="font-semibold">Location: </span>
-            <span className="text-theme-gray">{user.city}, GA</span>
+            <span className="text-theme-gray ml-1">{user.city}, GA</span>
           </p>
           <div className="flex flex-row mb-4">
             <p className="text-lg font-semibold mr-3">Disabilities: </p>
@@ -90,9 +90,12 @@ export default function ProfileContainer({ user, currUser }: ProfileContainerPro
                 })
               }
             </div>
+            {user.childDisabilities.length == 0 ? <p className="text-lg text-theme-gray -ml-1">N/A</p> : <></>}
           </div>
-          <p className="font-semibold text-lg">Bio</p>
-          <p className="text-lg text-theme-gray">{user.bio}</p>
+          <div className="flex flex-row gap-2">
+            {user.bio ? <p className="font-semibold text-lg">Bio:</p> : <></>}
+            <p className="text-lg text-theme-gray break-words overflow-hidden">{user.bio}</p>
+          </div>
         </div>
         <Separator className="bg-theme-gray my-6" />
         <Tabs defaultValue="my-posts">

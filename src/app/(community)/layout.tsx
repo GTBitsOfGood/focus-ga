@@ -26,7 +26,7 @@ export default function CommunityLayout({ children }: CommunityLayoutProps) {
       <body className={FOCUS_FONT.className}>
         <Navbar openModal={openCreatePostModal} user={user}/>
         <CreatePostModal isOpen={isCreatePostModalOpen} openModal={openCreatePostModal} closeModal={closeCreatePostModal} user={user}/>
-        <Sidebar />
+        <Sidebar user={user}/>
         <div className="ml-[280px] mt-[100px] p-4">
           {children}
           <Toaster />

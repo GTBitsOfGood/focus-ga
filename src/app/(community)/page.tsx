@@ -159,7 +159,7 @@ export default function Home() {
             }
           })}
           {loading &&
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center mt-8">
               <LoaderCircle className="animate-spin" size={32} color="#475CC6"/>
             </div>
           }
