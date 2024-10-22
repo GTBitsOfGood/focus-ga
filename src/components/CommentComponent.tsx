@@ -109,7 +109,9 @@ export default function CommentComponent(props: CommentComponentProps) {
                   {item.icon}
                 </div>
               </button>
-              {item.label}
+              <button disabled={!item.onClick} onClick={item.onClick}>
+                {item.label}
+              </button>
             </div>
           ))}
           <div className="flex items-center gap-1.5 px-1">
