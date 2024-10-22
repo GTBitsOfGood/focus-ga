@@ -105,7 +105,7 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
         const formattedData = {
           city: userData.location,
           childDisabilities: userData.tags.map((tag) => tag._id),
-          bio: userData.bio.substring(0, 600),
+          bio: userData.bio,
         }
 
         await editUser(props.id, formattedData);
