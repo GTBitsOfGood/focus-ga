@@ -79,7 +79,7 @@ export default function ProfileContainer({ user, currUser }: ProfileContainerPro
         <div>
           <p className="text-lg mb-4">
             <span className="font-semibold">Location: </span>
-            <span className="text-theme-gray">{user.city}, GA</span>
+            <span className="text-theme-gray ml-1">{user.city}, GA</span>
           </p>
           <div className="flex flex-row mb-4">
             <p className="text-lg font-semibold mr-3">Disabilities: </p>
@@ -90,9 +90,10 @@ export default function ProfileContainer({ user, currUser }: ProfileContainerPro
                 })
               }
             </div>
+            {user.childDisabilities.length == 0 ? <p className="text-lg text-theme-gray -ml-1">N/A</p> : <></>}
           </div>
           <div className="flex flex-row gap-2">
-            <p className="font-semibold text-lg">Bio:</p>
+            {user.bio ? <p className="font-semibold text-lg">Bio:</p> : <></>}
             <p className="text-lg text-theme-gray break-words overflow-hidden">{user.bio}</p>
           </div>
         </div>
