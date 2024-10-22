@@ -116,16 +116,20 @@ export default function PostComponent(props: PostComponentProps) {
   const bottomRow = [
     {
       label: likes.toString(),
-      icon: liked ? <Heart className="text-red-500 fill-red-500 transform transition-transform hover:scale-110" /> : <Heart className="transform transition-transform hover:scale-110"/>,
+      icon: liked ? 
+        <Heart className={`text-red-500 fill-red-500 ${clickable ? '' : 'transform transition-transform hover:scale-110'}`} />
+        : <Heart className={`${clickable ? '' : 'transform transition-transform hover:scale-110'}`} />,
       onClick: likeLoading ? undefined : handleLikeClick
     },
     {
       label: comments.toString(),
-      icon: <MessageSquare className={cn({"transform transition-transform hover:scale-110 cursor-pointer" : clickable})} />
+      icon: <MessageSquare />
     },
     {
       label: saved ? 'Saved Post' : 'Save Post',
-      icon: saved ? <Bookmark className="fill-theme-gray transform transition-transform hover:scale-110" /> : <Bookmark className="transform transition-transform hover:scale-110"/>,
+      icon: saved ? 
+      <Bookmark className={`fill-theme-gray ${clickable ? '' : 'transform transition-transform hover:scale-110'}`} />
+      : <Bookmark className={`${clickable ? '' : 'transform transition-transform hover:scale-110'}`} />,
       onClick: saveLoading ? undefined : handleSaveClick
     }
   ];
@@ -174,7 +178,7 @@ export default function PostComponent(props: PostComponentProps) {
           </div>
         ))}
       </div>
-      {clickable ? <div className="relative bottom-[-17px] w-full h-[1px] bg-[#dddddd]"/> : <></>} {/* Divider border*/}
+      {clickable ? <div className="relative bottom-[-17px] w-full h-[1px] bg-theme-medlight-gray"/> : <></>} {/* Divider border*/}
       <AlertDialog open={showDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
