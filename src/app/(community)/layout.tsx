@@ -1,7 +1,6 @@
 "use client"
 
 import Navbar from "@/components/Navbar";
-import Sidebar from "@/components/Sidebar";
 import CreatePostModal from "@/components/CreatePostModal";
 import React, { useState } from "react";
 import { Toaster } from "@/components/ui/toaster"
@@ -26,8 +25,7 @@ export default function CommunityLayout({ children }: CommunityLayoutProps) {
       <body className={FOCUS_FONT.className}>
         <Navbar openModal={openCreatePostModal} user={user}/>
         <CreatePostModal isOpen={isCreatePostModalOpen} openModal={openCreatePostModal} closeModal={closeCreatePostModal} user={user}/>
-        <Sidebar user={user}/>
-        <div className="ml-[280px] mt-[100px] p-4">
+        <div className="mx-48 mt-[100px] p-4">
           {children}
           <Toaster />
         </div>

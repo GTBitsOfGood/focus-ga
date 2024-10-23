@@ -32,7 +32,9 @@ export default function Navbar({ openModal, user }: NavbarProps) {
   return (
     <div className="w-full h-[100px] bg-white flex items-center justify-between fixed top-0 z-50 border-b border-gray-300">
       {/* Logo plus search bar*/}
-      <Image src={focusLogo} width={121} height={58} alt="focus-logo" className="mx-12 mb-2"/> 
+      <Link href="https://focus-ga.my.site.com/s/">
+        <Image src={focusLogo} width={121} height={58} alt="focus-logo" className="mx-12 mb-2" />
+      </Link>
       <div className="relative flex-grow mx-20">
         <input
           type="text"
@@ -44,10 +46,10 @@ export default function Navbar({ openModal, user }: NavbarProps) {
 
       {/* Create Post*/}
       <button
-        className="bg-theme-blue text-xl px-6 text-white font-semibold w-[184px] h-[45px] rounded-[12px] gap-2 flex flex-row justify-center items-center hover:opacity-90 whitespace-nowrap"
+        className="bg-theme-blue text-base py-2 px-6  text-white font-semibold rounded-[12px] gap-2 flex flex-row justify-center items-center hover:opacity-90 whitespace-nowrap"
         onClick={() => openModal()}
       >
-        <SquarePen color="#ffffff" /> Create Post
+        <SquarePen className="w-6 h-6" color="#ffffff" /> Create Post
       </button>
 
       {/* Profile Picture menu button */}
@@ -71,22 +73,31 @@ export default function Navbar({ openModal, user }: NavbarProps) {
 
       {/* Dropdown Menu */}
       {menuIsOpen && (
-        <div className="absolute right-[10px] top-[110px] w-[218px] h-[307] bg-white z-10 border border-gray-300 rounded-lg" ref={dropdownRef}>
-          <div className="w-[64px] h-[64px] bg-pink-300 rounded-full flex items-center justify-center m-auto mt-[21px]">
+        <div className="absolute right-[10px] top-[110px] w-[218px] h-[307] bg-white z-10 border border-theme-medlight-gray rounded-lg" ref={dropdownRef}>
+          <div className="w-[64px] h-[64px] bg-profile-pink rounded-full flex items-center justify-center m-auto mt-[21px]">
             <span className="text-black font-bold text-3xl">{user.lastName.charAt(0).toUpperCase()}</span>
           </div>
 
           <div className="p-2 text-center text-theme-gray">
             <p className="text-lg">{user.lastName} Family</p>
             <p className="text-sm">{user.email}</p>
-            <div className="w-44 border-theme-lightgray border-t border-sm mt-[18px] mx-auto"/>
-            <Link href={`/family/${user._id}`} onClick={toggleDropdown} className="block mt-4 ml-4 py-1 hover:underline cursor-pointer transition-colors text-left">
+            <div className="w-44 border-theme-medlight-gray border-t border-sm mt-[18px] mx-auto"/>
+            <Link href={`/`} onClick={toggleDropdown} className="block mt-4 ml-4 py-1 hover:underline cursor-pointer transition-colors text-left">
+              Home
+            </Link>
+            <Link href={`/family/${user._id}`} onClick={toggleDropdown} className="block mt-2 ml-4 py-1 hover:underline cursor-pointer transition-colors text-left">
               My Profile
             </Link>
             <Link href="/profile/settings" onClick={toggleDropdown} className="block mt-2 ml-4 py-1 hover:underline cursor-pointer transition-colors text-left">
               Settings & Preferences
             </Link>
-            <div className="w-44 border-theme-lightgray border-t border-sm mt-[18px] mx-auto"/>
+            <div className="w-44 border-theme-medlight-gray border-t border-sm mt-[18px] mx-auto"/>
+            <Link
+              href="https://focus-ga.org/contact-us/"
+              className="text-theme-blue mt-2 mb-2 block ml-4 py-1 hover:underline cursor-pointer transition-colors text-left text-theme-blue hover:underline"
+            >
+              Contact FOCUS
+            </Link>
             <Link
               href="/login"
               onClick={async () => {

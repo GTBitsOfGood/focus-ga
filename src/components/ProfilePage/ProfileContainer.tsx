@@ -43,7 +43,7 @@ export default function ProfileContainer({ user, currUser }: ProfileContainerPro
         </Link>
       </div>
     <div className="mx-16 my-4">
-      <div className="mx-20 mt-8">
+      <div className="mx-14 mt-8">
         <div className="flex flex-row mb-6 items-start justify-between">
           <div className="flex flex-row space-x-6">
             <div className="flex items-center justify-center w-[108px] h-[108px] rounded-full bg-profile-pink"> {/** Change to whatever color is chosen */}

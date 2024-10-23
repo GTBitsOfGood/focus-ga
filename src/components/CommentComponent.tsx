@@ -140,6 +140,7 @@ export default function CommentComponent(props: CommentComponentProps) {
             <AlertDialogAction
               disabled={deleteLoading}
               onClick={handleDeleteClick}
+              className="bg-theme-blue hover:bg-theme-blue hover:opacity-90 transition"
             >
               {deleteLoading ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
