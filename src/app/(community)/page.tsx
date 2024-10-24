@@ -141,6 +141,30 @@ export default function Home() {
     return null;
   }
 
+  const ContactButton = () => {
+    const [hovered, setHovered] = useState(false);
+  
+    return (
+      <a 
+        href="https://focus-ga.org/contact-us/" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="inline-block absolute left-6 bottom-6"
+      >
+        <button
+          className={`overflow-hidden transition-all duration-300 pl-2 ease-in-out border-2 border-theme-blue bg-white text-theme-blue text-lg p-2 whitespace-nowrap 
+                      ${hovered ? 'w-40 rounded-full opacity-90' : 'w-12 rounded-full opacity-100'}`}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+        >
+          {hovered ? 'Contact FOCUS' : '?'}
+        </button>
+      </a>
+    );
+  };
+  
+  
+
   return (
     <main className="flex min-h-screen flex-col items-center px-16">
       <div className="w-full max-w-4xl space-y-8">
@@ -165,6 +189,7 @@ export default function Home() {
           }
         </div>
       </div>
+      <ContactButton />
     </main>
   );
 }
