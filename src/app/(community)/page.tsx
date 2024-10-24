@@ -67,11 +67,11 @@ export default function Home() {
 
   //TODO: update once demographics are added
   const demographicFilter: Filter<any> = {
-    label: "Other Demographics",
+    label: "Age",
     data: [],
     selected: [],
     setSelected: (selected) => {
-      console.log("demographic selected")
+      console.log("age selected")
     }
   };
 
