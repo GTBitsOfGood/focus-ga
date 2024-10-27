@@ -1,3 +1,4 @@
+import { PostDeletionTimeline } from "@/utils/consts";
 import { User } from "@/utils/types/user";
 import mongoose, { Schema } from "mongoose";
 
@@ -14,6 +15,15 @@ const UserSchema = new Schema<User>({
   childDisabilities: [{ type: Schema.Types.ObjectId, ref: 'Disability', required: true }],
   city: { type: String, required: true },
   bio: { type: String },
+
+  notificationPreference: { type: Boolean, default: true }, // true = "Email about post replies", false = "Never email"
+  defaultDisabilityTags: [{ type: Schema.Types.ObjectId, ref: 'Disability' }],
+  defaultDisabilityFilters: [{ type: Schema.Types.ObjectId, ref: 'Disability' }],
+  postDeletionTimeline: {
+    type: String,
+    enum: Object.values(PostDeletionTimeline), // Use the enum values here
+    default: PostDeletionTimeline.FourYears, // Set the default using the enum
+  },
 });
 
 const UserModel = mongoose.models?.User ?? mongoose.model('User', UserSchema);

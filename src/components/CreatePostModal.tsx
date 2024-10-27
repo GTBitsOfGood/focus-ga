@@ -4,27 +4,15 @@ import React, { useEffect, useState, Suspense, useRef } from "react";
 import { createPost } from "@/server/db/actions/PostActions";
 import { getDisabilities } from "@/server/db/actions/DisabilityActions";
 import { Disability } from "@/utils/types/disability";
-import Tag from "./Tag";
 import dynamic from 'next/dynamic'
 import { MAX_POST_TITLE_LEN, MAX_POST_CONTENT_LEN, MAX_POST_DISABILITY_TAGS } from "@/utils/consts";
-import { ChevronDown, Check, X, ChevronUp } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { MDXEditorMethods } from "@mdxeditor/editor";
 import { cn, countNonMarkdownCharacters } from "@/lib/utils";
 import { User } from "@/utils/types/user";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
+import DropdownWithDisplay from "./DropdownWithDisplay";
+import { getPopulatedUser } from "@/server/db/actions/UserActions";
 
 const EditorComp = dynamic(() => import('./EditorComponent'), { ssr: false })
 
@@ -49,12 +37,24 @@ export default function CreatePostModal({user, isOpen, openModal, closeModal}: C
   });
   const [showTitleError, setTitleError] = useState(false);
   const [showBodyError, setBodyError] = useState(false);
-  const [showDisabilities, setShowDisabilities] = useState(false);
   const [disabilities, setDisabilities] = useState<Disability[]>([]);
   const [mouseDownOnBackground, setMouseDownOnBackground] = useState(false);
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const editorRef = useRef<MDXEditorMethods | null>(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const populatedUser = getPopulatedUser(user._id);
+        setPostData({ ...postData, tags: (await populatedUser).defaultDisabilityTags });
+      } catch (error) {
+        console.log("Failed to fetch/set default disability tags")
+      }
+    }
+
+    fetchUserData();
+  }, [user])
 
   useEffect(() => {
     const fetchDisabilities = async () => {
@@ -210,64 +210,15 @@ export default function CreatePostModal({user, isOpen, openModal, closeModal}: C
           <label htmlFor="title" className="block text-sm font-bold text-gray-700">
             Disability Tags
           </label>
-          <div className="relative w-full mt-1">
-            <Popover>
-              <PopoverTrigger asChild className="w-full" onClick={() => setShowDisabilities(!showDisabilities)}>
-                <div className="relative flex items-center p-3 border border-gray-300 rounded-md cursor-pointer">
-                  <div className="flex items-center w-full h-6">
-                    {postData.tags.length === 0 ? (
-                      <div className="text-neutral-400 text-sm font-normal">
-                      Add disability tags (up to five)
-                      </div>
-                    ) : (
-                      postData.tags.map((disability) => (
-                      <div
-                        key={disability._id}
-                        onClick={(e) => {
-                        e.stopPropagation();
-                        toggleDisability(disability);
-                        }}
-                        className="mr-2"
-                      >
-                        <Tag text={disability.name} isClickable={true}/>
-                      </div>
-                      ))
-                    )}
-                  </div>
-
-                  {showDisabilities ? <ChevronDown className="w-4 h-4" color="#7D7E82" /> : <ChevronUp className="w-4 h-4" color="#7D7E82" /> }
-
-                </div>
-                
-              </PopoverTrigger>
-
-              <PopoverContent align="start" className="p-2">
-                <Command>
-                  <CommandInput placeholder={`Search disabilities`} />
-                  <CommandList>
-                    <CommandEmpty>No disability found.</CommandEmpty>
-                    <CommandGroup>
-                      {disabilities.map((d) => (
-                        <CommandItem
-                          key={d._id}
-                          value={d.name}
-                          onSelect={() => {
-                            toggleDisability(d);
-                          }}
-                          className="flex items-center p-2 cursor-pointer rounded-lg hover:bg-gray-100 h-10"
-                        >
-                          { postData.tags.includes(d) ? 
-                          <Check className="w-4 h-4 mr-2" color="#7D7E82" />
-                          : null}
-                          {d.name}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </div>
+          <DropdownWithDisplay
+            items = {disabilities}
+            selectedItems={postData.tags}
+            onToggleItem={toggleDisability}
+            displayKey="name"
+            placeholder="Add disability tags"
+            maxSelectionCount={5}
+            typeDropdown="disabilities"
+          />
         </div>
 
         <div className="flex justify-end space-x-4">

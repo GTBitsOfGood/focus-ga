@@ -13,6 +13,7 @@ import { Filter } from "@/utils/types/common";
 import { PAGINATION_LIMIT } from "@/utils/consts";
 import { useUser } from "@/hooks/user";
 import { GEORGIA_CITIES } from "@/utils/cities";
+import { getPopulatedUser } from "@/server/db/actions/UserActions";
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +38,20 @@ export default function Home() {
     };
     fetchDisabilities();
   }, []);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!user) return;
+      try {
+        const populatedUser = getPopulatedUser(user._id);
+        setSelectedDisabilities((await populatedUser).defaultDisabilityTags);
+      } catch (error) {
+        console.log("Failed to fetch/set default disability filter")
+      }
+    }
+
+    fetchUserData();
+  }, [user])
 
   const handleSelected = <T extends { _id: string }>(
     selected: T, 
