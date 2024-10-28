@@ -104,6 +104,10 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
     }
   }
 
+  async function onPostEditClick(newBody: string) {
+    
+  }
+
   async function onPostDeleteClick() {
     try {
       await deletePost(post._id);
@@ -130,6 +134,7 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
           post={post}
           onLikeClick={onPostLikeClick}
           onSaveClick={onPostSaveClick}
+          onEditClick={post.author?._id === authUser._id ? onPostEditClick : undefined}
           onDeleteClick={post.author?._id === authUser._id ? onPostDeleteClick : undefined}
         />
         <CommentInputComponent

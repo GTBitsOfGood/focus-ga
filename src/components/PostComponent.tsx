@@ -11,6 +11,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
+import EditPostModal from "./EditPostModal";
+import { Disability } from "@/utils/types/disability";
 
 type PostComponentProps = {
   post: PopulatedPost;
@@ -18,6 +20,7 @@ type PostComponentProps = {
   clickable?: boolean;
   onLikeClick?: (liked: boolean) => Promise<void>;
   onSaveClick?: (saved: boolean) => Promise<void>;
+  onEditClick?: (newBody: string) => Promise<void>;
   onDeleteClick?: () => Promise<void>;
 };
 
@@ -32,7 +35,8 @@ export default function PostComponent(props: PostComponentProps) {
     clickable = false,
     onLikeClick,
     onSaveClick,
-    onDeleteClick
+    onDeleteClick,
+    onEditClick
   } = props;
   
   // don't render links for clickable components to avoid nested a tags
@@ -42,22 +46,26 @@ export default function PostComponent(props: PostComponentProps) {
   }
 
   const {
-    title,
+    title: initialTitle,
     author,
-    content,
+    content: initialContent,
     date,
-    tags,
+    tags: initialTags,
     likes: initialLikes,
     liked: initialLiked,
     saved: initialSaved,
     comments
   } = post;
 
+  const [title, setTitle] = useState<string>(initialTitle);
+  const [content, setContent] = useState<string>(initialContent);
+  const [tags, setTags] = useState<(Disability | null)[]>(initialTags);
   const [likes, setLikes] = useState<number>(initialLikes);
   const [liked, setLiked] = useState<boolean>(initialLiked);
   const [likeLoading, setLikeLoading] = useState<boolean>(false);
   const [saved, setSaved] = useState<boolean>(initialSaved);
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
@@ -152,6 +160,7 @@ export default function PostComponent(props: PostComponentProps) {
                 <Ellipsis className="w-6 h-6" />
               </DropdownMenuTrigger>
               <DropdownMenuContent side="bottom" align="end">
+                {onEditClick && <DropdownMenuItem onClick={() => setShowEditModal(true)}>Edit</DropdownMenuItem>}
                 {onDeleteClick && <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem>}
               </DropdownMenuContent>
             </DropdownMenu>
@@ -199,6 +208,12 @@ export default function PostComponent(props: PostComponentProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <EditPostModal
+        isOpen={showEditModal}
+        initialPostData={{ title, content, tags: tags.filter(tag => tag !== null) }}
+        closeModal={() => setShowEditModal(false)}
+        onSubmit={async () => {}}
+      />
     </>
   );
 
