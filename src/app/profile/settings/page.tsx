@@ -9,6 +9,8 @@ import { useUser } from "@/hooks/user";
 import { editUser, getPopulatedUser } from "@/server/db/actions/UserActions";
 import { useRouter } from 'next/navigation';
 import { PostDeletionTimeline } from "@/utils/consts";
+import Link from "next/link";
+import { ChevronLeftIcon } from 'lucide-react';
 
 export default function SettingsPage() {
     const user = useUser();
@@ -52,7 +54,6 @@ export default function SettingsPage() {
         const handleUpdateUser = async () => {
             if (!user) return;
             try {
-                console.log(postDeletionTimeline)
                 const updatedUser = await editUser(user._id, {
                     notificationPreference: notificationPreference,
                     defaultDisabilityTags: defaultDisabilityTags.map(disability => disability._id.toString()),
@@ -103,86 +104,94 @@ export default function SettingsPage() {
     }
 
     return (
-        <main className="flex flex-col px-16 space-y-8">
-            <div className="text-black text-xl font-bold">Settings & Preferences</div>
-
-            <div>
-                <label htmlFor="title" className="block text-m font-bold text-black">Notification Preferences</label>
-                <label className="block mt-2">
-                    <input
-                        type="radio"
-                        name="notificationPreference"
-                        value="never"
-                        checked={notificationPreference === false}
-                        onChange={() => setNotificationPreference(false)}
-                        className="mr-2"
-                    />
-                    Never email
-                </label>    
-                <label className="block mt-2">
-                    <input
-                        type="radio"
-                        name="notificationPreference"
-                        value="email"
-                        checked={notificationPreference === true}
-                        onChange={() => setNotificationPreference(true)}
-                        className="mr-2"
-                    />
-                    Email about post replies
-                </label>
+        <div>
+            <div className="mx-16 my-4 text-lg text-theme-gray">
+                <Link href={'/'} className="flex items-center gap-1 w-min p-2">
+                    <ChevronLeftIcon className="w-6 h-6" /> Back
+                </Link>
             </div>
+            <main className="flex flex-col px-16 space-y-6">
+                <div className="text-black text-xl font-bold">Settings & Preferences</div>
 
-            <div>
-                <label htmlFor="title" className="block text-m font-bold text-black">Default Disability Tag on Create Post</label>
-                <DropdownWithDisplay
-                    items={disabilities}
-                    selectedItems={defaultDisabilityTags}
-                    onToggleItem={toggleDisability}
-                    displayKey="name"
-                    placeholder="Select default disability tags"
-                    typeDropdown="disabilities"
-                    maxSelectionCount={MAX_POST_DISABILITY_TAGS}
-                />
-            </div>
-
-            <div>
-                <label htmlFor="title" className="block text-m font-bold text-black">Default Disability Filter on Feed</label>
-                <DropdownWithDisplay
-                    items={disabilities}
-                    selectedItems={defaultDisabilityFilters}
-                    onToggleItem={toggleFilter}
-                    displayKey="name"
-                    placeholder="Select default disability filters"
-                    maxSelectionCount={MAX_FILTER_DISABILITY_TAGS}
-                    typeDropdown="disabilities"
-                />
-            </div>
-
-            <div>
-                <label htmlFor="title" className="block text-m font-bold text-black">Delete Posts After</label>
-                {Object.values(PostDeletionTimeline).map((option) => (
-                    <label className="block mt-2" key={option}>
+                <div>
+                    <label htmlFor="title" className="block text-m font-bold text-black">Notification Preferences</label>
+                    <label className="block mt-2">
                         <input
                             type="radio"
-                            name="postDeletionTimeline"
-                            value={option}
-                            checked={postDeletionTimeline === option}
-                            onChange={() => setPostDeletionTimeline(option)}
+                            name="notificationPreference"
+                            value="never"
+                            checked={notificationPreference === false}
+                            onChange={() => setNotificationPreference(false)}
                             className="mr-2"
                         />
-                        {option === PostDeletionTimeline.FourYears ? `${option} (default)` : option}
+                        Never email
+                    </label>    
+                    <label className="block mt-2">
+                        <input
+                            type="radio"
+                            name="notificationPreference"
+                            value="email"
+                            checked={notificationPreference === true}
+                            onChange={() => setNotificationPreference(true)}
+                            className="mr-2"
+                        />
+                        Email about post replies
                     </label>
-                ))}
-            </div>
+                </div>
 
-            <div>
-                <button
-                    onClick={handleLogout}
-                    className="w-auto px-4 py-2 text-theme-blue rounded-lg border border-theme-blue"
-                >
-                    Sign out
-                </button>
-            </div>
-        </main>
+                <div>
+                    <label htmlFor="title" className="block text-m font-bold text-black">Default Disability Tag on Create Post</label>
+                    <DropdownWithDisplay
+                        items={disabilities}
+                        selectedItems={defaultDisabilityTags}
+                        onToggleItem={toggleDisability}
+                        displayKey="name"
+                        placeholder="Select default disability tags"
+                        typeDropdown="disabilities"
+                        maxSelectionCount={MAX_POST_DISABILITY_TAGS}
+                    />
+                </div>
+
+                <div>
+                    <label htmlFor="title" className="block text-m font-bold text-black">Default Disability Filter on Feed</label>
+                    <DropdownWithDisplay
+                        items={disabilities}
+                        selectedItems={defaultDisabilityFilters}
+                        onToggleItem={toggleFilter}
+                        displayKey="name"
+                        placeholder="Select default disability filters"
+                        maxSelectionCount={MAX_FILTER_DISABILITY_TAGS}
+                        typeDropdown="disabilities"
+                    />
+                </div>
+
+                <div>
+                    <label htmlFor="title" className="block text-m font-bold text-black">Delete Posts After</label>
+                    {Object.values(PostDeletionTimeline).map((option) => (
+                        <label className="block mt-2" key={option}>
+                            <input
+                                type="radio"
+                                name="postDeletionTimeline"
+                                value={option}
+                                checked={postDeletionTimeline === option}
+                                onChange={() => setPostDeletionTimeline(option)}
+                                className="mr-2"
+                            />
+                            {option === PostDeletionTimeline.FourYears ? `${option} (default)` : option}
+                        </label>
+                    ))}
+                </div>
+
+                <div>
+                    <button
+                        onClick={handleLogout}
+                        className="w-auto px-4 py-2 text-theme-blue rounded-lg border border-theme-blue"
+                    >
+                        Sign out
+                    </button>
+                </div>
+            </main>
+        </div>
+        
     )
 }

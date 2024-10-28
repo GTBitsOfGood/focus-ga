@@ -20,3 +20,12 @@ export enum PostDeletionTimeline {
   TwoYears = '2 years',
   FourYears = '4 years',
 };
+
+export enum ProfileColors {
+  ProfileOrange = 'profile-orange',
+  ProfileYellow = 'profile-yellow',
+  ProfileGreen = 'profile-green',
+  ProfileTeal = 'profile-teal',
+  ProfileIndigo = 'profile-indigo',
+  ProfileDefault = 'profile-pink',
+};

@@ -57,9 +57,9 @@ const DropdownWithDisplay = <T extends { _id: string }>({
             </div>
 
             {isDropdownOpen ? (
-              <ChevronDown className="w-4 h-4" color="#7D7E82" />
-            ) : (
               <ChevronUp className="w-4 h-4" color="#7D7E82" />
+            ) : (
+              <ChevronDown className="w-4 h-4" color="#7D7E82" />
             )}
           </div>
         </PopoverTrigger>

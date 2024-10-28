@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
+import { ProfileColors } from "@/utils/consts";
 
 type PostComponentProps = {
   post: PopulatedPost;
@@ -138,7 +139,7 @@ export default function PostComponent(props: PostComponentProps) {
     <>
       <div className="flex items-center justify-between text-sm">
         <Link className="flex items-center gap-2" href={`/family/${author?._id}`}>
-          <span className="w-6 h-6 bg-theme-med-gray rounded-full inline-block"/>
+          <span className={`w-6 h-6 bg-${author?.profileColor ? author.profileColor : ProfileColors.ProfileDefault} rounded-full inline-block`}/>
           {author ? `${author.lastName} Family` : 'Deleted User'}
         </Link>
         <p suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>

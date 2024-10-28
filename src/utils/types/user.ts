@@ -2,7 +2,7 @@ import { z } from "zod";
 import { Types } from "mongoose";
 import { ExtendId } from "./common";
 import { Disability } from "./disability";
-import { PostDeletionTimeline } from "@/utils/consts";
+import { PostDeletionTimeline, ProfileColors } from "@/utils/consts";
 
 export const userSchema = z.object({
   username: z.string(),
@@ -18,6 +18,7 @@ export const userSchema = z.object({
   defaultDisabilityTags: z.string().array().transform(ids => ids.map(id => new Types.ObjectId(id))).default([]),
   defaultDisabilityFilters: z.string().array().transform(ids => ids.map(id => new Types.ObjectId(id))).default([]),
   postDeletionTimeline: z.enum(Object.values(PostDeletionTimeline) as [PostDeletionTimeline, ...PostDeletionTimeline[]]).default(PostDeletionTimeline.FourYears), 
+  profileColor: z.enum(Object.values(ProfileColors) as [ProfileColors, ...ProfileColors[]]).default(ProfileColors.ProfileDefault), 
 });
 
 export const editUserSchema = userSchema.partial();

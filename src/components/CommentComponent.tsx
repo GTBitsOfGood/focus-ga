@@ -7,6 +7,7 @@ import { ReactNode, useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 import Link from "next/link";
+import { ProfileColors } from "@/utils/consts";
 
 type CommentComponentProps = {
   className?: string;
@@ -87,7 +88,7 @@ export default function CommentComponent(props: CommentComponentProps) {
   return (
     <div className="flex gap-2.5">
       <Link href={`/family/${author?._id}`}>
-        <span className="w-6 h-6 bg-theme-gray rounded-full inline-block"/>
+        <span className={`w-6 h-6 bg-${author?.profileColor ? author.profileColor : ProfileColors.ProfileDefault} rounded-full inline-block`}/>
       </Link>
       <div className={`flex-grow flex flex-col gap-2 text-theme-gray ${className}`}>
         <div className="flex items-center justify-between">

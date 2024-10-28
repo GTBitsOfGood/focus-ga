@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import focusLogo from "@/../public/focus-logo.png";
 import Image from "next/image";
@@ -11,6 +11,7 @@ import Link from "next/link";
 import useClickOff from "@/hooks/useClickOff";
 import { signOut } from "@/server/db/actions/UserActions";
 import { User } from "@/utils/types/user";
+import { ProfileColors } from "@/utils/consts";
 
 interface NavbarProps {
   openModal: () => void;
@@ -59,7 +60,7 @@ export default function Navbar({ openModal, user }: NavbarProps) {
         ref={dropdownButtonRef}
       >
         <div className="border-l pl-6">
-          <div className="w-[46px] h-[46px] bg-profile-pink rounded-full flex items-center justify-center cursor-pointer">  {/** Change to whatever color is chosen */}
+          <div className={`w-[46px] h-[46px] bg-${user.profileColor? user.profileColor: ProfileColors.ProfileDefault} rounded-full flex items-center justify-center cursor-pointer`}>  {/** Change to whatever color is chosen */}
             <span className="text-black font-bold text-lg select-none">{user.lastName.charAt(0).toUpperCase()}</span>
           </div>
         </div>
@@ -74,7 +75,7 @@ export default function Navbar({ openModal, user }: NavbarProps) {
       {/* Dropdown Menu */}
       {menuIsOpen && (
         <div className="absolute right-[10px] top-[110px] w-[218px] h-[307] bg-white z-10 border border-theme-medlight-gray rounded-lg" ref={dropdownRef}>
-          <div className="w-[64px] h-[64px] bg-profile-pink rounded-full flex items-center justify-center m-auto mt-[21px]">
+          <div className={`w-[64px] h-[64px] bg-${user.profileColor? user.profileColor: ProfileColors.ProfileDefault} rounded-full flex items-center justify-center m-auto mt-[21px]`}>
             <span className="text-black font-bold text-3xl">{user.lastName.charAt(0).toUpperCase()}</span>
           </div>
 

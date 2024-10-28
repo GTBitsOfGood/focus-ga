@@ -1,4 +1,4 @@
-import { PostDeletionTimeline } from "@/utils/consts";
+import { PostDeletionTimeline, ProfileColors } from "@/utils/consts";
 import { User } from "@/utils/types/user";
 import mongoose, { Schema } from "mongoose";
 
@@ -23,6 +23,12 @@ const UserSchema = new Schema<User>({
     type: String,
     enum: Object.values(PostDeletionTimeline), // Use the enum values here
     default: PostDeletionTimeline.FourYears, // Set the default using the enum
+  },
+
+  profileColor: {
+    type: String,
+    enum: Object.values(ProfileColors), // Use the keys of the profile colors for enum
+    default: ProfileColors.ProfileDefault, // Set the default color key
   },
 });
 

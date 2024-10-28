@@ -2,10 +2,10 @@
 
 import Navbar from "@/components/Navbar";
 import CreatePostModal from "@/components/CreatePostModal";
-import React, { useState } from "react";
+import React, { useState, createContext, useContext } from "react";
 import { Toaster } from "@/components/ui/toaster"
 import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
-import { FOCUS_FONT } from "@/utils/consts";
+import { FOCUS_FONT, ProfileColors } from "@/utils/consts";
 import { useUser } from "@/hooks/user";
 
 type CommunityLayoutProps = {
@@ -22,15 +22,15 @@ export default function CommunityLayout({ children }: CommunityLayoutProps) {
 
   return (
     <html lang='en'>
-      <body className={FOCUS_FONT.className}>
-        <Navbar openModal={openCreatePostModal} user={user}/>
-        <CreatePostModal isOpen={isCreatePostModalOpen} openModal={openCreatePostModal} closeModal={closeCreatePostModal} user={user}/>
-        <div className="mx-48 mt-[100px] p-4">
-          {children}
-          <Toaster />
-        </div>
-        <ProgressBar height="3px" color="#475CC6" shallowRouting options={{ showSpinner: false }} />
-      </body>
-    </html>
+    <body className={FOCUS_FONT.className}>
+      <Navbar openModal={openCreatePostModal} user={user} />
+      <CreatePostModal isOpen={isCreatePostModalOpen} openModal={openCreatePostModal} closeModal={closeCreatePostModal} user={user}/>
+      <div className="mx-48 mt-[100px] p-4">
+        {children}
+        <Toaster />
+      </div>
+      <ProgressBar height="3px" color="#475CC6" shallowRouting options={{ showSpinner: false }} />
+    </body>
+  </html>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeftIcon, Pencil } from "lucide-react";
+import { ChevronLeftIcon, Pencil, Palette } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { PopulatedUser, User } from "@/utils/types/user";
 import { useEffect, useState } from "react";
@@ -11,6 +11,9 @@ import { PopulatedPost } from "@/utils/types/post";
 import PostComponent from "../PostComponent";
 import EditProfileModal from "./EditProfileModal";
 import Link from "next/link";
+import ColorPicker from "../ColorPicker";
+import { ProfileColors } from "@/utils/consts";
+import { editUser } from "@/server/db/actions/UserActions";
 
 
 type ProfileContainerProps = {
@@ -20,8 +23,10 @@ type ProfileContainerProps = {
 
 export default function ProfileContainer({ user, currUser }: ProfileContainerProps) {
   const [userPosts, setUserPosts] = useState<PopulatedPost[]>([]);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [profileColor, setProfileColor] = useState(user? user.profileColor : ProfileColors.ProfileDefault);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
@@ -35,6 +40,16 @@ export default function ProfileContainer({ user, currUser }: ProfileContainerPro
     }
   }, [user]);
 
+  const handleColorPick = async (color: ProfileColors) => {
+    try {
+      const updatedUser = await editUser(user._id, { profileColor: color });
+      
+    } catch (error) {
+      console.error("failed to update profile color: ", error);
+    }
+    setProfileColor(color);
+  }
+
   return (
     <div>
       <div className="mx-16 my-4 text-lg text-theme-gray">
@@ -46,8 +61,9 @@ export default function ProfileContainer({ user, currUser }: ProfileContainerPro
       <div className="mx-14 mt-8">
         <div className="flex flex-row mb-6 items-start justify-between">
           <div className="flex flex-row space-x-6">
-            <div className="flex items-center justify-center w-[108px] h-[108px] rounded-full bg-profile-pink"> {/** Change to whatever color is chosen */}
+            <div className={`flex items-center justify-center w-[108px] h-[108px] rounded-full bg-${profileColor} relative`}> 
               <span className="text-6xl select-none font-medium text-black">{user.lastName.charAt(0).toUpperCase()}</span>
+              { currUser._id === user._id && <ColorPicker handleColorPick = {handleColorPick} /> }
             </div>
             <div className="flex flex-col justify-center">
               <p className="text-2xl font-bold">{user.lastName} Family</p>
