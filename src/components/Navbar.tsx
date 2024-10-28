@@ -3,10 +3,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import focusLogo from "@/../public/focus-logo.png";
 import Image from "next/image";
-import { SquarePen } from "lucide-react";
-import { Search } from "lucide-react";
-import { ChevronDown } from "lucide-react";
-import { ChevronUp } from "lucide-react";
+import { SquarePen, Search, ChevronDown, ChevronUp } from "lucide-react";
 import Link from "next/link";
 import useClickOff from "@/hooks/useClickOff";
 import { signOut } from "@/server/db/actions/UserActions";
@@ -46,7 +43,7 @@ export default function Navbar({ openModal, user }: NavbarProps) {
 
       {/* Create Post*/}
       <button
-        className="bg-theme-blue text-base py-2 px-6  text-white font-semibold rounded-[12px] gap-2 flex flex-row justify-center items-center hover:opacity-90 whitespace-nowrap"
+        className="bg-theme-blue text-base py-2 px-[18px] mr-10 text-white font-semibold rounded-[12px] gap-2 flex flex-row justify-center items-center transition hover:opacity-90 whitespace-nowrap"
         onClick={() => openModal()}
       >
         <SquarePen className="w-6 h-6" color="#ffffff" /> Create Post
@@ -75,7 +72,7 @@ export default function Navbar({ openModal, user }: NavbarProps) {
       {menuIsOpen && (
         <div className="absolute right-[10px] top-[110px] w-[218px] h-[307] bg-white z-10 border border-theme-medlight-gray rounded-lg" ref={dropdownRef}>
           <div className="w-[64px] h-[64px] bg-profile-pink rounded-full flex items-center justify-center m-auto mt-[21px]">
-            <span className="text-black font-bold text-3xl">{user.lastName.charAt(0).toUpperCase()}</span>
+            <span className="text-black font-bold text-3xl select-none">{user.lastName.charAt(0).toUpperCase()}</span>
           </div>
 
           <div className="p-2 text-center text-theme-gray">
@@ -92,12 +89,6 @@ export default function Navbar({ openModal, user }: NavbarProps) {
               Settings & Preferences
             </Link>
             <div className="w-44 border-theme-medlight-gray border-t border-sm mt-[18px] mx-auto"/>
-            <Link
-              href="https://focus-ga.org/contact-us/"
-              className="text-theme-blue mt-2 mb-2 block ml-4 py-1 hover:underline cursor-pointer transition-colors text-left text-theme-blue hover:underline"
-            >
-              Contact FOCUS
-            </Link>
             <Link
               href="/login"
               onClick={async () => {
