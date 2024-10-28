@@ -149,7 +149,7 @@ export default function Home() {
         href="https://focus-ga.org/contact-us/" 
         target="_blank" 
         rel="noopener noreferrer"
-        className="inline-block absolute left-6 bottom-6"
+        className="inline-block absolute left-8 bottom-8"
       >
         <button
           className={`overflow-hidden transition-all duration-300 pl-2 ease-in-out border-2 border-theme-blue bg-white text-theme-blue text-lg p-2 whitespace-nowrap 
