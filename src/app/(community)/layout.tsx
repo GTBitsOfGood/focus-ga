@@ -14,6 +14,7 @@ type CommunityLayoutProps = {
 
 export default function CommunityLayout({ children }: CommunityLayoutProps) {
   const [isCreatePostModalOpen, setCreatePostModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const openCreatePostModal = () => setCreatePostModal(true);
   const closeCreatePostModal = () => setCreatePostModal(false);
   const user = useUser();
@@ -23,10 +24,18 @@ export default function CommunityLayout({ children }: CommunityLayoutProps) {
   return (
     <html lang='en'>
       <body className={FOCUS_FONT.className}>
-        <Navbar openModal={openCreatePostModal} user={user}/>
+        <Navbar openModal={openCreatePostModal} setSearchTerm={setSearchTerm}  user={user}/>
         <CreatePostModal isOpen={isCreatePostModalOpen} openModal={openCreatePostModal} closeModal={closeCreatePostModal} user={user}/>
         <div className="mx-48 mt-[100px] p-4">
           {children}
+          {/* {
+            React.Children.map(children, (child) => {
+              if (React.isValidElement(child) && child.type === Home) {
+                return React.cloneElement(child, { searchInput });
+              }
+              return child;
+            });
+          } */}
           <Toaster />
         </div>
         <ProgressBar height="3px" color="#475CC6" shallowRouting options={{ showSpinner: false }} />

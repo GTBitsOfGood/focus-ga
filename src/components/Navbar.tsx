@@ -14,10 +14,11 @@ import { User } from "@/utils/types/user";
 
 interface NavbarProps {
   openModal: () => void;
+  setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
   user: User;
 }
 
-export default function Navbar({ openModal, user }: NavbarProps) {
+export default function Navbar({ openModal, setSearchTerm, user }: NavbarProps) {
   const router = useRouter();
   const [menuIsOpen, setMenuIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -27,6 +28,12 @@ export default function Navbar({ openModal, user }: NavbarProps) {
 
   const toggleDropdown = () => {
     setMenuIsOpen(!menuIsOpen);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      setSearchTerm(e.currentTarget.value);
+    }
   };
 
   return (
@@ -39,6 +46,7 @@ export default function Navbar({ openModal, user }: NavbarProps) {
         <input
           type="text"
           placeholder="Search for a post"
+          onKeyDown={handleKeyDown}
           className="w-full h-11 px-12 rounded-[20px] bg-[#F3F3F3] tracking-wide pl-16 focus:outline-none"
         />
         <Search strokeWidth={3} className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-500" />

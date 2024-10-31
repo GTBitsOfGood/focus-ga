@@ -18,10 +18,25 @@ type PipelineArgs = {
   limit?: number,
   tags?: Array<string>,
   postId?: string,
+  searchTerm?: string,
 }
 
-function postPopulationPipeline({authUserId, offset, limit, tags, postId}: PipelineArgs): mongoose.PipelineStage[] {
+function postPopulationPipeline({authUserId, offset, limit, tags, postId, searchTerm}: PipelineArgs): mongoose.PipelineStage[] {
   return [
+    // apply search
+    ...(searchTerm ? [
+      {
+        $search: {
+          index: "focus-fuzzy-search-posts",
+          text: {
+            query: searchTerm,
+            path: ["title", "content"],
+            fuzzy: {},
+          }
+        }
+      }
+    ] : []),
+
     // Match specific post ID if given, otherwise sort by date in descending order
     ... postId ? [
       { $match: { _id: new mongoose.Types.ObjectId(postId) } }
@@ -136,10 +151,10 @@ export async function getPosts(): Promise<Post[]> {
  * @param authUserId - The ID of the currently authenticated user, to determine whether they have liked each post.
  * @returns A promise that resolves to an array of populated post objects.
  */
-export async function getPopulatedPosts(authUserId: string, offset: number, limit: number, tags?: Array<string>): Promise<PopulatedPost[]> {
+export async function getPopulatedPosts(authUserId: string, offset: number, limit: number, tags?: Array<string>, searchTerm?: string): Promise<PopulatedPost[]> {
   await dbConnect();
 
-  const posts = await PostModel.aggregate(postPopulationPipeline({authUserId, offset, limit, tags}));
+  const posts = await PostModel.aggregate(postPopulationPipeline({authUserId, offset, limit, tags, searchTerm}));
   return posts;
 }
 
