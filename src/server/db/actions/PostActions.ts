@@ -291,6 +291,36 @@ export async function getSavedPosts(userId: string): Promise<Post[]> {
 }
 
 /**
+ * Retrieves all saved posts for a specific user in populated form.
+ * @param userId - The ID of the user whose saved posts are being retrieved.
+ * @returns A promise that resolves to an array of populated post objects.
+ * @throws Will throw an error if the user ID is invalid.
+ */
+export async function getPopulatedSavedPosts(userId: string): Promise<PopulatedPost[]> {
+  await dbConnect();
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new Error("Invalid user ID");
+  }
+
+  const pipeline: mongoose.PipelineStage[] = [
+    { $match: { user: new mongoose.Types.ObjectId(userId) } },
+    { $sort: { date: -1 as const } },
+    { $lookup: {
+      from: PostModel.collection.name,
+      localField: 'post',
+      foreignField: '_id',
+      as: 'post'
+    } },
+    { $unwind: { path: '$post' } },
+    { $replaceRoot: { newRoot: '$post' } }
+  ].concat(postPopulationPipeline({ authUserId: userId }).slice(1) satisfies mongoose.PipelineStage[] as any);
+
+  const savedPosts = await PostSaveModel.aggregate(pipeline);
+  return savedPosts;
+}
+
+/**
  * Deletes a post save record from the database.
  * @param userId - The ID of the user unsaving the post.
  * @param postId - The ID of the post being unsaved.
