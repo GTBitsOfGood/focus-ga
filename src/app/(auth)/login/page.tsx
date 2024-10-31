@@ -19,14 +19,13 @@ export default function Login() {
     const request = `
     <samlp:AuthnRequest
       xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
-      xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
-      ID="_${Math.random().toString(36).substring(2)}"
+      ID="http://localhost:3000/"
       Version="2.0"
       IssueInstant="${new Date().toISOString()}"
-      AssertionConsumerServiceURL="https://southface.netlify.app/api/user/sso/callback"
-      Destination="https://focus-ga--bitsofgood.sandbox.my.site.com/idp/login"
     >
-      <saml:Issuer>http://localhost:3000/</saml:Issuer>
+      <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
+        http://localhost:3000/
+      </saml:Issuer>
       <samlp:NameIDPolicy
         Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"
         AllowCreate="true"
@@ -42,7 +41,7 @@ export default function Login() {
   }
 
   const handleSalesforceLogin = () => {
-    window.location.href = `https://focus-ga--bitsofgood.sandbox.my.site.com/idp/login?app=0spEa0000000c8X&SAMLRequest=${generateEncodedRequest()}`; // Replace with actual Salesforce login URL
+    window.location.href = `https://focus-ga.my.site.com/idp/endpoint/HttpRedirect?SAMLRequest=${generateEncodedRequest()}`; // Replace with actual Salesforce login URL
   }
 
   return (

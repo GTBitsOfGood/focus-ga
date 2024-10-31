@@ -10,19 +10,21 @@ if (!SALESFORCE_CERTIFICATE && process.env["NODE_ENV"] === "production")
   throw new Error("SALESFORCE_CERTIFICATE env var must be set");
 
 export async function POST(request : NextResponse) {
-  const { SAMLResponse: encodedSAMLResp } = request.body as any;
+  const formData = await request.formData();
+  const encodedSAMLResp = formData.get('SAMLResponse');
 
   let result;
   try {
     const decodedSAMLResp = decodeSAMLResponse(encodedSAMLResp);
     // result = validateSAMLResponse(decodedSAMLResp, SALESFORCE_CERTIFICATE);
+    console.log(decodedSAMLResp);
   } catch (e) {
     console.error(e);
     result = { error: "Error processing SAML response" };
   }
 
-  const session : any = await getIronSession(cookies(), { password: "...", cookieName: "..." });
-  session.username = "Alison";
+  // const session : any = await getIronSession(cookies(), { password: "...", cookieName: "..." });
+  // session.username = "Alison";
 
-  await session.save();
+  // await session.save();
 }
