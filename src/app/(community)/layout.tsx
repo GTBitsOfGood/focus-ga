@@ -2,17 +2,18 @@
 
 import Navbar from "@/components/Navbar";
 import CreatePostModal from "@/components/CreatePostModal";
-import React, { useState, createContext, useContext } from "react";
+import React, { useState } from "react";
 import { Toaster } from "@/components/ui/toaster"
 import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
-import { FOCUS_FONT, ProfileColors } from "@/utils/consts";
+import { FOCUS_FONT } from "@/utils/consts";
 import { useUser } from "@/hooks/user";
+import { UserProvider } from "@/contexts/UserContext";
 
 type CommunityLayoutProps = {
   children: React.ReactNode;
 }
 
-export default function CommunityLayout({ children }: CommunityLayoutProps) {
+function CommunityContent({ children }: CommunityLayoutProps) {
   const [isCreatePostModalOpen, setCreatePostModal] = useState(false);
   const openCreatePostModal = () => setCreatePostModal(true);
   const closeCreatePostModal = () => setCreatePostModal(false);
@@ -23,7 +24,7 @@ export default function CommunityLayout({ children }: CommunityLayoutProps) {
   return (
     <html lang='en'>
     <body className={FOCUS_FONT.className}>
-      <Navbar openModal={openCreatePostModal} user={user} />
+      <Navbar openModal={openCreatePostModal} />
       <CreatePostModal isOpen={isCreatePostModalOpen} openModal={openCreatePostModal} closeModal={closeCreatePostModal} user={user}/>
       <div className="mx-48 mt-[100px] p-4">
         {children}
@@ -33,4 +34,12 @@ export default function CommunityLayout({ children }: CommunityLayoutProps) {
     </body>
   </html>
   );
+}
+
+export default function Community(props: CommunityLayoutProps) {
+  return (
+    <UserProvider>
+      <CommunityContent {...props} />
+    </UserProvider>
+  )
 }

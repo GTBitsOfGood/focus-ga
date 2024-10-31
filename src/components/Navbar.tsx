@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import focusLogo from "@/../public/focus-logo.png";
 import Image from "next/image";
@@ -10,25 +10,29 @@ import { ChevronUp } from "lucide-react";
 import Link from "next/link";
 import useClickOff from "@/hooks/useClickOff";
 import { signOut } from "@/server/db/actions/UserActions";
-import { User } from "@/utils/types/user";
 import { ProfileColors } from "@/utils/consts";
+import { useUser } from "@/contexts/UserContext";
 
 interface NavbarProps {
   openModal: () => void;
-  user: User;
 }
 
-export default function Navbar({ openModal, user }: NavbarProps) {
+export default function Navbar({ openModal }: NavbarProps) {
   const router = useRouter();
   const [menuIsOpen, setMenuIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dropdownButtonRef = useRef<HTMLDivElement>(null);
+  const { user } = useUser()
 
   useClickOff(dropdownRef, () => setMenuIsOpen(false), [dropdownRef, dropdownButtonRef]);
 
   const toggleDropdown = () => {
     setMenuIsOpen(!menuIsOpen);
   };
+
+  if (!user) {
+    return
+  }
 
   return (
     <div className="w-full h-[100px] bg-white flex items-center justify-between fixed top-0 z-50 border-b border-gray-300">

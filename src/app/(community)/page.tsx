@@ -11,7 +11,7 @@ import { Location } from "@/utils/types/location";
 import { getDisabilities } from "@/server/db/actions/DisabilityActions";
 import { Filter } from "@/utils/types/common";
 import { PAGINATION_LIMIT } from "@/utils/consts";
-import { useUser } from "@/hooks/user";
+import { useUser } from "@/contexts/UserContext";
 import { GEORGIA_CITIES } from "@/utils/cities";
 import { getPopulatedUser } from "@/server/db/actions/UserActions";
 
@@ -22,7 +22,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
-  const user = useUser();
+  const { user } = useUser();
   
   const [disabilities, setDisabilities] = useState<Disability[]>([]);
   const [selectedDisabilities, setSelectedDisabilities] = useState<Disability[]>([]);
@@ -36,6 +36,7 @@ export default function Home() {
       const disabilityList = await getDisabilities();
       setDisabilities(disabilityList);
     };
+    
     fetchDisabilities();
   }, []);
 
@@ -44,7 +45,7 @@ export default function Home() {
       if (!user) return;
       try {
         const populatedUser = getPopulatedUser(user._id);
-        setSelectedDisabilities((await populatedUser).defaultDisabilityTags);
+        setSelectedDisabilities((await populatedUser).defaultDisabilityFilters);
       } catch (error) {
         console.log("Failed to fetch/set default disability filter")
       }
