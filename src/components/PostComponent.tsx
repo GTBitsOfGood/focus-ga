@@ -20,7 +20,7 @@ type PostComponentProps = {
   clickable?: boolean;
   onLikeClick?: (liked: boolean) => Promise<void>;
   onSaveClick?: (saved: boolean) => Promise<void>;
-  onEditClick?: (newBody: string) => Promise<void>;
+  onEditClick?: (title: string, content: string, tags: Disability[]) => Promise<void>;
   onDeleteClick?: () => Promise<void>;
 };
 
@@ -121,6 +121,24 @@ export default function PostComponent(props: PostComponentProps) {
     }
   }
 
+  async function handleEditClick(newTitle: string, newContent: string, newTags: Disability[]) {
+    setTitle(newTitle);
+    setContent(newContent);
+    setTags(newTags);
+
+    if (onEditClick) {
+      try {
+        await onEditClick(newTitle, newContent, newTags);
+        setShowEditModal(false);
+      } catch (err) {
+        setTitle(title);
+        setContent(content);
+        setTags(tags);
+        throw err;
+      }
+    }
+  }
+
   const bottomRow = [
     {
       label: likes.toString(),
@@ -208,12 +226,14 @@ export default function PostComponent(props: PostComponentProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <EditPostModal
+      {showEditModal && <EditPostModal
         isOpen={showEditModal}
-        initialPostData={{ title, content, tags: tags.filter(tag => tag !== null) }}
+        title={title}
+        content={content}
+        tags={tags.filter(tag => tag !== null)}
         closeModal={() => setShowEditModal(false)}
-        onSubmit={async () => {}}
-      />
+        onSubmit={handleEditClick}
+      />}
     </>
   );
 

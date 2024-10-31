@@ -209,7 +209,7 @@ export async function getPopulatedPost(id: string, authUserId: string): Promise<
  * @throws Will throw an error if the post update fails or if the post is not found.
  * @returns The updated post object.
  */
-export async function editPost(id: string, post: Partial<PostInput>): Promise<Post> {
+export async function editPost(id: string, post: Partial<PostInput>): Promise<PostInput> {
   await dbConnect();
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -221,7 +221,10 @@ export async function editPost(id: string, post: Partial<PostInput>): Promise<Po
   if (!updatedPost) {
     throw new Error("Post not found");
   }
-  return updatedPost;
+  return {
+    ...updatedPost.toObject(),
+    author: updatedPost.author.toString(),
+  };
 }
 
 /**

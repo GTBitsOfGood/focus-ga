@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useEffect, useState, Suspense, useRef } from "react";
-import { createPost } from "@/server/db/actions/PostActions";
 import { getDisabilities } from "@/server/db/actions/DisabilityActions";
 import { Disability } from "@/utils/types/disability";
 import Tag from "./Tag";
@@ -16,7 +15,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { MDXEditorMethods } from "@mdxeditor/editor";
 import { cn, countNonMarkdownCharacters } from "@/lib/utils";
-import { User } from "@/utils/types/user";
 import {
   Command,
   CommandEmpty,
@@ -28,26 +26,32 @@ import {
 
 const EditorComp = dynamic(() => import('./EditorComponent'), { ssr: false })
 
-type PostData = {
-  title: string;
-  content: string;
-  tags: Disability[];
-}
-
-type CreatePostModalProps = {
+type EditPostModalProps = {
   isOpen: boolean;
   openModal?: () => void;
   closeModal: () => void;
-  initialPostData?: PostData;
-  onSubmit: (postData: PostData) => Promise<void>;
+  modalTitle?: string;
+  title?: string;
+  content?: string;
+  tags?: Disability[];
+  onSubmit: (title: string, content: string, tags: Disability[]) => Promise<void>;
 }
 
-export default function EditPostModal({ isOpen, openModal, closeModal, initialPostData, onSubmit }: CreatePostModalProps) {
-  const [postData, setPostData] = useState<PostData>(initialPostData || {
-    title: "",
-    content: "",
-    tags: []
-  });
+export default function EditPostModal(props: EditPostModalProps) {
+  const {
+    isOpen,
+    openModal,
+    closeModal,
+    modalTitle = "Edit Post",
+    title: initialTitle,
+    content: initialContent,
+    tags: initialTags,
+    onSubmit
+  } = props;
+
+  const [title, setTitle] = useState<string>(initialTitle || "");
+  const [content, setContent] = useState<string>(initialContent || "");
+  const [tags, setTags] = useState<Disability[]>(initialTags || []);
   const [showTitleError, setTitleError] = useState(false);
   const [showBodyError, setBodyError] = useState(false);
   const [showDisabilities, setShowDisabilities] = useState(false);
@@ -63,25 +67,24 @@ export default function EditPostModal({ isOpen, openModal, closeModal, initialPo
       setDisabilities(disabilityList);
     }
     fetchDisabilities();
-  }, [])
+  }, []);
 
-  const notifySuccess = () => {
-    toast({
-      title: "Post successfully added",
-      description: "Your post has been successfully added to the community.",
-    });
-  };
-
-  const notifyFailure = () => {
-    toast({
-      title: "Failed to add post",
-      description: "There was an error adding your post. Please try again.",
-    });
-  };
+  const handleSubmit = async () => {
+    try {
+      if (validateSubmission()) {
+        setIsSubmitting(true);
+        await onSubmit(title, content, tags);
+        closeModal();
+        editorRef.current?.setMarkdown("");
+      }
+    } catch (error) {} finally {
+      setIsSubmitting(false);
+    }
+  }
 
   const validateSubmission = (): boolean => {
-    const isTitleValid = postData.title.length > 0;
-    const isContentValid = postData.content.length > 0;
+    const isTitleValid = title.length > 0;
+    const isContentValid = content.length > 0;
 
     setTitleError(!isTitleValid);
     setBodyError(!isContentValid);
@@ -98,22 +101,22 @@ export default function EditPostModal({ isOpen, openModal, closeModal, initialPo
   const handleEditorChange = (text: string) => {
     const textLength = countNonMarkdownCharacters(text);
     if (textLength <= MAX_POST_CONTENT_LEN) {
-      setPostData({ ... postData, content: text });
+      setContent(text);
     } else {
-      editorRef.current?.setMarkdown(postData.content);
+      editorRef.current?.setMarkdown(content);
     }
   }
 
   const toggleDisability = (name: Disability) => {
-    if (postData.tags.length < MAX_POST_DISABILITY_TAGS) {
-      const newTags = postData.tags.includes(name)
-      ? postData.tags.filter((d) => d !== name)
-      : [...postData.tags, name];
+    if (tags.length < MAX_POST_DISABILITY_TAGS) {
+      const newTags = tags.includes(name)
+      ? tags.filter((d) => d !== name)
+      : [...tags, name];
     
-      setPostData({ ...postData, tags: newTags });
-    } else if (postData.tags.length == MAX_POST_DISABILITY_TAGS) {
-      const newTags = postData.tags.filter((d) => d !== name)
-      setPostData({ ...postData, tags: newTags });
+      setTags(newTags);
+    } else if (tags.length == MAX_POST_DISABILITY_TAGS) {
+      const newTags = tags.filter((d) => d !== name)
+      setTags(newTags);
     }
   };
 
@@ -136,7 +139,7 @@ export default function EditPostModal({ isOpen, openModal, closeModal, initialPo
     <div className={cn("fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50", { hidden: !isOpen })} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}>
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl relative z-50 flex flex-col max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-2">
-          <div className="text-black text-xl font-bold">Create New Post</div>
+          <div className="text-black text-xl font-bold">{modalTitle}</div>
           <X className="w-6 h-6 cursor-pointer" onClick={handleClose} />
         </div>
         
@@ -148,14 +151,14 @@ export default function EditPostModal({ isOpen, openModal, closeModal, initialPo
           <div className={`w-full mt-1 p-3 border ${showTitleError ? 'border-[#ff4e4e]' : 'border-gray-300'} rounded-md flex justify-between items-center`}>
             <input
               id="title"
-              value={postData.title}
+              value={title}
               maxLength={100}
               placeholder="Enter post title"
-              onChange={(event) => setPostData({ ...postData, title: event.target.value })}
+              onChange={(event) => setTitle(event.target.value)}
               className="focus:outline-none w-[89%]"
             />
             <div className="text-gray-400 text-sm">
-              {postData.title.length}/{MAX_POST_TITLE_LEN}
+              {title.length}/{MAX_POST_TITLE_LEN}
             </div>
           </div>
           
@@ -169,12 +172,12 @@ export default function EditPostModal({ isOpen, openModal, closeModal, initialPo
           </label>
           <div className={`mt-1 rounded-lg h-full border ${showBodyError ? 'border-red-300 border-2' : ''}`}>
             <Suspense fallback={null}>
-              <EditorComp editorRef={editorRef} markdown={postData.content} handleEditorChange={handleEditorChange} />
+              <EditorComp editorRef={editorRef} markdown={content} handleEditorChange={handleEditorChange} />
             </Suspense>
           </div>
           <div className="flex justify-between">
             {showBodyError ? <div className="text-[#ff4e4e] text-sm font-normal">Required Field</div> : <div></div> }
-            <p className="text-sm text-gray-400 text-right">{countNonMarkdownCharacters(postData.content)}/{MAX_POST_CONTENT_LEN}</p>
+            <p className="text-sm text-gray-400 text-right">{countNonMarkdownCharacters(content)}/{MAX_POST_CONTENT_LEN}</p>
           </div>
         </div>
 
@@ -187,12 +190,12 @@ export default function EditPostModal({ isOpen, openModal, closeModal, initialPo
               <PopoverTrigger asChild className="w-full" onClick={() => setShowDisabilities(!showDisabilities)}>
                 <div className="relative flex items-center p-3 border border-gray-300 rounded-md cursor-pointer">
                   <div className="flex items-center w-full h-6">
-                    {postData.tags.length === 0 ? (
+                    {tags.length === 0 ? (
                       <div className="text-neutral-400 text-sm font-normal">
                       Add disability tags (up to five)
                       </div>
                     ) : (
-                      postData.tags.map((disability) => (
+                      tags.map((disability) => (
                       <div
                         key={disability._id}
                         onClick={(e) => {
@@ -228,7 +231,7 @@ export default function EditPostModal({ isOpen, openModal, closeModal, initialPo
                           }}
                           className="flex items-center p-2 cursor-pointer rounded-lg hover:bg-gray-100 h-10"
                         >
-                          { postData.tags.includes(d) ? 
+                          { tags.includes(d) ? 
                           <Check className="w-4 h-4 mr-2" color="#7D7E82" />
                           : null}
                           {d.name}
@@ -250,7 +253,7 @@ export default function EditPostModal({ isOpen, openModal, closeModal, initialPo
             Cancel
           </button>
           <button 
-          onClick={() => onSubmit(postData)}
+          onClick={handleSubmit}
           disabled={isSubmitting}
           className={cn(
             "min-w-20 py-2 px-4 bg-theme-blue rounded-lg justify-center items-center gap-2.5 inline-flex",
