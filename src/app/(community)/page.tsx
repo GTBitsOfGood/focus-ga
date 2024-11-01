@@ -29,7 +29,8 @@ export default function Home() {
   const locations = GEORGIA_CITIES.map(city => ({ name: city, _id: city }));
   const [selectedLocations, setSelectedLocations] = useState<Location[]>([]);
 
-  const [searchTerm, setSearchTerm] = useState("obediant");
+  const [searchTerm, setSearchTerm] = useState("creo");
+  const [resultsCount, setResultsCount] = useState(0);
 
   // fetch disabilities on page load
   useEffect(() => {
@@ -103,7 +104,8 @@ export default function Home() {
 
       const tags = selectedDisabilities.map((disability) => disability._id);
 
-      const newPosts = await getPopulatedPosts(user._id, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, tags, searchTerm);
+      const {count, posts: newPosts } = await getPopulatedPosts(user._id, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, tags, searchTerm);
+      setResultsCount(count);
       if (newPosts.length > 0) {
         setPosts(clear ? newPosts : [...posts, ...newPosts]);
       } else {
@@ -153,7 +155,7 @@ export default function Home() {
                 <span className="font-bold">Showing results for: </span>
                 <span>{searchTerm}</span>
               </p>
-              <p className="font-bold text-theme-gray">{posts.length} Results</p>
+              <p className="font-bold text-theme-gray">{resultsCount} {resultsCount !== 1 ? "Results" : "Result"}</p>
             </div>
           ) : null
         }
