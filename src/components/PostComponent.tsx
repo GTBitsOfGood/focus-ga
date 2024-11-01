@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 type PostComponentProps = {
   post: PopulatedPost;
@@ -60,6 +61,8 @@ export default function PostComponent(props: PostComponentProps) {
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+
+  const { toast } = useToast();
 
   async function handleLikeClick() {
     if (likeLoading || clickable) return;
@@ -113,6 +116,23 @@ export default function PostComponent(props: PostComponentProps) {
     }
   }
 
+  async function handleShareClick() {
+    const url = `${window.location.origin}/posts/${post._id}`;
+
+    try {
+      await navigator.clipboard.writeText(url);
+      toast({
+        title: "Copied URL!",
+        description: "The URL for this post was copied to your clipboard.",
+      });
+    } catch (err) {
+      toast({
+        title: "Failed to copy URL",
+        description: "There was an error in copying the URL to your clipboard. Please try again.",
+      });
+    }
+  }
+
   const bottomRow = [
     {
       label: likes.toString(),
@@ -122,7 +142,7 @@ export default function PostComponent(props: PostComponentProps) {
       onClick: likeLoading ? undefined : handleLikeClick
     },
     {
-      label: (comments?? "").toString(),  
+      label: (comments ?? "").toString(),
       icon: <MessageSquare />
     },
     {
@@ -153,6 +173,7 @@ export default function PostComponent(props: PostComponentProps) {
               </DropdownMenuTrigger>
               <DropdownMenuContent side="bottom" align="end">
                 {onDeleteClick && <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem>}
+                <DropdownMenuItem onClick={handleShareClick}>Share</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )
