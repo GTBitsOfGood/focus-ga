@@ -122,7 +122,7 @@ export default function PostComponent(props: PostComponentProps) {
       onClick: likeLoading ? undefined : handleLikeClick
     },
     {
-      label: comments.toString(),
+      label: (comments?? "").toString(),  
       icon: <MessageSquare />
     },
     {
