@@ -39,13 +39,13 @@ function postPopulationPipeline({ authUserId, offset, limit, tags, postId, searc
             fuzzy: {},
           }
         }
-      }
-    ] : []),
-
-    // Match specific post ID if given, otherwise just continue to the next stages
-    ...(postId ? [
+      },
+    ] : postId ? [
       { $match: { _id: new mongoose.Types.ObjectId(postId) } }
-    ] : []),
+    ] : [
+      { $sort: { date: -1 as const } } // Default sort by date if no postId
+    ]),
+    // Match specific post ID if given, otherwise just continue to the next stages
 
     // Filter by tags
     ...(tags && tags.length ? [{ $match: { tags: { $in: tags.map((t) => new mongoose.Types.ObjectId(t)) } } }] : []),

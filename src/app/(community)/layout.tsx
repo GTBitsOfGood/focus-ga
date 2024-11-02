@@ -28,14 +28,6 @@ export default function CommunityLayout({ children }: CommunityLayoutProps) {
         <CreatePostModal isOpen={isCreatePostModalOpen} openModal={openCreatePostModal} closeModal={closeCreatePostModal} user={user}/>
         <div className="mx-48 mt-[100px] p-4">
           {children}
-          {/* {
-            React.Children.map(children, (child) => {
-              if (React.isValidElement(child) && child.type === Home) {
-                return React.cloneElement(child, { searchInput });
-              }
-              return child;
-            });
-          } */}
           <Toaster />
         </div>
         <ProgressBar height="3px" color="#475CC6" shallowRouting options={{ showSpinner: false }} />
