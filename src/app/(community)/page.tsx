@@ -81,7 +81,9 @@ export default function Home() {
 
   // fetch posts when filter changes
   useEffect(() => {
+    setLoading(true);
     fetchPosts(true);
+    setLoading(false);
   }, [selectedDisabilities, searchTerm])
 
   useEffect(() => {
@@ -177,7 +179,7 @@ export default function Home() {
                 }
               })
             ) : (
-              searchTerm && searchTerm.length ? (
+              !loading && searchTerm && searchTerm.length ? (
                 <div className="text-center font-bold text-theme-gray text-[22px]">
                   <p>No results found for &quot;{searchTerm}&quot;.</p>
                   <p>Please try another search!</p>

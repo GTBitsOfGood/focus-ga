@@ -56,12 +56,16 @@ export default function Navbar({ openModal, user }: NavbarProps) {
           className="w-full h-11 px-12 rounded-[20px] bg-[#F3F3F3] tracking-wide pl-16 focus:outline-none"
         />
         <Search strokeWidth={3} className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-500" />
-        <button
-          onClick={clearSearch}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500"
-        >
-          <X strokeWidth={2} />
-        </button>
+        {
+          inputValue.length ? (
+            <button
+              onClick={clearSearch}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500"
+            >
+              <X strokeWidth={2} />
+            </button>
+          ) : null
+        }
       </div>
 
       {/* Create Post*/}
