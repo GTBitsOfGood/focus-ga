@@ -8,19 +8,20 @@ import Link from "next/link";
 import useClickOff from "@/hooks/useClickOff";
 import { signOut } from "@/server/db/actions/UserActions";
 import { User } from "@/utils/types/user";
+import { useSearch } from "@/hooks/SearchContext";
 
 interface NavbarProps {
   openModal: () => void;
-  setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
   user: User;
 }
 
-export default function Navbar({ openModal, setSearchTerm, user }: NavbarProps) {
+export default function Navbar({ openModal, user }: NavbarProps) {
   const router = useRouter();
   const [menuIsOpen, setMenuIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dropdownButtonRef = useRef<HTMLDivElement>(null);
+  const { searchTerm, setSearchTerm } = useSearch();
 
   useClickOff(dropdownRef, () => setMenuIsOpen(false), [dropdownRef, dropdownButtonRef]);
 
@@ -31,7 +32,6 @@ export default function Navbar({ openModal, setSearchTerm, user }: NavbarProps) 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       setSearchTerm(inputValue);
-      console.log(inputValue);
     }
   };
 

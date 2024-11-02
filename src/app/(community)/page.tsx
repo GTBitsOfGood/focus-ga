@@ -13,6 +13,7 @@ import { Filter } from "@/utils/types/common";
 import { PAGINATION_LIMIT } from "@/utils/consts";
 import { useUser } from "@/hooks/user";
 import { GEORGIA_CITIES } from "@/utils/cities";
+import { useSearch } from "@/hooks/SearchContext";
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +30,7 @@ export default function Home() {
   const locations = GEORGIA_CITIES.map(city => ({ name: city, _id: city }));
   const [selectedLocations, setSelectedLocations] = useState<Location[]>([]);
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const { searchTerm } = useSearch();
   const [totalPostsCount, setTotalPostsCount] = useState(0);
 
   // fetch disabilities on page load
