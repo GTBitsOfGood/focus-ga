@@ -239,7 +239,8 @@ export async function getPopulatedPost(id: string, authUserId: string): Promise<
     throw new Error("Invalid post ID");
   }
 
-  const [post] = await PostModel.aggregate(postPopulationPipeline({authUserId, postId: id}));
+  const aggregationResult = await PostModel.aggregate(postPopulationPipeline({authUserId, postId: id}));
+  const post = aggregationResult[0].posts[0];
   if (!post) {
     throw new Error("Post not found");
   }
