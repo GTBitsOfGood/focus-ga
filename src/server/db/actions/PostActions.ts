@@ -26,6 +26,7 @@ function postPopulationPipeline({authUserId, offset, limit, tags, postId}: Pipel
     ... postId ? [
       { $match: { _id: new mongoose.Types.ObjectId(postId) } }
     ] : [
+      { $match: { isDeleted: false } },
       { $sort: { date: -1 as const } }
     ],
 
@@ -228,7 +229,7 @@ export async function editPost(id: string, post: Partial<PostInput>): Promise<Po
 }
 
 /**
- * Deletes a post from the database.
+ * Marks a post as deleted in the database and deletes its associated likes and saves.
  * @param id - The ID of the post to delete.
  * @throws Will throw an error if the post deletion fails or if the post is not found.
  */
@@ -239,10 +240,19 @@ export async function deletePost(id: string): Promise<void> {
     throw new Error("Invalid post ID");
   }
 
-  const deletedPost = await PostModel.findByIdAndDelete(id);
-  if (!deletedPost) {
+  const updatedPost = await PostModel.findByIdAndUpdate(id, {
+    title: '[deleted]',
+    content: '[deleted]',
+    author: new mongoose.Types.ObjectId('000000000000000000000000'),
+    tags: [],
+    isDeleted: true
+  });
+  if (!updatedPost) {
     throw new Error("Post not found");
   }
+
+  await PostLikeModel.deleteMany({ post: id });
+  await PostSaveModel.deleteMany({ post: id });
 }
 
 /**
@@ -314,7 +324,7 @@ export async function getPopulatedSavedPosts(userId: string): Promise<PopulatedP
     } },
     { $unwind: { path: '$post' } },
     { $replaceRoot: { newRoot: '$post' } }
-  ].concat(postPopulationPipeline({ authUserId: userId }).slice(1) satisfies mongoose.PipelineStage[] as any);
+  ].concat(postPopulationPipeline({ authUserId: userId }).slice(2) satisfies mongoose.PipelineStage[] as any);
 
   const savedPosts = await PostSaveModel.aggregate(pipeline);
   return savedPosts;

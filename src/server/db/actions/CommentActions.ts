@@ -43,7 +43,7 @@ export async function createComment(comment: CommentInput): Promise<Comment> {
 }
 
 /**
- * Deletes a comment from the database.
+ * Marks a comment as deleted in the database, deletes its associated likes, and updates its parent post's comment count.
  * @param id - The ID of the comment to delete.
  * @throws Will throw an error if the comment doesn't exist or deletion fails.
  */
@@ -53,7 +53,11 @@ export async function deleteComment(id: string): Promise<void> {
 
   try {
     await dbConnect();
-    const comment = await CommentModel.findByIdAndDelete(id, { session });
+    const comment = await CommentModel.findByIdAndUpdate(id, {
+      content: '[deleted]',
+      author: new mongoose.Types.ObjectId('000000000000000000000000'),
+      isDeleted: true
+    });
     if (!comment) {
       throw new Error("Comment does not exist");
     }
@@ -174,8 +178,14 @@ export async function getPostComments(postId: string, authUserId: string): Promi
   await dbConnect();
 
   const comments = await CommentModel.aggregate([
-    // Match post ID
-    { $match: { post: new mongoose.Types.ObjectId(postId) } },
+    // Match post ID and filter out deleted child comments (but not deleted parent comments)
+    { $match: {
+      post: new mongoose.Types.ObjectId(postId),
+      $or: [
+        { replyTo: null },
+        { isDeleted: false }
+      ]
+    } },
 
     // Sort by date in descending order
     { $sort: { date: -1 } },

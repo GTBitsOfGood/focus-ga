@@ -10,6 +10,7 @@ export const commentSchema = z.object({
   content: z.string(),
   likes: z.number().default(0),
   replyTo: z.string().transform(id => new Types.ObjectId(id)).optional(),
+  isDeleted: z.boolean().default(false)
 });
 
 export const commentLikeSchema = z.object({

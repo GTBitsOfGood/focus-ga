@@ -39,11 +39,11 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
   const router = useRouter();
   const { toast } = useToast();
 
-  const [parentComments, setParentComments] = useState<PopulatedComment[]>(
-    initialComments.filter(comment => comment.replyTo === null)
-  );
   const [childComments, setChildComments] = useState<Map<string, PopulatedComment[]>>(
     buildChildCommentsMap(initialComments)
+  );
+  const [parentComments, setParentComments] = useState<PopulatedComment[]>(
+    initialComments.filter(comment => comment.replyTo === null && (comment.isDeleted === false || childComments.get(comment._id)))
   );
 
   async function onNewCommentSubmit(newCommentBody: string) {

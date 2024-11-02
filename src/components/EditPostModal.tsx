@@ -77,7 +77,7 @@ export default function EditPostModal(props: EditPostModalProps) {
         closeModal();
         editorRef.current?.setMarkdown("");
       }
-    } catch (error) {} finally {
+    } finally {
       setIsSubmitting(false);
     }
   }
