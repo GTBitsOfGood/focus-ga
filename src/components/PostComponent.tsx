@@ -13,6 +13,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 import EditPostModal from "./EditPostModal";
 import { Disability } from "@/utils/types/disability";
+import { useToast } from "@/hooks/use-toast";
 
 type PostComponentProps = {
   post: PopulatedPost;
@@ -69,6 +70,8 @@ export default function PostComponent(props: PostComponentProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
+  const { toast } = useToast();
+
   async function handleLikeClick() {
     if (likeLoading || clickable) return;
 
@@ -120,7 +123,7 @@ export default function PostComponent(props: PostComponentProps) {
       }
     }
   }
-
+  
   async function handleEditClick(newTitle: string, newContent: string, newTags: Disability[]) {
     setTitle(newTitle);
     setContent(newContent);
@@ -139,6 +142,23 @@ export default function PostComponent(props: PostComponentProps) {
     }
   }
 
+  async function handleShareClick() {
+    const url = `${window.location.origin}/posts/${post._id}`;
+
+    try {
+      await navigator.clipboard.writeText(url);
+      toast({
+        title: "Copied URL!",
+        description: "The URL for this post was copied to your clipboard.",
+      });
+    } catch (err) {
+      toast({
+        title: "Failed to copy URL",
+        description: "There was an error in copying the URL to your clipboard. Please try again.",
+      });
+    }
+  }
+
   const bottomRow = [
     {
       label: likes.toString(),
@@ -148,7 +168,7 @@ export default function PostComponent(props: PostComponentProps) {
       onClick: likeLoading ? undefined : handleLikeClick
     },
     {
-      label: comments.toString(),
+      label: (comments ?? "").toString(),
       icon: <MessageSquare />
     },
     {
@@ -180,6 +200,7 @@ export default function PostComponent(props: PostComponentProps) {
               <DropdownMenuContent side="bottom" align="end">
                 {onEditClick && <DropdownMenuItem onClick={() => setShowEditModal(true)}>Edit</DropdownMenuItem>}
                 {onDeleteClick && <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem>}
+                <DropdownMenuItem onClick={handleShareClick}>Share</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )
