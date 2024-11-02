@@ -26,6 +26,7 @@ function postPopulationPipeline({authUserId, offset, limit, tags, postId}: Pipel
     ... postId ? [
       { $match: { _id: new mongoose.Types.ObjectId(postId) } }
     ] : [
+      { $match: { isDeleted: false } },
       { $sort: { date: -1 as const } }
     ],
 
@@ -209,7 +210,7 @@ export async function getPopulatedPost(id: string, authUserId: string): Promise<
  * @throws Will throw an error if the post update fails or if the post is not found.
  * @returns The updated post object.
  */
-export async function editPost(id: string, post: Partial<PostInput>): Promise<Post> {
+export async function editPost(id: string, post: Partial<PostInput>): Promise<PostInput> {
   await dbConnect();
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -221,11 +222,14 @@ export async function editPost(id: string, post: Partial<PostInput>): Promise<Po
   if (!updatedPost) {
     throw new Error("Post not found");
   }
-  return updatedPost;
+  return {
+    ...updatedPost.toObject(),
+    author: updatedPost.author.toString(),
+  };
 }
 
 /**
- * Deletes a post from the database.
+ * Marks a post as deleted in the database and deletes its associated likes and saves.
  * @param id - The ID of the post to delete.
  * @throws Will throw an error if the post deletion fails or if the post is not found.
  */
@@ -236,10 +240,19 @@ export async function deletePost(id: string): Promise<void> {
     throw new Error("Invalid post ID");
   }
 
-  const deletedPost = await PostModel.findByIdAndDelete(id);
-  if (!deletedPost) {
+  const updatedPost = await PostModel.findByIdAndUpdate(id, {
+    title: '[deleted]',
+    content: '[deleted]',
+    author: new mongoose.Types.ObjectId('000000000000000000000000'),
+    tags: [],
+    isDeleted: true
+  });
+  if (!updatedPost) {
     throw new Error("Post not found");
   }
+
+  await PostLikeModel.deleteMany({ post: id });
+  await PostSaveModel.deleteMany({ post: id });
 }
 
 /**
@@ -285,6 +298,36 @@ export async function getSavedPosts(userId: string): Promise<Post[]> {
     .populate('post')
     .exec();
   return savedPosts.map(save => save.post.toObject());
+}
+
+/**
+ * Retrieves all saved posts for a specific user in populated form.
+ * @param userId - The ID of the user whose saved posts are being retrieved.
+ * @returns A promise that resolves to an array of populated post objects.
+ * @throws Will throw an error if the user ID is invalid.
+ */
+export async function getPopulatedSavedPosts(userId: string): Promise<PopulatedPost[]> {
+  await dbConnect();
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new Error("Invalid user ID");
+  }
+
+  const pipeline: mongoose.PipelineStage[] = [
+    { $match: { user: new mongoose.Types.ObjectId(userId) } },
+    { $sort: { date: -1 as const } },
+    { $lookup: {
+      from: PostModel.collection.name,
+      localField: 'post',
+      foreignField: '_id',
+      as: 'post'
+    } },
+    { $unwind: { path: '$post' } },
+    { $replaceRoot: { newRoot: '$post' } }
+  ].concat(postPopulationPipeline({ authUserId: userId }).slice(2) satisfies mongoose.PipelineStage[] as any);
+
+  const savedPosts = await PostSaveModel.aggregate(pipeline);
+  return savedPosts;
 }
 
 /**

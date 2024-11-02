@@ -23,6 +23,7 @@ export const postSchema = z.object({
   isPinned: z.boolean().default(false),
   isPrivate: z.boolean().default(false),
   isFlagged: z.boolean().default(false),
+  isDeleted: z.boolean().default(false)
 });
 
 export const editPostSchema = postSchema.partial();
