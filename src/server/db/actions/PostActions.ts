@@ -182,7 +182,7 @@ export async function getPopulatedPosts(authUserId: string, offset: number, limi
 
   const postsInfo = await PostModel.aggregate(postPopulationPipeline({authUserId, offset, limit, tags, searchTerm}));
   return {
-    count: postsInfo[0].count[0].count,
+    count: postsInfo[0].count.length ? postsInfo[0].count[0].count : 0,
     posts: postsInfo[0].posts,
   };
 }
