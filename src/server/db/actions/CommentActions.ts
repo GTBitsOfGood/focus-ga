@@ -67,6 +67,7 @@ export async function deleteComment(id: string): Promise<void> {
       { $inc: { comments: -1 } },
       { session }
     );
+    await CommentLikeModel.deleteMany({ comment: id });
 
     await session.commitTransaction();
   } catch (e) {
