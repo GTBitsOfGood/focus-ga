@@ -81,9 +81,7 @@ export default function Home() {
 
   // fetch posts when filter changes
   useEffect(() => {
-    setLoading(true);
     fetchPosts(true);
-    setLoading(false);
   }, [selectedDisabilities, searchTerm])
 
   useEffect(() => {
