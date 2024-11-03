@@ -2,7 +2,7 @@
 
 import { getPopulatedPosts } from "@/server/db/actions/PostActions";
 import PostComponent from "@/components/PostComponent";
-import { useEffect, useState, useRef, useCallback, use } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { PopulatedPost } from "@/utils/types/post";
 import { LoaderCircle } from "lucide-react";
 import FilterComponent from "@/components/FilterComponent";
@@ -26,6 +26,7 @@ export default function Home() {
   
   const [disabilities, setDisabilities] = useState<Disability[]>([]);
   const [selectedDisabilities, setSelectedDisabilities] = useState<Disability[]>([]);
+  const [filtersLoading, setFiltersLoading] = useState(true);
 
   const locations = GEORGIA_CITIES.map(city => ({ name: city, _id: city }));
   const [selectedLocations, setSelectedLocations] = useState<Location[]>([]);
@@ -44,15 +45,17 @@ export default function Home() {
     const fetchUserData = async () => {
       if (!user) return;
       try {
-        const populatedUser = getPopulatedUser(user._id);
-        setSelectedDisabilities((await populatedUser).defaultDisabilityFilters);
+        const populatedUser = await getPopulatedUser(user._id);
+        setSelectedDisabilities(populatedUser.defaultDisabilityFilters);
       } catch (error) {
-        console.log("Failed to fetch/set default disability filter")
+        console.log("Failed to fetch/set default disability filter");
+      } finally {
+        setFiltersLoading(false); // Only set filtersLoading to false once default filters have loaded
       }
-    }
+    };
 
     fetchUserData();
-  }, [user])
+  }, [user]);
 
   const handleSelected = <T extends { _id: string }>(
     selected: T, 
@@ -94,15 +97,11 @@ export default function Home() {
   // fetch posts when filter changes
   useEffect(() => {
     fetchPosts(true);
-  }, [selectedDisabilities])
-
-  useEffect(() => {
-    console.log(selectedLocations);
-  }, [selectedLocations]);
+  }, [selectedDisabilities]);
 
   // Fetch posts when page changes
   const fetchPosts = async (clear: boolean = false) => {
-    if (!user) return;
+    if (!user || filtersLoading) return;
 
     if (clear) {
       setPage(0);
@@ -128,7 +127,7 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     fetchPosts();
@@ -153,10 +152,6 @@ export default function Home() {
     [loading, hasMore]
   );
 
-  if (!user) {
-    return null;
-  }
-
   return (
     <main className="flex min-h-screen flex-col items-center px-16">
       <div className="w-full max-w-4xl space-y-8">
@@ -164,7 +159,6 @@ export default function Home() {
         <div>
           {posts.map((post, index) => {
             if (posts.length <= index + 2) {
-              // Attach observer to the second-to-last post
               return (
                 <div ref={secondLastPostRef} key={post._id}>
                   <PostComponent post={post} clickable={true} />

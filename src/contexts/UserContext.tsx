@@ -3,39 +3,39 @@ import { User } from '@/utils/types/user';
 import { getAuthenticatedUser } from '@/server/db/actions/AuthActions';
 
 interface UserContextType {
-    user: User | null;
-    setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const useUser = () => {
-    const context = useContext(UserContext);
-    if (!context) {
-        throw new Error('useUser must be used within a UserProvider');
-    }
-    return context;
+  const context = useContext(UserContext);
+  if (!context) {
+    throw new Error('useUser must be used within a UserProvider');
+  }
+  return context;
 };
 
 interface UserProviderProps {
-    children: ReactNode; 
+  children: ReactNode; 
 }
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-    const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            const user = await getAuthenticatedUser();
-            setUser(user);
-        };
+  useEffect(() => {
+    const fetchUser = async () => {
+      const user = await getAuthenticatedUser();
+      setUser(user);
+    };
 
-        fetchUser();
-    }, []);
+    fetchUser();
+  }, []);
 
-    return (
-        <UserContext.Provider value={{ user, setUser }}>
-            {children}
-        </UserContext.Provider>
-    );
+  return (
+    <UserContext.Provider value={{ user, setUser }}>
+      {children}
+    </UserContext.Provider>
+  );
 };
