@@ -111,6 +111,7 @@ export async function POST(request: Request) {
           isPinned: Math.random() < 0.5 ? true : false,
           isPrivate: Math.random() < 0.5 ? true : false,
           isFlagged: Math.random() < 0.5 ? true : false,
+          isDeleted: false
         }
 
         posts.push(((await createPost(postInfo))));
@@ -131,6 +132,7 @@ export async function POST(request: Request) {
           post: post._id,
           date: faker.date.between({ from: post.date, to: new Date(), }),
           content: faker.lorem.sentences(),
+          isDeleted: false
         }
         
         if (postComments.length > 0) {

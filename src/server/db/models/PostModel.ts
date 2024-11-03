@@ -13,6 +13,7 @@ const PostSchema = new Schema<Post>({
   isPinned: { type: Boolean, default: false },
   isPrivate: { type: Boolean, default: false },
   isFlagged: { type: Boolean, default: false },
+  isDeleted: { type: Boolean, default: false }
 });
 
 const PostModel = mongoose.models?.Post ?? mongoose.model("Post", PostSchema);

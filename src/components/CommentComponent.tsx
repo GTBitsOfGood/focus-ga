@@ -7,6 +7,7 @@ import { ReactNode, useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 import Link from "next/link";
+import { User } from "@/utils/types/user";
 
 type CommentComponentProps = {
   className?: string;
@@ -30,17 +31,21 @@ export default function CommentComponent(props: CommentComponentProps) {
   } = props;
   
   const {
-    author,
-    content,
+    author: initialAuthor,
+    content: initialContent,
     date,
     likes: initialLikes,
     liked: initialLiked,
-    replyTo
+    replyTo,
+    isDeleted: initialIsDeleted
   } = comment;
 
+  const [author, setAuthor] = useState<User | null>(initialAuthor);
+  const [content, setContent] = useState<string>(initialContent);
   const [likes, setLikes] = useState<number>(initialLikes);
   const [liked, setLiked] = useState<boolean>(initialLiked);
   const [likeLoading, setLikeLoading] = useState<boolean>(false);
+  const [isDeleted, setIsDeleted] = useState<boolean>(initialIsDeleted);
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
@@ -68,7 +73,20 @@ export default function CommentComponent(props: CommentComponentProps) {
   }
 
   async function handleDeleteClick() {
-
+    if (deleteLoading) return;
+    
+    if (onDeleteClick) {
+      setDeleteLoading(true);
+      try {
+        await onDeleteClick();
+        setShowDeleteDialog(false);
+        setContent('[deleted]');
+        setAuthor(null);
+        setIsDeleted(true);
+      } finally {
+        setDeleteLoading(false);
+      }
+    }
   }
 
   const bottomRow = [
@@ -84,47 +102,54 @@ export default function CommentComponent(props: CommentComponentProps) {
     }]
   ];
 
+  const profilePicture = <span className="w-6 h-6 bg-theme-gray rounded-full inline-block"/>;
+  const deletedText = "This comment has been deleted.";
+
   return (
     <div className="flex gap-2.5">
-      <Link href={`/family/${author?._id}`}>
-        <span className="w-6 h-6 bg-theme-gray rounded-full inline-block"/>
-      </Link>
+      {isDeleted ? profilePicture : (
+        <Link href={`/family/${author?._id}`} >
+          {profilePicture}
+        </Link>
+      )}
       <div className={`flex-grow flex flex-col gap-2 text-theme-gray ${className}`}>
         <div className="flex items-center justify-between">
-          <Link className="font-bold text-black" href={`/family/${author?._id}`}>
+          {isDeleted ? deletedText : <Link className="font-bold text-black" href={`/family/${author?._id}`}>
             {author ? `${author.lastName} Family` : 'Deleted User'}
-          </Link>
+          </Link>}
           <p className="text-sm" suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
         </div>
-        <MarkdownRenderer
-          className="leading-5"
-          markdown={content}
-          parse={markdown => mdParser.render(markdown)}
-        />
-        <div className="flex items-center pt-2 gap-6 text-sm">
-          {bottomRow.map((item, index) => (
-            <div key={index} className="flex items-center gap-1.5 px-1">
-              <button disabled={!item.onClick} onClick={item.onClick}>
-                <div className="w-5 h-5 [&>*]:w-full [&>*]:h-full">
-                  {item.icon}
-                </div>
-              </button>
-              <button disabled={!item.onClick} onClick={item.onClick}>
-                {item.label}
-              </button>
+        {!isDeleted && <>
+          <MarkdownRenderer
+            className="leading-5"
+            markdown={content}
+            parse={markdown => mdParser.render(markdown)}
+          />
+          <div className="flex items-center pt-2 gap-6 text-sm">
+            {bottomRow.map((item, index) => (
+              <div key={index} className="flex items-center gap-1.5 px-1">
+                <button disabled={!item.onClick} onClick={item.onClick}>
+                  <div className="w-5 h-5 [&>*]:w-full [&>*]:h-full">
+                    {item.icon}
+                  </div>
+                </button>
+                <button disabled={!item.onClick} onClick={item.onClick}>
+                  {item.label}
+                </button>
+              </div>
+            ))}
+            <div className="flex items-center gap-1.5 px-1">
+              <DropdownMenu modal={false}>
+                <DropdownMenuTrigger>
+                  <Ellipsis className="w-5 h-5" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent side="bottom" align="start">
+                  {onDeleteClick ? <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem> : undefined}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
-          ))}
-          <div className="flex items-center gap-1.5 px-1">
-            <DropdownMenu modal={false}>
-              <DropdownMenuTrigger>
-                <Ellipsis className="w-5 h-5" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent side="bottom" align="start">
-                {onDeleteClick ? <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem> : undefined}
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
-        </div>
+        </>}
         {nestedContent}
       </div>
       <AlertDialog open={showDeleteDialog}>
