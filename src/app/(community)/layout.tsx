@@ -1,5 +1,6 @@
 "use client"
 
+import "@/app/globals.css";
 import Navbar from "@/components/Navbar";
 import React, { useState } from "react";
 import { Toaster } from "@/components/ui/toaster"
@@ -57,25 +58,20 @@ export default function CommunityLayout({ children }: CommunityLayoutProps) {
   }
 
   return (
-    <html lang='en'>
-      <body className={FOCUS_FONT.className}>
-        <SearchProvider>
-
-        <Navbar openModal={openCreatePostModal} user={user}/>
-          <EditPostModal
-            modalTitle="Create New Post"
-            isOpen={isCreatePostModalOpen}
-            openModal={openCreatePostModal}
-            closeModal={closeCreatePostModal}
-            onSubmit={onPostSubmit}
-          />
-          <div className="mx-48 mt-[100px] p-4">
-            {children}
-            <Toaster />
-          </div>
-          <ProgressBar height="3px" color="#475CC6" shallowRouting options={{ showSpinner: false }} />
-        </SearchProvider>
-      </body>
-    </html>
+    <SearchProvider>
+      <Navbar openModal={openCreatePostModal} user={user}/>
+      <EditPostModal
+        modalTitle="Create New Post"
+        isOpen={isCreatePostModalOpen}
+        openModal={openCreatePostModal}
+        closeModal={closeCreatePostModal}
+        onSubmit={onPostSubmit}
+      />
+      <div className="mx-48 mt-[100px] p-4">
+        {children}
+        <Toaster />
+      </div>
+      <ProgressBar height="3px" color="#475CC6" shallowRouting options={{ showSpinner: false }} />
+    </SearchProvider>
   );
 }
