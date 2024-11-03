@@ -183,10 +183,17 @@ export default function PostComponent(props: PostComponentProps) {
   const reactContent = (
     <>
       <div className="flex items-center justify-between text-sm">
-        <Link className="flex items-center gap-2" href={`/family/${author?._id}`}>
-          <span className="w-6 h-6 bg-theme-med-gray rounded-full inline-block"/>
-          {author ? `${author.lastName} Family` : 'Deleted User'}
-        </Link>
+        {clickable ? (
+          <div className="flex items-center gap-2">
+            <span className="w-6 h-6 bg-theme-med-gray rounded-full inline-block"/>
+            {author ? `${author.lastName} Family` : 'Deleted User'}
+          </div>
+        ) : (
+          <Link className="flex items-center gap-2" href={`/family/${author?._id}`}>
+            <span className="w-6 h-6 bg-theme-med-gray rounded-full inline-block"/>
+            {author ? `${author.lastName} Family` : 'Deleted User'}
+          </Link>
+        )}
         <p suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
       </div>
       <div className="flex items-center justify-between py-0.5">
