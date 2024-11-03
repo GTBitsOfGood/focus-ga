@@ -18,90 +18,130 @@ type PipelineArgs = {
   limit?: number,
   tags?: Array<string>,
   postId?: string,
+  searchTerm?: string,
 }
 
-function postPopulationPipeline({authUserId, offset, limit, tags, postId}: PipelineArgs): mongoose.PipelineStage[] {
+type PostAggregationResult = {
+  count: number;
+  posts: PopulatedPost[];
+};
+
+function postPopulationPipeline({ authUserId, offset, limit, tags, postId, searchTerm }: PipelineArgs): mongoose.PipelineStage[] {
   return [
-    // Match specific post ID if given, otherwise sort by date in descending order
-    ... postId ? [
+    // Apply search
+    ...(searchTerm ? [
+      {
+        $search: {
+          index: "focus-fuzzy-search-posts",
+          text: {
+            query: searchTerm,
+            path: ["title", "content"],
+            fuzzy: {},
+          }
+        }
+      },
+    ] : postId ? [
+      // Match specific post ID if given
       { $match: { _id: new mongoose.Types.ObjectId(postId) } }
     ] : [
       { $match: { isDeleted: false } },
       { $sort: { date: -1 as const } }
-    ],
+    ]),
 
-    // filter by tags
+    // Filter by tags
     ...(tags && tags.length ? [{ $match: { tags: { $in: tags.map((t) => new mongoose.Types.ObjectId(t)) } } }] : []),
 
-    // Skip and limit for pagination
-    ...(offset ? [{ $skip: offset }] : []),
-    ...(limit ? [{ $limit: limit }] : []),
+    // Use $facet to perform two separate aggregations: totalPostCount and posts (paginated)
+    {
+      $facet: {
+        count: [
+          { $count: "count" }
+        ],
+        posts: [
+          ...(offset ? [{ $skip: offset }] : []),
+          ...(limit ? [{ $limit: limit }] : []),
 
-    // Populate author field
-    { $lookup: {
-      from: UserModel.collection.name,
-      localField: 'author',
-      foreignField: '_id',
-      pipeline: [{ $addFields: { _id: { $toString: '$_id' } } }],
-      as: 'author'
-    } },
-    { $unwind: { path: '$author', preserveNullAndEmptyArrays: true } },
+          {
+            $lookup: {
+              from: UserModel.collection.name,
+              localField: 'author',
+              foreignField: '_id',
+              pipeline: [{ $addFields: { _id: { $toString: '$_id' } } }],
+              as: 'author'
+            }
+          },
+          { $unwind: { path: '$author', preserveNullAndEmptyArrays: true } },
 
-    // Populate tags
-    { $lookup: {
-      from: DisabilityModel.collection.name,
-      localField: 'tags',
-      foreignField: '_id',
-      pipeline: [{ $addFields: { _id: { $toString: '$_id' } } }],
-      as: 'tags'
-    } },
+          // Populate tags
+          {
+            $lookup: {
+              from: DisabilityModel.collection.name,
+              localField: 'tags',
+              foreignField: '_id',
+              pipeline: [{ $addFields: { _id: { $toString: '$_id' } } }],
+              as: 'tags'
+            }
+          },
 
-    // Replace author and tags with default values if necessary
-    { $addFields: {
-      author: { $ifNull: ['$author', null] },
-      tags: { $ifNull: ['$tags', []] }
-    } },
+          // Replace author and tags with default values if necessary
+          {
+            $addFields: {
+              author: { $ifNull: ['$author', null] },
+              tags: { $ifNull: ['$tags', []] }
+            }
+          },
 
-    // Determine whether user has liked post
-    { $lookup: {
-      from: PostLikeModel.collection.name,
-      let: { postId: '$_id'  },
-      pipeline: [
-        { $match: {
-          $expr: {
-            $and: [
-              { $eq: ['$post', '$$postId'] },
-              { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
-            ]
+          // Determine whether user has liked post
+          {
+            $lookup: {
+              from: PostLikeModel.collection.name,
+              let: { postId: '$_id' },
+              pipeline: [
+                { $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$post', '$$postId'] },
+                      { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
+                    ]
+                  }
+                } }
+              ],
+              as: 'liked'
+            }
+          },
+          {
+            $addFields: {
+              liked: { $gt: [{ $size: '$liked' }, 0] }
+            }
+          },
+
+          // Determine whether user has saved post
+          {
+            $lookup: {
+              from: PostSaveModel.collection.name,
+              let: { postId: '$_id' },
+              pipeline: [
+                { $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$post', '$$postId'] },
+                      { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
+                    ]
+                  }
+                } }
+              ],
+              as: 'saved'
+            }
+          },
+          {
+            $addFields: {
+              saved: { $gt: [{ $size: '$saved' }, 0] },
+              _id: { $toString: '$_id' }
+            }
           }
-        } }
-      ],
-      as: 'liked'
-    } },
-    { $addFields: {
-      liked: { $gt: [{ $size: '$liked' }, 0] }
-    } },
-
-    // Determine whether user has saved post
-    { $lookup: {
-      from: PostSaveModel.collection.name,
-      let: { postId: '$_id'  },
-      pipeline: [
-        { $match: {
-          $expr: {
-            $and: [
-              { $eq: ['$post', '$$postId'] },
-              { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
-            ]
-          }
-        } }
-      ],
-      as: 'saved'
-    } },
-    { $addFields: {
-      saved: { $gt: [{ $size: '$saved' }, 0] },
-      _id: { $toString: '$_id' }
-    } }
+        ]
+      }
+    }
   ];
 }
 
@@ -137,11 +177,14 @@ export async function getPosts(): Promise<Post[]> {
  * @param authUserId - The ID of the currently authenticated user, to determine whether they have liked each post.
  * @returns A promise that resolves to an array of populated post objects.
  */
-export async function getPopulatedPosts(authUserId: string, offset: number, limit: number, tags?: Array<string>): Promise<PopulatedPost[]> {
+export async function getPopulatedPosts(authUserId: string, offset: number, limit: number, tags?: Array<string>, searchTerm?: string): Promise<PostAggregationResult> {
   await dbConnect();
 
-  const posts = await PostModel.aggregate(postPopulationPipeline({authUserId, offset, limit, tags}));
-  return posts;
+  const postsInfo = await PostModel.aggregate(postPopulationPipeline({authUserId, offset, limit, tags, searchTerm}));
+  return {
+    count: postsInfo[0].count.length ? postsInfo[0].count[0].count : 0,
+    posts: postsInfo[0].posts,
+  };
 }
 
 /**
@@ -196,7 +239,8 @@ export async function getPopulatedPost(id: string, authUserId: string): Promise<
     throw new Error("Invalid post ID");
   }
 
-  const [post] = await PostModel.aggregate(postPopulationPipeline({authUserId, postId: id}));
+  const aggregationResult = await PostModel.aggregate(postPopulationPipeline({authUserId, postId: id}));
+  const post = aggregationResult[0].posts[0];
   if (!post) {
     throw new Error("Post not found");
   }

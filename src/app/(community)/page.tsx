@@ -13,6 +13,7 @@ import { Filter } from "@/utils/types/common";
 import { PAGINATION_LIMIT } from "@/utils/consts";
 import { useUser } from "@/hooks/user";
 import { GEORGIA_CITIES } from "@/utils/cities";
+import { useSearch } from "@/hooks/SearchContext";
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,9 @@ export default function Home() {
 
   const locations = GEORGIA_CITIES.map(city => ({ name: city, _id: city }));
   const [selectedLocations, setSelectedLocations] = useState<Location[]>([]);
+
+  const { searchTerm } = useSearch();
+  const [totalPostsCount, setTotalPostsCount] = useState(0);
 
   // fetch disabilities on page load
   useEffect(() => {
@@ -78,7 +82,7 @@ export default function Home() {
   // fetch posts when filter changes
   useEffect(() => {
     fetchPosts(true);
-  }, [selectedDisabilities])
+  }, [selectedDisabilities, searchTerm])
 
   useEffect(() => {
     console.log(selectedLocations);
@@ -101,7 +105,8 @@ export default function Home() {
 
       const tags = selectedDisabilities.map((disability) => disability._id);
 
-      const newPosts = await getPopulatedPosts(user._id, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, tags);
+      const {count, posts: newPosts } = await getPopulatedPosts(user._id, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, tags, searchTerm);
+      setTotalPostsCount(count);
       if (newPosts.length > 0) {
         setPosts(clear ? newPosts : [...posts, ...newPosts]);
       } else {
@@ -142,22 +147,44 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center px-16">
+    <main className="flex flex-col items-center px-16">
       <div className="w-full max-w-4xl space-y-8">
+        {
+          searchTerm && searchTerm.length ? (
+            <div className="flex flex-row justify-between">
+              <p className="text-lg">
+                <span className="font-bold">Showing results for: </span>
+                <span>{searchTerm}</span>
+              </p>
+              <p className="font-bold text-theme-gray">{totalPostsCount} {totalPostsCount !== 1 ? "Results" : "Result"}</p>
+            </div>
+          ) : null
+        }
         <FilterComponent filters={[disabilityFilter, locationFilter, demographicFilter]}/>
         <div>
-          {posts.map((post, index) => {
-            if (posts.length <= index + 2) {
-              // Attach observer to the second-to-last post
-              return (
-                <div ref={secondLastPostRef} key={post._id}>
-                  <PostComponent post={post} clickable={true} />
+          {
+            posts.length ? (
+              posts.map((post, index) => {
+                if (posts.length <= index + 2) {
+                  // Attach observer to the second-to-last post
+                  return (
+                    <div ref={secondLastPostRef} key={post._id}>
+                      <PostComponent post={post} clickable={true} />
+                    </div>
+                  );
+                } else {
+                  return <PostComponent key={post._id} post={post} clickable={true} />;
+                }
+              })
+            ) : (
+              !loading && searchTerm && searchTerm.length ? (
+                <div className="text-center font-bold text-theme-gray text-[22px]">
+                  <p>No results found for &quot;{searchTerm}&quot;.</p>
+                  <p>Please try another search!</p>
                 </div>
-              );
-            } else {
-              return <PostComponent key={post._id} post={post} clickable={true} />;
-            }
-          })}
+              ) : null
+            )
+          }
           {loading &&
             <div className="flex items-center justify-center mt-8">
               <LoaderCircle className="animate-spin" size={32} color="#475CC6"/>
