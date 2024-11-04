@@ -2,7 +2,7 @@ import { CommentInput, commentSchema, PopulatedComment } from "@/utils/types/com
 import CommentComponent from "../CommentComponent";
 import CommentInputComponent from "./CommentInputComponent";
 import { useState } from "react";
-import { createComment, createCommentLike, deleteCommentLike } from "@/server/db/actions/CommentActions";
+import { createComment, createCommentLike, deleteComment, deleteCommentLike } from "@/server/db/actions/CommentActions";
 import { User } from "@/utils/types/user";
 
 type CommentTreeContainerProps = {
@@ -16,6 +16,7 @@ export default function CommentTreeContainer(props: CommentTreeContainerProps) {
   const { postId, parentComment: initialParentComment, childComments: initialChildComments, authUser } = props;
   const [parentComment, setParentComment] = useState<PopulatedComment>(initialParentComment);
   const [childComments, setChildComments] = useState<PopulatedComment[]>(initialChildComments);
+  const [parentDeleted, setParentDeleted] = useState<boolean>(initialParentComment.isDeleted);
   const [showReplyInput, setShowReplyInput] = useState<boolean>(false);
 
   function onReplyClick() {
@@ -71,10 +72,20 @@ export default function CommentTreeContainer(props: CommentTreeContainerProps) {
   }
 
   async function onDeleteClick(commentId: string) {
-    // TODO
+    try {
+      await deleteComment(commentId);
+      if (commentId === parentComment._id) {
+        setParentDeleted(true);
+      } else {
+        setChildComments(childComments => childComments.filter(comment => comment._id !== commentId));
+      }
+    } catch (err) {
+      console.error(`Failed to delete comment:`, err);
+      throw err;
+    }
   }
 
-  return (
+  return parentDeleted && childComments.length === 0 ? null : (
     <CommentComponent
       comment={parentComment}
       onReplyClick={onReplyClick}

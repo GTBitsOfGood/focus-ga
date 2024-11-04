@@ -12,6 +12,9 @@ import { useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 import { ProfileColors } from "@/utils/consts";
+import EditPostModal from "./EditPostModal";
+import { Disability } from "@/utils/types/disability";
+import { useToast } from "@/hooks/use-toast";
 
 type PostComponentProps = {
   post: PopulatedPost;
@@ -19,6 +22,7 @@ type PostComponentProps = {
   clickable?: boolean;
   onLikeClick?: (liked: boolean) => Promise<void>;
   onSaveClick?: (saved: boolean) => Promise<void>;
+  onEditClick?: (title: string, content: string, tags: Disability[]) => Promise<void>;
   onDeleteClick?: () => Promise<void>;
 };
 
@@ -33,7 +37,8 @@ export default function PostComponent(props: PostComponentProps) {
     clickable = false,
     onLikeClick,
     onSaveClick,
-    onDeleteClick
+    onDeleteClick,
+    onEditClick
   } = props;
   
   // don't render links for clickable components to avoid nested a tags
@@ -43,24 +48,30 @@ export default function PostComponent(props: PostComponentProps) {
   }
 
   const {
-    title,
+    title: initialTitle,
     author,
-    content,
+    content: initialContent,
     date,
-    tags,
+    tags: initialTags,
     likes: initialLikes,
     liked: initialLiked,
     saved: initialSaved,
     comments
   } = post;
 
+  const [title, setTitle] = useState<string>(initialTitle);
+  const [content, setContent] = useState<string>(initialContent);
+  const [tags, setTags] = useState<(Disability | null)[]>(initialTags);
   const [likes, setLikes] = useState<number>(initialLikes);
   const [liked, setLiked] = useState<boolean>(initialLiked);
   const [likeLoading, setLikeLoading] = useState<boolean>(false);
   const [saved, setSaved] = useState<boolean>(initialSaved);
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+
+  const { toast } = useToast();
 
   async function handleLikeClick() {
     if (likeLoading || clickable) return;
@@ -113,6 +124,41 @@ export default function PostComponent(props: PostComponentProps) {
       }
     }
   }
+  
+  async function handleEditClick(newTitle: string, newContent: string, newTags: Disability[]) {
+    setTitle(newTitle);
+    setContent(newContent);
+    setTags(newTags);
+
+    if (onEditClick) {
+      try {
+        await onEditClick(newTitle, newContent, newTags);
+        setShowEditModal(false);
+      } catch (err) {
+        setTitle(title);
+        setContent(content);
+        setTags(tags);
+        throw err;
+      }
+    }
+  }
+
+  async function handleShareClick() {
+    const url = `${window.location.origin}/posts/${post._id}`;
+
+    try {
+      await navigator.clipboard.writeText(url);
+      toast({
+        title: "Copied URL!",
+        description: "The URL for this post was copied to your clipboard.",
+      });
+    } catch (err) {
+      toast({
+        title: "Failed to copy URL",
+        description: "There was an error in copying the URL to your clipboard. Please try again.",
+      });
+    }
+  }
 
   const bottomRow = [
     {
@@ -123,7 +169,7 @@ export default function PostComponent(props: PostComponentProps) {
       onClick: likeLoading ? undefined : handleLikeClick
     },
     {
-      label: comments.toString(),
+      label: (comments ?? "").toString(),
       icon: <MessageSquare />
     },
     {
@@ -138,10 +184,17 @@ export default function PostComponent(props: PostComponentProps) {
   const reactContent = (
     <>
       <div className="flex items-center justify-between text-sm">
-        <Link className="flex items-center gap-2" href={`/family/${author?._id}`}>
+        {clickable ? (
+        <div className="flex items-center gap-2">
           <span className={`w-6 h-6 bg-${author?.profileColor ? author.profileColor : ProfileColors.ProfileDefault} rounded-full inline-block`}/>
           {author ? `${author.lastName} Family` : 'Deleted User'}
+        </div>
+      ) : (
+          <Link className="flex items-center gap-2" href={`/family/${author?._id}`}>
+            <span className={`w-6 h-6 bg-${author?.profileColor ? author.profileColor : ProfileColors.ProfileDefault} rounded-full inline-block`}/>
+            {author ? `${author.lastName} Family` : 'Deleted User'}
         </Link>
+        )}
         <p suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
       </div>
       <div className="flex items-center justify-between py-0.5">
@@ -153,7 +206,9 @@ export default function PostComponent(props: PostComponentProps) {
                 <Ellipsis className="w-6 h-6" />
               </DropdownMenuTrigger>
               <DropdownMenuContent side="bottom" align="end">
+                {onEditClick && <DropdownMenuItem onClick={() => setShowEditModal(true)}>Edit</DropdownMenuItem>}
                 {onDeleteClick && <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem>}
+                <DropdownMenuItem onClick={handleShareClick}>Share</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )
@@ -200,6 +255,14 @@ export default function PostComponent(props: PostComponentProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      {showEditModal && <EditPostModal
+        isOpen={showEditModal}
+        title={title}
+        content={content}
+        tags={tags.filter(tag => tag !== null)}
+        closeModal={() => setShowEditModal(false)}
+        onSubmit={handleEditClick}
+      />}
     </>
   );
 

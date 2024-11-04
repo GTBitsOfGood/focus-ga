@@ -3,15 +3,13 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import focusLogo from "@/../public/focus-logo.png";
 import Image from "next/image";
-import { SquarePen } from "lucide-react";
-import { Search } from "lucide-react";
-import { ChevronDown } from "lucide-react";
-import { ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Search, SquarePen, X } from "lucide-react";
 import Link from "next/link";
 import useClickOff from "@/hooks/useClickOff";
 import { signOut } from "@/server/db/actions/UserActions";
 import { ProfileColors } from "@/utils/consts";
 import { useUser } from "@/contexts/UserContext";
+import { useSearch } from "@/hooks/SearchContext";
 
 interface NavbarProps {
   openModal: () => void;
@@ -20,16 +18,29 @@ interface NavbarProps {
 export default function Navbar({ openModal }: NavbarProps) {
   const router = useRouter();
   const [menuIsOpen, setMenuIsOpen] = useState(false);
+  const [inputValue, setInputValue] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dropdownButtonRef = useRef<HTMLDivElement>(null);
   const { user } = useUser()
+  const { searchTerm, setSearchTerm } = useSearch();
 
   useClickOff(dropdownRef, () => setMenuIsOpen(false), [dropdownRef, dropdownButtonRef]);
 
   const toggleDropdown = () => {
     setMenuIsOpen(!menuIsOpen);
   };
+  
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      setSearchTerm(inputValue);
+    }
+  };
 
+  const clearSearch = () => {
+    setInputValue("");
+    setSearchTerm("");
+  }
+  
   if (!user) {
     return
   }
@@ -44,9 +55,22 @@ export default function Navbar({ openModal }: NavbarProps) {
         <input
           type="text"
           placeholder="Search for a post"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown}
           className="w-full h-11 px-12 rounded-[20px] bg-[#F3F3F3] tracking-wide pl-16 focus:outline-none"
         />
         <Search strokeWidth={3} className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-500" />
+        {
+          inputValue.length ? (
+            <button
+              onClick={clearSearch}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500"
+            >
+              <X strokeWidth={2} />
+            </button>
+          ) : null
+        }
       </div>
 
       {/* Create Post*/}

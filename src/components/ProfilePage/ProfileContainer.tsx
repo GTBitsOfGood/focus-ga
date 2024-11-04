@@ -6,7 +6,7 @@ import { PopulatedUser, User } from "@/utils/types/user";
 import { useEffect, useState } from "react";
 import Tag from "../Tag";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getPopulatedUserPosts } from "@/server/db/actions/PostActions";
+import { getPopulatedSavedPosts, getPopulatedUserPosts } from "@/server/db/actions/PostActions";
 import { PopulatedPost } from "@/utils/types/post";
 import PostComponent from "../PostComponent";
 import EditProfileModal from "./EditProfileModal";
@@ -23,6 +23,8 @@ type ProfileContainerProps = {
 
 export default function ProfileContainer({ user }: ProfileContainerProps) {
   const [userPosts, setUserPosts] = useState<PopulatedPost[]>([]);
+  const [savedPosts, setSavedPosts] = useState<PopulatedPost[]>([]);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user: currUser, setUser } = useUser(); // Access the current authenticated user from UserContext
 
@@ -33,9 +35,13 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
     const fetchUserPosts = async () => {
       setUserPosts(await getPopulatedUserPosts(user._id));
     };
+    const fetchSavedPosts = async () => {
+      setSavedPosts(await getPopulatedSavedPosts(user._id));
+    };
 
     if (user) {
       fetchUserPosts(); 
+      fetchSavedPosts();
     }
   }, [user]);
 
@@ -104,7 +110,7 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
           </p>
           <div className="flex flex-row mb-4">
             <p className="text-lg font-semibold mr-3">Disabilities: </p>
-            <div className={`flex flex-row gap-2 flex-wrap gap-3 ${user.childDisabilities.length > 0 ? 'py-1' : '-my-1'}`}>
+            <div className={`flex flex-row flex-wrap gap-3 ${user.childDisabilities.length > 0 ? 'py-1' : '-my-1'}`}>
               {
                 user.childDisabilities.map((disability, index) => {
                   return <Tag text={disability.name} key={index} />
@@ -133,7 +139,15 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
               }
             </div>
           </TabsContent>
-          <TabsContent value="saved-posts">Saved posts here.</TabsContent>
+          <TabsContent value="saved-posts">
+            <div className="space-y-6">
+              {
+                savedPosts.map((post) => {
+                  return <PostComponent key={post._id} post={post} clickable={true} />
+                })
+              }
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
     </div>

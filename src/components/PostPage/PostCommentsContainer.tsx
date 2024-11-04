@@ -10,9 +10,10 @@ import { useState } from "react";
 import CommentInputComponent from "./CommentInputComponent";
 import CommentTreeContainer from "./CommentTreeContainer";
 import { User } from "@/utils/types/user";
-import { createPostLike, createPostSave, deletePost, deletePostLike, deletePostSave } from "@/server/db/actions/PostActions";
+import { createPostLike, createPostSave, deletePost, deletePostLike, deletePostSave, editPost } from "@/server/db/actions/PostActions";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { Disability } from "@/utils/types/disability";
 
 function buildChildCommentsMap(comments: PopulatedComment[]) {
   const map = new Map<string, PopulatedComment[]>();
@@ -38,11 +39,11 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
   const router = useRouter();
   const { toast } = useToast();
 
-  const [parentComments, setParentComments] = useState<PopulatedComment[]>(
-    initialComments.filter(comment => comment.replyTo === null)
-  );
   const [childComments, setChildComments] = useState<Map<string, PopulatedComment[]>>(
     buildChildCommentsMap(initialComments)
+  );
+  const [parentComments, setParentComments] = useState<PopulatedComment[]>(
+    initialComments.filter(comment => comment.replyTo === null && (comment.isDeleted === false || childComments.get(comment._id)))
   );
 
   async function onNewCommentSubmit(newCommentBody: string) {
@@ -104,6 +105,23 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
     }
   }
 
+  async function onPostEditClick(title: string, content: string, tags: Disability[]) {
+    try {
+      await editPost(post._id, { title, content, tags: tags.map(tag => tag._id) });
+      toast({
+        title: "Post successfully edited",
+        description: "Your post has been edited successfully.",
+      });
+    } catch (err) {
+      toast({
+        title: "Failed to edit post",
+        description: "There was an error editing your post. Please try again.",
+      });
+      console.error('Failed to edit post:', err);
+      throw err;
+    }
+  }
+
   async function onPostDeleteClick() {
     try {
       await deletePost(post._id);
@@ -130,6 +148,7 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
           post={post}
           onLikeClick={onPostLikeClick}
           onSaveClick={onPostSaveClick}
+          onEditClick={post.author?._id === authUser._id ? onPostEditClick : undefined}
           onDeleteClick={post.author?._id === authUser._id ? onPostDeleteClick : undefined}
         />
         <CommentInputComponent

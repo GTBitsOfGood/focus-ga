@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useEffect, useState, Suspense, useRef } from "react";
-import { createPost } from "@/server/db/actions/PostActions";
 import { getDisabilities } from "@/server/db/actions/DisabilityActions";
 import { Disability } from "@/utils/types/disability";
 import dynamic from 'next/dynamic'
@@ -16,45 +15,38 @@ import { getPopulatedUser } from "@/server/db/actions/UserActions";
 
 const EditorComp = dynamic(() => import('./EditorComponent'), { ssr: false })
 
-type CreatePostModalProps = {
-  user: User;
+type EditPostModalProps = {
   isOpen: boolean;
-  openModal: () => void;
+  openModal?: () => void;
   closeModal: () => void;
+  modalTitle?: string;
+  title?: string;
+  content?: string;
+  tags?: Disability[];
+  onSubmit: (title: string, content: string, tags: Disability[]) => Promise<void>;
 }
 
-type PostData = {
-  title: string;
-  content: string;
-  tags: Disability[];
-}
+export default function EditPostModal(props: EditPostModalProps) {
+  const {
+    isOpen,
+    openModal,
+    closeModal,
+    modalTitle = "Edit Post",
+    title: initialTitle,
+    content: initialContent,
+    tags: initialTags,
+    onSubmit
+  } = props;
 
-export default function CreatePostModal({user, isOpen, openModal, closeModal}: CreatePostModalProps) {
-  const [postData, setPostData] = useState<PostData>({
-    title: "",
-    content: "",
-    tags: []
-  });
+  const [title, setTitle] = useState<string>(initialTitle || "");
+  const [content, setContent] = useState<string>(initialContent || "");
+  const [tags, setTags] = useState<Disability[]>(initialTags || []);
   const [showTitleError, setTitleError] = useState(false);
   const [showBodyError, setBodyError] = useState(false);
   const [disabilities, setDisabilities] = useState<Disability[]>([]);
   const [mouseDownOnBackground, setMouseDownOnBackground] = useState(false);
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const editorRef = useRef<MDXEditorMethods | null>(null);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const populatedUser = getPopulatedUser(user._id);
-        setPostData({ ...postData, tags: (await populatedUser).defaultDisabilityTags });
-      } catch (error) {
-        console.log("Failed to fetch/set default disability tags")
-      }
-    }
-
-    fetchUserData();
-  }, [user])
 
   useEffect(() => {
     const fetchDisabilities = async () => {
@@ -62,59 +54,29 @@ export default function CreatePostModal({user, isOpen, openModal, closeModal}: C
       setDisabilities(disabilityList);
     }
     fetchDisabilities();
-  }, [])
-
-  const notifySuccess = () => {
-    toast({
-      title: "Post successfully added",
-      description: "Your post has been successfully added to the community.",
-    });
-  };
-
-  const notifyFailure = () => {
-    toast({
-      title: "Failed to add post",
-      description: "There was an error adding your post. Please try again.",
-    });
-  };
-
-  const validateSubmission = (): boolean => {
-    const isTitleValid = postData.title.length > 0;
-    const isContentValid = postData.content.length > 0;
-
-    setTitleError(!isTitleValid);
-    setBodyError(!isContentValid);
-
-    return isTitleValid && isContentValid;
-  }
+  }, []);
 
   const handleSubmit = async () => {
     try {
       if (validateSubmission()) {
         setIsSubmitting(true);
-        const formattedData = {
-          author: user._id,
-          title: postData.title,
-          content: postData.content.trim(),
-          tags: postData.tags.map((tag) => tag._id)
-        }
-
-        await createPost(formattedData);
+        await onSubmit(title, content, tags);
         closeModal();
-        notifySuccess();
-
-        setPostData({
-          title: "",
-          content: "",
-          tags: []
-        });
         editorRef.current?.setMarkdown("");
       }
-    } catch (error) {
-      notifyFailure();
-    } finally {
+    } catch (error) {} finally {
       setIsSubmitting(false);
     }
+  }
+
+  const validateSubmission = (): boolean => {
+    const isTitleValid = title.length > 0;
+    const isContentValid = content.length > 0;
+
+    setTitleError(!isTitleValid);
+    setBodyError(!isContentValid);
+
+    return isTitleValid && isContentValid;
   }
 
   const handleClose = () => {
@@ -126,22 +88,22 @@ export default function CreatePostModal({user, isOpen, openModal, closeModal}: C
   const handleEditorChange = (text: string) => {
     const textLength = countNonMarkdownCharacters(text);
     if (textLength <= MAX_POST_CONTENT_LEN) {
-      setPostData({ ... postData, content: text });
+      setContent(text);
     } else {
-      editorRef.current?.setMarkdown(postData.content);
+      editorRef.current?.setMarkdown(content);
     }
   }
 
   const toggleDisability = (name: Disability) => {
-    if (postData.tags.length < MAX_POST_DISABILITY_TAGS) {
-      const newTags = postData.tags.includes(name)
-      ? postData.tags.filter((d) => d !== name)
-      : [...postData.tags, name];
+    if (tags.length < MAX_POST_DISABILITY_TAGS) {
+      const newTags = tags.includes(name)
+      ? tags.filter((d) => d !== name)
+      : [...tags, name];
     
-      setPostData({ ...postData, tags: newTags });
-    } else if (postData.tags.length == MAX_POST_DISABILITY_TAGS) {
-      const newTags = postData.tags.filter((d) => d !== name)
-      setPostData({ ...postData, tags: newTags });
+      setTags(newTags);
+    } else if (tags.length == MAX_POST_DISABILITY_TAGS) {
+      const newTags = tags.filter((d) => d !== name)
+      setTags(newTags);
     }
   };
 
@@ -160,11 +122,15 @@ export default function CreatePostModal({user, isOpen, openModal, closeModal}: C
     setMouseDownOnBackground(false);
   };
 
+  if (!isOpen) {
+    return <></>
+  }
+
   return (
-    <div className={cn("fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50", { hidden: !isOpen })} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}>
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl relative z-50 flex flex-col max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-2">
-          <div className="text-black text-xl font-bold">Create New Post</div>
+          <div className="text-black text-xl font-bold">{modalTitle}</div>
           <X className="w-6 h-6 cursor-pointer" onClick={handleClose} />
         </div>
         
@@ -176,14 +142,14 @@ export default function CreatePostModal({user, isOpen, openModal, closeModal}: C
           <div className={`w-full mt-1 p-3 border ${showTitleError ? 'border-[#ff4e4e]' : 'border-gray-300'} rounded-md flex justify-between items-center`}>
             <input
               id="title"
-              value={postData.title}
+              value={title}
               maxLength={100}
               placeholder="Enter post title"
-              onChange={(event) => setPostData({ ...postData, title: event.target.value })}
+              onChange={(event) => setTitle(event.target.value)}
               className="focus:outline-none w-[89%]"
             />
             <div className="text-gray-400 text-sm">
-              {postData.title.length}/{MAX_POST_TITLE_LEN}
+              {title.length}/{MAX_POST_TITLE_LEN}
             </div>
           </div>
           
@@ -197,12 +163,12 @@ export default function CreatePostModal({user, isOpen, openModal, closeModal}: C
           </label>
           <div className={`mt-1 rounded-lg h-full border ${showBodyError ? 'border-red-300 border-2' : ''}`}>
             <Suspense fallback={null}>
-              <EditorComp editorRef={editorRef} markdown={postData.content} handleEditorChange={handleEditorChange} />
+              <EditorComp editorRef={editorRef} markdown={content} handleEditorChange={handleEditorChange} />
             </Suspense>
           </div>
           <div className="flex justify-between">
             {showBodyError ? <div className="text-[#ff4e4e] text-sm font-normal">Required Field</div> : <div></div> }
-            <p className="text-sm text-gray-400 text-right">{countNonMarkdownCharacters(postData.content)}/{MAX_POST_CONTENT_LEN}</p>
+            <p className="text-sm text-gray-400 text-right">{countNonMarkdownCharacters(content)}/{MAX_POST_CONTENT_LEN}</p>
           </div>
         </div>
 
@@ -212,7 +178,7 @@ export default function CreatePostModal({user, isOpen, openModal, closeModal}: C
           </label>
           <DropdownWithDisplay
             items = {disabilities}
-            selectedItems={postData.tags}
+            selectedItems={tags}
             onToggleItem={toggleDisability}
             displayKey="name"
             placeholder="Add disability tags"
@@ -229,15 +195,15 @@ export default function CreatePostModal({user, isOpen, openModal, closeModal}: C
             Cancel
           </button>
           <button 
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className={cn(
-            "min-w-20 py-2 px-4 bg-theme-blue rounded-lg justify-center items-center gap-2.5 inline-flex",
-            {
-            "opacity-50 cursor-not-allowed": isSubmitting,
-            "hover:bg-blue-900": !isSubmitting,
-            }
-          )}
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className={cn(
+              "min-w-20 py-2 px-4 bg-theme-blue rounded-lg justify-center items-center gap-2.5 inline-flex",
+              {
+              "opacity-50 cursor-not-allowed": isSubmitting,
+              "hover:bg-blue-900": !isSubmitting,
+              }
+            )}
           >
           <div className="text-white font-bold">{isSubmitting ? 'Posting...' : 'Post'}</div>
           </button>
