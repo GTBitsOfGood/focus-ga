@@ -6,12 +6,9 @@ import { Disability } from "@/utils/types/disability";
 import dynamic from 'next/dynamic'
 import { MAX_POST_TITLE_LEN, MAX_POST_CONTENT_LEN, MAX_POST_DISABILITY_TAGS } from "@/utils/consts";
 import { X } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { MDXEditorMethods } from "@mdxeditor/editor";
 import { cn, countNonMarkdownCharacters } from "@/lib/utils";
-import { User } from "@/utils/types/user";
 import DropdownWithDisplay from "./DropdownWithDisplay";
-import { getPopulatedUser } from "@/server/db/actions/UserActions";
 
 const EditorComp = dynamic(() => import('./EditorComponent'), { ssr: false })
 
