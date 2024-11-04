@@ -2,7 +2,7 @@
 
 import { getPopulatedPosts } from "@/server/db/actions/PostActions";
 import PostComponent from "@/components/PostComponent";
-import { useEffect, useState, useRef, useCallback, use } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { PopulatedPost } from "@/utils/types/post";
 import { LoaderCircle } from "lucide-react";
 import FilterComponent from "@/components/FilterComponent";
@@ -11,8 +11,9 @@ import { Location } from "@/utils/types/location";
 import { getDisabilities } from "@/server/db/actions/DisabilityActions";
 import { Filter } from "@/utils/types/common";
 import { PAGINATION_LIMIT } from "@/utils/consts";
-import { useUser } from "@/hooks/user";
+import { useUser } from "@/contexts/UserContext";
 import { GEORGIA_CITIES } from "@/utils/cities";
+import { getPopulatedUser } from "@/server/db/actions/UserActions";
 import { useSearch } from "@/hooks/SearchContext";
 
 export const dynamic = 'force-dynamic';
@@ -22,10 +23,11 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
-  const user = useUser();
+  const { user } = useUser();
   
   const [disabilities, setDisabilities] = useState<Disability[]>([]);
   const [selectedDisabilities, setSelectedDisabilities] = useState<Disability[]>([]);
+  const [filtersLoading, setFiltersLoading] = useState(true);
 
   const locations = GEORGIA_CITIES.map(city => ({ name: city, _id: city }));
   const [selectedLocations, setSelectedLocations] = useState<Location[]>([]);
@@ -39,8 +41,25 @@ export default function Home() {
       const disabilityList = await getDisabilities();
       setDisabilities(disabilityList);
     };
+    
     fetchDisabilities();
   }, []);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!user) return;
+      try {
+        const populatedUser = await getPopulatedUser(user._id);
+        setSelectedDisabilities(populatedUser.defaultDisabilityFilters);
+      } catch (error) {
+        console.log("Failed to fetch/set default disability filter");
+      } finally {
+        setFiltersLoading(false); // Only set filtersLoading to false once default filters have loaded
+      }
+    };
+
+    fetchUserData();
+  }, [user]);
 
   const handleSelected = <T extends { _id: string }>(
     selected: T, 
@@ -90,7 +109,7 @@ export default function Home() {
 
   // Fetch posts when page changes
   const fetchPosts = async (clear: boolean = false) => {
-    if (!user) return;
+    if (!user || filtersLoading) return;
 
     if (clear) {
       setPage(0);
@@ -117,7 +136,7 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     fetchPosts();
@@ -141,10 +160,6 @@ export default function Home() {
     },
     [loading, hasMore]
   );
-
-  if (!user) {
-    return null;
-  }
 
   return (
     <main className="flex flex-col items-center px-16">

@@ -3,26 +3,12 @@
 import React, { useEffect, useState, Suspense, useRef } from "react";
 import { getDisabilities } from "@/server/db/actions/DisabilityActions";
 import { Disability } from "@/utils/types/disability";
-import Tag from "./Tag";
 import dynamic from 'next/dynamic'
 import { MAX_POST_TITLE_LEN, MAX_POST_CONTENT_LEN, MAX_POST_DISABILITY_TAGS } from "@/utils/consts";
-import { ChevronDown, Check, X, ChevronUp } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { useToast } from "@/hooks/use-toast";
+import { X } from "lucide-react";
 import { MDXEditorMethods } from "@mdxeditor/editor";
 import { cn, countNonMarkdownCharacters } from "@/lib/utils";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
+import DropdownWithDisplay from "./DropdownWithDisplay";
 
 const EditorComp = dynamic(() => import('./EditorComponent'), { ssr: false })
 
@@ -54,10 +40,8 @@ export default function EditPostModal(props: EditPostModalProps) {
   const [tags, setTags] = useState<Disability[]>(initialTags || []);
   const [showTitleError, setTitleError] = useState(false);
   const [showBodyError, setBodyError] = useState(false);
-  const [showDisabilities, setShowDisabilities] = useState(false);
   const [disabilities, setDisabilities] = useState<Disability[]>([]);
   const [mouseDownOnBackground, setMouseDownOnBackground] = useState(false);
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const editorRef = useRef<MDXEditorMethods | null>(null);
 
@@ -189,64 +173,15 @@ export default function EditPostModal(props: EditPostModalProps) {
           <label htmlFor="title" className="block text-sm font-bold text-gray-700">
             Disability Tags
           </label>
-          <div className="relative w-full mt-1">
-            <Popover>
-              <PopoverTrigger asChild className="w-full" onClick={() => setShowDisabilities(!showDisabilities)}>
-                <div className="relative flex items-center p-3 border border-gray-300 rounded-md cursor-pointer">
-                  <div className="flex items-center w-full h-6">
-                    {tags.length === 0 ? (
-                      <div className="text-neutral-400 text-sm font-normal">
-                      Add disability tags (up to five)
-                      </div>
-                    ) : (
-                      tags.map((disability) => (
-                      <div
-                        key={disability._id}
-                        onClick={(e) => {
-                        e.stopPropagation();
-                        toggleDisability(disability);
-                        }}
-                        className="mr-2"
-                      >
-                        <Tag text={disability.name} isClickable={true}/>
-                      </div>
-                      ))
-                    )}
-                  </div>
-
-                  {showDisabilities ? <ChevronDown className="w-4 h-4" color="#7D7E82" /> : <ChevronUp className="w-4 h-4" color="#7D7E82" /> }
-
-                </div>
-                
-              </PopoverTrigger>
-
-              <PopoverContent align="start" className="p-2">
-                <Command>
-                  <CommandInput placeholder={`Search disabilities`} />
-                  <CommandList>
-                    <CommandEmpty>No disability found.</CommandEmpty>
-                    <CommandGroup>
-                      {disabilities.map((d) => (
-                        <CommandItem
-                          key={d._id}
-                          value={d.name}
-                          onSelect={() => {
-                            toggleDisability(d);
-                          }}
-                          className="flex items-center p-2 cursor-pointer rounded-lg hover:bg-gray-100 h-10"
-                        >
-                          { tags.includes(d) ? 
-                          <Check className="w-4 h-4 mr-2" color="#7D7E82" />
-                          : null}
-                          {d.name}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </div>
+          <DropdownWithDisplay
+            items = {disabilities}
+            selectedItems={tags}
+            onToggleItem={toggleDisability}
+            displayKey="name"
+            placeholder="Add disability tags"
+            maxSelectionCount={5}
+            typeDropdown="disabilities"
+          />
         </div>
 
         <div className="flex justify-end space-x-4">
@@ -257,15 +192,15 @@ export default function EditPostModal(props: EditPostModalProps) {
             Cancel
           </button>
           <button 
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className={cn(
-            "min-w-20 py-2 px-4 bg-theme-blue rounded-lg justify-center items-center gap-2.5 inline-flex",
-            {
-            "opacity-50 cursor-not-allowed": isSubmitting,
-            "hover:bg-blue-900": !isSubmitting,
-            }
-          )}
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className={cn(
+              "min-w-20 py-2 px-4 bg-theme-blue rounded-lg justify-center items-center gap-2.5 inline-flex",
+              {
+              "opacity-50 cursor-not-allowed": isSubmitting,
+              "hover:bg-blue-900": !isSubmitting,
+              }
+            )}
           >
           <div className="text-white font-bold">{isSubmitting ? 'Posting...' : 'Post'}</div>
           </button>

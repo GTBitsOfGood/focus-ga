@@ -5,8 +5,8 @@ import Navbar from "@/components/Navbar";
 import React, { useState } from "react";
 import { Toaster } from "@/components/ui/toaster"
 import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
-import { FOCUS_FONT } from "@/utils/consts";
 import { useUser } from "@/hooks/user";
+import { UserProvider } from "@/contexts/UserContext";
 import { SearchProvider } from "@/hooks/SearchContext";
 import { Disability } from "@/utils/types/disability";
 import { createPost } from "@/server/db/actions/PostActions";
@@ -59,19 +59,21 @@ export default function CommunityLayout({ children }: CommunityLayoutProps) {
 
   return (
     <SearchProvider>
-      <Navbar openModal={openCreatePostModal} user={user}/>
-      <EditPostModal
-        modalTitle="Create New Post"
-        isOpen={isCreatePostModalOpen}
-        openModal={openCreatePostModal}
-        closeModal={closeCreatePostModal}
-        onSubmit={onPostSubmit}
-      />
-      <div className="mx-48 mt-[100px] p-4">
-        {children}
-        <Toaster />
-      </div>
-      <ProgressBar height="3px" color="#475CC6" shallowRouting options={{ showSpinner: false }} />
+      <UserProvider>
+        <Navbar openModal={openCreatePostModal}/>
+        <EditPostModal
+          modalTitle="Create New Post"
+          isOpen={isCreatePostModalOpen}
+          openModal={openCreatePostModal}
+          closeModal={closeCreatePostModal}
+          onSubmit={onPostSubmit}
+        />
+        <div className="mx-48 mt-[100px] p-4">
+          {children}
+          <Toaster />
+        </div>
+        <ProgressBar height="3px" color="#475CC6" shallowRouting options={{ showSpinner: false }} />
+      </UserProvider>
     </SearchProvider>
   );
 }
