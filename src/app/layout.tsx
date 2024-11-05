@@ -5,8 +5,8 @@ import { FOCUS_FONT } from "@/utils/consts";
 import Head from 'next/head';
 
 export const metadata: Metadata = {
-  title: "Focus Community Page",
-  description: "Community page for families who are registered under FOCUS",
+  title: "Focus Community Platform",
+  description: "Community platform for families who are registered under FOCUS",
 };
 
 export default function RootLayout({
