@@ -321,6 +321,8 @@ export async function createPostSave(userId: string, postId: string): Promise<Po
   const postSaveInput: PostSaveInput = { user: userId, post: postId };
   const validatedPostSave = postSaveSchema.parse(postSaveInput);
   const createdPostSave = await PostSaveModel.create(validatedPostSave);
+
+  revalidatePath(`/posts/${postId}`);
   return createdPostSave.toObject();
 }
 
@@ -392,6 +394,7 @@ export async function deletePostSave(userId: string, postId: string): Promise<vo
   if (!deletedSave) {
     throw new Error("Post save not found");
   }
+  revalidatePath(`/posts/${postId}`);
 }
 
 /**
