@@ -46,7 +46,7 @@ export default function Navbar({ openModal }: NavbarProps) {
   return (
     <div className="w-full h-[100px] bg-white flex items-center justify-between fixed top-0 z-50 border-b border-gray-300">
       {/* Logo plus search bar*/}
-      <Link href="/">
+      <Link href="/" className="cursor-pointer">
         <Image src={focusLogo} width={121} height={58} alt="focus-logo" className="mx-12 mb-2" />
       </Link>
       <div className="relative flex-grow mx-20">
