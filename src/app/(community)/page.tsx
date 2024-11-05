@@ -4,7 +4,7 @@ import { getPopulatedPosts } from "@/server/db/actions/PostActions";
 import PostComponent from "@/components/PostComponent";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { PopulatedPost } from "@/utils/types/post";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, Mail } from "lucide-react";
 import FilterComponent from "@/components/FilterComponent";
 import { Disability } from "@/utils/types/disability";
 import { Location } from "@/utils/types/location";
@@ -15,6 +15,7 @@ import { useUser } from "@/contexts/UserContext";
 import { GEORGIA_CITIES } from "@/utils/cities";
 import { getPopulatedUser } from "@/server/db/actions/UserActions";
 import { useSearch } from "@/contexts/SearchContext";
+import ContactButton from "@/components/ContactButton";
 
 export const dynamic = 'force-dynamic';
 
@@ -161,6 +162,10 @@ export default function Home() {
     [loading, hasMore]
   );
 
+  if (!user) {
+    return null;
+  }
+  
   return (
     <main className="flex flex-col items-center px-16">
       <div className="w-full max-w-4xl space-y-8">
@@ -207,6 +212,7 @@ export default function Home() {
           }
         </div>
       </div>
+      <ContactButton />
     </main>
   );
 }

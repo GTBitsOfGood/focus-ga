@@ -294,7 +294,7 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
         <div className="flex justify-end space-x-4">
           <button
             onClick={handleClose}
-            className="w-20 py-2 bg-light-gray text-theme-gray rounded-md hover:bg-zinc-300 font-bold"
+            className="w-20 py-2 bg-gray-300 text-gray-700 rounded-md transition hover:bg-gray-400 font-bold"
           >
             Cancel
           </button>
@@ -305,7 +305,7 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
             "min-w-20 py-2 px-4 bg-theme-blue rounded-lg justify-center items-center gap-2.5 inline-flex",
             {
             "opacity-50 cursor-not-allowed": isSubmitting,
-            "hover:bg-blue-900": !isSubmitting,
+            "transition hover:bg-blue-900": !isSubmitting,
             }
           )}
           >
