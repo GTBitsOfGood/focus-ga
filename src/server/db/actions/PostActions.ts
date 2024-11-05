@@ -18,89 +18,130 @@ type PipelineArgs = {
   limit?: number,
   tags?: Array<string>,
   postId?: string,
+  searchTerm?: string,
 }
 
-function postPopulationPipeline({authUserId, offset, limit, tags, postId}: PipelineArgs): mongoose.PipelineStage[] {
+type PostAggregationResult = {
+  count: number;
+  posts: PopulatedPost[];
+};
+
+function postPopulationPipeline({ authUserId, offset, limit, tags, postId, searchTerm }: PipelineArgs): mongoose.PipelineStage[] {
   return [
-    // Match specific post ID if given, otherwise sort by date in descending order
-    ... postId ? [
+    // Apply search
+    ...(searchTerm ? [
+      {
+        $search: {
+          index: "focus-fuzzy-search-posts",
+          text: {
+            query: searchTerm,
+            path: ["title", "content"],
+            fuzzy: {},
+          }
+        }
+      },
+    ] : postId ? [
+      // Match specific post ID if given
       { $match: { _id: new mongoose.Types.ObjectId(postId) } }
     ] : [
+      { $match: { isDeleted: false } },
       { $sort: { date: -1 as const } }
-    ],
+    ]),
 
-    // filter by tags
+    // Filter by tags
     ...(tags && tags.length ? [{ $match: { tags: { $in: tags.map((t) => new mongoose.Types.ObjectId(t)) } } }] : []),
 
-    // Skip and limit for pagination
-    ...(offset ? [{ $skip: offset }] : []),
-    ...(limit ? [{ $limit: limit }] : []),
+    // Use $facet to perform two separate aggregations: totalPostCount and posts (paginated)
+    {
+      $facet: {
+        count: [
+          { $count: "count" }
+        ],
+        posts: [
+          ...(offset ? [{ $skip: offset }] : []),
+          ...(limit ? [{ $limit: limit }] : []),
 
-    // Populate author field
-    { $lookup: {
-      from: UserModel.collection.name,
-      localField: 'author',
-      foreignField: '_id',
-      pipeline: [{ $addFields: { _id: { $toString: '$_id' } } }],
-      as: 'author'
-    } },
-    { $unwind: { path: '$author', preserveNullAndEmptyArrays: true } },
+          {
+            $lookup: {
+              from: UserModel.collection.name,
+              localField: 'author',
+              foreignField: '_id',
+              pipeline: [{ $addFields: { _id: { $toString: '$_id' } } }],
+              as: 'author'
+            }
+          },
+          { $unwind: { path: '$author', preserveNullAndEmptyArrays: true } },
 
-    // Populate tags
-    { $lookup: {
-      from: DisabilityModel.collection.name,
-      localField: 'tags',
-      foreignField: '_id',
-      pipeline: [{ $addFields: { _id: { $toString: '$_id' } } }],
-      as: 'tags'
-    } },
+          // Populate tags
+          {
+            $lookup: {
+              from: DisabilityModel.collection.name,
+              localField: 'tags',
+              foreignField: '_id',
+              pipeline: [{ $addFields: { _id: { $toString: '$_id' } } }],
+              as: 'tags'
+            }
+          },
 
-    // Replace author and tags with default values if necessary
-    { $addFields: {
-      author: { $ifNull: ['$author', null] },
-      tags: { $ifNull: ['$tags', []] }
-    } },
+          // Replace author and tags with default values if necessary
+          {
+            $addFields: {
+              author: { $ifNull: ['$author', null] },
+              tags: { $ifNull: ['$tags', []] }
+            }
+          },
 
-    // Determine whether user has liked post
-    { $lookup: {
-      from: PostLikeModel.collection.name,
-      let: { postId: '$_id'  },
-      pipeline: [
-        { $match: {
-          $expr: {
-            $and: [
-              { $eq: ['$post', '$$postId'] },
-              { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
-            ]
+          // Determine whether user has liked post
+          {
+            $lookup: {
+              from: PostLikeModel.collection.name,
+              let: { postId: '$_id' },
+              pipeline: [
+                { $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$post', '$$postId'] },
+                      { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
+                    ]
+                  }
+                } }
+              ],
+              as: 'liked'
+            }
+          },
+          {
+            $addFields: {
+              liked: { $gt: [{ $size: '$liked' }, 0] }
+            }
+          },
+
+          // Determine whether user has saved post
+          {
+            $lookup: {
+              from: PostSaveModel.collection.name,
+              let: { postId: '$_id' },
+              pipeline: [
+                { $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ['$post', '$$postId'] },
+                      { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
+                    ]
+                  }
+                } }
+              ],
+              as: 'saved'
+            }
+          },
+          {
+            $addFields: {
+              saved: { $gt: [{ $size: '$saved' }, 0] },
+              _id: { $toString: '$_id' }
+            }
           }
-        } }
-      ],
-      as: 'liked'
-    } },
-    { $addFields: {
-      liked: { $gt: [{ $size: '$liked' }, 0] }
-    } },
-
-    // Determine whether user has saved post
-    { $lookup: {
-      from: PostSaveModel.collection.name,
-      let: { postId: '$_id'  },
-      pipeline: [
-        { $match: {
-          $expr: {
-            $and: [
-              { $eq: ['$post', '$$postId'] },
-              { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
-            ]
-          }
-        } }
-      ],
-      as: 'saved'
-    } },
-    { $addFields: {
-      saved: { $gt: [{ $size: '$saved' }, 0] },
-      _id: { $toString: '$_id' }
-    } }
+        ]
+      }
+    }
   ];
 }
 
@@ -136,11 +177,14 @@ export async function getPosts(): Promise<Post[]> {
  * @param authUserId - The ID of the currently authenticated user, to determine whether they have liked each post.
  * @returns A promise that resolves to an array of populated post objects.
  */
-export async function getPopulatedPosts(authUserId: string, offset: number, limit: number, tags?: Array<string>): Promise<PopulatedPost[]> {
+export async function getPopulatedPosts(authUserId: string, offset: number, limit: number, tags?: Array<string>, searchTerm?: string): Promise<PostAggregationResult> {
   await dbConnect();
 
-  const posts = await PostModel.aggregate(postPopulationPipeline({authUserId, offset, limit, tags}));
-  return posts;
+  const postsInfo = await PostModel.aggregate(postPopulationPipeline({authUserId, offset, limit, tags, searchTerm}));
+  return {
+    count: postsInfo[0].count.length ? postsInfo[0].count[0].count : 0,
+    posts: postsInfo[0].posts,
+  };
 }
 
 /**
@@ -195,7 +239,8 @@ export async function getPopulatedPost(id: string, authUserId: string): Promise<
     throw new Error("Invalid post ID");
   }
 
-  const [post] = await PostModel.aggregate(postPopulationPipeline({authUserId, postId: id}));
+  const aggregationResult = await PostModel.aggregate(postPopulationPipeline({authUserId, postId: id}));
+  const post = aggregationResult[0].posts[0];
   if (!post) {
     throw new Error("Post not found");
   }
@@ -209,7 +254,7 @@ export async function getPopulatedPost(id: string, authUserId: string): Promise<
  * @throws Will throw an error if the post update fails or if the post is not found.
  * @returns The updated post object.
  */
-export async function editPost(id: string, post: Partial<PostInput>): Promise<Post> {
+export async function editPost(id: string, post: Partial<PostInput>): Promise<PostInput> {
   await dbConnect();
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -221,11 +266,14 @@ export async function editPost(id: string, post: Partial<PostInput>): Promise<Po
   if (!updatedPost) {
     throw new Error("Post not found");
   }
-  return updatedPost;
+  return {
+    ...updatedPost.toObject(),
+    author: updatedPost.author.toString(),
+  };
 }
 
 /**
- * Deletes a post from the database.
+ * Marks a post as deleted in the database and deletes its associated likes and saves.
  * @param id - The ID of the post to delete.
  * @throws Will throw an error if the post deletion fails or if the post is not found.
  */
@@ -236,10 +284,19 @@ export async function deletePost(id: string): Promise<void> {
     throw new Error("Invalid post ID");
   }
 
-  const deletedPost = await PostModel.findByIdAndDelete(id);
-  if (!deletedPost) {
+  const updatedPost = await PostModel.findByIdAndUpdate(id, {
+    title: '[deleted]',
+    content: '[deleted]',
+    author: new mongoose.Types.ObjectId('000000000000000000000000'),
+    tags: [],
+    isDeleted: true
+  });
+  if (!updatedPost) {
     throw new Error("Post not found");
   }
+
+  await PostLikeModel.deleteMany({ post: id });
+  await PostSaveModel.deleteMany({ post: id });
 }
 
 /**
@@ -264,6 +321,8 @@ export async function createPostSave(userId: string, postId: string): Promise<Po
   const postSaveInput: PostSaveInput = { user: userId, post: postId };
   const validatedPostSave = postSaveSchema.parse(postSaveInput);
   const createdPostSave = await PostSaveModel.create(validatedPostSave);
+
+  revalidatePath(`/posts/${postId}`);
   return createdPostSave.toObject();
 }
 
@@ -288,6 +347,37 @@ export async function getSavedPosts(userId: string): Promise<Post[]> {
 }
 
 /**
+ * Retrieves all saved posts for a specific user in populated form.
+ * @param userId - The ID of the user whose saved posts are being retrieved.
+ * @returns A promise that resolves to an array of populated post objects.
+ * @throws Will throw an error if the user ID is invalid.
+ */
+export async function getPopulatedSavedPosts(userId: string): Promise<PopulatedPost[]> {
+  await dbConnect();
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    throw new Error("Invalid user ID");
+  }
+
+  const pipeline: mongoose.PipelineStage[] = [
+    { $match: { user: new mongoose.Types.ObjectId(userId) } },
+    { $sort: { date: -1 as const } },
+    { $lookup: {
+      from: PostModel.collection.name,
+      localField: 'post',
+      foreignField: '_id',
+      as: 'post'
+    } },
+    { $unwind: { path: '$post' } },
+    { $replaceRoot: { newRoot: '$post' } }
+  ].concat(postPopulationPipeline({ authUserId: userId }).slice(2) satisfies mongoose.PipelineStage[] as any);
+
+  const pipelineResult = await PostSaveModel.aggregate(pipeline);
+  const savedPosts = pipelineResult[0].posts;
+  return savedPosts;
+}
+
+/**
  * Deletes a post save record from the database.
  * @param userId - The ID of the user unsaving the post.
  * @param postId - The ID of the post being unsaved.
@@ -304,6 +394,7 @@ export async function deletePostSave(userId: string, postId: string): Promise<vo
   if (!deletedSave) {
     throw new Error("Post save not found");
   }
+  revalidatePath(`/posts/${postId}`);
 }
 
 /**

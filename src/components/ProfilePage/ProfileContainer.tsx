@@ -1,27 +1,33 @@
 "use client";
 
-import { ChevronLeftIcon, Pencil } from "lucide-react";
+import { ChevronLeftIcon, Pencil, Palette } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { PopulatedUser, User } from "@/utils/types/user";
 import { useEffect, useState } from "react";
 import Tag from "../Tag";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getPopulatedUserPosts } from "@/server/db/actions/PostActions";
+import { getPopulatedSavedPosts, getPopulatedUserPosts } from "@/server/db/actions/PostActions";
 import { PopulatedPost } from "@/utils/types/post";
 import PostComponent from "../PostComponent";
 import EditProfileModal from "./EditProfileModal";
 import Link from "next/link";
+import ColorPicker from "../ColorPicker";
+import { ProfileColors } from "@/utils/consts";
+import { editUser } from "@/server/db/actions/UserActions";
+import { useUser } from "@/contexts/UserContext";
 
 
 type ProfileContainerProps = {
   user: PopulatedUser;
-  currUser: User;
 }
 
-export default function ProfileContainer({ user, currUser }: ProfileContainerProps) {
+export default function ProfileContainer({ user }: ProfileContainerProps) {
   const [userPosts, setUserPosts] = useState<PopulatedPost[]>([]);
+  const [savedPosts, setSavedPosts] = useState<PopulatedPost[]>([]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { user: currUser, setUser } = useUser(); // Access the current authenticated user from UserContext
+
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
@@ -29,11 +35,31 @@ export default function ProfileContainer({ user, currUser }: ProfileContainerPro
     const fetchUserPosts = async () => {
       setUserPosts(await getPopulatedUserPosts(user._id));
     };
+    const fetchSavedPosts = async () => {
+      setSavedPosts(await getPopulatedSavedPosts(user._id));
+    };
 
     if (user) {
       fetchUserPosts(); 
+      fetchSavedPosts();
     }
   }, [user]);
+
+  const handleColorPick = async (color: ProfileColors) => {
+    if (!currUser) {
+      return;
+    }
+    try {
+      const updatedUser = await editUser(currUser._id, { profileColor: color });
+      setUser(updatedUser);
+    } catch (error) {
+      console.error("Failed to update profile color: ", error);
+    }
+  }
+
+  if (!currUser) {
+    return;
+  }
 
   return (
     <div>
@@ -46,8 +72,9 @@ export default function ProfileContainer({ user, currUser }: ProfileContainerPro
       <div className="mx-14 mt-8">
         <div className="flex flex-row mb-6 items-start justify-between">
           <div className="flex flex-row space-x-6">
-            <div className="flex items-center justify-center w-[108px] h-[108px] rounded-full bg-profile-pink"> {/** Change to whatever color is chosen */}
+            <div className={`flex items-center justify-center w-[108px] h-[108px] rounded-full bg-${user.profileColor} relative`}> 
               <span className="text-6xl select-none font-medium text-black">{user.lastName.charAt(0).toUpperCase()}</span>
+              { user._id === currUser._id && <ColorPicker handleColorPick = {handleColorPick} /> }
             </div>
             <div className="flex flex-col justify-center">
               <p className="text-2xl font-bold">{user.lastName} Family</p>
@@ -55,7 +82,7 @@ export default function ProfileContainer({ user, currUser }: ProfileContainerPro
             </div>
           </div>
           {
-            currUser._id === user._id 
+            user._id === currUser._id 
             ? (
               <button onClick={() => setIsModalOpen(true)} className="bg-light-gray hover:bg-zinc-300 transition text-theme-gray text-lg font-bold px-4 py-2 rounded-lg">
                 <div className="flex flex-row items-center space-x-2.5">
@@ -83,7 +110,7 @@ export default function ProfileContainer({ user, currUser }: ProfileContainerPro
           </p>
           <div className="flex flex-row mb-4">
             <p className="text-lg font-semibold mr-3">Disabilities: </p>
-            <div className={`flex flex-row gap-2 flex-wrap gap-3 ${user.childDisabilities.length > 0 ? 'py-1' : '-my-1'}`}>
+            <div className={`flex flex-row flex-wrap gap-3 ${user.childDisabilities.length > 0 ? 'py-1' : '-my-1'}`}>
               {
                 user.childDisabilities.map((disability, index) => {
                   return <Tag text={disability.name} key={index} />
@@ -100,8 +127,8 @@ export default function ProfileContainer({ user, currUser }: ProfileContainerPro
         <Separator className="bg-theme-gray my-6" />
         <Tabs defaultValue="my-posts">
           <TabsList className="mb-4">
-            <TabsTrigger value="my-posts">{currUser._id === user._id ? 'My Posts' : 'Posts'}</TabsTrigger>
-            {currUser._id === user._id && <TabsTrigger value="saved-posts">Saved Posts</TabsTrigger>}
+            <TabsTrigger value="my-posts">{user._id === currUser._id ? 'My Posts' : 'Posts'}</TabsTrigger>
+            {user._id === currUser._id && <TabsTrigger value="saved-posts">Saved Posts</TabsTrigger>}
           </TabsList>
           <TabsContent value="my-posts">
             <div className="space-y-6">
@@ -112,7 +139,15 @@ export default function ProfileContainer({ user, currUser }: ProfileContainerPro
               }
             </div>
           </TabsContent>
-          <TabsContent value="saved-posts">Saved posts here.</TabsContent>
+          <TabsContent value="saved-posts">
+            <div className="space-y-6">
+              {
+                savedPosts.map((post) => {
+                  return <PostComponent key={post._id} post={post} clickable={true} />
+                })
+              }
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
     </div>

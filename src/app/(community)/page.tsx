@@ -2,7 +2,7 @@
 
 import { getPopulatedPosts } from "@/server/db/actions/PostActions";
 import PostComponent from "@/components/PostComponent";
-import { useEffect, useState, useRef, useCallback, use } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { PopulatedPost } from "@/utils/types/post";
 import { LoaderCircle, Mail } from "lucide-react";
 import FilterComponent from "@/components/FilterComponent";
@@ -11,8 +11,11 @@ import { Location } from "@/utils/types/location";
 import { getDisabilities } from "@/server/db/actions/DisabilityActions";
 import { Filter } from "@/utils/types/common";
 import { PAGINATION_LIMIT } from "@/utils/consts";
-import { useUser } from "@/hooks/user";
+import { useUser } from "@/contexts/UserContext";
 import { GEORGIA_CITIES } from "@/utils/cities";
+import { getPopulatedUser } from "@/server/db/actions/UserActions";
+import { useSearch } from "@/contexts/SearchContext";
+import ContactButton from "@/components/ContactButton";
 
 export const dynamic = 'force-dynamic';
 
@@ -21,13 +24,17 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
-  const user = useUser();
+  const { user } = useUser();
   
   const [disabilities, setDisabilities] = useState<Disability[]>([]);
   const [selectedDisabilities, setSelectedDisabilities] = useState<Disability[]>([]);
+  const [filtersLoading, setFiltersLoading] = useState(true);
 
   const locations = GEORGIA_CITIES.map(city => ({ name: city, _id: city }));
   const [selectedLocations, setSelectedLocations] = useState<Location[]>([]);
+
+  const { searchTerm } = useSearch();
+  const [totalPostsCount, setTotalPostsCount] = useState(0);
 
   // fetch disabilities on page load
   useEffect(() => {
@@ -35,8 +42,25 @@ export default function Home() {
       const disabilityList = await getDisabilities();
       setDisabilities(disabilityList);
     };
+    
     fetchDisabilities();
   }, []);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!user) return;
+      try {
+        const populatedUser = await getPopulatedUser(user._id);
+        setSelectedDisabilities(populatedUser.defaultDisabilityFilters);
+      } catch (error) {
+        console.log("Failed to fetch/set default disability filter");
+      } finally {
+        setFiltersLoading(false); // Only set filtersLoading to false once default filters have loaded
+      }
+    };
+
+    fetchUserData();
+  }, [user]);
 
   const handleSelected = <T extends { _id: string }>(
     selected: T, 
@@ -78,7 +102,7 @@ export default function Home() {
   // fetch posts when filter changes
   useEffect(() => {
     fetchPosts(true);
-  }, [selectedDisabilities])
+  }, [selectedDisabilities, searchTerm])
 
   useEffect(() => {
     console.log(selectedLocations);
@@ -86,7 +110,7 @@ export default function Home() {
 
   // Fetch posts when page changes
   const fetchPosts = async (clear: boolean = false) => {
-    if (!user) return;
+    if (!user || filtersLoading) return;
 
     if (clear) {
       setPage(0);
@@ -101,7 +125,8 @@ export default function Home() {
 
       const tags = selectedDisabilities.map((disability) => disability._id);
 
-      const newPosts = await getPopulatedPosts(user._id, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, tags);
+      const {count, posts: newPosts } = await getPopulatedPosts(user._id, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, tags, searchTerm);
+      setTotalPostsCount(count);
       if (newPosts.length > 0) {
         setPosts(clear ? newPosts : [...posts, ...newPosts]);
       } else {
@@ -112,7 +137,7 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     fetchPosts();
@@ -140,48 +165,46 @@ export default function Home() {
   if (!user) {
     return null;
   }
-
-  const ContactButton = () => {
-    const [hovered, setHovered] = useState(false);
   
-    return (
-      <a 
-        href="https://focus-ga.org/contact-us/" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="inline-block fixed left-8 bottom-8"
-      >
-        <button
-          className={`overflow-hidden h-12 transition-all duration-300 pl-2 ease-in-out border-2 border-theme-blue bg-white text-theme-blue text-lg p-2 whitespace-nowrap 
-                      ${hovered ? 'w-40 rounded-full opacity-90' : 'w-12 rounded-full opacity-100'}`}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-        >
-          {hovered ? 'Contact FOCUS' : <Mail className="w-6 h-6 my-auto ml-[2px]" color="#475CC6" />}
-        </button>
-      </a>
-    );
-  };
-  
-  
-
   return (
-    <main className="flex min-h-screen flex-col items-center px-16">
+    <main className="flex flex-col items-center px-16">
       <div className="w-full max-w-4xl space-y-8">
+        {
+          searchTerm && searchTerm.length ? (
+            <div className="flex flex-row justify-between">
+              <p className="text-lg">
+                <span className="font-bold">Showing results for: </span>
+                <span>{searchTerm}</span>
+              </p>
+              <p className="font-bold text-theme-gray">{totalPostsCount} {totalPostsCount !== 1 ? "Results" : "Result"}</p>
+            </div>
+          ) : null
+        }
         <FilterComponent filters={[disabilityFilter, locationFilter, demographicFilter]}/>
         <div>
-          {posts.map((post, index) => {
-            if (posts.length <= index + 2) {
-              // Attach observer to the second-to-last post
-              return (
-                <div ref={secondLastPostRef} key={post._id}>
-                  <PostComponent post={post} clickable={true} />
+          {
+            posts.length ? (
+              posts.map((post, index) => {
+                if (posts.length <= index + 2) {
+                  // Attach observer to the second-to-last post
+                  return (
+                    <div ref={secondLastPostRef} key={post._id}>
+                      <PostComponent post={post} clickable={true} />
+                    </div>
+                  );
+                } else {
+                  return <PostComponent key={post._id} post={post} clickable={true} />;
+                }
+              })
+            ) : (
+              !loading && searchTerm && searchTerm.length ? (
+                <div className="text-center font-bold text-theme-gray text-[22px]">
+                  <p>No results found for &quot;{searchTerm}&quot;.</p>
+                  <p>Please try another search!</p>
                 </div>
-              );
-            } else {
-              return <PostComponent key={post._id} post={post} clickable={true} />;
-            }
-          })}
+              ) : null
+            )
+          }
           {loading &&
             <div className="flex items-center justify-center mt-8">
               <LoaderCircle className="animate-spin" size={32} color="#475CC6"/>

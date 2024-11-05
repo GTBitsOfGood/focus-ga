@@ -1,44 +1,78 @@
 "use client";
+
 import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
 import focusLogo from "@/../public/focus-logo.png";
 import Image from "next/image";
-import { SquarePen, Search, ChevronDown, ChevronUp } from "lucide-react";
+import { SquarePen, Search, ChevronDown, ChevronUp, X } from "lucide-react";
 import Link from "next/link";
 import useClickOff from "@/hooks/useClickOff";
 import { signOut } from "@/server/db/actions/UserActions";
-import { User } from "@/utils/types/user";
+import { ProfileColors } from "@/utils/consts";
+import { useUser } from "@/contexts/UserContext";
+import { useSearch } from "@/contexts/SearchContext";
+import { useRouter } from "next/navigation";
 
 interface NavbarProps {
   openModal: () => void;
-  user: User;
 }
 
-export default function Navbar({ openModal, user }: NavbarProps) {
-  const router = useRouter();
+export default function Navbar({ openModal }: NavbarProps) {
   const [menuIsOpen, setMenuIsOpen] = useState(false);
+  const [inputValue, setInputValue] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dropdownButtonRef = useRef<HTMLDivElement>(null);
+  const { user } = useUser()
+  const { searchTerm, setSearchTerm } = useSearch();
+  const router = useRouter();
 
   useClickOff(dropdownRef, () => setMenuIsOpen(false), [dropdownRef, dropdownButtonRef]);
 
   const toggleDropdown = () => {
     setMenuIsOpen(!menuIsOpen);
   };
+  
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      setSearchTerm(inputValue);
+      router.push("/");
+    }
+  };
+
+  const clearSearch = () => {
+    setInputValue("");
+    setSearchTerm("");
+  }
+  
+  if (!user) {
+    return
+  }
 
   return (
     <div className="w-full h-[100px] bg-white flex items-center justify-between fixed top-0 z-50 border-b border-gray-300">
       {/* Logo plus search bar*/}
-      <Link href="https://focus-ga.my.site.com/s/">
+      <Link href="/" className="cursor-pointer">
         <Image src={focusLogo} width={121} height={58} alt="focus-logo" className="mx-12 mb-2" />
       </Link>
       <div className="relative flex-grow mx-20">
         <input
           type="text"
           placeholder="Search for a post"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown}
           className="w-full h-11 px-12 rounded-[20px] bg-[#F3F3F3] tracking-wide pl-16 focus:outline-none"
         />
         <Search strokeWidth={3} className="absolute left-6 top-1/2 transform -translate-y-1/2 text-gray-500" />
+        {
+          inputValue.length ? (
+            <button
+              onClick={clearSearch}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500"
+            >
+              <X strokeWidth={2} />
+            </button>
+          ) : null
+        }
       </div>
 
       {/* Create Post*/}
@@ -56,7 +90,7 @@ export default function Navbar({ openModal, user }: NavbarProps) {
         ref={dropdownButtonRef}
       >
         <div className="border-l pl-6">
-          <div className="w-[46px] h-[46px] bg-profile-pink rounded-full flex items-center justify-center cursor-pointer">  {/** Change to whatever color is chosen */}
+          <div className={`w-[46px] h-[46px] bg-${user.profileColor? user.profileColor: ProfileColors.ProfileDefault} rounded-full flex items-center justify-center cursor-pointer`}>  {/** Change to whatever color is chosen */}
             <span className="text-black font-bold text-lg select-none">{user.lastName.charAt(0).toUpperCase()}</span>
           </div>
         </div>
@@ -71,7 +105,7 @@ export default function Navbar({ openModal, user }: NavbarProps) {
       {/* Dropdown Menu */}
       {menuIsOpen && (
         <div className="absolute right-[10px] top-[110px] w-[218px] h-[307] bg-white z-10 border border-theme-medlight-gray rounded-lg" ref={dropdownRef}>
-          <div className="w-[64px] h-[64px] bg-profile-pink rounded-full flex items-center justify-center m-auto mt-[21px]">
+          <div className={`w-[64px] h-[64px] bg-${user.profileColor? user.profileColor: ProfileColors.ProfileDefault} rounded-full flex items-center justify-center m-auto mt-[21px]`}>
             <span className="text-black font-bold text-3xl select-none">{user.lastName.charAt(0).toUpperCase()}</span>
           </div>
 

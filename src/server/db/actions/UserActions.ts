@@ -48,7 +48,9 @@ export async function getPopulatedUser(id: string): Promise<PopulatedUser> {
 
   const user = await UserModel
     .findById(id)
-    .populate({ path: 'childDisabilities', model: 'Disability' });
+    .populate({ path: 'childDisabilities', model: 'Disability' })
+    .populate({ path: 'defaultDisabilityTags', model: 'Disability' })
+    .populate({ path: 'defaultDisabilityFilters', model: 'Disability' });
   if (!user) {
     throw new Error("User not found");
   }
