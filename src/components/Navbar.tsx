@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useRef } from "react";
 import focusLogo from "@/../public/focus-logo.png";
 import Image from "next/image";
@@ -9,6 +10,7 @@ import { signOut } from "@/server/db/actions/UserActions";
 import { ProfileColors } from "@/utils/consts";
 import { useUser } from "@/contexts/UserContext";
 import { useSearch } from "@/contexts/SearchContext";
+import { useRouter } from "next/navigation";
 
 interface NavbarProps {
   openModal: () => void;
@@ -21,6 +23,7 @@ export default function Navbar({ openModal }: NavbarProps) {
   const dropdownButtonRef = useRef<HTMLDivElement>(null);
   const { user } = useUser()
   const { searchTerm, setSearchTerm } = useSearch();
+  const router = useRouter();
 
   useClickOff(dropdownRef, () => setMenuIsOpen(false), [dropdownRef, dropdownButtonRef]);
 
@@ -31,6 +34,7 @@ export default function Navbar({ openModal }: NavbarProps) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       setSearchTerm(inputValue);
+      router.push("/");
     }
   };
 
