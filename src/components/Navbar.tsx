@@ -9,7 +9,7 @@ import useClickOff from "@/hooks/useClickOff";
 import { signOut } from "@/server/db/actions/UserActions";
 import { ProfileColors } from "@/utils/consts";
 import { useUser } from "@/contexts/UserContext";
-import { useSearch } from "@/hooks/SearchContext";
+import { useSearch } from "@/contexts/SearchContext";
 
 interface NavbarProps {
   openModal: () => void;

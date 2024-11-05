@@ -14,7 +14,7 @@ import { PAGINATION_LIMIT } from "@/utils/consts";
 import { useUser } from "@/contexts/UserContext";
 import { GEORGIA_CITIES } from "@/utils/cities";
 import { getPopulatedUser } from "@/server/db/actions/UserActions";
-import { useSearch } from "@/hooks/SearchContext";
+import { useSearch } from "@/contexts/SearchContext";
 
 export const dynamic = 'force-dynamic';
 
