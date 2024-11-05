@@ -1,6 +1,5 @@
 "use client";
 import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
 import focusLogo from "@/../public/focus-logo.png";
 import Image from "next/image";
 import { ChevronDown, ChevronUp, Search, SquarePen, X } from "lucide-react";
@@ -16,7 +15,6 @@ interface NavbarProps {
 }
 
 export default function Navbar({ openModal }: NavbarProps) {
-  const router = useRouter();
   const [menuIsOpen, setMenuIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -48,7 +46,7 @@ export default function Navbar({ openModal }: NavbarProps) {
   return (
     <div className="w-full h-[100px] bg-white flex items-center justify-between fixed top-0 z-50 border-b border-gray-300">
       {/* Logo plus search bar*/}
-      <Link href="https://focus-ga.my.site.com/s/">
+      <Link href="/">
         <Image src={focusLogo} width={121} height={58} alt="focus-logo" className="mx-12 mb-2" />
       </Link>
       <div className="relative flex-grow mx-20">

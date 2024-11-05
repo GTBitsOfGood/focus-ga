@@ -164,8 +164,8 @@ export default function PostComponent(props: PostComponentProps) {
     {
       label: likes.toString(),
       icon: liked ? 
-        <Heart className={`text-red-500 fill-red-500 ${clickable ? '' : 'transform transition-transform hover:scale-110'}`} />
-        : <Heart className={`${clickable ? '' : 'transform transition-transform hover:scale-110'}`} />,
+        <Heart className={cn("text-red-500 fill-red-500", {'transform transition-transform hover:scale-110': !clickable})} />
+        : <Heart className={cn({'transform transition-transform hover:scale-110': !clickable})} />,
       onClick: likeLoading ? undefined : handleLikeClick
     },
     {
@@ -175,8 +175,8 @@ export default function PostComponent(props: PostComponentProps) {
     {
       label: saved ? 'Saved Post' : 'Save Post',
       icon: saved ? 
-      <Bookmark className={`fill-theme-gray ${clickable ? '' : 'transform transition-transform hover:scale-110'}`} />
-      : <Bookmark className={`${clickable ? '' : 'transform transition-transform hover:scale-110'}`} />,
+      <Bookmark className={cn("fill-theme-gray", {'transform transition-transform hover:scale-110': !clickable})} />
+      : <Bookmark className={cn({'transform transition-transform hover:scale-110': !clickable})} />,
       onClick: saveLoading ? undefined : handleSaveClick
     }
   ];
@@ -186,12 +186,12 @@ export default function PostComponent(props: PostComponentProps) {
       <div className="flex items-center justify-between text-sm">
         {clickable ? (
         <div className="flex items-center gap-2">
-          <span className={`w-6 h-6 bg-${author?.profileColor ? author.profileColor : ProfileColors.ProfileDefault} rounded-full inline-block`}/>
+          <span className={cn("w-6 h-6 rounded-full inline-block", {[`bg-${author?.profileColor ? author.profileColor : ProfileColors.ProfileDefault}`]: true})}/>
           {author ? `${author.lastName} Family` : 'Deleted User'}
         </div>
       ) : (
           <Link className="flex items-center gap-2" href={`/family/${author?._id}`}>
-            <span className={`w-6 h-6 bg-${author?.profileColor ? author.profileColor : ProfileColors.ProfileDefault} rounded-full inline-block`}/>
+            <span className={cn("w-6 h-6 rounded-full inline-block", {[`bg-${author?.profileColor ? author.profileColor : ProfileColors.ProfileDefault}`]: true})}/>
             {author ? `${author.lastName} Family` : 'Deleted User'}
         </Link>
         )}
@@ -219,7 +219,7 @@ export default function PostComponent(props: PostComponentProps) {
         markdown={content}
         parse={markdown => mdParser.render(markdown)}
       />
-      <div className={`flex flex-wrap gap-3 ${tags.length > 0 ? 'py-1' : '-my-1'}`}>
+      <div className={cn("flex flex-wrap gap-3", {'py-1': tags.length})}>
         {tags.filter(tag => tag !== null).map(tag => <Tag key={`${post._id}-${tag._id}`} text={tag.name} />)}
       </div>
       <div className="flex items-center pt-2 gap-6">
@@ -268,7 +268,7 @@ export default function PostComponent(props: PostComponentProps) {
 
   const classes = cn(
     'flex flex-col gap-2 text-theme-gray rounded-lg',
-    clickable && 'cursor-pointer hover:bg-gray-100 p-4',
+    {'cursor-pointer hover:bg-gray-100 p-4': clickable},
     className
   );
 

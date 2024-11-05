@@ -9,6 +9,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import Link from "next/link";
 import { ProfileColors } from "@/utils/consts";
 import { User } from "@/utils/types/user";
+import { cn } from "@/lib/utils";
 
 type CommentComponentProps = {
   className?: string;
@@ -109,7 +110,7 @@ export default function CommentComponent(props: CommentComponentProps) {
   return (
     <div className="flex gap-2.5">
       <Link href={`/family/${author?._id}`}>
-        <span className={`w-6 h-6 bg-${author?.profileColor ? author.profileColor : ProfileColors.ProfileDefault} rounded-full inline-block`}/>
+        <span className={cn("w-6 h-6 rounded-full inline-block", author?.profileColor ? `bg-${author.profileColor}` : `bg-${ProfileColors.ProfileDefault}`)}/>
       </Link>
       <div className={`flex-grow flex flex-col gap-2 text-theme-gray ${className}`}>
         <div className="flex items-center justify-between">
