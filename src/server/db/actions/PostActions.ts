@@ -370,7 +370,8 @@ export async function getPopulatedSavedPosts(userId: string): Promise<PopulatedP
     { $replaceRoot: { newRoot: '$post' } }
   ].concat(postPopulationPipeline({ authUserId: userId }).slice(2) satisfies mongoose.PipelineStage[] as any);
 
-  const savedPosts = await PostSaveModel.aggregate(pipeline);
+  const pipelineResult = await PostSaveModel.aggregate(pipeline);
+  const savedPosts = pipelineResult[0].posts;
   return savedPosts;
 }
 
