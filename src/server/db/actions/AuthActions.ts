@@ -7,6 +7,8 @@ import { getUser, signOut } from './UserActions';
 import { User } from '@/utils/types/user';
 import { redirect } from 'next/navigation';
 
+let user: User | null;
+
 /**
  * Retrieves the authenticated user from the session.
  * If the user is not logged in, this function returns null.
@@ -16,11 +18,16 @@ export async function getAuthenticatedUser(): Promise<User | null> {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
   if (!session.isLoggedIn) {
+    user = null;
     return null;
   }
 
+  if (user) {
+    return user;
+  }
+
   try {
-    const user = await getUser(session.userId);
+    user = await getUser(session.userId);
     return user;
   } catch (e) {
     await signOut();
