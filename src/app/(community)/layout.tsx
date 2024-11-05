@@ -7,7 +7,7 @@ import { Toaster } from "@/components/ui/toaster"
 import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
 import { useUser } from "@/hooks/user";
 import { UserProvider } from "@/contexts/UserContext";
-import { SearchProvider } from "@/hooks/SearchContext";
+import { SearchProvider } from "@/contexts/SearchContext";
 import { Disability } from "@/utils/types/disability";
 import { createPost } from "@/server/db/actions/PostActions";
 import { useToast } from "@/hooks/use-toast";
