@@ -5,26 +5,35 @@ import Navbar from "@/components/Navbar";
 import React, { useState } from "react";
 import { Toaster } from "@/components/ui/toaster"
 import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
-import { useUser } from "@/hooks/user";
-import { UserProvider } from "@/contexts/UserContext";
+import { UserProvider, useUser } from "@/contexts/UserContext";
 import { SearchProvider } from "@/contexts/SearchContext";
 import { Disability } from "@/utils/types/disability";
 import { createPost } from "@/server/db/actions/PostActions";
 import { useToast } from "@/hooks/use-toast";
 import EditPostModal from "@/components/EditPostModal";
 
-type CommunityLayoutProps = {
+type LayoutProps = {
   children: React.ReactNode;
 }
 
-export default function CommunityLayout({ children }: CommunityLayoutProps) {
+export default function ContextWrapper({ children }: LayoutProps) {
+  return (
+    <SearchProvider>
+      <UserProvider>
+        <CommunityLayout>
+          {children}
+        </CommunityLayout>
+      </UserProvider>
+    </SearchProvider>
+  );
+}
+
+function CommunityLayout({ children }: LayoutProps) {
   const [isCreatePostModalOpen, setCreatePostModal] = useState(false);
   const openCreatePostModal = () => setCreatePostModal(true);
   const closeCreatePostModal = () => setCreatePostModal(false);
-  const user = useUser();
   const { toast } = useToast();
-
-  if (!user) return null;
+  const { user } = useUser();
 
   const notifySuccess = () => {
     toast({
@@ -58,22 +67,20 @@ export default function CommunityLayout({ children }: CommunityLayoutProps) {
   }
 
   return (
-    <SearchProvider>
-      <UserProvider>
-        <Navbar openModal={openCreatePostModal}/>
-        <EditPostModal
-          modalTitle="Create New Post"
-          isOpen={isCreatePostModalOpen}
-          openModal={openCreatePostModal}
-          closeModal={closeCreatePostModal}
-          onSubmit={onPostSubmit}
-        />
-        <div className="mx-48 mt-[100px] p-4">
-          {children}
-          <Toaster />
-        </div>
-        <ProgressBar height="3px" color="#475CC6" shallowRouting options={{ showSpinner: false }} />
-      </UserProvider>
-    </SearchProvider>
-  );
+    <>
+      <Navbar openModal={openCreatePostModal}/>
+      <EditPostModal
+        modalTitle="Create New Post"
+        isOpen={isCreatePostModalOpen}
+        openModal={openCreatePostModal}
+        closeModal={closeCreatePostModal}
+        onSubmit={onPostSubmit}
+      />
+      <div className="mx-32 sm:mx-0 mt-[100px] p-4">
+        {children}
+        <Toaster />
+      </div>
+      <ProgressBar height="3px" color="#475CC6" shallowRouting options={{ showSpinner: false }} />
+    </>
+  )
 }
