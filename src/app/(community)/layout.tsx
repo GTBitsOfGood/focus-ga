@@ -11,6 +11,8 @@ import { Disability } from "@/utils/types/disability";
 import { createPost } from "@/server/db/actions/PostActions";
 import { useToast } from "@/hooks/use-toast";
 import EditPostModal from "@/components/EditPostModal";
+import Image from "next/image";
+import focusLogo from "../../../public/focus-logo.png";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -64,6 +66,14 @@ function CommunityLayout({ children }: LayoutProps) {
       notifyFailure();
       throw error;
     }
+  }
+
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Image src={focusLogo} alt="focus logo" width={200} priority={true} />
+      </div>
+    );
   }
 
   return (
