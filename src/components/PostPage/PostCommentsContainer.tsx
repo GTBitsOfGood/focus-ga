@@ -4,8 +4,6 @@ import PostComponent from "@/components/PostComponent";
 import { createComment } from "@/server/db/actions/CommentActions";
 import { CommentInput, commentSchema, PopulatedComment } from "@/utils/types/comment";
 import { PopulatedPost } from "@/utils/types/post";
-import { ChevronLeftIcon } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 import CommentInputComponent from "./CommentInputComponent";
 import CommentTreeContainer from "./CommentTreeContainer";
@@ -14,6 +12,7 @@ import { createPostLike, createPostSave, deletePost, deletePostLike, deletePostS
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Disability } from "@/utils/types/disability";
+import BackButton from "../BackButton";
 
 function buildChildCommentsMap(comments: PopulatedComment[]) {
   const map = new Map<string, PopulatedComment[]>();
@@ -139,9 +138,7 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
   return (
     <>
       <div className="mx-16 my-4 text-lg text-[#686868]">
-        <Link href={'/'} className="flex items-center gap-1 w-min p-2">
-          <ChevronLeftIcon className="w-6 h-6" /> Back
-        </Link>
+        <BackButton />
       </div>
       <div className="mx-32 mb-16 p-4 flex flex-col items-stretch gap-4">
         <PostComponent

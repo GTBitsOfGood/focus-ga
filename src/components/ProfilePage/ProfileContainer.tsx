@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeftIcon, Pencil, Palette } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { PopulatedUser, User } from "@/utils/types/user";
 import { useEffect, useState } from "react";
@@ -10,11 +10,11 @@ import { getPopulatedSavedPosts, getPopulatedUserPosts } from "@/server/db/actio
 import { PopulatedPost } from "@/utils/types/post";
 import PostComponent from "../PostComponent";
 import EditProfileModal from "./EditProfileModal";
-import Link from "next/link";
 import ColorPicker from "../ColorPicker";
 import { ProfileColors } from "@/utils/consts";
 import { editUser } from "@/server/db/actions/UserActions";
 import { useUser } from "@/contexts/UserContext";
+import BackButton from "../BackButton";
 
 
 type ProfileContainerProps = {
@@ -64,9 +64,7 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
   return (
     <div>
       <div className="mx-16 my-4 text-lg text-theme-gray">
-        <Link href={'/'} className="flex items-center gap-1 w-min p-2">
-          <ChevronLeftIcon className="w-6 h-6" /> Back
-        </Link>
+        <BackButton />
       </div>
     <div className="mx-16 my-4">
       <div className="mx-14 mt-8">

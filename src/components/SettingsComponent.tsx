@@ -7,11 +7,10 @@ import DropdownWithDisplay from '@/components/DropdownWithDisplay';
 import { editUser, signOut } from "@/server/db/actions/UserActions";
 import { useRouter } from 'next/navigation';
 import { PostDeletionTimeline } from "@/utils/consts";
-import Link from "next/link";
-import { ChevronLeftIcon } from 'lucide-react';
 import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
 import { PopulatedUser } from '@/utils/types/user';
+import BackButton from './BackButton';
 
 
 type SettingsProps = {
@@ -95,9 +94,7 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
       </div>
 
       <div className="mx-16 my-4 text-lg text-theme-gray">
-        <Link href={'/'} className="flex items-center gap-1 w-min p-2">
-          <ChevronLeftIcon className="w-6 h-6" /> Back
-        </Link>
+        <BackButton />
       </div>
       <main className="mx-20 flex flex-col px-16 space-y-6">
         <div className="text-black text-xl font-bold">Settings & Preferences</div>
