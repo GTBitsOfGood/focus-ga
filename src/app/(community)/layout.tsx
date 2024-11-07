@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import EditPostModal from "@/components/EditPostModal";
 import Image from "next/image";
 import focusLogo from "../../../public/focus-logo.png";
+import { DisabilityProvider } from "@/contexts/DisabilityContext";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -22,9 +23,11 @@ export default function ContextWrapper({ children }: LayoutProps) {
   return (
     <SearchProvider>
       <UserProvider>
-        <CommunityLayout>
-          {children}
-        </CommunityLayout>
+        <DisabilityProvider>
+          <CommunityLayout>
+            {children}
+          </CommunityLayout>
+        </DisabilityProvider>
       </UserProvider>
     </SearchProvider>
   );

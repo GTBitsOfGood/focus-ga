@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useEffect, useState, Suspense, useRef } from "react";
-import { getDisabilities } from "@/server/db/actions/DisabilityActions";
 import { Disability } from "@/utils/types/disability";
 import Tag from "../Tag";
 import dynamic from 'next/dynamic';
@@ -17,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { GEORGIA_CITIES } from "@/utils/cities";
 import { editUser } from "@/server/db/actions/UserActions";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
+import { useDisabilities } from "@/contexts/DisabilityContext";
 
 const EditorComp = dynamic(() => import('../EditorComponent'), { ssr: false })
 
@@ -46,7 +46,7 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
   const [showLocations, setShowLocations] = useState(false);
   const [showLocationError, setLocationError] = useState(false);
 
-  const [allDisabilities, setAllDisabilities] = useState<Disability[]>([]);
+  const disabilities = useDisabilities();
   const [originalDisabilities, setOriginalDisabilities] = useState<Disability[]>([]);
   const [showDisabilities, setShowDisabilities] = useState(false);
   const [showDisabilitiesError, setDisabilitiesError] = useState(false);
@@ -55,14 +55,6 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const editorRef = useRef<MDXEditorMethods | null>(null);
-
-  useEffect(() => {
-    const fetchDisabilities = async () => {
-      const disabilityList = await getDisabilities();
-      setAllDisabilities(disabilityList);
-    }
-    fetchDisabilities();
-  }, []);
 
   useEffect(() => {
     const originalDisabilitiesData = allDisabilities.filter((disability) =>

@@ -8,7 +8,6 @@ import { LoaderCircle, Mail } from "lucide-react";
 import FilterComponent from "@/components/FilterComponent";
 import { Disability } from "@/utils/types/disability";
 import { Location } from "@/utils/types/location";
-import { getDisabilities } from "@/server/db/actions/DisabilityActions";
 import { Filter } from "@/utils/types/common";
 import { PAGINATION_LIMIT } from "@/utils/consts";
 import { useUser } from "@/contexts/UserContext";
@@ -16,6 +15,7 @@ import { GEORGIA_CITIES } from "@/utils/cities";
 import { getPopulatedUser } from "@/server/db/actions/UserActions";
 import { useSearch } from "@/contexts/SearchContext";
 import ContactButton from "@/components/ContactButton";
+import { useDisabilities } from "@/contexts/DisabilityContext";
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +26,7 @@ export default function Home() {
   const [page, setPage] = useState(0);
   const { user } = useUser();
   
-  const [disabilities, setDisabilities] = useState<Disability[]>([]);
+  const disabilities = useDisabilities();
   const [selectedDisabilities, setSelectedDisabilities] = useState<Disability[]>([]);
   const [filtersLoading, setFiltersLoading] = useState(true);
 
@@ -35,16 +35,6 @@ export default function Home() {
 
   const { searchTerm } = useSearch();
   const [totalPostsCount, setTotalPostsCount] = useState(0);
-
-  // fetch disabilities on page load
-  useEffect(() => {
-    const fetchDisabilities = async () => {
-      const disabilityList = await getDisabilities();
-      setDisabilities(disabilityList);
-    };
-    
-    fetchDisabilities();
-  }, []);
 
   useEffect(() => {
     const fetchUserData = async () => {

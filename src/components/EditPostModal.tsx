@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useEffect, useState, Suspense, useRef } from "react";
-import { getDisabilities } from "@/server/db/actions/DisabilityActions";
 import { Disability } from "@/utils/types/disability";
 import dynamic from 'next/dynamic'
 import { MAX_POST_TITLE_LEN, MAX_POST_CONTENT_LEN, MAX_POST_DISABILITY_TAGS } from "@/utils/consts";
@@ -9,6 +8,7 @@ import { X } from "lucide-react";
 import { MDXEditorMethods } from "@mdxeditor/editor";
 import { cn, countNonMarkdownCharacters } from "@/lib/utils";
 import DropdownWithDisplay from "./DropdownWithDisplay";
+import { useDisabilities } from "@/contexts/DisabilityContext";
 
 const EditorComp = dynamic(() => import('./EditorComponent'), { ssr: false })
 
@@ -40,18 +40,10 @@ export default function EditPostModal(props: EditPostModalProps) {
   const [tags, setTags] = useState<Disability[]>(initialTags || []);
   const [showTitleError, setTitleError] = useState(false);
   const [showBodyError, setBodyError] = useState(false);
-  const [disabilities, setDisabilities] = useState<Disability[]>([]);
+  const disabilities = useDisabilities();
   const [mouseDownOnBackground, setMouseDownOnBackground] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const editorRef = useRef<MDXEditorMethods | null>(null);
-
-  useEffect(() => {
-    const fetchDisabilities = async () => {
-      const disabilityList = await getDisabilities();
-      setDisabilities(disabilityList);
-    }
-    fetchDisabilities();
-  }, []);
 
   const handleSubmit = async () => {
     try {
