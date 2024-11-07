@@ -46,7 +46,7 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
   const [showLocations, setShowLocations] = useState(false);
   const [showLocationError, setLocationError] = useState(false);
 
-  const disabilities = useDisabilities();
+  const allDisabilities = useDisabilities();
   const [originalDisabilities, setOriginalDisabilities] = useState<Disability[]>([]);
   const [showDisabilities, setShowDisabilities] = useState(false);
   const [showDisabilitiesError, setDisabilitiesError] = useState(false);
