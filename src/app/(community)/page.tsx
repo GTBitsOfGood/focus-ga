@@ -37,19 +37,10 @@ export default function Home() {
   const [totalPostsCount, setTotalPostsCount] = useState(0);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      if (!user) return;
-      try {
-        const populatedUser = await getPopulatedUser(user._id);
-        setSelectedDisabilities(populatedUser.defaultDisabilityFilters);
-      } catch (error) {
-        console.log("Failed to fetch/set default disability filter");
-      } finally {
-        setFiltersLoading(false); // Only set filtersLoading to false once default filters have loaded
-      }
-    };
+    if (!user) return;
 
-    fetchUserData();
+    setSelectedDisabilities(user.defaultDisabilityFilters);
+    setFiltersLoading(false);
   }, [user]);
 
   const handleSelected = <T extends { _id: string }>(

@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { User } from '@/utils/types/user';
+import { PopulatedUser } from '@/utils/types/user';
 import { getAuthenticatedUser } from '@/server/db/actions/AuthActions';
 
 interface UserContextType {
-  user: User | null;
-  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  user: PopulatedUser | null;
+  setUser: React.Dispatch<React.SetStateAction<PopulatedUser | null>>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -22,7 +22,7 @@ interface UserProviderProps {
 }
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<PopulatedUser | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -32,6 +32,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    console.log(user);
+  }, [user]);
 
   return (
     <UserContext.Provider value={{ user, setUser }}>

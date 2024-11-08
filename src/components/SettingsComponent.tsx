@@ -11,6 +11,7 @@ import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
 import { PopulatedUser } from '@/utils/types/user';
 import BackButton from './BackButton';
+import { getAuthenticatedUser } from '@/server/db/actions/AuthActions';
 
 
 type SettingsProps = {
@@ -37,13 +38,15 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
     
     const handleUpdateUser = async () => {
       try {
-        const updatedUser = await editUser(user._id, {
+        await editUser(user._id, {
           notificationPreference: notificationPreference,
           defaultDisabilityTags: defaultDisabilityTags.map(disability => disability._id.toString()),
           defaultDisabilityFilters: defaultDisabilityFilters.map(disability => disability._id.toString()),
           postDeletionTimeline: postDeletionTimeline
         });
-        setUser(updatedUser);
+        const newUser = { ...user, notificationPreference, defaultDisabilityTags, defaultDisabilityFilters, postDeletionTimeline };
+        setUser(newUser);
+        getAuthenticatedUser(true);
 
         toast({
           title: "Update Success",

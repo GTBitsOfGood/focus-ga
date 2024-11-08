@@ -51,7 +51,7 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
     }
     try {
       const updatedUser = await editUser(currUser._id, { profileColor: color });
-      setUser(updatedUser);
+      setUser({ ...currUser, profileColor: color });
     } catch (error) {
       console.error("Failed to update profile color: ", error);
     }
