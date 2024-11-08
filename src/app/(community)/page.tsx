@@ -101,23 +101,28 @@ export default function Home() {
 
     if (loading || !(hasMore || clear)) return;
     setLoading(true);
-    try {
-      const newPage = clear ? 0 : page;
 
-      const tags = selectedDisabilities.map((disability) => disability._id);
-
-      const {count, posts: newPosts } = await getPopulatedPosts(user._id, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, tags, searchTerm);
-      setTotalPostsCount(count);
-      if (newPosts.length > 0) {
-        setPosts(clear ? newPosts : [...posts, ...newPosts]);
-      } else {
-        setHasMore(false);
+    let retries = 5;
+    while (retries > 0) {
+      try {
+        const newPage = clear ? 0 : page;
+  
+        const tags = selectedDisabilities.map((disability) => disability._id);
+  
+        const {count, posts: newPosts } = await getPopulatedPosts(user._id, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, tags, searchTerm);
+        setTotalPostsCount(count);
+        if (newPosts.length > 0) {
+          setPosts(clear ? newPosts : [...posts, ...newPosts]);
+        } else {
+          setHasMore(false);
+        }
+        break;
+      } catch (error) {
+        retries--;
       }
-    } catch (error) {
-      console.error("Failed to fetch posts:", error);
-    } finally {
-      setLoading(false);
     }
+
+    setLoading(false);
   };
 
   useEffect(() => {
