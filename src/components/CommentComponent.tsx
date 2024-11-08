@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 import Link from "next/link";
 import { ProfileColors } from "@/utils/consts";
-import { User } from "@/utils/types/user";
+import { PopulatedUser, User } from "@/utils/types/user";
 import { cn } from "@/lib/utils";
 
 type CommentComponentProps = {
@@ -42,7 +42,7 @@ export default function CommentComponent(props: CommentComponentProps) {
     isDeleted: initialIsDeleted
   } = comment;
 
-  const [author, setAuthor] = useState<User | null>(initialAuthor);
+  const [author, setAuthor] = useState<User | PopulatedUser | null>(initialAuthor);
   const [content, setContent] = useState<string>(initialContent);
   const [likes, setLikes] = useState<number>(initialLikes);
   const [liked, setLiked] = useState<boolean>(initialLiked);
@@ -110,7 +110,9 @@ export default function CommentComponent(props: CommentComponentProps) {
   return (
     <div className="flex gap-2.5">
       <Link href={`/family/${author?._id}`}>
-        <span className={cn("w-6 h-6 rounded-full inline-block", author?.profileColor ? `bg-${author.profileColor}` : `bg-${ProfileColors.ProfileDefault}`)}/>
+        <span className={cn("w-6 h-6 rounded-full inline-block", author?.profileColor ? `bg-${author.profileColor}` : `bg-${ProfileColors.ProfileDefault}`)}>
+          B
+        </span>
       </Link>
       <div className={`flex-grow flex flex-col gap-2 text-theme-gray ${className}`}>
         <div className="flex items-center justify-between">
