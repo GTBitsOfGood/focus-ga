@@ -17,8 +17,8 @@ export default function CommentInputComponent(props: CommentInputComponentProps)
     setLoading(true);
 
     try {
-      await onSubmit(value);
       setValue('');
+      await onSubmit(value);
     } catch (err) {}
 
     setLoading(false);
