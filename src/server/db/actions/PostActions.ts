@@ -162,17 +162,6 @@ export async function createPost(post: PostInput): Promise<Post> {
 }
 
 /**
- * Retrieves all posts from the database.
- * @returns A promise that resolves to an array of post objects.
- */
-export async function getPosts(): Promise<Post[]> {
-  await dbConnect();
-
-  const posts = await PostModel.find();
-  return posts.map(post => post.toObject());
-}
-
-/**
  * Retrieves all posts from the database with their author and disability fields populated and like status specified.
  * @param authUserId - The ID of the currently authenticated user, to determine whether they have liked each post.
  * @returns A promise that resolves to an array of populated post objects.
@@ -185,22 +174,6 @@ export async function getPopulatedPosts(authUserId: string, offset: number, limi
     count: postsInfo[0].count.length ? postsInfo[0].count[0].count : 0,
     posts: postsInfo[0].posts,
   };
-}
-
-/**
- * Retrieves a single post from the database by its ID.
- * @param id - The ID of the post to retrieve.
- * @returns A promise that resolves to a post object.
- * @throws Will throw an error if the post is not found.
- */
-export async function getPost(id: string): Promise<Post> {
-  await dbConnect();
-
-  const post = await PostModel.findById(id);
-  if (!post) {
-    throw new Error("Post not found");
-  }
-  return post.toObject();
 }
 
 /**
