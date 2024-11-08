@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { Types } from "mongoose";
 import { ExtendId } from "./common";
-import { User } from "./user";
+import { PopulatedUser, User } from "./user";
 
 export const commentSchema = z.object({
   author: z.string().transform(id => new Types.ObjectId(id)),
@@ -23,7 +23,7 @@ export type Comment = ExtendId<z.infer<typeof commentSchema>>;
 export type CommentLike = ExtendId<z.infer<typeof commentLikeSchema>>;
 
 export type PopulatedComment = Omit<Comment, 'author' | 'post' | 'replyTo'> & {
-  author: User | null,
+  author: User | PopulatedUser | null,
   post: string,
   replyTo: string | null,
   liked: boolean

@@ -3,13 +3,13 @@ import CommentComponent from "../CommentComponent";
 import CommentInputComponent from "./CommentInputComponent";
 import { useState } from "react";
 import { createComment, createCommentLike, deleteComment, deleteCommentLike } from "@/server/db/actions/CommentActions";
-import { User } from "@/utils/types/user";
+import { PopulatedUser, User } from "@/utils/types/user";
 
 type CommentTreeContainerProps = {
   postId: string;
   parentComment: PopulatedComment;
   childComments: PopulatedComment[];
-  authUser: User;
+  authUser: User | PopulatedUser;
 };
 
 export default function CommentTreeContainer(props: CommentTreeContainerProps) {

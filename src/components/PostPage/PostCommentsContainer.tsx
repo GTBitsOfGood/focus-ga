@@ -7,12 +7,12 @@ import { PopulatedPost } from "@/utils/types/post";
 import { useState } from "react";
 import CommentInputComponent from "./CommentInputComponent";
 import CommentTreeContainer from "./CommentTreeContainer";
-import { User } from "@/utils/types/user";
 import { createPostLike, createPostSave, deletePost, deletePostLike, deletePostSave, editPost } from "@/server/db/actions/PostActions";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Disability } from "@/utils/types/disability";
 import BackButton from "../BackButton";
+import { User, PopulatedUser } from "@/utils/types/user";
 
 function buildChildCommentsMap(comments: PopulatedComment[]) {
   const map = new Map<string, PopulatedComment[]>();
@@ -29,7 +29,7 @@ function buildChildCommentsMap(comments: PopulatedComment[]) {
 type PostCommentsContainerProps = {
   post: PopulatedPost;
   comments: PopulatedComment[];
-  authUser: User;
+  authUser: User | PopulatedUser;
 };
 
 export default function PostCommentsContainer(props: PostCommentsContainerProps) {
