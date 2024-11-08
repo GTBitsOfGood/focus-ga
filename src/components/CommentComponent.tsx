@@ -110,9 +110,7 @@ export default function CommentComponent(props: CommentComponentProps) {
   return (
     <div className="flex gap-2.5">
       <Link href={`/family/${author?._id}`}>
-        <span className={cn("w-6 h-6 rounded-full inline-block", author?.profileColor ? `bg-${author.profileColor}` : `bg-${ProfileColors.ProfileDefault}`)}>
-          B
-        </span>
+        <span className={cn("w-6 h-6 rounded-full inline-block", author?.profileColor ? `bg-${author.profileColor}` : `bg-${ProfileColors.ProfileDefault}`)} />
       </Link>
       <div className={`flex-grow flex flex-col gap-2 text-theme-gray ${className}`}>
         <div className="flex items-center justify-between">
