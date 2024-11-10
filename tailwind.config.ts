@@ -27,6 +27,7 @@ const config: Config = {
         'profile-indigo': '#778EFF',
         'profile-pink': '#F8A5FF',
         'error-red': '#ff4e4e',
+        'error-light-red': '#fff1f1',
       },
       borderRadius: {
         lg: 'var(--radius)',

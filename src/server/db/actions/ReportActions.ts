@@ -21,6 +21,21 @@ export async function getReports(): Promise<Report[]> {
   }
 }
 
+export async function getReportsByPost(postId: string): Promise<Report[]> {
+  if (!mongoose.Types.ObjectId.isValid(postId)) {
+    throw new Error("Invalid postId");
+  }
+
+  try {
+    await dbConnect();
+    const reports = await ReportModel.find({ reportedContent: postId, contentType: "Post" }).sort({ date: 'desc' });
+    return reports;
+  } catch (error) {
+    console.error(`Failed to retrieve reports for user ${postId}:`, error);
+    throw new Error(`Failed to retrieve reports for user ${postId}`);
+  }
+}
+
 /**
  * Retrieves all reports for a specific user from the database, sorted by date in descending order.
  * @param userId - The ID of the reported user.

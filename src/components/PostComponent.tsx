@@ -2,13 +2,13 @@
 
 import { PopulatedPost } from "@/utils/types/post";
 import Tag from "./Tag";
-import { Bookmark, MessageSquare, Ellipsis, Heart } from "lucide-react";
+import { Bookmark, MessageSquare, Ellipsis, Heart, OctagonAlert, ChevronRight } from "lucide-react";
 import { getDateDifferenceString } from "@/utils/dateUtils";
 import MarkdownIt from "markdown-it";
 import MarkdownRenderer from "./MarkdownRenderer";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 import { ProfileColors } from "@/utils/consts";
@@ -16,9 +16,12 @@ import EditPostModal from "./EditPostModal";
 import { Disability } from "@/utils/types/disability";
 import { useToast } from "@/hooks/use-toast";
 import ReportPostModal from "./ReportPostModal";
-import { createReport } from "@/server/db/actions/ReportActions";
-import { ReportReason, ContentType } from "@/utils/types/report";
+import { createReport, getReportsByPost } from "@/server/db/actions/ReportActions";
+import { Report, ReportReason, ContentType } from "@/utils/types/report";
 import { useUser } from '@/contexts/UserContext';
+import ContentReportsModal from "./ContentReportsModal";
+
+const IS_ADMIN = true;
 
 type PostComponentProps = {
   post: PopulatedPost;
@@ -77,8 +80,24 @@ export default function PostComponent(props: PostComponentProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const [showReportModal, setShowReportModal] = useState<boolean>(false);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [showContentReports, setShowContentReports] = useState(false);
 
   const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const reportsData = await getReportsByPost(post._id);
+        setReports(reportsData);
+        console.log(reportsData); 
+      } catch (error) {
+        console.error('Error fetching reports:', error);
+      }
+    };
+
+    fetchReports();
+  }, []);
 
   async function handleLikeClick() {
     if (likeLoading || clickable) return;
@@ -244,17 +263,30 @@ export default function PostComponent(props: PostComponentProps) {
       <div className={cn("flex flex-wrap gap-3", {'py-1': tags.length})}>
         {tags.filter(tag => tag !== null).map(tag => <Tag key={`${post._id}-${tag._id}`} text={tag.name} />)}
       </div>
-      <div className="flex items-center pt-2 gap-6">
-        {bottomRow.map((item, index) => (
-          <div key={`${post._id}-${index}`} className="flex items-center gap-1.5 px-2">
-            <button disabled={!item.onClick} onClick={item.onClick}>
-              <div className="w-6 h-6 [&>*]:w-full [&>*]:h-full">
-                {item.icon}
+      <div className="flex flex-row justify-between">
+        <div className="flex items-center pt-2 gap-6">
+          {bottomRow.map((item, index) => (
+            <div key={`${post._id}-${index}`} className="flex items-center gap-1.5 px-2">
+              <button disabled={!item.onClick} onClick={item.onClick}>
+                <div className="w-6 h-6 [&>*]:w-full [&>*]:h-full">
+                  {item.icon}
+                </div>
+              </button>
+              {item.label}
+            </div>
+          ))}
+        </div>
+        {
+          reports.length > 0 && IS_ADMIN ? (
+            <button onClick={() => setShowContentReports(true)} className="pl-2 pr-1.5 py-1 flex flex-row gap-x-1.5 items-center bg-error-light-red text-error-red border-2 border-error-red rounded-full">
+              <div className="flex flex-row gap-x-1">
+                <OctagonAlert className="stroke-error-red" />
+                Post Reported ({reports.length})
               </div>
+              <ChevronRight className="stroke-" />
             </button>
-            {item.label}
-          </div>
-        ))}
+          ) : null
+        }
       </div>
       {clickable ? <div className="relative bottom-[-17px] w-full h-[1px] bg-theme-medlight-gray"/> : <></>} {/* Divider border*/}
       <AlertDialog open={showDeleteDialog}>
@@ -288,6 +320,11 @@ export default function PostComponent(props: PostComponentProps) {
       {showReportModal && <ReportPostModal
         isOpen={showReportModal}
         closeModal={() => setShowReportModal(false)}
+        onSubmit={handleReportClick}
+      />}
+      {showContentReports && <ContentReportsModal
+        isOpen={showContentReports}
+        closeModal={() => setShowContentReports(false)}
         onSubmit={handleReportClick}
       />}
     </>

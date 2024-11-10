@@ -17,6 +17,8 @@ import { useSearch } from "@/contexts/SearchContext";
 import ContactButton from "@/components/ContactButton";
 import { useDisabilities } from "@/contexts/DisabilityContext";
 
+const IS_ADMIN = true;
+
 export const dynamic = 'force-dynamic';
 
 export default function Home() {

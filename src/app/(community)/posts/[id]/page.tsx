@@ -5,6 +5,8 @@ import { getPopulatedPost } from "@/server/db/actions/PostActions";
 import { User } from "@/utils/types/user";
 import { notFound } from 'next/navigation';
 
+const IS_ADMIN = true;
+
 type PostPageProps = {
   params: { id: string }
 };
