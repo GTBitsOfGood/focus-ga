@@ -12,7 +12,7 @@ export const userSchema = z.object({
   email: z.string().email(),
   childAge: z.number().min(0),
   childDisabilities: z.string().array().transform(ids => ids.map(id => new Types.ObjectId(id))),
-  city: z.enum(GEORGIA_CITIES),
+  city: z.string(),
   bio: z.string().optional(),
 
   notificationPreference: z.boolean().default(true), // true = "Email about post replies", false = "Never email"
