@@ -37,6 +37,16 @@ export async function getUser(id: string): Promise<User> {
   return user.toObject();
 }
 
+export async function getUserBySalesforceUid(salesforceUid: string): Promise<User> {
+  await dbConnect();
+
+  const user = await UserModel.findOne({ salesforce_uid: salesforceUid });
+  if (!user) {
+    return user;
+  }
+  return user.toObject();
+}
+
 /**
  * Retrieves a user from the database by their ID with child disabilities populated.
  * @param id - The ID of the user to retrieve.
@@ -56,23 +66,6 @@ export async function getPopulatedUser(id: string): Promise<PopulatedUser> {
   }
   return user.toObject();
 }
-
-/**
- * Retrieves a user from the database by their username.
- * @param email - The email of the user to retrieve.
- * @returns A promise that resolves to the user object with extended ID.
- * @throws Will throw an error if the user is not found.
- */
-export async function getUserByEmail(email: string): Promise<User | null> {
-  await dbConnect();
-
-  const user = await UserModel.findOne({ email });
-  if (!user) {
-    return null;
-  }
-  return user.toObject();
-}
-
 
 /**
  * Updates an existing user in the database.
@@ -95,21 +88,23 @@ export async function editUser(id: string, updated: Partial<UserInput>): Promise
 }
 
 /**
- * Logs in a user by their username. If the user does not exist, a new user is created with default values.
- * @param username - The username of the user attempting to log in.
+ * Logs in a user by their uid. If the user does not exist, a new user is created with default values and provided email and uid.
+ * @param email - The username of the user attempting to log in.
+ * @param uid - uid provided by salesforce
  * @returns A promise that resolves to an object indicating the success of the login operation.
  */
-export async function loginUser(email: string) {
-  let user = await getUserByEmail(email);
+export async function loginUser(email: string, uid: string) {
+  let user = await getUserBySalesforceUid(uid);
   if (!user) {
     user = await createUser({ 
       email,
-      username: "12738718",
+      username: email,
       lastName: "BoG", 
       childAge: 10, 
       childDisabilities: [],
       city: "Fulton",
-      bio: "Hello World!"
+      bio: "Hello World!",
+      salesforce_uid: uid
     });
   }
 

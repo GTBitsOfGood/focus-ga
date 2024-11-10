@@ -2,15 +2,11 @@ import { PostDeletionTimeline, ProfileColors } from "@/utils/consts";
 import { User } from "@/utils/types/user";
 import mongoose, { Schema } from "mongoose";
 
-const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-
 const UserSchema = new Schema<User>({
   username: { type: String, required: true },
   isAdmin: { type: Boolean, default: false },
   lastName: { type: String, required: true },
-  email: { type: String, required: true, validate: {
-    validator: (s: string) => emailRegex.test(s) 
-  }},
+  email: { type: String, required: true},
   childAge: { type: Number, min: 0, required: true },
   childDisabilities: [{ type: Schema.Types.ObjectId, ref: 'Disability', required: true }],
   city: { type: String, required: true },

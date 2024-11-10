@@ -1,15 +1,18 @@
 import { getIronSession } from 'iron-session'
 import { cookies } from 'next/headers'
-
+import { SessionData, sessionOptions } from "@/lib/session";
 import { decodeSAMLResponse, validateSAMLResponse } from "@/server/db/actions/sso";
-import { NextResponse } from 'next/server';
-
+import { NextRequest, NextResponse } from 'next/server';
+import { loginUser } from '@/server/db/actions/UserActions';
+import { redirect } from 'next/navigation'
 
 const SALESFORCE_CERTIFICATE = process.env["SALESFORCE_CERTIFICATE"];
 if (!SALESFORCE_CERTIFICATE && process.env["NODE_ENV"] === "production")
   throw new Error("SALESFORCE_CERTIFICATE env var must be set");
 
-export async function POST(request : NextResponse) {
+const isDevelopment = process.env["NODE_ENV"] !== "production";
+
+export async function POST(request : NextRequest) {
   const formData = await request.formData();
   const encodedSAMLResp = formData.get('SAMLResponse') as string;
 
@@ -23,23 +26,11 @@ export async function POST(request : NextResponse) {
     result = { error: "Error processing SAML response" };
   }
 
-  const session = await getIronSession(request, {
-    cookieName: "your-session-cookie-name",
-    password: process.env.SESSION_SECRET,
-  });
-
   if (result.error) {
-    return NextResponse.json({ error: result.error }, { status: 400 });
+    return redirect(`/login?error=${encodeURIComponent(result.error)}`);
   }
 
-  // Assuming result.userId and result.username are available
-  session.user = {
-    id: result.userId,
-    username: result.username,
-  };
+  await loginUser(result.username, result.userId);
 
-  // Save the session
-  await session.save();
-
-  return NextResponse.json({ message: "Session created successfully", user: session.user }, { status: 200 });
+  return redirect('/');
 }
