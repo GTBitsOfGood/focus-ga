@@ -15,6 +15,10 @@ import { ProfileColors } from "@/utils/consts";
 import EditPostModal from "./EditPostModal";
 import { Disability } from "@/utils/types/disability";
 import { useToast } from "@/hooks/use-toast";
+import ReportPostModal from "./ReportPostModal";
+import { createReport } from "@/server/db/actions/ReportActions";
+import { ReportReason, ContentType } from "@/utils/types/report";
+import { useUser } from '@/contexts/UserContext';
 
 type PostComponentProps = {
   post: PopulatedPost;
@@ -30,6 +34,8 @@ export default function PostComponent(props: PostComponentProps) {
   const mdParser = new MarkdownIt({
     html: true,
   });
+
+  const { user, setUser } = useUser();
 
   const {
     className = '',
@@ -70,6 +76,7 @@ export default function PostComponent(props: PostComponentProps) {
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+  const [showReportModal, setShowReportModal] = useState<boolean>(false);
 
   const { toast } = useToast();
 
@@ -143,6 +150,20 @@ export default function PostComponent(props: PostComponentProps) {
     }
   }
 
+  async function handleReportClick(reason: string, description: string) {
+    if (author && user) {
+      const reportData = {
+        reason: reason as ReportReason,
+        description: description,
+        reportedUser: author?._id,
+        sourceUser: user?._id,
+        reportedContent: post._id,
+        contentType: ContentType.POST,
+      }
+      await createReport(reportData);
+    }
+  }
+
   async function handleShareClick() {
     const url = `${window.location.origin}/posts/${post._id}`;
 
@@ -208,6 +229,7 @@ export default function PostComponent(props: PostComponentProps) {
               <DropdownMenuContent side="bottom" align="end">
                 {onEditClick && <DropdownMenuItem onClick={() => setShowEditModal(true)}>Edit</DropdownMenuItem>}
                 {onDeleteClick && <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem>}
+                <DropdownMenuItem onClick={() => setShowReportModal(true)}>Report Post</DropdownMenuItem>
                 <DropdownMenuItem onClick={handleShareClick}>Share</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -262,6 +284,11 @@ export default function PostComponent(props: PostComponentProps) {
         tags={tags.filter(tag => tag !== null)}
         closeModal={() => setShowEditModal(false)}
         onSubmit={handleEditClick}
+      />}
+      {showReportModal && <ReportPostModal
+        isOpen={showReportModal}
+        closeModal={() => setShowReportModal(false)}
+        onSubmit={handleReportClick}
       />}
     </>
   );
