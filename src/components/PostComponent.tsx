@@ -278,7 +278,9 @@ export default function PostComponent(props: PostComponentProps) {
         </div>
         {
           reports.length > 0 && IS_ADMIN ? (
-            <button onClick={() => setShowContentReports(true)} className="pl-2 pr-1.5 py-1 flex flex-row gap-x-1.5 items-center bg-error-light-red text-error-red border-2 border-error-red rounded-full">
+            <button 
+              onClick={!clickable ? () => setShowContentReports(true) : undefined}
+              className="pl-2 pr-1.5 py-1 flex flex-row gap-x-1.5 items-center bg-error-light-red text-error-red border-2 border-error-red rounded-full">
               <div className="flex flex-row gap-x-1">
                 <OctagonAlert className="stroke-error-red" />
                 Post Reported ({reports.length})
