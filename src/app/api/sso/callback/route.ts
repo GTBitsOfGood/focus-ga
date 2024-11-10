@@ -11,20 +11,35 @@ if (!SALESFORCE_CERTIFICATE && process.env["NODE_ENV"] === "production")
 
 export async function POST(request : NextResponse) {
   const formData = await request.formData();
-  const encodedSAMLResp = formData.get('SAMLResponse');
+  const encodedSAMLResp = formData.get('SAMLResponse') as string;
 
   let result;
   try {
-    const decodedSAMLResp = decodeSAMLResponse(encodedSAMLResp);
-    // result = validateSAMLResponse(decodedSAMLResp, SALESFORCE_CERTIFICATE);
-    console.log(decodedSAMLResp);
+    const decodedSAMLResp = decodeSAMLResponse(encodedSAMLResp ?? "");
+    result = validateSAMLResponse(decodedSAMLResp, SALESFORCE_CERTIFICATE ?? "");
+    console.log(result);
   } catch (e) {
     console.error(e);
     result = { error: "Error processing SAML response" };
   }
 
-  // const session : any = await getIronSession(cookies(), { password: "...", cookieName: "..." });
-  // session.username = "Alison";
+  const session = await getIronSession(request, {
+    cookieName: "your-session-cookie-name",
+    password: process.env.SESSION_SECRET,
+  });
 
-  // await session.save();
+  if (result.error) {
+    return NextResponse.json({ error: result.error }, { status: 400 });
+  }
+
+  // Assuming result.userId and result.username are available
+  session.user = {
+    id: result.userId,
+    username: result.username,
+  };
+
+  // Save the session
+  await session.save();
+
+  return NextResponse.json({ message: "Session created successfully", user: session.user }, { status: 200 });
 }

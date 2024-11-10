@@ -37,15 +37,22 @@ export function validateSAMLResponse(samlResp : string, certificate : string) {
     return { error: "Response was not successful" };
 
   const attributes = xml.getElementsByTagName("saml2:Attribute");
+
   let userId;
+  let username;
+
   for (let attribute of attributes) {
     if (attribute.getAttribute("Name") === "userId")
       userId = attribute.textContent.trim();
+    
+    if (attribute.getAttribute("Name") == "username")
+      username = attribute.textContent.trim();
   }
 
   if (!userId) return { error: "Could not find user ID" };
+  if (!username) return { error: "Could not find username"};
 
-  return { userId };
+  return { userId, username };
 }
 
 export function generateSAMLPayload() {
