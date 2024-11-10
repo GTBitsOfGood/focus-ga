@@ -2,7 +2,7 @@
 
 import { PopulatedPost } from "@/utils/types/post";
 import Tag from "./Tag";
-import { Bookmark, MessageSquare, Ellipsis, Heart } from "lucide-react";
+import { Bookmark, MessageSquare, Ellipsis, Heart, ShieldCheck } from "lucide-react";
 import { getDateDifferenceString } from "@/utils/dateUtils";
 import MarkdownIt from "markdown-it";
 import MarkdownRenderer from "./MarkdownRenderer";
@@ -185,15 +185,17 @@ export default function PostComponent(props: PostComponentProps) {
     <>
       <div className="flex items-center justify-between text-sm">
         {clickable ? (
-        <div className="flex items-center gap-2">
-          <span className={cn("w-6 h-6 rounded-full inline-block", {[`bg-${author?.profileColor ? author.profileColor : ProfileColors.ProfileDefault}`]: true})}/>
-          {author ? `${author.lastName} Family` : 'Deleted User'}
-        </div>
-      ) : (
+          <div className="flex items-center gap-2">
+            <span className={cn("w-6 h-6 rounded-full inline-block", {[`bg-${author?.profileColor ? author.profileColor : ProfileColors.ProfileDefault}`]: true})}/>
+            {author ? `${author.lastName} Family` : 'Deleted User'}
+            {author?.isAdmin && <ShieldCheck className="w-5 h-5 -ms-1.5 text-white fill-theme-gray" />}
+          </div>
+        ) : (
           <Link className="flex items-center gap-2" href={`/family/${author?._id}`}>
             <span className={cn("w-6 h-6 rounded-full inline-block", {[`bg-${author?.profileColor ? author.profileColor : ProfileColors.ProfileDefault}`]: true})}/>
             {author ? `${author.lastName} Family` : 'Deleted User'}
-        </Link>
+            {author?.isAdmin && <ShieldCheck className="w-5 h-5 -ms-1.5 text-white fill-theme-gray" />}
+          </Link>
         )}
         <p suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
       </div>

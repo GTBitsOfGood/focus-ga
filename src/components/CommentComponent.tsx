@@ -1,6 +1,6 @@
 import { getDateDifferenceString } from "@/utils/dateUtils";
 import { PopulatedComment } from "@/utils/types/comment";
-import { MessageSquare, Ellipsis, Heart } from "lucide-react";
+import { MessageSquare, Ellipsis, Heart, ShieldCheck } from "lucide-react";
 import MarkdownRenderer from "./MarkdownRenderer";
 import MarkdownIt from "markdown-it";
 import { ReactNode, useState } from "react";
@@ -114,8 +114,9 @@ export default function CommentComponent(props: CommentComponentProps) {
       </Link>
       <div className={`flex-grow flex flex-col gap-2 text-theme-gray ${className}`}>
         <div className="flex items-center justify-between">
-          {isDeleted ? deletedText : <Link className="font-bold text-black" href={`/family/${author?._id}`}>
+          {isDeleted ? deletedText : <Link className="font-bold text-black flex items-center gap-0.5" href={`/family/${author?._id}`}>
             {author ? `${author.lastName} Family` : 'Deleted User'}
+            {author?.isAdmin && <ShieldCheck className="w-5 h-5 text-white fill-theme-gray" />}
           </Link>}
           <p className="text-sm" suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
         </div>
