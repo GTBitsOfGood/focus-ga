@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 import { ExtendId } from "./common";
 import { Disability } from "./disability";
 import { PostDeletionTimeline, ProfileColors } from "@/utils/consts";
+import { GEORGIA_CITIES } from "../cities";
 
 export const userSchema = z.object({
   username: z.string(),
@@ -11,7 +12,7 @@ export const userSchema = z.object({
   email: z.string().email(),
   childAge: z.number().min(0),
   childDisabilities: z.string().array().transform(ids => ids.map(id => new Types.ObjectId(id))),
-  city: z.string(),
+  city: z.enum(GEORGIA_CITIES),
   bio: z.string().optional(),
 
   notificationPreference: z.boolean().default(true), // true = "Email about post replies", false = "Never email"

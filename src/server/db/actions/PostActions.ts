@@ -16,7 +16,8 @@ type PipelineArgs = {
   authUserId: string,
   offset?: number,
   limit?: number,
-  tags?: Array<string>,
+  tags?: string[],
+  locations?: string[],
   postId?: string,
   searchTerm?: string,
 }
@@ -26,7 +27,7 @@ type PostAggregationResult = {
   posts: PopulatedPost[];
 };
 
-function postPopulationPipeline({ authUserId, offset, limit, tags, postId, searchTerm }: PipelineArgs): mongoose.PipelineStage[] {
+function postPopulationPipeline({ authUserId, offset, limit, tags, locations, postId, searchTerm }: PipelineArgs): mongoose.PipelineStage[] {
   return [
     // Apply search
     ...(searchTerm ? [
@@ -71,6 +72,11 @@ function postPopulationPipeline({ authUserId, offset, limit, tags, postId, searc
             }
           },
           { $unwind: { path: '$author', preserveNullAndEmptyArrays: true } },
+
+          // Filter by author location
+          ...(locations && locations.length ? [
+            { $match: { 'author.city': { $in: locations } } }
+          ] : []),
 
           // Populate tags
           {
@@ -166,10 +172,16 @@ export async function createPost(post: PostInput): Promise<Post> {
  * @param authUserId - The ID of the currently authenticated user, to determine whether they have liked each post.
  * @returns A promise that resolves to an array of populated post objects.
  */
-export async function getPopulatedPosts(authUserId: string, offset: number, limit: number, tags?: Array<string>, searchTerm?: string): Promise<PostAggregationResult> {
+type Filters = {
+  tags?: string[],
+  locations?: string[],
+  searchTerm?: string,
+}
+
+export async function getPopulatedPosts(authUserId: string, offset: number, limit: number, {tags, locations, searchTerm}: Filters): Promise<PostAggregationResult> {
   await dbConnect();
 
-  const postsInfo = await PostModel.aggregate(postPopulationPipeline({authUserId, offset, limit, tags, searchTerm}));
+  const postsInfo = await PostModel.aggregate(postPopulationPipeline({authUserId, offset, limit, tags, locations, searchTerm}));
   return {
     count: postsInfo[0].count.length ? postsInfo[0].count[0].count : 0,
     posts: postsInfo[0].posts,

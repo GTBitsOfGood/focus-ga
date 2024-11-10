@@ -1,3 +1,4 @@
+import { GEORGIA_CITIES } from "@/utils/cities";
 import { PostDeletionTimeline, ProfileColors } from "@/utils/consts";
 import { User } from "@/utils/types/user";
 import mongoose, { Schema } from "mongoose";
@@ -13,7 +14,7 @@ const UserSchema = new Schema<User>({
   }},
   childAge: { type: Number, min: 0, required: true },
   childDisabilities: [{ type: Schema.Types.ObjectId, ref: 'Disability', required: true }],
-  city: { type: String, required: true },
+  city: { type: String, enum: GEORGIA_CITIES, required: true },
   bio: { type: String },
 
   notificationPreference: { type: Boolean, default: true }, // true = "Email about post replies", false = "Never email"

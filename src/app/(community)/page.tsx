@@ -4,7 +4,7 @@ import { getPopulatedPosts } from "@/server/db/actions/PostActions";
 import PostComponent from "@/components/PostComponent";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { PopulatedPost } from "@/utils/types/post";
-import { LoaderCircle, Mail } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import FilterComponent from "@/components/FilterComponent";
 import { Disability } from "@/utils/types/disability";
 import { Location } from "@/utils/types/location";
@@ -12,7 +12,6 @@ import { Filter } from "@/utils/types/common";
 import { PAGINATION_LIMIT } from "@/utils/consts";
 import { useUser } from "@/contexts/UserContext";
 import { GEORGIA_CITIES } from "@/utils/cities";
-import { getPopulatedUser } from "@/server/db/actions/UserActions";
 import { useSearch } from "@/contexts/SearchContext";
 import ContactButton from "@/components/ContactButton";
 import { useDisabilities } from "@/contexts/DisabilityContext";
@@ -83,13 +82,9 @@ export default function Home() {
   // fetch posts when filter changes
   useEffect(() => {
     fetchPosts(true);
-  }, [selectedDisabilities, searchTerm])
+  }, [selectedDisabilities, selectedLocations, searchTerm])
 
-  useEffect(() => {
-    console.log(selectedLocations);
-  }, [selectedLocations]);
-
-  // Fetch posts when page changes
+  // fetch posts when page changes
   const fetchPosts = async (clear: boolean = false) => {
     if (!user || filtersLoading) return;
 
@@ -108,8 +103,10 @@ export default function Home() {
         const newPage = clear ? 0 : page;
   
         const tags = selectedDisabilities.map((disability) => disability._id);
-  
-        const {count, posts: newPosts } = await getPopulatedPosts(user._id, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, tags, searchTerm);
+        const locations = selectedLocations.map((location) => location.name);
+
+        const filters = { tags, locations, searchTerm };
+        const {count, posts: newPosts } = await getPopulatedPosts(user._id, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, filters);
         setTotalPostsCount(count);
         if (newPosts.length > 0) {
           setPosts(clear ? newPosts : [...posts, ...newPosts]);
