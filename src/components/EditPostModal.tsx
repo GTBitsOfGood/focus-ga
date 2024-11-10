@@ -9,6 +9,7 @@ import { MDXEditorMethods } from "@mdxeditor/editor";
 import { cn, countNonMarkdownCharacters } from "@/lib/utils";
 import DropdownWithDisplay from "./DropdownWithDisplay";
 import { useDisabilities } from "@/contexts/DisabilityContext";
+import { useUser } from "@/contexts/UserContext";
 
 const EditorComp = dynamic(() => import('./EditorComponent'), { ssr: false })
 
@@ -44,6 +45,7 @@ export default function EditPostModal(props: EditPostModalProps) {
   const [mouseDownOnBackground, setMouseDownOnBackground] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const editorRef = useRef<MDXEditorMethods | null>(null);
+  const { user } = useUser();
 
   const handleSubmit = async () => {
     try {
@@ -111,6 +113,12 @@ export default function EditPostModal(props: EditPostModalProps) {
     setMouseDownOnBackground(false);
   };
 
+  useEffect(() => {
+    if (!user) return;
+    
+    setTags(user.defaultDisabilityTags);
+  }, [user]);
+
   if (!isOpen) {
     return <></>
   }
@@ -166,7 +174,7 @@ export default function EditPostModal(props: EditPostModalProps) {
             Disability Tags
           </label>
           <DropdownWithDisplay
-            items = {disabilities}
+            items={disabilities}
             selectedItems={tags}
             onToggleItem={toggleDisability}
             displayKey="name"
