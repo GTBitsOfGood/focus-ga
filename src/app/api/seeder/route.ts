@@ -15,6 +15,7 @@ import { createComment, createCommentLike } from '@/server/db/actions/CommentAct
 import { createReport } from '@/server/db/actions/ReportActions';
 import { ReportReason, ContentType } from '@/utils/types/report';
 import { CommentInput } from '@/utils/types/comment';
+import { GEORGIA_CITIES } from "@/utils/cities";
 
 const DISABILITIES = ["Cerebral Palsy", "Autism Spectrum Disorder", "Down Syndrome", "Spina Bifida", "Muscular Dystrophy", "Rett Syndrome", "Fragile X Syndrome", "Epilepsy", "ADHD", "Spinal Muscular Atrophy"];
 const NUM_USERS = 10;
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
 
       for (let i = 0; i < randomDisabilityCount; i++) {
         const randomIndex = Math.floor(Math.random() * availableDisabilities.length);
-        selectedDisabilities.push(disabilityIds[randomIndex]);
+        selectedDisabilities.push(availableDisabilities[randomIndex]);
         availableDisabilities.splice(randomIndex, 1);
       }
 
@@ -68,6 +69,7 @@ export async function POST(request: Request) {
       const lastName = faker.person.lastName();
       const username = faker.internet.userName({ firstName: firstName, lastName: lastName })
       const email = faker.internet.email({ firstName: firstName, lastName: lastName });
+      const cityIndex = Math.floor(Math.random() * GEORGIA_CITIES.length);
 
       const userInfo = {
         username: username,
@@ -75,7 +77,8 @@ export async function POST(request: Request) {
         email: email,
         childAge: Math.floor(Math.random() * (MAX_CHILD_AGE)),
         childDisabilities: selectedDisabilities,
-        county: faker.location.county(),
+        city: GEORGIA_CITIES[cityIndex],
+        bio: faker.lorem.paragraph({ min: 1, max: 6 }),
       }
 
       users.push((await createUser(userInfo)));
@@ -108,6 +111,7 @@ export async function POST(request: Request) {
           isPinned: Math.random() < 0.5 ? true : false,
           isPrivate: Math.random() < 0.5 ? true : false,
           isFlagged: Math.random() < 0.5 ? true : false,
+          isDeleted: false
         }
 
         posts.push(((await createPost(postInfo))));
@@ -120,6 +124,7 @@ export async function POST(request: Request) {
     for (let i = 0; i < posts.length; i++) {
       const post = posts[i];
       const numberOfComments = Math.floor(Math.random() * (MAX_COMMENTS_PER_POST + 1));
+      const postComments = [];
 
       for (let j = 0; j < numberOfComments; j++) {
         const commentInfo: CommentInput = {
@@ -127,16 +132,18 @@ export async function POST(request: Request) {
           post: post._id,
           date: faker.date.between({ from: post.date, to: new Date(), }),
           content: faker.lorem.sentences(),
+          isDeleted: false
         }
         
-        if (comments.length > 0) {
-          const randomIndex = Math.floor(Math.random() * comments.length);
-          if (commentInfo.date && comments[randomIndex].date < commentInfo.date) {
-            commentInfo.replyTo = comments[randomIndex]._id;
+        if (postComments.length > 0) {
+          const randomIndex = Math.floor(Math.random() * postComments.length);
+          if (commentInfo.date && postComments[randomIndex].date < commentInfo.date) {
+            commentInfo.replyTo = postComments[randomIndex]._id;
           }
         }
-
-        comments.push(await createComment(commentInfo));
+        const newComment = await createComment(commentInfo);
+        postComments.push(newComment);
+        comments.push(newComment);
       }
     }
     console.log("Successfully created comments");

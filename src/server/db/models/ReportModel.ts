@@ -12,6 +12,6 @@ const ReportSchema = new Schema<Report>({
   contentType: { type: String, enum: ContentType, required: true }
 });
 
-const ReportModel = mongoose.models?.Report ?? mongoose.model('Report', ReportSchema);
+const ReportModel = mongoose.models.Report || mongoose.model('Report', ReportSchema);
 
 export default ReportModel;

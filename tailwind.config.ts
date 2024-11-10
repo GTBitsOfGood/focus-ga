@@ -16,8 +16,17 @@ const config: Config = {
       colors: {
         'theme-blue': '#475CC6',
         'theme-gray': '#636363',
-        'med-gray': '#00000099',
-        'dropdown-gray': '#f2f2f2'
+        'theme-med-gray': '#00000099',
+        'theme-medlight-gray': "#C7C7C7",
+        'theme-lightgray': '#F3F3F3',
+        'dropdown-gray': '#f2f2f2',
+        'profile-orange': '#FFBFBF',
+        'profile-yellow': '#FFFA96',
+        'profile-green': '#90C399',
+        'profile-teal': '#7BBAD1',
+        'profile-indigo': '#778EFF',
+        'profile-pink': '#F8A5FF',
+        'error-red': '#ff4e4e',
       },
       borderRadius: {
         lg: 'var(--radius)',

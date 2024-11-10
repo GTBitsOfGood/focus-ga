@@ -8,8 +8,9 @@ const CommentSchema = new Schema<Comment>({
     content: { type: String, required: true },
     likes: { type: Number, default: 0 },
     replyTo: { type: Schema.Types.ObjectId, ref: 'Comment', default: null },
+    isDeleted: { type: Boolean, default: false }
 });
 
-const CommentModel = mongoose.models?.Comment ?? mongoose.model("Comment", CommentSchema);
+const CommentModel = mongoose.models.Comment || mongoose.model("Comment", CommentSchema);
 
 export default CommentModel;

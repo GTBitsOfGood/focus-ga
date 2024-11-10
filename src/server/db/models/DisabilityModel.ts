@@ -5,6 +5,6 @@ const DisabilitySchema = new Schema<Disability>({
   name: { type: String, required: true }
 });
 
-const DisabilityModel = mongoose.models?.Disability ?? mongoose.model('Disability', DisabilitySchema);
+const DisabilityModel = mongoose.models.Disability || mongoose.model('Disability', DisabilitySchema);
 
 export default DisabilityModel;

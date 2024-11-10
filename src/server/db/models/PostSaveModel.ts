@@ -8,6 +8,6 @@ const PostSaveSchema = new Schema<PostSave>({
   date: { type: Date, default: Date.now() },
 });
 
-const PostSaveModel = mongoose.models?.PostSave ?? mongoose.model("PostSave", PostSaveSchema);
+const PostSaveModel = mongoose.models.PostSave || mongoose.model("PostSave", PostSaveSchema);
 
 export default PostSaveModel;

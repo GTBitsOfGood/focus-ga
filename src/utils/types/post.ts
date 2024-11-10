@@ -23,6 +23,7 @@ export const postSchema = z.object({
   isPinned: z.boolean().default(false),
   isPrivate: z.boolean().default(false),
   isFlagged: z.boolean().default(false),
+  isDeleted: z.boolean().default(false)
 });
 
 export const editPostSchema = postSchema.partial();
@@ -40,9 +41,15 @@ export const postLikeSchema = z.object({
 });
 
 export type Post = ExtendId<z.infer<typeof postSchema>>;
-export type PopulatedPost = Omit<Post, 'author' | 'tags'> & { author: User | null, tags: (Disability | null)[] };
 export type PostSave = ExtendId<z.infer<typeof postSaveSchema>>;
 export type PostLike = ExtendId<z.infer<typeof postLikeSchema>>;
+
+export type PopulatedPost = Omit<Post, 'author' | 'tags'> & {
+  author: User | null,
+  tags: (Disability | null)[],
+  liked: boolean,
+  saved: boolean
+};
 
 export type PostInput = z.input<typeof postSchema>;
 export type PostSaveInput = z.input<typeof postSaveSchema>;
