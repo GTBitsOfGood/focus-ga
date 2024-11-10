@@ -16,6 +16,6 @@ const PostSchema = new Schema<Post>({
   isDeleted: { type: Boolean, default: false }
 });
 
-const PostModel = mongoose.models?.Post ?? mongoose.model("Post", PostSchema);
+const PostModel = mongoose.models.Post || mongoose.model("Post", PostSchema);
 
 export default PostModel;

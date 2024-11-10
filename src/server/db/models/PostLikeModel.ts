@@ -8,6 +8,6 @@ const PostLikeSchema = new Schema<PostLike>({
   date: { type: Date, default: Date.now() },
 });
 
-const PostLikeModel = mongoose.models?.PostLike ?? mongoose.model("PostLike", PostLikeSchema);
+const PostLikeModel = mongoose.models.PostLike || mongoose.model("PostLike", PostLikeSchema);
 
 export default PostLikeModel;

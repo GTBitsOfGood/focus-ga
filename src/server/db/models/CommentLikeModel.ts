@@ -11,6 +11,6 @@ const CommentLikeSchema = new Schema<CommentLike>({
     date: { type: Date, default: Date.now() },
 });
 
-const CommentLikeModel = mongoose.models?.CommentLike ?? mongoose.model("CommentLike", CommentLikeSchema);
+const CommentLikeModel = mongoose.models.CommentLike || mongoose.model("CommentLike", CommentLikeSchema);
 
 export default CommentLikeModel;

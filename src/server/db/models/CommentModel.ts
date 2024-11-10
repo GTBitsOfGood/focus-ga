@@ -11,6 +11,6 @@ const CommentSchema = new Schema<Comment>({
     isDeleted: { type: Boolean, default: false }
 });
 
-const CommentModel = mongoose.models?.Comment ?? mongoose.model("Comment", CommentSchema);
+const CommentModel = mongoose.models.Comment || mongoose.model("Comment", CommentSchema);
 
 export default CommentModel;
