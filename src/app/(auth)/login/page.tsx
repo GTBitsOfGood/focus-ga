@@ -18,7 +18,7 @@ export default function Login() {
 
   const handleLogin = async () => {
     try {
-      const result = await loginUser(email);
+      const result = await loginUser(email, email);
       if (result.success) {
         router.push("/");
       }
