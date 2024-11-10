@@ -10,6 +10,7 @@ import { cn, countNonMarkdownCharacters } from "@/lib/utils";
 import DropdownWithDisplay from "./DropdownWithDisplay";
 import { useDisabilities } from "@/contexts/DisabilityContext";
 import { useUser } from "@/contexts/UserContext";
+import { useToast } from "@/hooks/use-toast";
 
 const EditorComp = dynamic(() => import('./EditorComponent'), { ssr: false })
 
@@ -85,16 +86,13 @@ export default function EditPostModal(props: EditPostModalProps) {
     }
   }
 
-  const toggleDisability = (name: Disability) => {
-    if (tags.length < MAX_POST_DISABILITY_TAGS) {
-      const newTags = tags.includes(name)
-      ? tags.filter((d) => d !== name)
-      : [...tags, name];
-    
-      setTags(newTags);
-    } else if (tags.length == MAX_POST_DISABILITY_TAGS) {
-      const newTags = tags.filter((d) => d !== name)
-      setTags(newTags);
+  const toggleDisability = (disability: Disability) => {
+    const hasTag = tags.some(d => d._id.toString() === disability._id.toString());
+
+    if (hasTag) {
+      setTags(tags.filter(d => d._id.toString() !== disability._id.toString()));
+    } else if (tags.length < MAX_POST_DISABILITY_TAGS) {
+      setTags([...tags, disability]);
     }
   };
 
@@ -115,7 +113,7 @@ export default function EditPostModal(props: EditPostModalProps) {
 
   useEffect(() => {
     if (!user) return;
-    
+
     setTags(user.defaultDisabilityTags);
   }, [user]);
 

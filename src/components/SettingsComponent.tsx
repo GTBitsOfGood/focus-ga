@@ -63,23 +63,22 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
     handleUpdateUser();
   }, [notificationPreference, defaultDisabilityTags, defaultDisabilityFilters, postDeletionTimeline])
 
-  const toggleDisability = (name: Disability) => {
-    if (defaultDisabilityTags.length < MAX_POST_DISABILITY_TAGS) {
-      const newTags = defaultDisabilityTags.includes(name)
-        ? defaultDisabilityTags.filter((d) => d !== name)
-        : [...defaultDisabilityTags, name];
-      
-      setDefaultDisabilityTags(newTags);
-    } else if (defaultDisabilityTags.length == MAX_POST_DISABILITY_TAGS) {
-      const newTags = defaultDisabilityTags.filter((d) => d !== name)
-      setDefaultDisabilityTags(newTags);
+  const toggleDisability = (disability: Disability) => {
+    const hasTag = defaultDisabilityTags.some(d => d._id.toString() === disability._id.toString());
+
+    if (hasTag) {
+      setDefaultDisabilityTags(defaultDisabilityTags.filter(d => d._id.toString() !== disability._id.toString()));
+    } else if (defaultDisabilityTags.length < MAX_POST_DISABILITY_TAGS) {
+      setDefaultDisabilityTags([...defaultDisabilityTags, disability]);
     }
   };
 
-  const toggleFilter = (name: Disability) => {
-    const newFilters = defaultDisabilityFilters.includes(name)
-      ? defaultDisabilityFilters.filter((d) => d !== name)
-      : [...defaultDisabilityFilters, name];
+  const toggleFilter = (disability: Disability) => {
+    const hasFilter = defaultDisabilityFilters.some(d => d._id.toString() === disability._id.toString());
+
+    const newFilters = hasFilter
+      ? defaultDisabilityFilters.filter(d => d._id.toString() !== disability._id.toString())
+      : [...defaultDisabilityFilters, disability];
     
     setDefaultDisabilityFilters(newFilters);
   };
