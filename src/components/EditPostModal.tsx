@@ -174,7 +174,7 @@ export default function EditPostModal(props: EditPostModalProps) {
           <DropdownWithDisplay
             items={disabilities}
             selectedItems={tags}
-            onToggleItem={toggleDisability}
+            onChange={(items) => setTags(items)}
             displayKey="name"
             placeholder="Add disability tags"
             maxSelectionCount={5}

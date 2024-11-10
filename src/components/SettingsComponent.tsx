@@ -63,26 +63,6 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
     handleUpdateUser();
   }, [notificationPreference, defaultDisabilityTags, defaultDisabilityFilters, postDeletionTimeline])
 
-  const toggleDisability = (disability: Disability) => {
-    const hasTag = defaultDisabilityTags.some(d => d._id.toString() === disability._id.toString());
-
-    if (hasTag) {
-      setDefaultDisabilityTags(defaultDisabilityTags.filter(d => d._id.toString() !== disability._id.toString()));
-    } else if (defaultDisabilityTags.length < MAX_POST_DISABILITY_TAGS) {
-      setDefaultDisabilityTags([...defaultDisabilityTags, disability]);
-    }
-  };
-
-  const toggleFilter = (disability: Disability) => {
-    const hasFilter = defaultDisabilityFilters.some(d => d._id.toString() === disability._id.toString());
-
-    const newFilters = hasFilter
-      ? defaultDisabilityFilters.filter(d => d._id.toString() !== disability._id.toString())
-      : [...defaultDisabilityFilters, disability];
-    
-    setDefaultDisabilityFilters(newFilters);
-  };
-
   return (
     <div>
       {/* for rendering dynamic classes: https://www.reddit.com/r/sveltejs/comments/1b3u9d2/tailwind_colors_not_working/ */}
@@ -132,7 +112,7 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
           <DropdownWithDisplay
             items={disabilities}
             selectedItems={defaultDisabilityTags}
-            onToggleItem={toggleDisability}
+            onChange={(tags) => setDefaultDisabilityTags(tags)}
             displayKey="name"
             placeholder="Select default disability tags"
             typeDropdown="disabilities"
@@ -145,7 +125,7 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
           <DropdownWithDisplay
             items={disabilities}
             selectedItems={defaultDisabilityFilters}
-            onToggleItem={toggleFilter}
+            onChange={(filters) => setDefaultDisabilityFilters(filters)}
             displayKey="name"
             placeholder="Select default disability filters"
             maxSelectionCount={MAX_FILTER_DISABILITY_TAGS}
