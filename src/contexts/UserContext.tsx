@@ -33,10 +33,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     fetchUser();
   }, []);
 
-  useEffect(() => {
-    console.log(user);
-  }, [user]);
-
   return (
     <UserContext.Provider value={{ user, setUser }}>
       {children}

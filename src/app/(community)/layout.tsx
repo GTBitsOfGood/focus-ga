@@ -88,6 +88,7 @@ function CommunityLayout({ children }: LayoutProps) {
         openModal={openCreatePostModal}
         closeModal={closeCreatePostModal}
         onSubmit={onPostSubmit}
+        tags={user.defaultDisabilityTags}
       />
       <div className="mx-32 sm:mx-0 mt-[100px] p-4">
         {children}
