@@ -6,7 +6,7 @@ import PostSaveModel from "../models/PostSaveModel";
 import PostLikeModel from "../models/PostLikeModel";
 import { postSaveSchema, postLikeSchema } from "@/utils/types/post";
 import dbConnect from "../dbConnect";
-import mongoose, { Mongoose } from "mongoose";
+import mongoose from "mongoose";
 import UserModel from "../models/UserModel";
 import DisabilityModel from "../models/DisabilityModel";
 import { revalidatePath } from "next/cache";
