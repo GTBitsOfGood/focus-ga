@@ -146,7 +146,7 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
           onLikeClick={onPostLikeClick}
           onSaveClick={onPostSaveClick}
           onEditClick={post.author?._id === authUser._id ? onPostEditClick : undefined}
-          onDeleteClick={post.author?._id === authUser._id ? onPostDeleteClick : undefined}
+          onDeleteClick={authUser.isAdmin || post.author?._id === authUser._id ? onPostDeleteClick : undefined}
         />
         <CommentInputComponent
           placeholder="Add comment"
