@@ -3,7 +3,6 @@ import { Types } from "mongoose";
 import { ExtendId } from "./common";
 import { Disability } from "./disability";
 import { PostDeletionTimeline, ProfileColors } from "@/utils/consts";
-import { GEORGIA_CITIES } from "../cities";
 
 export const userSchema = z.object({
   username: z.string(),
