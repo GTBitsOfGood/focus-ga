@@ -25,17 +25,29 @@ export default function DropdownComponent (
   props: DropdownProps
 ) {
   const [showData, setShowData] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
 
   const handleItemClick = (item: any) => {
     props.filter.setSelected(item);
   };
 
+  const debouceOpenDropdown = (open: boolean) => {
+    setShowData(open);
+    setIsDisabled(true);
+    setTimeout(() => setIsDisabled(false), 300);
+  };
+
   return (
-    <Popover onOpenChange={(open) => setShowData(open)}>
+    <Popover onOpenChange={debouceOpenDropdown}>
       <PopoverTrigger
         asChild
       >
-        <div className="relative flex items-center justify-center rounded-full cursor-pointer bg-dropdown-gray py-2 px-4">
+        <div className={`relative flex items-center justify-center rounded-full cursor-pointer bg-dropdown-gray py-2 px-4 hover:bg-gray-200 transition ${
+            isDisabled ? "pointer-events-none " : " "
+          } ${
+            showData ? "bg-gray-200" : ""
+          }`}
+        >
           <div className="text-black text-sm font-normal">
               {props.filter.label}
           </div>
