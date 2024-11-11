@@ -42,7 +42,7 @@ export default function DropdownComponent (
       <PopoverTrigger
         asChild
       >
-        <div className={`relative flex items-center justify-center rounded-full cursor-pointer bg-dropdown-gray py-2 px-4 hover:bg-gray-200 transition ${
+        <div className={`relative flex items-center justify-center rounded-full cursor-pointer bg-dropdown-gray py-1 px-3 hover:bg-gray-200 transition ${
             isDisabled ? "pointer-events-none " : " "
           } ${
             showData ? "bg-gray-200" : ""

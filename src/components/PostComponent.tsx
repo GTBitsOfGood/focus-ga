@@ -186,7 +186,9 @@ export default function PostComponent(props: PostComponentProps) {
       <div className="flex items-center justify-between text-sm">
         {clickable ? (
         <div className="flex items-center gap-2">
-          <span className={cn("w-6 h-6 rounded-full inline-block", {[`bg-${author?.profileColor ? author.profileColor : ProfileColors.ProfileDefault}`]: true})}/>
+          <div className={`w-6 h-6 bg-${author?.profileColor? author?.profileColor: ProfileColors.ProfileDefault} rounded-full flex items-center justify-center cursor-pointer`}>  {/** Change to whatever color is chosen */}
+            <span className="text-black text-[10px] font-bold select-none">{author ? author?.lastName.charAt(0).toUpperCase() : 'D'}</span>
+          </div>
           {author ? `${author.lastName} Family` : 'Deleted User'}
         </div>
       ) : (
