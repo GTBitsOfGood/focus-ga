@@ -76,12 +76,12 @@ export default function Navbar({ openModal }: NavbarProps) {
       </div>
 
       {/* Create Post*/}
-      <button
+      {!user.isBanned && <button
         className="bg-theme-blue text-base py-2 px-[18px] mr-10 text-white font-semibold rounded-[12px] gap-2 flex flex-row justify-center items-center transition hover:opacity-90 whitespace-nowrap"
         onClick={() => openModal()}
       >
         <SquarePen className="w-6 h-6" color="#ffffff" /> Create Post
-      </button>
+      </button>}
 
       {/* Profile Picture menu button */}
       <div
