@@ -90,7 +90,6 @@ export default function PostComponent(props: PostComponentProps) {
       try {
         const reportsData = await getReportsByPost(post._id);
         setReports(reportsData);
-        console.log(reportsData); 
       } catch (error) {
         console.error('Error fetching reports:', error);
       }

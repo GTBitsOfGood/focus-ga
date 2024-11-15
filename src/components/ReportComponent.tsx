@@ -4,11 +4,9 @@ import { useEffect, useState } from "react";
 import { getDateDifferenceString } from "@/utils/dateUtils";
 import { cn } from "@/lib/utils";
 import { ProfileColors } from "@/utils/consts";
-import { Report, ReportReason, ContentType } from "@/utils/types/report";
+import { Report } from "@/utils/types/report";
 import { getUser } from "@/server/db/actions/UserActions";
 import { User } from "@/utils/types/user";
-
-const IS_ADMIN = true;
 
 type ReportComponentProps = {
   report: Report;
