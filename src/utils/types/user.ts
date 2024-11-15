@@ -7,6 +7,7 @@ import { PostDeletionTimeline, ProfileColors } from "@/utils/consts";
 export const userSchema = z.object({
   username: z.string(),
   isAdmin: z.boolean().default(false),
+  isBanned: z.boolean().default(false),
   lastName: z.string(),
   email: z.string().email(),
   childAge: z.number().min(0),

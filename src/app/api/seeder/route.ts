@@ -73,6 +73,8 @@ export async function POST(request: Request) {
 
       const userInfo = {
         username: username,
+        isAdmin: false,
+        isBanned: false,
         lastName: lastName,
         email: email,
         childAge: Math.floor(Math.random() * (MAX_CHILD_AGE)),

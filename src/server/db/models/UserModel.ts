@@ -7,6 +7,7 @@ const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 const UserSchema = new Schema<User>({
   username: { type: String, required: true },
   isAdmin: { type: Boolean, default: false },
+  isBanned: { type: Boolean, default: false },
   lastName: { type: String, required: true },
   email: { type: String, required: true, validate: {
     validator: (s: string) => emailRegex.test(s) 

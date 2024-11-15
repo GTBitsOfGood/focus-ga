@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil } from "lucide-react";
+import { Ban, Pencil } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { PopulatedUser, User } from "@/utils/types/user";
 import { useEffect, useState } from "react";
@@ -15,6 +15,7 @@ import { ProfileColors } from "@/utils/consts";
 import { editUser } from "@/server/db/actions/UserActions";
 import { useUser } from "@/contexts/UserContext";
 import BackButton from "../BackButton";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
 
 
 type ProfileContainerProps = {
@@ -24,7 +25,9 @@ type ProfileContainerProps = {
 export default function ProfileContainer({ user }: ProfileContainerProps) {
   const [userPosts, setUserPosts] = useState<PopulatedPost[]>([]);
   const [savedPosts, setSavedPosts] = useState<PopulatedPost[]>([]);
-
+  const [isBanned, setIsBanned] = useState<boolean>(user.isBanned);
+  const [showBanDialog, setShowBanDialog] = useState<boolean>(false);
+  const [banLoading, setBanLoading] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user: currUser, setUser } = useUser(); // Access the current authenticated user from UserContext
 
@@ -57,6 +60,18 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
     }
   }
 
+  const handleBanClick = async () => {
+    if (banLoading) return;
+    setBanLoading(true);
+    try {
+      await editUser(user._id, { isBanned: !isBanned });
+      setIsBanned(isBanned => !isBanned);
+      setShowBanDialog(false);
+    } finally {
+      setBanLoading(false);
+    }
+  }
+
   if (!currUser) {
     return;
   }
@@ -80,7 +95,7 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
             </div>
           </div>
           {
-            user._id === currUser._id 
+            user._id === currUser._id
             ? (
               <button onClick={() => setIsModalOpen(true)} className="bg-light-gray hover:bg-zinc-300 transition text-theme-gray text-lg font-bold px-4 py-2 rounded-lg">
                 <div className="flex flex-row items-center space-x-2.5">
@@ -88,8 +103,15 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
                   <p>Edit</p>
                 </div>
               </button>
-            )
-            : null
+            ) : currUser.isAdmin
+            ? (
+              <button onClick={() => setShowBanDialog(true)} className={`'bg-light-gray ${isBanned ? 'hover:bg-theme-gray hover:text-gray-200' : 'hover:bg-zinc-300'} transition text-theme-gray text-lg font-bold px-4 py-2 rounded-lg`}>
+                <div className="flex flex-row items-center space-x-2.5">
+                  <Ban className="w-6 h-6" />
+                  <p>{user.isBanned ? 'Unban User' : 'Ban User'}</p>
+                </div>
+              </button>
+            ) : null
           }
         </div>
         <EditProfileModal
@@ -101,6 +123,34 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
           openModal={openModal}
           closeModal={closeModal}
         />
+        <AlertDialog open={showBanDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{isBanned ? 'Unban User' : 'Ban User'}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {
+                  isBanned
+                    ? 'Are you sure you want to unban this user?'
+                    : 'Are you sure you want to ban this user? They would not be able to view any future posts.'
+                }
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setShowBanDialog(false)}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                disabled={banLoading}
+                onClick={handleBanClick}
+                className="bg-theme-blue hover:bg-theme-blue hover:opacity-90 transition"
+              >
+                {
+                  isBanned
+                    ? (banLoading ? 'Unbanning...' : 'Unban')
+                    : (banLoading ? 'Banning...' : 'Ban')
+                }
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         <div>
           <p className="text-lg mb-4">
             <span className="font-semibold">Location: </span>
