@@ -12,13 +12,13 @@ import {
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "./ui/command";
 import { ReportReason } from "@/utils/types/report";
 
-type ReportPostModalProps = {
+type ReportContentModalProps = {
   isOpen: boolean;
   closeModal: () => void;
   onSubmit: (title: string, content: string) => Promise<void>;
 }
 
-export default function ReportPostModal(props: ReportPostModalProps) {
+export default function ReportContentModal(props: ReportContentModalProps) {
   const {
     isOpen,
     closeModal,

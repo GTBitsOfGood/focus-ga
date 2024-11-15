@@ -15,7 +15,7 @@ import { ProfileColors } from "@/utils/consts";
 import EditPostModal from "./EditPostModal";
 import { Disability } from "@/utils/types/disability";
 import { useToast } from "@/hooks/use-toast";
-import ReportPostModal from "./ReportPostModal";
+import ReportContentModal from "./ReportContentModal";
 import { createReport, getReportsByPost } from "@/server/db/actions/ReportActions";
 import { Report, ReportReason, ContentType } from "@/utils/types/report";
 import { useUser } from '@/contexts/UserContext';
@@ -247,7 +247,7 @@ export default function PostComponent(props: PostComponentProps) {
               <DropdownMenuContent side="bottom" align="end">
                 {onEditClick && <DropdownMenuItem onClick={() => setShowEditModal(true)}>Edit</DropdownMenuItem>}
                 {onDeleteClick && <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem>}
-                <DropdownMenuItem onClick={() => setShowReportModal(true)}>Report Post</DropdownMenuItem>
+                {user && user._id != post.author?._id ? <DropdownMenuItem onClick={() => setShowReportModal(true)}>Report Post</DropdownMenuItem> : null}
                 <DropdownMenuItem onClick={handleShareClick}>Share</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -318,7 +318,7 @@ export default function PostComponent(props: PostComponentProps) {
         closeModal={() => setShowEditModal(false)}
         onSubmit={handleEditClick}
       />}
-      {showReportModal && <ReportPostModal
+      {showReportModal && <ReportContentModal
         isOpen={showReportModal}
         closeModal={() => setShowReportModal(false)}
         onSubmit={handleReportClick}

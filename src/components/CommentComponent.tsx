@@ -10,6 +10,10 @@ import Link from "next/link";
 import { ProfileColors } from "@/utils/consts";
 import { PopulatedUser, User } from "@/utils/types/user";
 import { cn } from "@/lib/utils";
+import { useUser } from "@/contexts/UserContext";
+import { createReport } from "@/server/db/actions/ReportActions";
+import { ContentType, ReportReason } from "@/utils/types/report";
+import ReportContentModal from "./ReportContentModal";
 
 type CommentComponentProps = {
   className?: string;
@@ -50,6 +54,9 @@ export default function CommentComponent(props: CommentComponentProps) {
   const [isDeleted, setIsDeleted] = useState<boolean>(initialIsDeleted);
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+  const [showReportModal, setShowReportModal] = useState<boolean>(false);
+
+  const { user, setUser } = useUser();
 
   async function handleLikeClick() {
     if (likeLoading) return;
@@ -88,6 +95,20 @@ export default function CommentComponent(props: CommentComponentProps) {
       } finally {
         setDeleteLoading(false);
       }
+    }
+  }
+
+  async function handleReportClick(reason: string, description: string) {
+    if (author && user) {
+      const reportData = {
+        reason: reason as ReportReason,
+        description: description,
+        reportedUser: author?._id,
+        sourceUser: user?._id,
+        reportedContent: comment._id,
+        contentType: ContentType.COMMENT,
+      }
+      await createReport(reportData);
     }
   }
 
@@ -145,6 +166,7 @@ export default function CommentComponent(props: CommentComponentProps) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent side="bottom" align="start">
                   {onDeleteClick ? <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem> : undefined}
+                  {user && user._id != comment.author?._id ? <DropdownMenuItem onClick={() => setShowReportModal(true)}>Report Comment</DropdownMenuItem> : null}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -152,6 +174,11 @@ export default function CommentComponent(props: CommentComponentProps) {
         </>}
         {nestedContent}
       </div>
+      {showReportModal && <ReportContentModal
+        isOpen={showReportModal}
+        closeModal={() => setShowReportModal(false)}
+        onSubmit={handleReportClick}
+      />}
       <AlertDialog open={showDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
