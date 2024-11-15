@@ -326,6 +326,7 @@ export default function PostComponent(props: PostComponentProps) {
       />}
       {showContentReports && <ContentReportsModal
         isOpen={showContentReports}
+        reports={reports}
         closeModal={() => setShowContentReports(false)}
         onSubmit={handleReportClick}
       />}
