@@ -1,6 +1,3 @@
-import { getIronSession } from 'iron-session'
-import { cookies } from 'next/headers'
-import { SessionData, sessionOptions } from "@/lib/session";
 import { decodeSAMLResponse, validateSAMLResponse } from "@/server/db/actions/sso";
 import { NextRequest, NextResponse } from 'next/server';
 import { loginUser } from '@/server/db/actions/UserActions';
@@ -20,14 +17,15 @@ export async function POST(request : NextRequest) {
   try {
     const decodedSAMLResp = decodeSAMLResponse(encodedSAMLResp ?? "");
     result = validateSAMLResponse(decodedSAMLResp, SALESFORCE_CERTIFICATE ?? "");
-    console.log(result);
   } catch (e) {
-    console.error(e);
     result = { error: "Error processing SAML response" };
   }
 
   if (result.error) {
     return redirect(`/login?error=${encodeURIComponent(result.error)}`);
+  }
+  if (!result.username) {
+    return redirect(`/login?error=${encodeURIComponent("Could not determine username")}`);
   }
 
   await loginUser(result.username, result.userId);
