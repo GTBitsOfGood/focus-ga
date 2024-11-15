@@ -64,7 +64,7 @@ export default function ContentReportsModal(props: EditPostModalProps) {
           <X className="w-6 h-6 cursor-pointer" onClick={handleClose} />
         </div>
 
-        <div className="my-5 overflow-y-auto px-4">
+        <div className="my-5 overflow-y-auto pr-4">
           {
             reports.map((report, index) => {
               return <ReportComponent key={report._id} report={report} isLast={index == reports.length - 1}/>;
