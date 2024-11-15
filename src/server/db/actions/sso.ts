@@ -41,12 +41,12 @@ export function validateSAMLResponse(samlResp : string, certificate : string) {
   let userId;
   let username;
 
-  for (let attribute of attributes) {
+  for (let attribute of Array.from(attributes)) {
     if (attribute.getAttribute("Name") === "userId")
-      userId = attribute.textContent.trim();
+      userId = attribute?.textContent?.trim();
     
     if (attribute.getAttribute("Name") == "username")
-      username = attribute.textContent.trim();
+      username = attribute?.textContent?.trim();
   }
 
   if (!userId) return { error: "Could not find user ID" };
