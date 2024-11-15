@@ -31,10 +31,6 @@ export default function ContentReportsModal(props: EditPostModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const editorRef = useRef<MDXEditorMethods | null>(null);
 
-  const handleSubmit = async () => {
-    
-  }
-
   const handleClose = () => {
     closeModal();
     setBodyError(false);
@@ -68,36 +64,27 @@ export default function ContentReportsModal(props: EditPostModalProps) {
           <X className="w-6 h-6 cursor-pointer" onClick={handleClose} />
         </div>
 
-        <div className="my-5 overflow-y-auto">
+        <div className="my-5 overflow-y-auto px-4">
           {
-            reports.map((report) => {
-              return <ReportComponent key={report._id} report={report} />;
+            reports.map((report, index) => {
+              return <ReportComponent key={report._id} report={report} isLast={index == reports.length - 1}/>;
             })
           }
         </div>
 
-        <div className="flex flex-row justify-between items-center">
+        <div className="flex flex-row justify-between items-center mt-5">
           <button className="flex flex-row items-center font-bold text-error-red gap-x-1.5 text-lg">
             <Trash2 />
             Delete Post
           </button>
           <div className="flex justify-end space-x-4">
             <button
-              onClick={handleClose}
               className="w-20 py-2 bg-gray-300 text-gray-700 rounded-md transition hover:bg-gray-400 font-bold"
             >
               Ignore
             </button>
             <button 
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className={cn(
-                "min-w-20 py-2 px-4 bg-theme-blue rounded-lg justify-center items-center gap-2.5 inline-flex",
-                {
-                "opacity-50 cursor-not-allowed": isSubmitting,
-                "transition hover:bg-blue-900": !isSubmitting,
-                }
-              )}
+              className="min-w-20 py-2 px-4 bg-theme-blue rounded-lg justify-center items-center gap-2.5 inline-flex transition hover:bg-blue-900"
             >
             <div className="text-white font-bold">Edit Content</div>
             </button>

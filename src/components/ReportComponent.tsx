@@ -13,9 +13,10 @@ const IS_ADMIN = true;
 type ReportComponentProps = {
   report: Report;
   className?: string;
+  isLast: boolean
 };
 
-export default function ReportComponent({ report } : ReportComponentProps) {
+export default function ReportComponent({ report, isLast } : ReportComponentProps) {
   const [sourceUser, setSourceUser] = useState<User>()
 
   useEffect(() => {
@@ -54,7 +55,11 @@ export default function ReportComponent({ report } : ReportComponentProps) {
           </div>
         ) : null
       }
-      <div className="w-full h-[1px] bg-theme-medlight-gray mb-5"/>
+      { 
+        !isLast ? (
+          <div className="w-full h-[1px] bg-theme-medlight-gray mb-5"/>
+        ) : null
+      }
     </div>
   );
 }
