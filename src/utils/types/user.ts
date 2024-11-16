@@ -4,11 +4,6 @@ import { ExtendId } from "./common";
 import { Disability } from "./disability";
 import { PostDeletionTimeline, ProfileColors } from "@/utils/consts";
 
-const getRandomProfileColor = () => {
-  const colors = Object.values(ProfileColors);
-  return colors[Math.floor(Math.random() * colors.length)];
-};
-
 export const userSchema = z.object({
   username: z.string(),
   isAdmin: z.boolean().default(false),
@@ -23,7 +18,7 @@ export const userSchema = z.object({
   defaultDisabilityTags: z.string().array().transform(ids => ids.map(id => new Types.ObjectId(id))).default([]),
   defaultDisabilityFilters: z.string().array().transform(ids => ids.map(id => new Types.ObjectId(id))).default([]),
   postDeletionTimeline: z.enum(Object.values(PostDeletionTimeline) as [PostDeletionTimeline, ...PostDeletionTimeline[]]).default(PostDeletionTimeline.FourYears), 
-  profileColor: z.enum(Object.values(ProfileColors) as [ProfileColors, ...ProfileColors[]]).default(getRandomProfileColor()), 
+  profileColor: z.enum(Object.values(ProfileColors) as [ProfileColors, ...ProfileColors[]]).default(ProfileColors.ProfileDefault), 
 });
 
 export const editUserSchema = userSchema.partial();
