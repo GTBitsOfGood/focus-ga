@@ -52,8 +52,8 @@ const handler: Handler = async (event, context) => {
     const disabilities = await DisabilityModel.find({});
     console.log(disabilities);
     console.log(DisabilityModel);
-    // console.log(UserModel);
-    // const users = await UserModel.find({});
+    console.log(UserModel);
+    const users = await UserModel.find({});
     // console.log(users);
     const notifications = await NotificationModel.find({});
     const usersToNotify: { [userId: string]: string[] } = {};
