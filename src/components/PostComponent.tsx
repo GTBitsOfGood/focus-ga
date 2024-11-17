@@ -15,6 +15,7 @@ import { ProfileColors } from "@/utils/consts";
 import EditPostModal from "./EditPostModal";
 import { Disability } from "@/utils/types/disability";
 import { useToast } from "@/hooks/use-toast";
+import UserIcon from "./UserIconComponent";
 
 type PostComponentProps = {
   post: PopulatedPost;
@@ -184,19 +185,7 @@ export default function PostComponent(props: PostComponentProps) {
   const reactContent = (
     <>
       <div className="flex items-center justify-between text-sm">
-        {clickable ? (
-        <div className="flex items-center gap-2">
-          <div className={`w-6 h-6 bg-${author?.profileColor? author?.profileColor: ProfileColors.ProfileDefault} rounded-full flex items-center justify-center cursor-pointer`}>  {/** Change to whatever color is chosen */}
-            <span className="text-black text-[10px] font-bold select-none">{author ? author?.lastName.charAt(0).toUpperCase() : 'D'}</span>
-          </div>
-          {author ? `${author.lastName} Family` : 'Deleted User'}
-        </div>
-      ) : (
-          <Link className="flex items-center gap-2" href={`/family/${author?._id}`}>
-            <span className={cn("w-6 h-6 rounded-full inline-block", {[`bg-${author?.profileColor ? author.profileColor : ProfileColors.ProfileDefault}`]: true})}/>
-            {author ? `${author.lastName} Family` : 'Deleted User'}
-        </Link>
-        )}
+        <UserIcon user={author} clickable={clickable} />
         <p suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
       </div>
       <div className="flex items-center justify-between py-0.5">
