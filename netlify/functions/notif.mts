@@ -1,55 +1,57 @@
-import type { Config } from "@netlify/functions"
-import { Handler } from '@netlify/functions';
-import NotificationModel from "@/server/db/models/NotificationModel";
-import UserModel from "@/server/db/models/UserModel";
-import juno from "juno-sdk";
-import PostModel from "@/server/db/models/PostModel";
-import CommentModel from "@/server/db/models/CommentModel";
-import { PopulatedComment } from "@/utils/types/comment";
-import { deleteNotification } from "@/server/db/actions/NotificationActions";
+import { Handler, Config } from '@netlify/functions';
+import juno from 'juno-sdk';
+import NotificationModel from '../../src/server/db/models/NotificationModel';
+import dbConnect from '../../src/server/db/dbConnect';
+// import CommentModel from '../../src/server/db/models/CommentModel';
+// import PostModel from '../../src/server/db/models/PostModel';
+// import UserModel from '../../src/server/db/models/UserModel';
+// import { deleteNotification } from '../../src/server/db/actions/NotificationActions';
+// import { PopulatedComment } from '../../src/utils/types/comment';
 
-juno.init({
-  apiKey: process.env.JUNO_API_KEY as string,
-  baseURL: "https://api-gateway.whitesmoke-cea9a269.eastus.azurecontainerapps.io"
-})
+// async function generateEmailContents(commentIds: string[]) {
+//   const postsToComments: { [postId: string]: PopulatedComment[] } = {};
+//   let content = "";
 
-export async function generateEmailContents(commentIds: string[]) {
-  const postsToComments: { [postId: string]: PopulatedComment[] } = {};
-  let content = "";
+//   const comments = await CommentModel.find({ _id: { $in: commentIds } }).populate('author');
 
-  const comments = await CommentModel.find({ _id: { $in: commentIds } }).populate('author');
+//   for (const comment of comments) {
+//     const postId = comment.post._id.toString();
+//     if (!postsToComments[postId]) {
+//       postsToComments[postId] = [];
+//     }
+//     postsToComments[postId].push(comment);
+//   }
 
-  for (const comment of comments) {
-    const postId = comment.post._id.toString();
-    if (!postsToComments[postId]) {
-      postsToComments[postId] = [];
-    }
-    postsToComments[postId].push(comment);
-  }
+//   for (const postId in postsToComments) {
+//     const post = await PostModel.findById(postId); // Fetch the post title
+//     if (post) {
+//       content += `<strong>${post.title}</strong><br>`;
+//       const postComments = postsToComments[postId];
 
-  for (const postId in postsToComments) {
-    const post = await PostModel.findById(postId); // Fetch the post title
-    if (post) {
-      content += `<strong>${post.title}</strong><br>`;
-      const postComments = postsToComments[postId];
+//       for (const comment of postComments) {
+//         content += `${comment.author?.lastName} family commented: ${comment.content}<br>`;
+//       }
 
-      for (const comment of postComments) {
-        content += `${comment.author?.lastName} family commented: ${comment.content}<br>`;
-      }
+//       content += "<br><br>";
+//     }
+//   }
 
-      content += "<br><br>";
-    }
-  }
-
-  return {
-    type: "text/html",
-    value: content,
-  };
-}
+//   return {
+//     type: "text/html",
+//     value: content,
+//   };
+// }
 
 const handler: Handler = async(event, context) => {
   try {
+    console.log('juno init')
+    juno.init({
+      apiKey: process.env.JUNO_API_KEY as string,
+      baseURL: "https://api-gateway.whitesmoke-cea9a269.eastus.azurecontainerapps.io"
+    })
+
     // Fetch notifications and group by user
+    await dbConnect();
     const notifications = await NotificationModel.find({});
     const usersToNotify: { [userId: string]: string[] } = {};
 
@@ -103,15 +105,22 @@ const handler: Handler = async(event, context) => {
         }
       }
     }
+    console.log(notifications)
+
+    const response = {
+      message: "hello",
+      eventDetails: event
+    }
+
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: 'Notifications sent successfully' }),
+      body: JSON.stringify(response),
     }
   } catch (error) {
     console.error('Error sending notifications:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({message: 'Error sending notifications'})
+      body: JSON.stringify({error: "Error sending notifications"})
     }
   }
 }

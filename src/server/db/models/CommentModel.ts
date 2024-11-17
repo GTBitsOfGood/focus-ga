@@ -13,12 +13,10 @@ const CommentSchema = new Schema<Comment>({
   isDeleted: { type: Boolean, default: false }
 });
 
-
-
 CommentSchema.post("save", async function (comment) {
   try {
     const post = await PostModel.findById(comment.post).populate("author");
-    if (post?.author && post.author.notificationPreference) {
+    if (post?.author && post.author.notificationPreference && post.author._id.toString() != comment.author.toString()) {
       // Create a notification
       await createNotification({
         author: post.author._id.toString(),
