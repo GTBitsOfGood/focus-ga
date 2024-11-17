@@ -20,7 +20,7 @@ export const dynamic = 'force-dynamic';
 
 export default function Home() {
   const [posts, setPosts] = useState<PopulatedPost[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
   const { user } = useUser();
@@ -94,7 +94,7 @@ export default function Home() {
       setPosts([]);
     }
 
-    if (loading || !(hasMore || clear)) return;
+    if (!hasMore && !clear) return;
     setLoading(true);
 
     let retries = 5;
