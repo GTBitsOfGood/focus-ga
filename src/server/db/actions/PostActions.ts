@@ -168,6 +168,97 @@ export async function createPost(post: PostInput): Promise<Post> {
 }
 
 /**
+ * Pins a post in the database.
+ * @param postId - The ID of the post to pin.
+ * @throws Will throw an error if the post pinning fails or if the post is not found.
+ */
+export async function pinPost(authUserId: string, postId: string): Promise<{ success: boolean; error?: string }> {
+  await dbConnect();
+
+  if (!mongoose.Types.ObjectId.isValid(postId)) {
+    return { success: false, error: "Invalid post ID" };
+  }
+
+  const user = await UserModel.findById(authUserId);
+  if (!user || !user.isAdmin) {
+    return { success: false, error: "Only admins can pin posts" };
+  }
+
+  const existingPinnedPosts = await PostModel.countDocuments({ isPinned: true });
+  if (existingPinnedPosts >= 5) {
+    return { success: false, error: "Cannot pin more than 5 posts" };
+  }
+
+  const existingPin = await PostModel.findOne({ _id: postId, pinned: true });
+  if (existingPin) {
+    return { success: false, error: "Post is already pinned" };
+  }
+
+  const updatedPost = await PostModel.findByIdAndUpdate(postId, { isPinned: true }, { new: true });
+  console.log(updatedPost)
+  if (!updatedPost) {
+    return { success: false, error: "Post not found" };
+  }
+
+  updatedPost.save
+
+  return { success: true };
+}
+
+/**
+ * Unpins a post in the database.
+ * @param authUserId - The ID of the user attempting to unpin the post.
+ * @param postId - The ID of the post to unpin.
+ * @returns A promise that resolves to an object indicating success or failure.
+ */
+export async function unpinPost(authUserId: string, postId: string): Promise<{ success: boolean; error?: string }> {
+  await dbConnect();
+
+  if (!mongoose.Types.ObjectId.isValid(postId)) {
+    return { success: false, error: "Invalid post ID" };
+  }
+
+  const user = await UserModel.findById(authUserId);
+  if (!user || !user.isAdmin) {
+    return { success: false, error: "Only admins can unpin posts" };
+  }
+
+  const updatedPost = await PostModel.findByIdAndUpdate(postId, { isPinned: false }, { new: true });
+  if (!updatedPost) {
+    return { success: false, error: "Post not found" };
+  }
+
+  return { success: true };
+}
+
+/**
+ * Retrieves all pinned posts from the database with their author and tags fields populated.
+ * @param authUserId - The ID of the currently authenticated user to determine their like and save statuses.
+ * @returns A promise that resolves to an object containing the count and an array of populated post objects.
+ */
+export async function getPopulatedPinnedPosts(authUserId: string): Promise<PostAggregationResult> {
+  await dbConnect();
+
+  const pipeline = [
+    { $match: { isPinned: true } },
+    ...postPopulationPipeline({
+      authUserId,
+      tags: [],
+      locations: [],
+      searchTerm: undefined,
+      postId: undefined,
+    }),
+  ];
+
+  const result = await PostModel.aggregate(pipeline);
+
+  return {
+    count: result[0]?.count?.[0]?.count || 0,
+    posts: result[0]?.posts || [],
+  };
+}
+
+/**
  * Retrieves all posts from the database with their author and disability fields populated and like status specified.
  * @param authUserId - The ID of the currently authenticated user, to determine whether they have liked each post.
  * @returns A promise that resolves to an array of populated post objects.

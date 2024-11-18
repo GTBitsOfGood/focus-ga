@@ -108,7 +108,7 @@ export async function POST(request: Request) {
           title: faker.word.words({count: { min: 3, max: 10 }}),
           content: faker.lorem.paragraph({ min: 3, max: 10 }),
           tags: selectedDisabilities,
-          isPinned: Math.random() < 0.5 ? true : false,
+          isPinned: false,
           isPrivate: Math.random() < 0.5 ? true : false,
           isFlagged: Math.random() < 0.5 ? true : false,
           isDeleted: false
@@ -222,7 +222,6 @@ export async function POST(request: Request) {
       await createReport(reportInfo);
     }
     console.log("Successfully created reports");
-
   } catch (e) {
     console.log(e);
     throw e;
