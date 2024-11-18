@@ -21,6 +21,11 @@ export async function getReports(): Promise<Report[]> {
   }
 }
 
+/**
+ * Fetches a list of reports associated with a specific content ID.
+ * @param contentId The unique identifier of the content for which reports are being retrieved.
+ * @returns A promise that resolves to an array of reports associated with the provided content ID.
+ */
 export async function getReportsByContentId(contentId: string): Promise<Report[]> {
   if (!mongoose.Types.ObjectId.isValid(contentId)) {
     throw new Error("Invalid contentId");
