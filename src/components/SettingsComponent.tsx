@@ -63,27 +63,6 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
     handleUpdateUser();
   }, [notificationPreference, defaultDisabilityTags, defaultDisabilityFilters, postDeletionTimeline])
 
-  const toggleDisability = (name: Disability) => {
-    if (defaultDisabilityTags.length < MAX_POST_DISABILITY_TAGS) {
-      const newTags = defaultDisabilityTags.includes(name)
-        ? defaultDisabilityTags.filter((d) => d !== name)
-        : [...defaultDisabilityTags, name];
-      
-      setDefaultDisabilityTags(newTags);
-    } else if (defaultDisabilityTags.length == MAX_POST_DISABILITY_TAGS) {
-      const newTags = defaultDisabilityTags.filter((d) => d !== name)
-      setDefaultDisabilityTags(newTags);
-    }
-  };
-
-  const toggleFilter = (name: Disability) => {
-    const newFilters = defaultDisabilityFilters.includes(name)
-      ? defaultDisabilityFilters.filter((d) => d !== name)
-      : [...defaultDisabilityFilters, name];
-    
-    setDefaultDisabilityFilters(newFilters);
-  };
-
   return (
     <div>
       {/* for rendering dynamic classes: https://www.reddit.com/r/sveltejs/comments/1b3u9d2/tailwind_colors_not_working/ */}
@@ -133,7 +112,7 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
           <DropdownWithDisplay
             items={disabilities}
             selectedItems={defaultDisabilityTags}
-            onToggleItem={toggleDisability}
+            onChange={(tags) => setDefaultDisabilityTags(tags)}
             displayKey="name"
             placeholder="Select default disability tags"
             typeDropdown="disabilities"
@@ -146,7 +125,7 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
           <DropdownWithDisplay
             items={disabilities}
             selectedItems={defaultDisabilityFilters}
-            onToggleItem={toggleFilter}
+            onChange={(filters) => setDefaultDisabilityFilters(filters)}
             displayKey="name"
             placeholder="Select default disability filters"
             maxSelectionCount={MAX_FILTER_DISABILITY_TAGS}
@@ -177,7 +156,7 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
               await signOut();
               router.push('/login');
             }}
-            className="w-auto px-4 py-2 text-theme-blue rounded-lg border border-theme-blue"
+            className="w-auto px-4 py-2 text-theme-blue rounded-md border border-theme-blue hover:bg-blue-100 transition"
           >
             Sign out
           </button>

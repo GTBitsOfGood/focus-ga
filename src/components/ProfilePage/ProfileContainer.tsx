@@ -130,6 +130,7 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
           </TabsList>
           <TabsContent value="my-posts">
             <div className="space-y-6">
+              {userPosts.length === 0 ? <p className="text-lg text-theme-gray mt-12 mx-auto w-fit place-self-center">No posts to view</p> : <></>}
               {
                 userPosts.map((post) => {
                   return <PostComponent key={post._id} post={post} clickable={true} />
@@ -139,6 +140,7 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
           </TabsContent>
           <TabsContent value="saved-posts">
             <div className="space-y-6">
+              {savedPosts.length === 0 ? <p className="text-lg text-theme-gray mt-12 mx-auto w-fit place-self-center">No saved posts to view</p> : <></>}
               {
                 savedPosts.map((post) => {
                   return <PostComponent key={post._id} post={post} clickable={true} />

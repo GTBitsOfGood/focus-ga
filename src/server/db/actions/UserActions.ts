@@ -102,7 +102,7 @@ export async function loginUser(email: string, uid: string) {
       lastName: "BoG", 
       childAge: 10, 
       childDisabilities: [],
-      city: "Fulton",
+      city: "Atlanta",
       bio: "Hello World!",
       salesforce_uid: uid
     });
