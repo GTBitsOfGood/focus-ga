@@ -156,7 +156,7 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
               await signOut();
               router.push('/login');
             }}
-            className="w-auto px-4 py-2 text-theme-blue rounded-lg border border-theme-blue"
+            className="w-auto px-4 py-2 text-theme-blue rounded-md border border-theme-blue hover:bg-blue-100 transition"
           >
             Sign out
           </button>

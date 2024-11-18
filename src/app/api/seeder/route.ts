@@ -16,8 +16,61 @@ import { createReport } from '@/server/db/actions/ReportActions';
 import { ReportReason, ContentType } from '@/utils/types/report';
 import { CommentInput } from '@/utils/types/comment';
 import { GEORGIA_CITIES } from "@/utils/cities";
+import { ProfileColors } from "@/utils/consts";
 
-const DISABILITIES = ["Cerebral Palsy", "Autism Spectrum Disorder", "Down Syndrome", "Spina Bifida", "Muscular Dystrophy", "Rett Syndrome", "Fragile X Syndrome", "Epilepsy", "ADHD", "Spinal Muscular Atrophy"];
+const DISABILITIES = [
+  "ADHD",
+  "Anxiety Disorder",
+  "Arthritis",
+  "Autism Spectrum Disorder",
+  "Bipolar Disorder",
+  "Cerebral Palsy",
+  "Chronic Fatigue Syndrome",
+  "Chronic Pain Syndrome",
+  "Crohn's Disease",
+  "Depression",
+  "Dyslexia",
+  "Epilepsy",
+  "Fibromyalgia",
+  "Hearing Impairment",
+  "Intellectual Disability",
+  "Learning Disabilities",
+  "Multiple Sclerosis",
+  "Muscular Dystrophy",
+  "Obsessive-Compulsive Disorder",
+  "Parkinson's Disease",
+  "Post-Traumatic Stress Disorder",
+  "Rett Syndrome",
+  "Schizophrenia",
+  "Sickle Cell Disease",
+  "Spina Bifida",
+  "Spinal Muscular Atrophy",
+  "Stroke",
+  "Tourette Syndrome",
+  "Traumatic Brain Injury",
+  "Ulcerative Colitis",
+  "Visual Impairment",
+  "Alzheimer's Disease",
+  "Amputation/Limb Loss",
+  "Asthma",
+  "Cancer (various types)",
+  "Diabetes (Type 1 and 2)",
+  "Heart Disease",
+  "High Blood Pressure",
+  "Hyperlexia",
+  "Irritable Bowel Syndrome (IBS)",
+  "Obesity",
+  "Osteoarthritis",
+  "Post-Concussion Syndrome",
+  "Seizure Disorders",
+  "Sleep Apnea",
+  "Thyroid Disorders",
+  "Vertigo",
+  "Autism",
+  "Cystic Fibrosis",
+  "Down Syndrome",
+  "Fragile X Syndrome"
+];
 const NUM_USERS = 10;
 const MAX_CHILD_AGE = 20;
 const MAX_POSTS_PER_USER = 5;
@@ -70,7 +123,11 @@ export async function POST(request: Request) {
       const username = faker.internet.userName({ firstName: firstName, lastName: lastName })
       const email = faker.internet.email({ firstName: firstName, lastName: lastName });
       const cityIndex = Math.floor(Math.random() * GEORGIA_CITIES.length);
-
+      const getRandomProfileColor = () => {
+        const colors = Object.values(ProfileColors);
+        return colors[Math.floor(Math.random() * colors.length)];
+      };
+      
       const userInfo = {
         username: username,
         lastName: lastName,
@@ -79,6 +136,7 @@ export async function POST(request: Request) {
         childDisabilities: selectedDisabilities,
         city: GEORGIA_CITIES[cityIndex],
         bio: faker.lorem.paragraph({ min: 1, max: 6 }),
+        profileColor: getRandomProfileColor(),
       }
 
       users.push((await createUser(userInfo)));
