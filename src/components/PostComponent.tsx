@@ -25,6 +25,7 @@ type PostComponentProps = {
   onSaveClick?: (saved: boolean) => Promise<void>;
   onEditClick?: (title: string, content: string, tags: Disability[]) => Promise<void>;
   onDeleteClick?: () => Promise<void>;
+  onPostPin?: () => Promise<void>;
 };
 
 export default function PostComponent(props: PostComponentProps) {
@@ -39,7 +40,8 @@ export default function PostComponent(props: PostComponentProps) {
     onLikeClick,
     onSaveClick,
     onDeleteClick,
-    onEditClick
+    onEditClick,
+    onPostPin
   } = props;
   
   // don't render links for clickable components to avoid nested a tags
@@ -199,6 +201,7 @@ export default function PostComponent(props: PostComponentProps) {
               <DropdownMenuContent side="bottom" align="end">
                 {onEditClick && <DropdownMenuItem onClick={() => setShowEditModal(true)}>Edit</DropdownMenuItem>}
                 {onDeleteClick && <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem>}
+                {onPostPin && <DropdownMenuItem onClick={onPostPin}>{post.isPinned ? "Unpin Post" : "Pin Post"}</DropdownMenuItem>}
                 <DropdownMenuItem onClick={handleShareClick}>Share</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
