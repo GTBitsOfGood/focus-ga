@@ -24,9 +24,9 @@ export default function ContextWrapper({ children }: LayoutProps) {
     <SearchProvider>
       <UserProvider>
         <DisabilityProvider>
-            <CommunityLayout>
-              {children}
-            </CommunityLayout>
+          <CommunityLayout>
+            {children}
+          </CommunityLayout>
         </DisabilityProvider>
       </UserProvider>
     </SearchProvider>
