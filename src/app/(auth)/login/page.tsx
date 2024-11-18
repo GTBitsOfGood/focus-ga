@@ -63,7 +63,7 @@ export default function Login() {
   }
 
   return (
-    <div className="bg-[url('/Portal_Background.avif')] bg-cover bg-no-repeat h-screen w-screen">
+    <div className="bg-[url('/Portal_Background.avif')] min-h-screen w-screen">
       <a href="https://focus-ga.org/">
         <Image src={focusLogo} width={181} height={87} alt="focus-logo" className="mt-6 ml-[60px] fixed" />
       </a>
@@ -136,7 +136,7 @@ export default function Login() {
             >
               Donate
             </button>
-            <p className="text-center mt-6">
+            <p className="text-center mt-6 mb-6">
               FOCUS (Families of Children Under Stress) is a 501(c)(3) nonprofit organization with tax ID&nbsp;
               <span className="whitespace-nowrap">#58-1577602</span>.
             </p>
