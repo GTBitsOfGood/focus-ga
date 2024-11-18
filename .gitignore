@@ -40,3 +40,6 @@ next-env.d.ts
 
 # mongo
 /mongo
+
+# Local Netlify folder
+.netlify

@@ -7,11 +7,6 @@ export const MAX_FILTER_DISABILITY_TAGS = 3;
 
 export const PAGINATION_LIMIT = 10;
 
-export const FOCUS_FONT = Lato({
-  subsets: ['latin'],
-  weight: ['100', '300', '400', '700', '900'],
-});
-
 export enum PostDeletionTimeline {
   OneMonth = '1 month',
   ThreeMonths = '3 months',
