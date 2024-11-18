@@ -21,18 +21,20 @@ export async function getReports(): Promise<Report[]> {
   }
 }
 
-export async function getReportsByPost(postId: string): Promise<Report[]> {
-  if (!mongoose.Types.ObjectId.isValid(postId)) {
-    throw new Error("Invalid postId");
+export async function getReportsByContentId(contentId: string): Promise<Report[]> {
+  if (!mongoose.Types.ObjectId.isValid(contentId)) {
+    throw new Error("Invalid contentId");
   }
 
   try {
     await dbConnect();
-    const reports = await ReportModel.find({ reportedContent: postId, contentType: "Post" }).sort({ date: 'desc' });
+    const reports = await ReportModel.find({
+      reportedContent: contentId,
+    }).sort({ date: "desc" });
     return reports;
   } catch (error) {
-    console.error(`Failed to retrieve reports for user ${postId}:`, error);
-    throw new Error(`Failed to retrieve reports for user ${postId}`);
+    console.error(`Failed to retrieve reports for contentId ${contentId}:`, error);
+    throw new Error(`Failed to retrieve reports for contentId ${contentId}`);
   }
 }
 

@@ -16,7 +16,7 @@ import EditPostModal from "./EditPostModal";
 import { Disability } from "@/utils/types/disability";
 import { useToast } from "@/hooks/use-toast";
 import ReportContentModal from "./ReportContentModal";
-import { createReport, getReportsByPost } from "@/server/db/actions/ReportActions";
+import { createReport, getReportsByContentId } from "@/server/db/actions/ReportActions";
 import { Report, ReportReason, ContentType } from "@/utils/types/report";
 import { useUser } from '@/contexts/UserContext';
 import ContentReportsModal from "./ContentReportsModal";
@@ -88,7 +88,7 @@ export default function PostComponent(props: PostComponentProps) {
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const reportsData = await getReportsByPost(post._id);
+        const reportsData = await getReportsByContentId(post._id);
         setReports(reportsData);
       } catch (error) {
         console.error('Error fetching reports:', error);

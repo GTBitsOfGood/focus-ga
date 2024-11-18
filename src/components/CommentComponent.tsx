@@ -1,9 +1,9 @@
 import { getDateDifferenceString } from "@/utils/dateUtils";
 import { PopulatedComment } from "@/utils/types/comment";
-import { MessageSquare, Ellipsis, Heart } from "lucide-react";
+import { MessageSquare, Ellipsis, Heart, OctagonAlert, ChevronRight } from "lucide-react";
 import MarkdownRenderer from "./MarkdownRenderer";
 import MarkdownIt from "markdown-it";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 import Link from "next/link";
@@ -11,9 +11,11 @@ import { ProfileColors } from "@/utils/consts";
 import { PopulatedUser, User } from "@/utils/types/user";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/contexts/UserContext";
-import { createReport } from "@/server/db/actions/ReportActions";
-import { ContentType, ReportReason } from "@/utils/types/report";
+import { createReport, getReportsByContentId } from "@/server/db/actions/ReportActions";
+import { Report, ContentType, ReportReason } from "@/utils/types/report";
 import ReportContentModal from "./ReportContentModal";
+
+const IS_ADMIN = true;
 
 type CommentComponentProps = {
   className?: string;
@@ -55,8 +57,24 @@ export default function CommentComponent(props: CommentComponentProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const [showReportModal, setShowReportModal] = useState<boolean>(false);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [showContentReports, setShowContentReports] = useState(false);
 
   const { user, setUser } = useUser();
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const reportsData = await getReportsByContentId(comment._id);
+        console.log(reportsData);
+        setReports(reportsData);
+      } catch (error) {
+        console.error('Error fetching reports:', error);
+      }
+    };
+
+    fetchReports();
+  }, []);
 
   async function handleLikeClick() {
     if (likeLoading) return;
@@ -146,30 +164,45 @@ export default function CommentComponent(props: CommentComponentProps) {
             markdown={content}
             parse={markdown => mdParser.render(markdown)}
           />
-          <div className="flex items-center pt-2 gap-6 text-sm">
-            {bottomRow.map((item, index) => (
-              <div key={index} className="flex items-center gap-1.5 px-1">
-                <button disabled={!item.onClick} onClick={item.onClick}>
-                  <div className="w-5 h-5 [&>*]:w-full [&>*]:h-full">
-                    {item.icon}
-                  </div>
-                </button>
-                <button disabled={!item.onClick} onClick={item.onClick}>
-                  {item.label}
-                </button>
+          <div className="flex flex-row justify-between">
+            <div className="flex items-center pt-2 gap-6 text-sm">
+              {bottomRow.map((item, index) => (
+                <div key={index} className="flex items-center gap-1.5 px-1">
+                  <button disabled={!item.onClick} onClick={item.onClick}>
+                    <div className="w-5 h-5 [&>*]:w-full [&>*]:h-full">
+                      {item.icon}
+                    </div>
+                  </button>
+                  <button disabled={!item.onClick} onClick={item.onClick}>
+                    {item.label}
+                  </button>
+                </div>
+              ))}
+              <div className="flex items-center gap-1.5 px-1">
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger>
+                    <Ellipsis className="w-5 h-5" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="bottom" align="start">
+                    {onDeleteClick ? <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem> : undefined}
+                    {user && user._id != comment.author?._id ? <DropdownMenuItem onClick={() => setShowReportModal(true)}>Report Comment</DropdownMenuItem> : null}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-            ))}
-            <div className="flex items-center gap-1.5 px-1">
-              <DropdownMenu modal={false}>
-                <DropdownMenuTrigger>
-                  <Ellipsis className="w-5 h-5" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="bottom" align="start">
-                  {onDeleteClick ? <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem> : undefined}
-                  {user && user._id != comment.author?._id ? <DropdownMenuItem onClick={() => setShowReportModal(true)}>Report Comment</DropdownMenuItem> : null}
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
+            {
+              reports.length > 0 && IS_ADMIN ? (
+                <button 
+                  onClick={() => setShowContentReports(true)}
+                  className="pl-2 pr-1.5 py-1 flex flex-row gap-x-1.5 items-center bg-error-light-red text-error-red border-2 border-error-red rounded-full">
+                  <div className="flex flex-row gap-x-1">
+                    <OctagonAlert className="stroke-error-red" />
+                    Comment Reported ({reports.length})
+                  </div>
+                  <ChevronRight className="stroke-" />
+                </button>
+              ) : null
+            }
           </div>
         </>}
         {nestedContent}
