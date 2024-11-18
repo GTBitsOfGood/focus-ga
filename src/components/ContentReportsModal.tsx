@@ -1,11 +1,8 @@
 'use client'
 
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { Disability } from "@/utils/types/disability";
 import { X, Trash2 } from "lucide-react";
-import { MDXEditorMethods } from "@mdxeditor/editor";
-import { cn } from "@/lib/utils";
-import { useDisabilities } from "@/contexts/DisabilityContext";
 import { Report } from "@/utils/types/report";
 import ReportComponent from "./ReportComponent";
 
@@ -24,17 +21,10 @@ export default function ContentReportsModal(props: EditPostModalProps) {
     onSubmit
   } = props;
 
-  const [showTitleError, setTitleError] = useState(false);
-  const [showBodyError, setBodyError] = useState(false);
-  const disabilities = useDisabilities();
   const [mouseDownOnBackground, setMouseDownOnBackground] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const editorRef = useRef<MDXEditorMethods | null>(null);
 
   const handleClose = () => {
     closeModal();
-    setBodyError(false);
-    setTitleError(false);
   }
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {

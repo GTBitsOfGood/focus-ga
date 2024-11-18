@@ -14,6 +14,7 @@ import { useUser } from "@/contexts/UserContext";
 import { createReport, getReportsByContentId } from "@/server/db/actions/ReportActions";
 import { Report, ContentType, ReportReason } from "@/utils/types/report";
 import ReportContentModal from "./ReportContentModal";
+import ContentReportsModal from "./ContentReportsModal";
 
 const IS_ADMIN = true;
 
@@ -210,6 +211,12 @@ export default function CommentComponent(props: CommentComponentProps) {
       {showReportModal && <ReportContentModal
         isOpen={showReportModal}
         closeModal={() => setShowReportModal(false)}
+        onSubmit={handleReportClick}
+      />}
+      {showContentReports && <ContentReportsModal
+        isOpen={showContentReports}
+        reports={reports}
+        closeModal={() => setShowContentReports(false)}
         onSubmit={handleReportClick}
       />}
       <AlertDialog open={showDeleteDialog}>
