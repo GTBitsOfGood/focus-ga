@@ -18,14 +18,14 @@ const PinnedPosts: React.FC<PinnedPostsProps> = ({ posts }) => {
     <div className="pinned-posts border-2 border-light-gray rounded-lg p-4">
       <button onClick={toggleOpen} className="flex justify-between w-full">
         <div className='flex justify-between space-x-2'>
-            <Pin/>
-            <h2 className="text-lg font-bold">
-              Pinned Posts ({posts.length}) 
-            </h2>
+          <Pin/>
+          <h2 className="text-lg font-bold">
+            Pinned Posts ({posts.length}) 
+          </h2>
         </div>
 
         <div>
-            {isOpen ? '▲' : '▼'}
+          {isOpen ? '▲' : '▼'}
         </div>
       </button>
       {isOpen && (
