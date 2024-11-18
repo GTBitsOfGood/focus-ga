@@ -174,7 +174,7 @@ export default function Home() {
           ) : null
         }
         <FilterComponent filters={[disabilityFilter, locationFilter, demographicFilter]}/>
-        <PinnedPosts posts={pinnedPostContents} />
+        { pinnedPostContents.length > 0 && <PinnedPosts posts={pinnedPostContents} />}
         <div>
           {
             posts.length ? (

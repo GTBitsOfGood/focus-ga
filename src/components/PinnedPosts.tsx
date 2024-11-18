@@ -20,7 +20,7 @@ const PinnedPosts: React.FC<PinnedPostsProps> = ({ posts }) => {
         <div className='flex justify-between space-x-2'>
             <Pin/>
             <h2 className="text-lg font-bold">
-            Pinned Posts ({posts.length}) 
+              Pinned Posts ({posts.length}) 
             </h2>
         </div>
 
