@@ -8,7 +8,7 @@ import user from "../../../../public/user.png";
 import focusLogo from "../../../../public/focus-logo.png";
 import transparencyBadge from "../../../../public/transparency-badge.png";
 import { deflateRawSync } from "zlib";
-import { loginUser } from "@/server/db/actions/UserActions"; // Import the createUser function
+import { loginUser } from "@/server/db/actions/AuthActions";
 
 export default function Login() {
   const router = useRouter();

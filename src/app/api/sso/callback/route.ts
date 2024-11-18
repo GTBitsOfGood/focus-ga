@@ -1,6 +1,6 @@
 import { decodeSAMLResponse, validateSAMLResponse } from "@/server/db/actions/sso";
-import { NextRequest, NextResponse } from 'next/server';
-import { loginUser } from '@/server/db/actions/UserActions';
+import { NextRequest } from 'next/server';
+import { loginUser } from '@/server/db/actions/AuthActions';
 import { redirect } from 'next/navigation'
 
 const SALESFORCE_CERTIFICATE = process.env["SALESFORCE_CERTIFICATE"];
