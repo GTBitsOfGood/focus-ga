@@ -6,10 +6,9 @@ import MarkdownIt from "markdown-it";
 import { ReactNode, useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
-import Link from "next/link";
-import { ProfileColors } from "@/utils/consts";
 import { PopulatedUser, User } from "@/utils/types/user";
 import { cn } from "@/lib/utils";
+import UserIcon from "./UserIconComponent";
 
 type CommentComponentProps = {
   className?: string;
@@ -108,50 +107,52 @@ export default function CommentComponent(props: CommentComponentProps) {
   const deletedText = "This comment has been deleted.";
 
   return (
-    <div className="flex gap-2.5">
-      <Link href={`/family/${author?._id}`}>
-        <span className={cn("w-6 h-6 rounded-full inline-block", author?.profileColor ? `bg-${author.profileColor}` : `bg-${ProfileColors.ProfileDefault}`)} />
-      </Link>
-      <div className={`flex-grow flex flex-col gap-2 text-theme-gray ${className}`}>
+    <div>
+      <div className={cn("flex-grow flex flex-col gap-2 text-theme-gray", className)}>
         <div className="flex items-center justify-between">
-          {isDeleted ? deletedText : <Link className="font-bold text-black flex items-center gap-0.5" href={`/family/${author?._id}`}>
-            {author ? `${author.lastName} Family` : 'Deleted User'}
-            {author?.isAdmin && <ShieldCheck className="w-5 h-5 text-white fill-theme-gray" />}
-          </Link>}
+          {isDeleted ? (
+          <div className="flex gap-2">
+            {profilePicture} {deletedText}
+          </div>
+          ) : (
+          <UserIcon user={author} clickable={false} boldText />
+          )}
           <p className="text-sm" suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
         </div>
-        {!isDeleted && <>
-          <MarkdownRenderer
-            className="leading-5"
-            markdown={content}
-            parse={markdown => mdParser.render(markdown)}
-          />
-          <div className="flex items-center pt-2 gap-6 text-sm">
-            {bottomRow.map((item, index) => (
-              <div key={index} className="flex items-center gap-1.5 px-1">
-                <button disabled={!item.onClick} onClick={item.onClick}>
-                  <div className="w-5 h-5 [&>*]:w-full [&>*]:h-full">
-                    {item.icon}
-                  </div>
-                </button>
-                <button disabled={!item.onClick} onClick={item.onClick}>
-                  {item.label}
-                </button>
+        <div className="flex flex-col pl-8 gap-2">
+          {!isDeleted && <>
+            <MarkdownRenderer
+              className="leading-5"
+              markdown={content}
+              parse={markdown => mdParser.render(markdown)}
+            />
+            <div className="flex items-center pt-2 gap-6 text-sm">
+              {bottomRow.map((item, index) => (
+                <div key={index} className="flex items-center gap-1.5">
+                  <button disabled={!item.onClick} onClick={item.onClick}>
+                <div className="w-5 h-5 [&>*]:w-full [&>*]:h-full">
+                  {item.icon}
+                </div>
+                  </button>
+                  <button disabled={!item.onClick} onClick={item.onClick}>
+                {item.label}
+                  </button>
+                </div>
+              ))}
+              <div className="flex items-center gap-1.5 px-1">
+                <DropdownMenu modal={false}>
+                  <DropdownMenuTrigger>
+                    <Ellipsis className="w-5 h-5" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent side="bottom" align="start">
+                    {onDeleteClick ? <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem> : undefined}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-            ))}
-            <div className="flex items-center gap-1.5 px-1">
-              <DropdownMenu modal={false}>
-                <DropdownMenuTrigger>
-                  <Ellipsis className="w-5 h-5" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="bottom" align="start">
-                  {onDeleteClick ? <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem> : undefined}
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
-          </div>
-        </>}
-        {nestedContent}
+          </>}
+          {nestedContent}
+        </div>
       </div>
       <AlertDialog open={showDeleteDialog}>
         <AlertDialogContent>

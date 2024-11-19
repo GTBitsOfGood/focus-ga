@@ -6,7 +6,7 @@ import Image from "next/image";
 import { SquarePen, Search, ChevronDown, ChevronUp, X } from "lucide-react";
 import Link from "next/link";
 import useClickOff from "@/hooks/useClickOff";
-import { signOut } from "@/server/db/actions/UserActions";
+import { signOut } from "@/server/db/actions/AuthActions";
 import { ProfileColors } from "@/utils/consts";
 import { useUser } from "@/contexts/UserContext";
 import { useSearch } from "@/contexts/SearchContext";
@@ -21,7 +21,7 @@ export default function Navbar({ openModal }: NavbarProps) {
   const [inputValue, setInputValue] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dropdownButtonRef = useRef<HTMLDivElement>(null);
-  const { user } = useUser()
+  const { user, setUser } = useUser()
   const { searchTerm, setSearchTerm } = useSearch();
   const router = useRouter();
 
@@ -126,6 +126,7 @@ export default function Navbar({ openModal }: NavbarProps) {
             <Link
               href="/login"
               onClick={async () => {
+                setUser(null);
                 await signOut();
               }} 
               className="text-theme-blue mt-2 mb-2 block ml-4 py-1 hover:underline cursor-pointer transition-colors text-left"

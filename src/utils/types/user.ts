@@ -15,6 +15,8 @@ export const userSchema = z.object({
   city: z.string(),
   bio: z.string().optional(),
 
+  salesforce_uid: z.string().optional(),
+
   notificationPreference: z.boolean().default(true), // true = "Email about post replies", false = "Never email"
   defaultDisabilityTags: z.string().array().transform(ids => ids.map(id => new Types.ObjectId(id))).default([]),
   defaultDisabilityFilters: z.string().array().transform(ids => ids.map(id => new Types.ObjectId(id))).default([]),

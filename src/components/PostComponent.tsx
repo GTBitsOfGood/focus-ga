@@ -15,6 +15,7 @@ import { ProfileColors } from "@/utils/consts";
 import EditPostModal from "./EditPostModal";
 import { Disability } from "@/utils/types/disability";
 import { useToast } from "@/hooks/use-toast";
+import UserIcon from "./UserIconComponent";
 
 type PostComponentProps = {
   post: PopulatedPost;
@@ -24,6 +25,7 @@ type PostComponentProps = {
   onSaveClick?: (saved: boolean) => Promise<void>;
   onEditClick?: (title: string, content: string, tags: Disability[]) => Promise<void>;
   onDeleteClick?: () => Promise<void>;
+  onPostPin?: () => Promise<void>;
 };
 
 export default function PostComponent(props: PostComponentProps) {
@@ -38,7 +40,8 @@ export default function PostComponent(props: PostComponentProps) {
     onLikeClick,
     onSaveClick,
     onDeleteClick,
-    onEditClick
+    onEditClick,
+    onPostPin
   } = props;
   
   // don't render links for clickable components to avoid nested a tags
@@ -184,19 +187,7 @@ export default function PostComponent(props: PostComponentProps) {
   const reactContent = (
     <>
       <div className="flex items-center justify-between text-sm">
-        {clickable ? (
-          <div className="flex items-center gap-2">
-            <span className={cn("w-6 h-6 rounded-full inline-block", {[`bg-${author?.profileColor ? author.profileColor : ProfileColors.ProfileDefault}`]: true})}/>
-            {author ? `${author.lastName} Family` : 'Deleted User'}
-            {author?.isAdmin && <ShieldCheck className="w-5 h-5 -ms-1.5 text-white fill-theme-gray" />}
-          </div>
-        ) : (
-          <Link className="flex items-center gap-2" href={`/family/${author?._id}`}>
-            <span className={cn("w-6 h-6 rounded-full inline-block", {[`bg-${author?.profileColor ? author.profileColor : ProfileColors.ProfileDefault}`]: true})}/>
-            {author ? `${author.lastName} Family` : 'Deleted User'}
-            {author?.isAdmin && <ShieldCheck className="w-5 h-5 -ms-1.5 text-white fill-theme-gray" />}
-          </Link>
-        )}
+        <UserIcon user={author} clickable={clickable} />
         <p suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
       </div>
       <div className="flex items-center justify-between py-0.5">
@@ -210,6 +201,7 @@ export default function PostComponent(props: PostComponentProps) {
               <DropdownMenuContent side="bottom" align="end">
                 {onEditClick && <DropdownMenuItem onClick={() => setShowEditModal(true)}>Edit</DropdownMenuItem>}
                 {onDeleteClick && <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem>}
+                {onPostPin && <DropdownMenuItem onClick={onPostPin}>{post.isPinned ? "Unpin Post" : "Pin Post"}</DropdownMenuItem>}
                 <DropdownMenuItem onClick={handleShareClick}>Share</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

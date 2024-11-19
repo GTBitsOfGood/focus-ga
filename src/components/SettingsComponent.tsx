@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { Disability } from "@/utils/types/disability";
 import { MAX_POST_DISABILITY_TAGS, MAX_FILTER_DISABILITY_TAGS } from "@/utils/consts";
 import DropdownWithDisplay from '@/components/DropdownWithDisplay';
-import { editUser, signOut } from "@/server/db/actions/UserActions";
+import { editUser } from "@/server/db/actions/UserActions";
+import { signOut } from '@/server/db/actions/AuthActions';
 import { useRouter } from 'next/navigation';
 import { PostDeletionTimeline } from "@/utils/consts";
 import { useUser } from '@/contexts/UserContext';
@@ -156,7 +157,7 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
               await signOut();
               router.push('/login');
             }}
-            className="w-auto px-4 py-2 text-theme-blue rounded-lg border border-theme-blue"
+            className="w-auto px-4 py-2 text-theme-blue rounded-md border border-theme-blue hover:bg-blue-100 transition"
           >
             Sign out
           </button>

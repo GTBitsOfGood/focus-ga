@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Disability } from "@/utils/types/disability";
 import BackButton from "../BackButton";
 import { User, PopulatedUser } from "@/utils/types/user";
+import { pinPost, unpinPost } from "@/server/db/actions/PostActions";
 
 function buildChildCommentsMap(comments: PopulatedComment[]) {
   const map = new Map<string, PopulatedComment[]>();
@@ -137,6 +138,37 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
       throw err;
     }
   }
+  async function onPostPin() {
+    if (post.isPinned) {
+      // If the post is already pinned, call the unpin action
+      const unpinResponse = await unpinPost(authUser._id, post._id);
+      if (unpinResponse.error) {
+        toast({
+          title: "Failed to unpin post",
+          description: unpinResponse.error,
+        });
+        return;
+      }
+      toast({
+        title: "Post successfully unpinned",
+        description: "Your post has been unpinned.",
+      });
+    } else {
+      // If the post is not pinned, call the pin action
+      const pinResponse = await pinPost(authUser._id, post._id);
+      if (pinResponse.error) {
+        toast({
+          title: "Failed to pin post",
+          description: pinResponse.error,
+        });
+        return;
+      }
+      toast({
+        title: "Post successfully pinned",
+        description: "Your post has been pinned.",
+      });
+    }
+  }
 
   return (
     <>
@@ -150,6 +182,7 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
           onSaveClick={onPostSaveClick}
           onEditClick={showEdit ? onPostEditClick : undefined}
           onDeleteClick={showDelete ? onPostDeleteClick : undefined}
+          onPostPin={authUser.isAdmin ? onPostPin : undefined}
         />
         <CommentInputComponent
           placeholder="Add comment"
