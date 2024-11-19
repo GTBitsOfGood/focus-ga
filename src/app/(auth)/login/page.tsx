@@ -63,7 +63,7 @@ export default function Login() {
   }
 
   return (
-    <div className="bg-[url('/Portal_Background.avif')] min-h-screen w-screen">
+    <div className="bg-[url('/Portal_Background.avif')] bg-cover min-h-screen w-screen">
       <a href="https://focus-ga.org/">
         <Image src={focusLogo} width={181} height={87} alt="focus-logo" className="mt-6 ml-[60px] fixed" />
       </a>
