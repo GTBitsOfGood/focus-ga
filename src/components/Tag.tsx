@@ -10,7 +10,7 @@ type TagProps = {
 export default function Tag(props: TagProps) {
   return (
     <div className={cn(
-      "rounded-full text-sm text-theme-gray py-0.5 bg-[#D6F4F4] outline outline-1 outline-[#3AC0C1] flex items-center",
+      "rounded-full text-sm text-theme-gray py-0.5 bg-theme-light outline outline-1 outline-theme-accent flex items-center",
       props.className,
       props.isClickable ? "pl-4 pr-2 cursor-pointer" : "px-4"
     )}>

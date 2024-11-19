@@ -1,13 +1,11 @@
 import { getDateDifferenceString } from "@/utils/dateUtils";
 import { PopulatedComment } from "@/utils/types/comment";
-import { MessageSquare, Ellipsis, Heart, OctagonAlert, ChevronRight } from "lucide-react";
+import { MessageSquare, Ellipsis, Heart, ShieldCheck, OctagonAlert, ChevronRight } from "lucide-react";
 import MarkdownRenderer from "./MarkdownRenderer";
 import MarkdownIt from "markdown-it";
 import { ReactNode, useEffect, useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
-import Link from "next/link";
-import { ProfileColors } from "@/utils/consts";
 import { PopulatedUser, User } from "@/utils/types/user";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/contexts/UserContext";
@@ -16,6 +14,7 @@ import { ContentType, ReportReason, PopulatedReport } from "@/utils/types/report
 import ReportContentModal from "./ReportContentModal";
 import ContentReportsModal from "./ContentReportsModal";
 import { useToast } from "@/hooks/use-toast";
+import UserIcon from "./UserIconComponent";
 
 type CommentComponentProps = {
   className?: string;
@@ -151,34 +150,35 @@ export default function CommentComponent(props: CommentComponentProps) {
   const deletedText = "This comment has been deleted.";
 
   return (
-    <div className="flex gap-2.5">
-      <Link href={`/family/${author?._id}`}>
-        <span className={cn("w-6 h-6 rounded-full inline-block", author?.profileColor ? `bg-${author.profileColor}` : `bg-${ProfileColors.ProfileDefault}`)} />
-      </Link>
-      <div className={`flex-grow flex flex-col gap-2 text-theme-gray ${className}`}>
+    <div>
+      <div className={cn("flex-grow flex flex-col gap-2 text-theme-gray", className)}>
         <div className="flex items-center justify-between">
-          {isDeleted ? deletedText : <Link className="font-bold text-black" href={`/family/${author?._id}`}>
-            {author ? `${author.lastName} Family` : 'Deleted User'}
-          </Link>}
+          {isDeleted ? (
+          <div className="flex gap-2">
+            {profilePicture} {deletedText}
+          </div>
+          ) : (
+          <UserIcon user={author} clickable={false} boldText />
+          )}
           <p className="text-sm" suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
         </div>
-        {!isDeleted && <>
-          <MarkdownRenderer
-            className="leading-5"
-            markdown={content}
-            parse={markdown => mdParser.render(markdown)}
-          />
-          <div className="flex flex-row justify-between">
+        <div className="flex flex-col pl-8 gap-2">
+          {!isDeleted && <>
+            <MarkdownRenderer
+              className="leading-5"
+              markdown={content}
+              parse={markdown => mdParser.render(markdown)}
+            />
             <div className="flex items-center pt-2 gap-6 text-sm">
               {bottomRow.map((item, index) => (
-                <div key={index} className="flex items-center gap-1.5 px-1">
+                <div key={index} className="flex items-center gap-1.5">
                   <button disabled={!item.onClick} onClick={item.onClick}>
-                    <div className="w-5 h-5 [&>*]:w-full [&>*]:h-full">
-                      {item.icon}
-                    </div>
+                <div className="w-5 h-5 [&>*]:w-full [&>*]:h-full">
+                  {item.icon}
+                </div>
                   </button>
                   <button disabled={!item.onClick} onClick={item.onClick}>
-                    {item.label}
+                {item.label}
                   </button>
                 </div>
               ))}
@@ -189,27 +189,13 @@ export default function CommentComponent(props: CommentComponentProps) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="bottom" align="start">
                     {onDeleteClick ? <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem> : undefined}
-                    {user && user._id != comment.author?._id ? <DropdownMenuItem onClick={() => setShowReportModal(true)}>Report Comment</DropdownMenuItem> : null}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
             </div>
-            {
-              reports.length > 0 && user?.isAdmin ? (
-                <button 
-                  onClick={() => setShowContentReports(true)}
-                  className="pl-2 pr-1.5 py-1 flex flex-row gap-x-1.5 items-center bg-error-light-red text-error-red border-2 border-error-red rounded-full">
-                  <div className="flex flex-row gap-x-1">
-                    <OctagonAlert className="stroke-error-red" />
-                    Comment Reported ({reports.length})
-                  </div>
-                  <ChevronRight className="stroke-" />
-                </button>
-              ) : null
-            }
-          </div>
-        </>}
-        {nestedContent}
+          </>}
+          {nestedContent}
+        </div>
       </div>
       {showReportModal && <ReportContentModal
         isOpen={showReportModal}

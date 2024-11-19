@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronDown, Check, X, ChevronUp } from "lucide-react";
+import { ChevronDown, Check, ChevronUp } from "lucide-react";
 import React, { useState } from "react";
 import {
   Popover,
@@ -16,6 +16,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
+import cn from "classnames";
 
 type DropdownProps = {
   filter: Filter<any>;
@@ -25,17 +26,28 @@ export default function DropdownComponent (
   props: DropdownProps
 ) {
   const [showData, setShowData] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
 
   const handleItemClick = (item: any) => {
     props.filter.setSelected(item);
   };
 
+  const debounceOopenDropdown = (open: boolean) => {
+    setShowData(open);
+    setIsDisabled(true);
+    setTimeout(() => setIsDisabled(false), 300);
+  };
+
   return (
-    <Popover onOpenChange={(open) => setShowData(open)}>
-      <PopoverTrigger
-        asChild
-      >
-        <div className="relative flex items-center justify-center rounded-full cursor-pointer bg-dropdown-gray py-2 px-4">
+    <Popover onOpenChange={debounceOopenDropdown}>
+      <PopoverTrigger asChild>
+        <div
+          className={cn(
+            "relative flex items-center justify-center rounded-full cursor-pointer bg-dropdown-gray py-1 px-3 hover:bg-gray-200 transition",
+            { "pointer-events-none": isDisabled },
+            { "bg-gray-200": showData }
+          )}
+        >
           <div className="text-black text-sm font-normal">
               {props.filter.label}
           </div>

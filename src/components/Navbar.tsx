@@ -6,7 +6,7 @@ import Image from "next/image";
 import { SquarePen, Search, ChevronDown, ChevronUp, X } from "lucide-react";
 import Link from "next/link";
 import useClickOff from "@/hooks/useClickOff";
-import { signOut } from "@/server/db/actions/UserActions";
+import { signOut } from "@/server/db/actions/AuthActions";
 import { ProfileColors } from "@/utils/consts";
 import { useUser } from "@/contexts/UserContext";
 import { useSearch } from "@/contexts/SearchContext";
@@ -21,7 +21,7 @@ export default function Navbar({ openModal }: NavbarProps) {
   const [inputValue, setInputValue] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dropdownButtonRef = useRef<HTMLDivElement>(null);
-  const { user } = useUser()
+  const { user, setUser } = useUser()
   const { searchTerm, setSearchTerm } = useSearch();
   const router = useRouter();
 
@@ -76,12 +76,12 @@ export default function Navbar({ openModal }: NavbarProps) {
       </div>
 
       {/* Create Post*/}
-      <button
+      {!user.isBanned && <button
         className="bg-theme-blue text-base py-2 px-[18px] mr-10 text-white font-semibold rounded-[12px] gap-2 flex flex-row justify-center items-center transition hover:opacity-90 whitespace-nowrap"
         onClick={() => openModal()}
       >
         <SquarePen className="w-6 h-6" color="#ffffff" /> Create Post
-      </button>
+      </button>}
 
       {/* Profile Picture menu button */}
       <div
@@ -123,15 +123,16 @@ export default function Navbar({ openModal }: NavbarProps) {
               Settings & Preferences
             </Link>
             <div className="w-44 border-theme-medlight-gray border-t border-sm mt-[18px] mx-auto"/>
-            <Link
-              href="/login"
+            <div
               onClick={async () => {
+                setUser(null);
                 await signOut();
+                router.refresh();
               }} 
               className="text-theme-blue mt-2 mb-2 block ml-4 py-1 hover:underline cursor-pointer transition-colors text-left"
             >
               Sign out
-            </Link>
+            </div>
           </div>
         </div>
       )}

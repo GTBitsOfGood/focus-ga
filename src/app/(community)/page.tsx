@@ -4,7 +4,7 @@ import { getPopulatedPosts } from "@/server/db/actions/PostActions";
 import PostComponent from "@/components/PostComponent";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { PopulatedPost } from "@/utils/types/post";
-import { LoaderCircle, Mail } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import FilterComponent from "@/components/FilterComponent";
 import { Disability } from "@/utils/types/disability";
 import { Location } from "@/utils/types/location";
@@ -12,16 +12,17 @@ import { Filter } from "@/utils/types/common";
 import { PAGINATION_LIMIT } from "@/utils/consts";
 import { useUser } from "@/contexts/UserContext";
 import { GEORGIA_CITIES } from "@/utils/cities";
-import { getPopulatedUser } from "@/server/db/actions/UserActions";
 import { useSearch } from "@/contexts/SearchContext";
 import ContactButton from "@/components/ContactButton";
 import { useDisabilities } from "@/contexts/DisabilityContext";
+import { getPopulatedPinnedPosts } from "@/server/db/actions/PostActions";
+import PinnedPosts from "@/components/PinnedPosts";
 
 export const dynamic = 'force-dynamic';
 
 export default function Home() {
   const [posts, setPosts] = useState<PopulatedPost[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
   const { user } = useUser();
@@ -35,6 +36,7 @@ export default function Home() {
 
   const { searchTerm } = useSearch();
   const [totalPostsCount, setTotalPostsCount] = useState(0);
+  const [pinnedPostContents, setPinnedPostContents] = useState<PopulatedPost[]>([]);
 
   useEffect(() => {
     if (!user) return;
@@ -83,13 +85,9 @@ export default function Home() {
   // fetch posts when filter changes
   useEffect(() => {
     fetchPosts(true);
-  }, [selectedDisabilities, searchTerm])
+  }, [selectedDisabilities, selectedLocations, searchTerm])
 
-  useEffect(() => {
-    console.log(selectedLocations);
-  }, [selectedLocations]);
-
-  // Fetch posts when page changes
+  // fetch posts when page changes
   const fetchPosts = async (clear: boolean = false) => {
     if (!user || filtersLoading) return;
 
@@ -99,7 +97,7 @@ export default function Home() {
       setPosts([]);
     }
 
-    if (loading || !(hasMore || clear)) return;
+    if (!hasMore && !clear) return;
     setLoading(true);
 
     let retries = 5;
@@ -108,8 +106,10 @@ export default function Home() {
         const newPage = clear ? 0 : page;
   
         const tags = selectedDisabilities.map((disability) => disability._id);
-  
-        const {count, posts: newPosts } = await getPopulatedPosts(user._id, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, tags, searchTerm);
+        const locations = selectedLocations.map((location) => location.name);
+
+        const filters = { tags, locations, searchTerm };
+        const {count, posts: newPosts } = await getPopulatedPosts(user._id, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, filters);
         setTotalPostsCount(count);
         if (newPosts.length > 0) {
           setPosts(clear ? newPosts : [...posts, ...newPosts]);
@@ -148,6 +148,17 @@ export default function Home() {
     [loading, hasMore]
   );
   
+  useEffect(() => {
+    const fetchPinnedPosts = async () => {
+      if (user) {
+        const posts = await getPopulatedPinnedPosts(user._id);
+        setPinnedPostContents(posts.posts);
+      }
+    };
+
+    fetchPinnedPosts();
+  }, [user]);
+
   return (
     <main className="flex flex-col items-center px-16">
       <div className="w-full max-w-4xl space-y-8">
@@ -163,6 +174,7 @@ export default function Home() {
           ) : null
         }
         <FilterComponent filters={[disabilityFilter, locationFilter, demographicFilter]}/>
+        { pinnedPostContents.length > 0 && <PinnedPosts posts={pinnedPostContents} />}
         <div>
           {
             posts.length ? (
@@ -179,12 +191,20 @@ export default function Home() {
                 }
               })
             ) : (
-              !loading && searchTerm && searchTerm.length ? (
-                <div className="text-center font-bold text-theme-gray text-[22px]">
-                  <p>No results found for &quot;{searchTerm}&quot;.</p>
-                  <p>Please try another search!</p>
-                </div>
-              ) : null
+              <>
+                {!loading && searchTerm && searchTerm.length ? (
+                  <div className="text-center font-bold text-theme-gray text-[22px]">
+                    <p>No results found for &quot;{searchTerm}&quot;.</p>
+                    <p>Please try another search!</p>
+                  </div>
+                ) : null}
+
+                {!loading && !searchTerm && (
+                  <div className="text-center font-bold text-theme-gray text-[22px]">
+                    <p>No posts found.</p>
+                  </div>
+                )}
+              </>
             )
           }
           {loading &&

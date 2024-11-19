@@ -28,6 +28,8 @@ const config: Config = {
         'profile-pink': '#F8A5FF',
         'error-red': '#ff4e4e',
         'error-light-red': '#fff1f1',
+        'theme-light': '#D6F4F4',
+        'theme-accent': '#3AC0C1'
       },
       borderRadius: {
         lg: 'var(--radius)',

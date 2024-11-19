@@ -2,7 +2,7 @@
 
 import { PopulatedPost } from "@/utils/types/post";
 import Tag from "./Tag";
-import { Bookmark, MessageSquare, Ellipsis, Heart, OctagonAlert, ChevronRight } from "lucide-react";
+import { Bookmark, MessageSquare, Ellipsis, Heart, ShieldCheck, OctagonAlert, ChevronRight } from "lucide-react";
 import { getDateDifferenceString } from "@/utils/dateUtils";
 import MarkdownIt from "markdown-it";
 import MarkdownRenderer from "./MarkdownRenderer";
@@ -20,6 +20,7 @@ import { createReport, getReportsByContentId } from "@/server/db/actions/ReportA
 import { ReportReason, ContentType, PopulatedReport } from "@/utils/types/report";
 import { useUser } from '@/contexts/UserContext';
 import ContentReportsModal from "./ContentReportsModal";
+import UserIcon from "./UserIconComponent";
 
 type PostComponentProps = {
   post: PopulatedPost;
@@ -29,6 +30,7 @@ type PostComponentProps = {
   onSaveClick?: (saved: boolean) => Promise<void>;
   onEditClick?: (title: string, content: string, tags: Disability[]) => Promise<void>;
   onDeleteClick?: () => Promise<void>;
+  onPostPin?: () => Promise<void>;
 };
 
 export default function PostComponent(props: PostComponentProps) {
@@ -45,7 +47,8 @@ export default function PostComponent(props: PostComponentProps) {
     onLikeClick,
     onSaveClick,
     onDeleteClick,
-    onEditClick
+    onEditClick,
+    onPostPin
   } = props;
   
   // don't render links for clickable components to avoid nested a tags
@@ -226,17 +229,7 @@ export default function PostComponent(props: PostComponentProps) {
   const reactContent = (
     <>
       <div className="flex items-center justify-between text-sm">
-        {clickable ? (
-        <div className="flex items-center gap-2">
-          <span className={cn("w-6 h-6 rounded-full inline-block", {[`bg-${author?.profileColor ? author.profileColor : ProfileColors.ProfileDefault}`]: true})}/>
-          {author ? `${author.lastName} Family` : 'Deleted User'}
-        </div>
-      ) : (
-          <Link className="flex items-center gap-2" href={`/family/${author?._id}`}>
-            <span className={cn("w-6 h-6 rounded-full inline-block", {[`bg-${author?.profileColor ? author.profileColor : ProfileColors.ProfileDefault}`]: true})}/>
-            {author ? `${author.lastName} Family` : 'Deleted User'}
-        </Link>
-        )}
+        <UserIcon user={author} clickable={clickable} />
         <p suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
       </div>
       <div className="flex items-center justify-between py-0.5">
@@ -251,6 +244,7 @@ export default function PostComponent(props: PostComponentProps) {
                 {onEditClick && <DropdownMenuItem onClick={() => setShowEditModal(true)}>Edit</DropdownMenuItem>}
                 {onDeleteClick && <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem>}
                 {user && user._id != post.author?._id ? <DropdownMenuItem onClick={() => setShowReportModal(true)}>Report Post</DropdownMenuItem> : null}
+                {onPostPin && <DropdownMenuItem onClick={onPostPin}>{post.isPinned ? "Unpin Post" : "Pin Post"}</DropdownMenuItem>}
                 <DropdownMenuItem onClick={handleShareClick}>Share</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
