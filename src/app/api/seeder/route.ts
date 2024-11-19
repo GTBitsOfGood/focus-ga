@@ -74,6 +74,7 @@ const DISABILITIES = [
 const NUM_USERS = 10;
 const MAX_CHILD_AGE = 20;
 const MAX_POSTS_PER_USER = 5;
+const MAX_USER_DISABILITIES = 3;
 const MAX_COMMENTS_PER_POST = 5;
 const MAX_LIKED_SAVED_POSTS_PER_USER = 5;
 const MAX_LIKED_COMMENTS_PER_USER = 5;
@@ -108,12 +109,12 @@ export async function POST(request: Request) {
     // create users
     const users = [];
     for (let i = 0; i < NUM_USERS; i++) {
-      const randomDisabilityCount = Math.floor(Math.random() * DISABILITIES.length) + 1;
+      const randomDisabilityCount = Math.floor(Math.random() * MAX_USER_DISABILITIES) + 1;
       const availableDisabilities = [...disabilityIds];
       const selectedDisabilities: string[] = [];
 
       for (let i = 0; i < randomDisabilityCount; i++) {
-        const randomIndex = Math.floor(Math.random() * availableDisabilities.length);
+        const randomIndex = Math.floor(Math.random() * 3);
         selectedDisabilities.push(availableDisabilities[randomIndex]);
         availableDisabilities.splice(randomIndex, 1);
       }
