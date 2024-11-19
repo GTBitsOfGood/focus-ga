@@ -1,6 +1,6 @@
 "use client";
 
-import { Ban, Pencil } from "lucide-react";
+import { Ban, Pencil, ShieldCheck } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { PopulatedUser } from "@/utils/types/user";
 import { useEffect, useState } from "react";
@@ -16,6 +16,7 @@ import { editUser } from "@/server/db/actions/UserActions";
 import { useUser } from "@/contexts/UserContext";
 import BackButton from "../BackButton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "../ui/alert-dialog";
+import { Tooltip } from "react-tooltip";
 
 
 type ProfileContainerProps = {
@@ -90,7 +91,11 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
                 { user._id === currUser._id && <ColorPicker handleColorPick = {handleColorPick} /> }
               </div>
               <div className="flex flex-col justify-center">
-                <p className="text-2xl font-bold">{user.lastName} Family</p>
+                <div className="flex items-center gap-1">
+                  <p className="text-2xl font-bold">{user.lastName} Family</p>
+                  <ShieldCheck className="admin-icon-profile w-8 h-8 text-white fill-theme-gray" />
+                  <Tooltip anchorSelect=".admin-icon-profile" className="text-xs py-1">Admin User</Tooltip>
+                </div>
                 <p className="text-lg font-normal">{user.email}</p>
               </div>
             </div>
