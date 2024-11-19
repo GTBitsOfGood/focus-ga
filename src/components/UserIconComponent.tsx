@@ -2,6 +2,8 @@ import { ProfileColors } from "@/utils/consts";
 import { PopulatedUser, User } from "@/utils/types/user";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { ShieldCheck } from "lucide-react";
+import { Tooltip } from 'react-tooltip'
 
 type UserIconProps = {
   user: User | PopulatedUser | null;
@@ -31,11 +33,18 @@ export default function UserIcon({ user, clickable, boldText }: UserIconProps) {
     </div>
   );
 
-  return clickable ? (
-    inner
-  ) : (
-    <Link href={`/family/${user?._id}`}>
-      {inner}
-    </Link>
+  return (
+    <div className="flex items-center gap-1">
+      {clickable ? (
+        inner
+      ) : (
+        <Link href={`/family/${user?._id}`}>
+          {inner}
+        </Link>
+      )}
+
+      {user?.isAdmin && <ShieldCheck className="admin-icon w-5 h-5 text-white fill-theme-gray" />}
+      <Tooltip anchorSelect=".admin-icon" className="text-xs py-1">Admin User</Tooltip>
+    </div>
   );
 }
