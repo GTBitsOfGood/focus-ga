@@ -63,7 +63,6 @@ export async function loginUser(email: string, uid: string) {
  * @returns A promise that resolves to an object indicating the success of the sign-out operation.
  */
 export async function signOut() {
-  user = null;
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
   
   session.destroy();

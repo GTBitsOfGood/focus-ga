@@ -195,12 +195,11 @@ export async function pinPost(authUserId: string, postId: string): Promise<{ suc
   }
 
   const updatedPost = await PostModel.findByIdAndUpdate(postId, { isPinned: true }, { new: true });
-  console.log(updatedPost)
   if (!updatedPost) {
     return { success: false, error: "Post not found" };
   }
 
-  updatedPost.save
+  revalidatePath(`/posts/${postId}`);
 
   return { success: true };
 }
@@ -227,6 +226,8 @@ export async function unpinPost(authUserId: string, postId: string): Promise<{ s
   if (!updatedPost) {
     return { success: false, error: "Post not found" };
   }
+
+  revalidatePath(`/posts/${postId}`);
 
   return { success: true };
 }
