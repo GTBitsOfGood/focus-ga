@@ -226,6 +226,8 @@ export default function PostComponent(props: PostComponentProps) {
     }
   ];
 
+  const showReport = user && user._id !== author?._id;
+
   const reactContent = (
     <>
       <div className="flex items-center justify-between text-sm">
@@ -243,7 +245,7 @@ export default function PostComponent(props: PostComponentProps) {
               <DropdownMenuContent side="bottom" align="end">
                 {onEditClick && <DropdownMenuItem onClick={() => setShowEditModal(true)}>Edit</DropdownMenuItem>}
                 {onDeleteClick && <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem>}
-                {user && user._id != post.author?._id ? <DropdownMenuItem onClick={() => setShowReportModal(true)}>Report Post</DropdownMenuItem> : null}
+                {showReport && <DropdownMenuItem onClick={() => setShowReportModal(true)}>Report Post</DropdownMenuItem>}
                 {onPostPin && <DropdownMenuItem onClick={onPostPin}>{post.isPinned ? "Unpin Post" : "Pin Post"}</DropdownMenuItem>}
                 <DropdownMenuItem onClick={handleShareClick}>Share</DropdownMenuItem>
               </DropdownMenuContent>
