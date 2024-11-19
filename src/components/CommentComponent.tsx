@@ -183,14 +183,16 @@ export default function CommentComponent(props: CommentComponentProps) {
                 </div>
               ))}
               <div className="flex items-center gap-1.5 px-1">
-                <DropdownMenu modal={false}>
-                  <DropdownMenuTrigger>
-                    <Ellipsis className="w-5 h-5" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent side="bottom" align="start">
-                    {onDeleteClick ? <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem> : undefined}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                {onDeleteClick && (
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger>
+                      <Ellipsis className="w-5 h-5" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="bottom" align="start">
+                      <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             </div>
           </>}

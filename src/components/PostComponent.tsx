@@ -245,9 +245,9 @@ export default function PostComponent(props: PostComponentProps) {
               <DropdownMenuContent side="bottom" align="end">
                 {onEditClick && <DropdownMenuItem onClick={() => setShowEditModal(true)}>Edit</DropdownMenuItem>}
                 {onDeleteClick && <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem>}
-                {showReport && <DropdownMenuItem onClick={() => setShowReportModal(true)}>Report Post</DropdownMenuItem>}
-                {onPostPin && <DropdownMenuItem onClick={onPostPin}>{post.isPinned ? "Unpin Post" : "Pin Post"}</DropdownMenuItem>}
                 <DropdownMenuItem onClick={handleShareClick}>Share</DropdownMenuItem>
+                {showReport && <DropdownMenuItem onClick={() => setShowReportModal(true)}>Report</DropdownMenuItem>}
+                {onPostPin && <DropdownMenuItem onClick={onPostPin}>{post.isPinned ? "Unpin Post" : "Pin Post"}</DropdownMenuItem>}
               </DropdownMenuContent>
             </DropdownMenu>
           )
