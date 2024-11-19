@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { Types } from "mongoose";
 import { ExtendId } from "./common";
+import { User } from "./user";
 
 export enum ReportReason {
   SPAM = 'Spam',
@@ -30,3 +31,7 @@ export const editReportSchema = reportSchema.partial();
 
 export type Report = ExtendId<z.infer<typeof reportSchema>>;
 export type ReportInput = z.input<typeof reportSchema>;
+
+export type PopulatedReport = Omit<Report, 'sourceUser'> & {
+  sourceUser: User
+};

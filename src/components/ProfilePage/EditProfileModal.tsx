@@ -9,7 +9,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { MDXEditorMethods } from "@mdxeditor/editor";
 import { cn } from "@/lib/utils";

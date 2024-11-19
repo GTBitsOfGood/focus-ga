@@ -131,7 +131,7 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
       router.push('/');
       toast({
         title: "Post successfully deleted",
-        description: "Your post has been successfully deleted from the community."
+        description: "The post has been successfully deleted from the community."
       });
     } catch (err) {
       console.error('Failed to delete post:', err);
@@ -151,7 +151,7 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
       }
       toast({
         title: "Post successfully unpinned",
-        description: "Your post has been unpinned.",
+        description: "The post has been unpinned.",
       });
     } else {
       // If the post is not pinned, call the pin action
@@ -165,7 +165,7 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
       }
       toast({
         title: "Post successfully pinned",
-        description: "Your post has been pinned.",
+        description: "The post has been pinned.",
       });
     }
   }

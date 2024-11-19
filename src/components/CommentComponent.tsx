@@ -1,13 +1,19 @@
 import { getDateDifferenceString } from "@/utils/dateUtils";
 import { PopulatedComment } from "@/utils/types/comment";
-import { MessageSquare, Ellipsis, Heart, ShieldCheck } from "lucide-react";
+import { MessageSquare, Ellipsis, Heart, ShieldCheck, OctagonAlert, ChevronRight } from "lucide-react";
 import MarkdownRenderer from "./MarkdownRenderer";
 import MarkdownIt from "markdown-it";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 import { PopulatedUser, User } from "@/utils/types/user";
 import { cn } from "@/lib/utils";
+import { useUser } from "@/contexts/UserContext";
+import { createReport, getReportsByContentId } from "@/server/db/actions/ReportActions";
+import { ContentType, ReportReason, PopulatedReport } from "@/utils/types/report";
+import ReportContentModal from "./ReportContentModal";
+import ContentReportsModal from "./ContentReportsModal";
+import { useToast } from "@/hooks/use-toast";
 import UserIcon from "./UserIconComponent";
 
 type CommentComponentProps = {
@@ -49,6 +55,24 @@ export default function CommentComponent(props: CommentComponentProps) {
   const [isDeleted, setIsDeleted] = useState<boolean>(initialIsDeleted);
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+  const [showReportModal, setShowReportModal] = useState<boolean>(false);
+  const [reports, setReports] = useState<PopulatedReport[]>([]);
+  const [showContentReports, setShowContentReports] = useState(false);
+  const { toast } = useToast();
+  const { user } = useUser();
+
+  const fetchReports = async () => {
+    try {
+      const reportsData = await getReportsByContentId(comment._id);
+      setReports(reportsData);
+    } catch (error) {
+      console.error('Error fetching reports:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchReports();
+  }, []);
 
   async function handleLikeClick() {
     if (likeLoading) return;
@@ -87,6 +111,25 @@ export default function CommentComponent(props: CommentComponentProps) {
       } finally {
         setDeleteLoading(false);
       }
+    }
+  }
+
+  async function handleReportClick(reason: string, description: string) {
+    if (author && user) {
+      const reportData = {
+        reason: reason as ReportReason,
+        description: description,
+        reportedUser: author?._id,
+        sourceUser: user?._id,
+        reportedContent: comment._id,
+        contentType: ContentType.COMMENT,
+      }
+      await createReport(reportData);
+      toast({
+        title: "Report Submitted",
+        description: "Thank you for reporting this content. Our team will review it shortly.",
+      });
+      fetchReports();
     }
   }
 
@@ -154,6 +197,17 @@ export default function CommentComponent(props: CommentComponentProps) {
           {nestedContent}
         </div>
       </div>
+      {showReportModal && <ReportContentModal
+        isOpen={showReportModal}
+        closeModal={() => setShowReportModal(false)}
+        onSubmit={handleReportClick}
+      />}
+      {showContentReports && <ContentReportsModal
+        isOpen={showContentReports}
+        reports={reports}
+        closeModal={() => setShowContentReports(false)}
+        onDeleteContent={handleDeleteClick}
+      />}
       <AlertDialog open={showDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
