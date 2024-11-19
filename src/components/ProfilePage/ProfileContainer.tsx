@@ -93,8 +93,13 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
               <div className="flex flex-col justify-center">
                 <div className="flex items-center gap-1">
                   <p className="text-2xl font-bold">{user.lastName} Family</p>
-                  <ShieldCheck className="admin-icon-profile w-8 h-8 text-white fill-theme-gray" />
-                  <Tooltip anchorSelect=".admin-icon-profile" className="text-xs py-1">Admin User</Tooltip>
+                  { user.isAdmin && (
+                      <>
+                        <ShieldCheck className="admin-icon-profile w-8 h-8 text-white fill-theme-gray" />
+                        <Tooltip anchorSelect=".admin-icon-profile" className="text-xs py-1">Admin User</Tooltip>
+                      </>
+                    )
+                  }
                 </div>
                 <p className="text-lg font-normal">{user.email}</p>
               </div>
