@@ -90,7 +90,7 @@ export default function CommentTreeContainer(props: CommentTreeContainerProps) {
       comment={parentComment}
       onReplyClick={onReplyClick}
       onLikeClick={liked => onLikeClick(parentComment._id, liked)}
-      onDeleteClick={parentComment.author?._id === authUser._id ? () => onDeleteClick(parentComment._id) : undefined}
+      onDeleteClick={authUser.isAdmin || parentComment.author?._id === authUser._id ? () => onDeleteClick(parentComment._id) : undefined}
       nestedContent={(
         <div className="mt-2 flex flex-col gap-2">
           {showReplyInput && <CommentInputComponent
@@ -102,7 +102,7 @@ export default function CommentTreeContainer(props: CommentTreeContainerProps) {
             key={comment._id}
             comment={comment}
             onLikeClick={liked => onLikeClick(comment._id, liked)}
-            onDeleteClick={comment.author?._id === authUser._id ? () => onDeleteClick(comment._id) : undefined}
+            onDeleteClick={authUser.isAdmin || comment.author?._id === authUser._id ? () => onDeleteClick(comment._id) : undefined}
           />)}
         </div>
       )}

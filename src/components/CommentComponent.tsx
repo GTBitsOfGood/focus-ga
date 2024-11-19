@@ -1,6 +1,6 @@
 import { getDateDifferenceString } from "@/utils/dateUtils";
 import { PopulatedComment } from "@/utils/types/comment";
-import { MessageSquare, Ellipsis, Heart } from "lucide-react";
+import { MessageSquare, Ellipsis, Heart, ShieldCheck } from "lucide-react";
 import MarkdownRenderer from "./MarkdownRenderer";
 import MarkdownIt from "markdown-it";
 import { ReactNode, useState } from "react";

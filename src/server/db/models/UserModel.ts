@@ -6,6 +6,7 @@ import mongoose, { Schema } from "mongoose";
 const UserSchema = new Schema<User>({
   username: { type: String, required: true },
   isAdmin: { type: Boolean, default: false },
+  isBanned: { type: Boolean, default: false },
   lastName: { type: String, required: true },
   email: { type: String, required: true},
   childAge: { type: Number, min: 0, required: true },

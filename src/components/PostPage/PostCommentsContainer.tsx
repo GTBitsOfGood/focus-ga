@@ -46,6 +46,9 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
     initialComments.filter(comment => comment.replyTo === null && (comment.isDeleted === false || childComments.get(comment._id)))
   );
 
+  const showEdit = post.author?._id === authUser._id;
+  const showDelete = post.author?._id === authUser._id || authUser.isAdmin;
+
   async function onNewCommentSubmit(newCommentBody: string) {
     const newCommentInput: CommentInput = {
       author: authUser._id,
@@ -177,8 +180,8 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
           post={post}
           onLikeClick={onPostLikeClick}
           onSaveClick={onPostSaveClick}
-          onEditClick={post.author?._id === authUser._id ? onPostEditClick : undefined}
-          onDeleteClick={post.author?._id === authUser._id ? onPostDeleteClick : undefined}
+          onEditClick={showEdit ? onPostEditClick : undefined}
+          onDeleteClick={showDelete ? onPostDeleteClick : undefined}
           onPostPin={authUser.isAdmin ? onPostPin : undefined}
         />
         <CommentInputComponent

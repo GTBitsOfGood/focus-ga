@@ -2,7 +2,7 @@
 
 import { PopulatedPost } from "@/utils/types/post";
 import Tag from "./Tag";
-import { Bookmark, MessageSquare, Ellipsis, Heart } from "lucide-react";
+import { Bookmark, MessageSquare, Ellipsis, Heart, ShieldCheck } from "lucide-react";
 import { getDateDifferenceString } from "@/utils/dateUtils";
 import MarkdownIt from "markdown-it";
 import MarkdownRenderer from "./MarkdownRenderer";
