@@ -13,6 +13,7 @@ const UserSchema = new Schema<User>({
   childDisabilities: [{ type: Schema.Types.ObjectId, ref: 'Disability', required: true }],
   city: { type: String, enum: GEORGIA_CITIES, required: true },
   bio: { type: String },
+  salesforce_uid: { type: String },
 
   notificationPreference: { type: Boolean, default: true }, // true = "Email about post replies", false = "Never email"
   defaultDisabilityTags: [{ type: Schema.Types.ObjectId, ref: 'Disability' }],

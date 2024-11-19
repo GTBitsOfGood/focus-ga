@@ -48,12 +48,12 @@ export default function Navbar({ openModal }: NavbarProps) {
   }
 
   return (
-    <div className="w-full h-[100px] bg-white flex items-center justify-between fixed top-0 z-50 border-b border-gray-300">
+    <div className="w-full h-[100px] bg-white flex items-center justify-between fixed top-0 z-50 border-b border-gray-300 md:gap-12 gap-4 pl-8">
       {/* Logo plus search bar*/}
       <Link href="/" className="cursor-pointer">
-        <Image src={focusLogo} width={121} height={58} alt="focus-logo" className="mx-12 mb-2" />
+        <Image src={focusLogo} alt="focus-logo" className="mb-2 min-w-24 w-24" />
       </Link>
-      <div className="relative flex-grow mx-20">
+      <div className="relative flex-grow">
         <input
           type="text"
           placeholder="Search for a post"
@@ -77,7 +77,7 @@ export default function Navbar({ openModal }: NavbarProps) {
 
       {/* Create Post*/}
       {!user.isBanned && <button
-        className="bg-theme-blue text-base py-2 px-[18px] mr-10 text-white font-semibold rounded-[12px] gap-2 flex flex-row justify-center items-center transition hover:opacity-90 whitespace-nowrap"
+        className="bg-theme-blue text-base py-2 px-4 text-white font-semibold rounded-[12px] gap-2 flex flex-row justify-center items-center transition hover:opacity-90 whitespace-nowrap"
         onClick={() => openModal()}
       >
         <SquarePen className="w-6 h-6" color="#ffffff" /> Create Post
@@ -85,7 +85,7 @@ export default function Navbar({ openModal }: NavbarProps) {
 
       {/* Profile Picture menu button */}
       <div
-        className="flex items-center justify-center mx-6 mr-2 w-[88px] h-full relative group hover:bg-gray-100 transition-colors duration-200 cursor-pointer m-1 pr-16 pl-12"
+        className="flex items-center justify-center w-[88px] h-full relative group hover:bg-gray-100 transition-colors duration-200 cursor-pointer pr-16 pl-12"
         onClick={toggleDropdown}
         ref={dropdownButtonRef}
       >

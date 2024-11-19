@@ -71,13 +71,13 @@ const DISABILITIES = [
   "Down Syndrome",
   "Fragile X Syndrome"
 ];
-const NUM_USERS = 10;
+const NUM_USERS = 100;
 const MAX_CHILD_AGE = 20;
-const MAX_POSTS_PER_USER = 5;
+const MAX_POSTS_PER_USER = 10;
 const MAX_USER_DISABILITIES = 3;
-const MAX_COMMENTS_PER_POST = 5;
-const MAX_LIKED_SAVED_POSTS_PER_USER = 5;
-const MAX_LIKED_COMMENTS_PER_USER = 5;
+const MAX_COMMENTS_PER_POST = 15;
+const MAX_LIKED_SAVED_POSTS_PER_USER = 20;
+const MAX_LIKED_COMMENTS_PER_USER = 20;
 const NUM_REPORTS = 10;
 const NUM_REPORT_REASONS = 4;
 const NUM_CONTENT_TYPES = 3;
@@ -140,6 +140,7 @@ export async function POST(request: Request) {
         city: GEORGIA_CITIES[cityIndex],
         bio: faker.lorem.paragraph({ min: 1, max: 6 }),
         profileColor: getRandomProfileColor(),
+        salesforce_uid: email,
       }
 
       users.push((await createUser(userInfo)));
