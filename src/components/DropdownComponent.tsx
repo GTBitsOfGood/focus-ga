@@ -49,7 +49,7 @@ export default function DropdownComponent (
           )}
         >
           <div className="text-black text-sm font-normal">
-              {props.filter.label}
+            {props.filter.label} {props.filter.selected.length > 0 ? `(${props.filter.selected.length})` : ""}
           </div>
 
           {!showData ? (
