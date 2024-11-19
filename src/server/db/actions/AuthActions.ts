@@ -7,8 +7,6 @@ import { createUser, getPopulatedUser, getUserBySalesforceUid } from './UserActi
 import { PopulatedUser } from '@/utils/types/user';
 import { redirect } from 'next/navigation';
 
-let user: PopulatedUser | null;
-
 /**
  * Retrieves the authenticated user from the session.
  * If the user is not logged in, this function returns null.
@@ -18,16 +16,11 @@ export async function getAuthenticatedUser(refresh = false): Promise<PopulatedUs
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
   if (!session.isLoggedIn) {
-    user = null;
     return null;
   }
 
-  if (user && !refresh) {
-    return user;
-  }
-
   try {
-    user = await getPopulatedUser(session.userId);
+    const user = await getPopulatedUser(session.userId);
     return user;
   } catch (e) {
     await signOut();
