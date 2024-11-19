@@ -21,8 +21,6 @@ import { Report, ReportReason, ContentType } from "@/utils/types/report";
 import { useUser } from '@/contexts/UserContext';
 import ContentReportsModal from "./ContentReportsModal";
 
-const IS_ADMIN = true;
-
 type PostComponentProps = {
   post: PopulatedPost;
   className?: string;
@@ -280,7 +278,7 @@ export default function PostComponent(props: PostComponentProps) {
           ))}
         </div>
         {
-          reports.length > 0 && IS_ADMIN ? (
+          reports.length > 0 && user?.isAdmin ? (
             <button 
               onClick={!clickable ? () => setShowContentReports(true) : undefined}
               className="pl-2 pr-1.5 py-1 flex flex-row gap-x-1.5 items-center bg-error-light-red text-error-red border-2 border-error-red rounded-full">

@@ -17,8 +17,6 @@ import ReportContentModal from "./ReportContentModal";
 import ContentReportsModal from "./ContentReportsModal";
 import { useToast } from "@/hooks/use-toast";
 
-const IS_ADMIN = true;
-
 type CommentComponentProps = {
   className?: string;
   comment: PopulatedComment;
@@ -197,7 +195,7 @@ export default function CommentComponent(props: CommentComponentProps) {
               </div>
             </div>
             {
-              reports.length > 0 && IS_ADMIN ? (
+              reports.length > 0 && user?.isAdmin ? (
                 <button 
                   onClick={() => setShowContentReports(true)}
                   className="pl-2 pr-1.5 py-1 flex flex-row gap-x-1.5 items-center bg-error-light-red text-error-red border-2 border-error-red rounded-full">
