@@ -15,6 +15,7 @@ import { createReport, getReportsByContentId } from "@/server/db/actions/ReportA
 import { Report, ContentType, ReportReason } from "@/utils/types/report";
 import ReportContentModal from "./ReportContentModal";
 import ContentReportsModal from "./ContentReportsModal";
+import { useToast } from "@/hooks/use-toast";
 
 const IS_ADMIN = true;
 
@@ -60,8 +61,8 @@ export default function CommentComponent(props: CommentComponentProps) {
   const [showReportModal, setShowReportModal] = useState<boolean>(false);
   const [reports, setReports] = useState<Report[]>([]);
   const [showContentReports, setShowContentReports] = useState(false);
-
-  const { user, setUser } = useUser();
+  const { toast } = useToast();
+  const { user } = useUser();
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -128,6 +129,10 @@ export default function CommentComponent(props: CommentComponentProps) {
         contentType: ContentType.COMMENT,
       }
       await createReport(reportData);
+      toast({
+        title: "Report Submitted",
+        description: "Thank you for reporting this content. Our team will review it shortly.",
+      });
     }
   }
 

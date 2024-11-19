@@ -179,6 +179,10 @@ export default function PostComponent(props: PostComponentProps) {
         contentType: ContentType.POST,
       }
       await createReport(reportData);
+      toast({
+        title: "Report Submitted",
+        description: "Thank you for reporting this content. Our team will review it shortly.",
+      });
     }
   }
 

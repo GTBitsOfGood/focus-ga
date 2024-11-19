@@ -76,7 +76,7 @@ export default function ContentReportsModal(props: EditPostModalProps) {
             <button 
               className="min-w-20 py-2 px-4 bg-theme-blue rounded-lg justify-center items-center gap-2.5 inline-flex transition hover:bg-blue-900"
             >
-            <div className="text-white font-bold">Edit Content</div>
+              <div className="text-white font-bold">Edit Content</div>
             </button>
           </div>
         </div>
