@@ -66,21 +66,28 @@ export default function DropdownComponent (
           <CommandList>
             <CommandEmpty>No {props.filter.label.toLowerCase()} found.</CommandEmpty>
             <CommandGroup>
-              {props.filter.data.map((d) => (
-                <CommandItem
+                {props.filter.data
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .sort((a, b) => {
+                  const aSelected = props.filter.selected.some((item) => item._id === a._id);
+                  const bSelected = props.filter.selected.some((item) => item._id === b._id);
+                  return aSelected === bSelected ? 0 : aSelected ? -1 : 1;
+                })
+                .map((d) => (
+                  <CommandItem
                   key={d._id}
                   value={d.name}
                   onSelect={() => {
                     handleItemClick(d);
                   }}
                   className="flex items-center p-2 cursor-pointer rounded-lg hover:bg-gray-100 h-10"
-                >
+                  >
                   {props.filter.selected.some((item) => item._id === d._id) && (
                     <Check className="w-4 h-4 mr-2" color="black" />
                   )}
                   {d.name}
-                </CommandItem>
-              ))}
+                  </CommandItem>
+                ))}
             </CommandGroup>
           </CommandList>
         </Command>
