@@ -123,16 +123,16 @@ export default function Navbar({ openModal }: NavbarProps) {
               Settings & Preferences
             </Link>
             <div className="w-44 border-theme-medlight-gray border-t border-sm mt-[18px] mx-auto"/>
-            <Link
-              href="/login"
+            <div
               onClick={async () => {
                 setUser(null);
                 await signOut();
+                router.refresh();
               }} 
               className="text-theme-blue mt-2 mb-2 block ml-4 py-1 hover:underline cursor-pointer transition-colors text-left"
             >
               Sign out
-            </Link>
+            </div>
           </div>
         </div>
       )}
