@@ -1,36 +1,18 @@
 'use client'
 
-import { useEffect, useState } from "react";
 import { getDateDifferenceString } from "@/utils/dateUtils";
 import { cn } from "@/lib/utils";
 import { ProfileColors } from "@/utils/consts";
-import { Report } from "@/utils/types/report";
-import { getUser } from "@/server/db/actions/UserActions";
-import { User } from "@/utils/types/user";
+import { PopulatedReport } from "@/utils/types/report";
 
 type ReportComponentProps = {
-  report: Report;
+  report: PopulatedReport;
   className?: string;
   isLast: boolean
 };
 
 export default function ReportComponent({ report, isLast } : ReportComponentProps) {
-  const [sourceUser, setSourceUser] = useState<User>()
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const user = await getUser(report.sourceUser.toString());
-        setSourceUser(user);
-      } catch (error) {
-        console.error('Error fetching reports:', error);
-      }
-    };
-
-    if (report.sourceUser) {
-      fetchUser();
-    }
-  }, [report.sourceUser]);
+  const sourceUser = report.sourceUser;
 
   return (
     <div className="flex flex-col gap-3.5 text-theme-gray rounded-lg">
@@ -46,17 +28,17 @@ export default function ReportComponent({ report, isLast } : ReportComponentProp
         <p className="text-sm font-normal">{report.reason}</p>
       </div>
       {
-        report.description ? (
+        report.description && (
           <div>
             <h2 className="text-base text-black font-medium">Description</h2>
             <p className="text-sm font-normal">{report.description}</p>
           </div>
-        ) : null
+        )
       }
       { 
-        !isLast ? (
+        !isLast && (
           <div className="w-full h-[1px] bg-theme-medlight-gray mb-5"/>
-        ) : null
+        )
       }
     </div>
   );

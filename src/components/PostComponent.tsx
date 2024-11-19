@@ -17,7 +17,7 @@ import { Disability } from "@/utils/types/disability";
 import { useToast } from "@/hooks/use-toast";
 import ReportContentModal from "./ReportContentModal";
 import { createReport, getReportsByContentId } from "@/server/db/actions/ReportActions";
-import { Report, ReportReason, ContentType } from "@/utils/types/report";
+import { ReportReason, ContentType, PopulatedReport } from "@/utils/types/report";
 import { useUser } from '@/contexts/UserContext';
 import ContentReportsModal from "./ContentReportsModal";
 
@@ -36,7 +36,7 @@ export default function PostComponent(props: PostComponentProps) {
     html: true,
   });
 
-  const { user, setUser } = useUser();
+  const { user } = useUser();
 
   const {
     className = '',
@@ -66,6 +66,8 @@ export default function PostComponent(props: PostComponentProps) {
     comments
   } = post;
 
+  const { toast } = useToast();
+
   const [title, setTitle] = useState<string>(initialTitle);
   const [content, setContent] = useState<string>(initialContent);
   const [tags, setTags] = useState<(Disability | null)[]>(initialTags);
@@ -78,21 +80,19 @@ export default function PostComponent(props: PostComponentProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const [showReportModal, setShowReportModal] = useState<boolean>(false);
-  const [reports, setReports] = useState<Report[]>([]);
+  const [reports, setReports] = useState<PopulatedReport[]>([]);
   const [showContentReports, setShowContentReports] = useState(false);
 
-  const { toast } = useToast();
+  const fetchReports = async () => {
+    try {
+      const reportsData = await getReportsByContentId(post._id);
+      setReports(reportsData);
+    } catch (error) {
+      console.error('Error fetching reports:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchReports = async () => {
-      try {
-        const reportsData = await getReportsByContentId(post._id);
-        setReports(reportsData);
-      } catch (error) {
-        console.error('Error fetching reports:', error);
-      }
-    };
-
     fetchReports();
   }, []);
 
@@ -181,6 +181,7 @@ export default function PostComponent(props: PostComponentProps) {
         title: "Report Submitted",
         description: "Thank you for reporting this content. Our team will review it shortly.",
       });
+      fetchReports();
     }
   }
 
@@ -329,7 +330,7 @@ export default function PostComponent(props: PostComponentProps) {
         isOpen={showContentReports}
         reports={reports}
         closeModal={() => setShowContentReports(false)}
-        onSubmit={handleReportClick}
+        onDeleteContent={handleDeleteClick}
       />}
     </>
   );

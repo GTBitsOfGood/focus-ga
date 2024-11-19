@@ -12,7 +12,7 @@ import { PopulatedUser, User } from "@/utils/types/user";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/contexts/UserContext";
 import { createReport, getReportsByContentId } from "@/server/db/actions/ReportActions";
-import { Report, ContentType, ReportReason } from "@/utils/types/report";
+import { ContentType, ReportReason, PopulatedReport } from "@/utils/types/report";
 import ReportContentModal from "./ReportContentModal";
 import ContentReportsModal from "./ContentReportsModal";
 import { useToast } from "@/hooks/use-toast";
@@ -57,22 +57,21 @@ export default function CommentComponent(props: CommentComponentProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const [showReportModal, setShowReportModal] = useState<boolean>(false);
-  const [reports, setReports] = useState<Report[]>([]);
+  const [reports, setReports] = useState<PopulatedReport[]>([]);
   const [showContentReports, setShowContentReports] = useState(false);
   const { toast } = useToast();
   const { user } = useUser();
 
-  useEffect(() => {
-    const fetchReports = async () => {
-      try {
-        const reportsData = await getReportsByContentId(comment._id);
-        console.log(reportsData);
-        setReports(reportsData);
-      } catch (error) {
-        console.error('Error fetching reports:', error);
-      }
-    };
+  const fetchReports = async () => {
+    try {
+      const reportsData = await getReportsByContentId(comment._id);
+      setReports(reportsData);
+    } catch (error) {
+      console.error('Error fetching reports:', error);
+    }
+  };
 
+  useEffect(() => {
     fetchReports();
   }, []);
 
@@ -131,6 +130,7 @@ export default function CommentComponent(props: CommentComponentProps) {
         title: "Report Submitted",
         description: "Thank you for reporting this content. Our team will review it shortly.",
       });
+      fetchReports();
     }
   }
 
@@ -220,7 +220,7 @@ export default function CommentComponent(props: CommentComponentProps) {
         isOpen={showContentReports}
         reports={reports}
         closeModal={() => setShowContentReports(false)}
-        onSubmit={handleReportClick}
+        onDeleteContent={handleDeleteClick}
       />}
       <AlertDialog open={showDeleteDialog}>
         <AlertDialogContent>

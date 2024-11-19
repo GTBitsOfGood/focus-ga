@@ -1,27 +1,31 @@
 'use client'
 
 import React, { useState } from "react";
-import { Disability } from "@/utils/types/disability";
 import { X, Trash2 } from "lucide-react";
-import { Report } from "@/utils/types/report";
+import { ContentType, PopulatedReport } from "@/utils/types/report";
 import ReportComponent from "./ReportComponent";
+import { useToast } from "@/hooks/use-toast";
 
-type EditPostModalProps = {
+type ContentReportsModalProps = {
   isOpen: boolean;
-  reports: Report[];
+  reports: PopulatedReport[];
   closeModal: () => void;
-  onSubmit: (title: string, content: string, tags: Disability[]) => Promise<void>;
+  onDeleteContent: (id: string) => void;
 }
 
-export default function ContentReportsModal(props: EditPostModalProps) {
+export default function ContentReportsModal(props: ContentReportsModalProps) {
   const {
     isOpen,
     reports,
     closeModal,
-    onSubmit
+    onDeleteContent,
   } = props;
 
   const [mouseDownOnBackground, setMouseDownOnBackground] = useState(false);
+  const { toast } = useToast();
+
+  const id = reports[0].reportedContent.toString();
+  const contentType = reports[0].contentType;
 
   const handleClose = () => {
     closeModal();
@@ -63,9 +67,15 @@ export default function ContentReportsModal(props: EditPostModalProps) {
         </div>
 
         <div className="flex flex-row justify-between items-center mt-5">
-          <button className="flex flex-row items-center font-bold text-error-red gap-x-1.5 text-lg">
+          <button 
+            className="flex flex-row items-center font-bold text-error-red gap-x-1.5 text-lg"
+            onClick={() => {
+              onDeleteContent(id);
+              closeModal();
+            }}
+          >
             <Trash2 />
-            Delete Post
+            Delete {contentType === ContentType.COMMENT ? 'Comment' : 'Post'}
           </button>
           <div className="flex justify-end space-x-4">
             <button

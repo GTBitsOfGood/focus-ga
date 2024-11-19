@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "./ui/command";
 import { ReportReason } from "@/utils/types/report";
+import { useRouter } from "next/navigation";
 
 type ReportContentModalProps = {
   isOpen: boolean;
@@ -31,6 +32,7 @@ export default function ReportContentModal(props: ReportContentModalProps) {
   const [description, setDescription] = useState<string>("");
   const [mouseDownOnBackground, setMouseDownOnBackground] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async () => {
     try {
