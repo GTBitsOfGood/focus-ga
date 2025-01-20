@@ -4,7 +4,8 @@
 
 - Install [Node.js](https://nodejs.org/en/download/package-manager)
 - Install and enable [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) in VSCode
-- Install [MongoDB Community Server](https://www.mongodb.com/docs/manual/administration/install-community/) to host a local instance of MongoDB. It may also be helpful to download [MongoDB Compass](https://www.mongodb.com/try/download/compass#compass) to view the state of your database.
+- Install [MongoDB Community Server](https://www.mongodb.com/docs/manual/administration/install-community/) to host a local instance of MongoDB. 
+- Download the [MongoDB Compass](https://www.mongodb.com/try/download/compass#compass) UI to view the state of your database as well.
 - Get a locally running MongoDB instance.
   
   Install [Docker](https://docs.docker.com/engine/install/).
@@ -50,6 +51,9 @@
   ```
 
 - Navigate to http://localhost:3000/ to view the application.
+- Within your local deployment, you can login with credentials formatted like so:
+  - Username: \[string]@\[string].\[string]
+  - Password: \[string]
 
 ## Tech Stack
 
@@ -58,3 +62,50 @@
 - MongoDB (database)
 - Zod (type validation)
 - Salesforce (auth + account integration)
+
+## Troubleshooting
+
+This section is meant for resolving issues that have previously been encountered and fixed. If you encounter an issue that isn't on this list, please inform your EM.
+
+<br>
+
+### Issue: `MongoServerError[NotPrimaryOrSecondary]: node is not in primary or recovering state`
+
+**Resolution:**
+
+Run the following command in your MongoDB shell:
+
+```sh
+rs.reconfig({
+  _id: "rs0",
+  members: [
+    { _id: 0, host: "127.0.0.1:30001" }
+  ]
+}, { force: true });
+```
+<br>
+
+### Issue: No content in the website
+
+**Resolution:**
+
+Run the following POST command in Postman after connecting to the database:
+
+```sh
+http://localhost:3000/api/seeder
+```
+<br>
+
+### Issue: `Error: ECONNREFUSED`
+
+**Resolution:**
+
+Verify your .env file contains the correct MONGO_URI connection string, found in the product@bitsofgood.org [Bitwarden](https://bitwarden.com/), under the FOCUS tab .env file.
+
+<br>
+
+### Issue: `Error: Module not found: Can't resolve '...'`
+**Resolution:**
+
+cd to the the directory where you have cloned the FOCUS repository, and run `npm i`
+
