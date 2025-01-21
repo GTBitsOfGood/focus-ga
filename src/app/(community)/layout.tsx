@@ -73,8 +73,9 @@ function CommunityLayout({ children }: LayoutProps) {
 
   if (!user) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center h-screen flex-col">
         <Image src={focusLogo} alt="focus logo" width={200} priority={true} />
+        <p className="absolute bottom-16">Please refresh this page if it does not load in 10 seconds</p>
       </div>
     );
   }

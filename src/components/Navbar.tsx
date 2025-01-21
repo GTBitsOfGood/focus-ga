@@ -11,6 +11,8 @@ import { ProfileColors } from "@/utils/consts";
 import { useUser } from "@/contexts/UserContext";
 import { useSearch } from "@/contexts/SearchContext";
 import { useRouter } from "next/navigation";
+import { ShieldCheck } from "lucide-react";
+import { Tooltip } from 'react-tooltip'
 
 interface NavbarProps {
   openModal: () => void;
@@ -110,7 +112,11 @@ export default function Navbar({ openModal }: NavbarProps) {
           </div>
 
           <div className="p-2 text-center text-theme-gray">
-            <p className="text-lg">{user.lastName} Family</p>
+            <div className="flex flex-row justify-center">
+              <p className="text-lg">{user.lastName} Family</p> 
+              {user?.isAdmin && <ShieldCheck className="admin-icon w-5 h-5 text-white fill-theme-gray mt-1" />}
+              <Tooltip anchorSelect=".admin-icon" className="text-xs py-1">Admin User</Tooltip>
+            </div>
             <p className="text-sm">{user.email}</p>
             <div className="w-44 border-theme-medlight-gray border-t border-sm mt-[18px] mx-auto"/>
             <Link href={`/`} onClick={toggleDropdown} className="block mt-4 ml-4 py-1 hover:underline cursor-pointer transition-colors text-left">
