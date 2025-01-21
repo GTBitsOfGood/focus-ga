@@ -194,6 +194,7 @@ export async function POST(request: Request) {
           post: post._id,
           date: faker.date.between({ from: post.date, to: new Date(), }),
           content: faker.lorem.sentences(),
+          isFlagged: Math.random() < 0.5 ? true : false,
           isDeleted: false
         }
         

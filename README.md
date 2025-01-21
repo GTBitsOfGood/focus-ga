@@ -91,6 +91,9 @@ Run the following POST command in Postman after connecting to the database:
 ```sh
 http://localhost:3000/api/seeder
 ```
+
+NOTE: This can take up to a minute to process since there is a lot of data to be loaded onto the database. If there isn't automatically a 500 server-side error then you can just wait.
+
 <br>
 
 ### Issue: `Error: iron-session: Bad usage. Missing password.`

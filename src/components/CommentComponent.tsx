@@ -44,6 +44,7 @@ export default function CommentComponent(props: CommentComponentProps) {
     likes: initialLikes,
     liked: initialLiked,
     replyTo,
+    isFlagged :initialIsFlagged,
     isDeleted: initialIsDeleted
   } = comment;
 
@@ -53,6 +54,7 @@ export default function CommentComponent(props: CommentComponentProps) {
   const [liked, setLiked] = useState<boolean>(initialLiked);
   const [likeLoading, setLikeLoading] = useState<boolean>(false);
   const [isDeleted, setIsDeleted] = useState<boolean>(initialIsDeleted);
+  const [isFlagged, setIsFlagged] = useState<boolean>(initialIsFlagged);
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const [showReportModal, setShowReportModal] = useState<boolean>(false);

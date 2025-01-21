@@ -8,6 +8,7 @@ const CommentSchema = new Schema<Comment>({
     content: { type: String, required: true },
     likes: { type: Number, default: 0 },
     replyTo: { type: Schema.Types.ObjectId, ref: 'Comment', default: null },
+    isFlagged: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false }
 });
 
