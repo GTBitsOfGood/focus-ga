@@ -96,7 +96,7 @@ http://localhost:3000/api/seeder
 ```
 <br>
 
-### Issue: `Error: ECONNREFUSED`
+### Issue: `Error: iron-session: Bad usage. Missing password.`
 
 **Resolution:**
 
