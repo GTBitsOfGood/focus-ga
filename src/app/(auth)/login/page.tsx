@@ -15,8 +15,10 @@ export default function Login() {
   const [credentialsError, setCredentialsError] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
+    setIsLoading(true);
     try {
       const result = await loginUser(email, email);
       if (result.success) {
@@ -24,6 +26,8 @@ export default function Login() {
       }
     } catch (error) {
       setCredentialsError(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -105,7 +109,10 @@ export default function Login() {
 
           <button
             onClick={handleLogin}
-            className="rounded-sm h-[51px] mt-5 bg-theme-blue text-white w-[295px] hover:bg-opacity-80"
+            disabled={isLoading}
+            className={`rounded-sm h-[51px] mt-5 bg-theme-blue text-white w-[295px] ${
+              isLoading ? "bg-opacity-80" : "hover:bg-opacity-80"
+            }`}
           >
             Log in
           </button>

@@ -55,6 +55,8 @@
   - Username: \[string]@\[string].\[string]
   - Password: \[string]
 
+- For Salesforce authentication, we have a FOCUS account so please reach out to the EM if that is needed
+
 ## Tech Stack
 
 - Next.js (frontend + backend)
