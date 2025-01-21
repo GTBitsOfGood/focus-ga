@@ -78,12 +78,7 @@ This section is meant for resolving issues that have previously been encountered
 Run the following command in your MongoDB shell:
 
 ```sh
-rs.reconfig({
-  _id: "rs0",
-  members: [
-    { _id: 0, host: "127.0.0.1:30001" }
-  ]
-}, { force: true });
+rs.initiate()
 ```
 <br>
 
