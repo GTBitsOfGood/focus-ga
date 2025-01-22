@@ -106,7 +106,7 @@ export default function Navbar({ openModal }: NavbarProps) {
 
       {/* Dropdown Menu */}
       {menuIsOpen && (
-        <div className="absolute right-[10px] top-[110px] w-[218px] h-[307] bg-white z-10 border border-theme-medlight-gray rounded-lg" ref={dropdownRef}>
+        <div className="absolute right-[10px] top-[110px] w-[218px] bg-white z-10 border border-theme-medlight-gray rounded-lg" ref={dropdownRef}>
           <div className={`w-[64px] h-[64px] bg-${user.profileColor? user.profileColor: ProfileColors.ProfileDefault} rounded-full flex items-center justify-center m-auto mt-[21px]`}>
             <span className="text-black font-bold text-3xl select-none">{user.lastName.charAt(0).toUpperCase()}</span>
           </div>
@@ -128,6 +128,11 @@ export default function Navbar({ openModal }: NavbarProps) {
             <Link href="/profile/settings" onClick={toggleDropdown} className="block mt-2 ml-4 py-1 hover:underline cursor-pointer transition-colors text-left">
               Settings & Preferences
             </Link>
+            {user?.isAdmin && 
+              <Link href={`/admin-dashboard/admin-privileges`} onClick={toggleDropdown} className="font-bold block mt-2 ml-4 py-1 hover:underline cursor-pointer transition-colors text-left">
+                Admin Dashboard
+              </Link>
+            }
             <div className="w-44 border-theme-medlight-gray border-t border-sm mt-[18px] mx-auto"/>
             <div
               onClick={async () => {
