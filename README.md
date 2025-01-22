@@ -1,12 +1,11 @@
 # Focus GA
 
-## Development Setup
+## Development Setup (Try to Follow This in Order)
 
 - Install [Node.js](https://nodejs.org/en/download/package-manager)
 - Install and enable [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) in VSCode
 - Install [MongoDB Community Server](https://www.mongodb.com/docs/manual/administration/install-community/) to host a local instance of MongoDB. 
-- Download the [MongoDB Compass](https://www.mongodb.com/try/download/compass#compass) UI to view the state of your database as well.
-- Get a locally running MongoDB instance.
+- Download the [MongoDB Compass](https://www.mongodb.com/try/download/compass#compass) UI to view the state of your database.
   
   Install [Docker](https://docs.docker.com/engine/install/).
   
@@ -25,7 +24,7 @@
 
   Windows Users: If you come across this error `exec ./scripts/rs-init.sh: no such file or directory` or `exec ./scripts/env-init.sh: no such file or directory` when running the docker-compose command, please follow this [Stackoverflow thread](https://stackoverflow.com/questions/40452508/docker-error-on-an-entrypoint-script-no-such-file-or-directory) to fix it.
 
-
+- Clone the Repository through the HTTPS link into a directory on your local machine
 
 - In the root directory of the project, run:
 
@@ -43,6 +42,8 @@
   You should be prompted for a master password. Ask your Engineering leadership to continue. Once the password has been verified, your `.env` file should have been created automatically for you.
 
   If you are unable to use the commands to retrieve the `.env` file, you can download or visit [Bitwarden](https://bitwarden.com/) and login using `product@bitsofgood.org` and the master password. The `.env` file will be available within the vault.
+
+- Get a locally running MongoDB instance by copying the MongoDB URI string value obtained from the bitwarden. Then, click "Add a new collection" and input the link in the URI field.
 
 - To start the Next.js dev server, run:
 
@@ -67,7 +68,7 @@
 
 ## Troubleshooting
 
-This section is meant for resolving issues that have previously been encountered and fixed. If you encounter an issue that isn't on this list, please inform your EM.
+> This section is meant for resolving issues that have previously been encountered and fixed. If you encounter an issue that isn't on this list, please inform your EM.
 
 <br>
 
@@ -105,7 +106,15 @@ Verify your .env file contains the correct MONGO_URI connection string, found in
 <br>
 
 ### Issue: `Error: Module not found: Can't resolve '...'`
+
 **Resolution:**
 
-cd to the the directory where you have cloned the FOCUS repository, and run `npm i`
+`cd` to the the directory where you have cloned the FOCUS repository, and run `npm i`. If this does not work, you may have used an Object/function that belongs to a library that you haven't imported or installed yet.
 
+<br>
+
+### Issue: Website not reflecting frontend/backend change
+
+**Resolution:**
+
+Stop your localhost with Ctrl + C, then rerun `npm i` and `npm run dev`.
