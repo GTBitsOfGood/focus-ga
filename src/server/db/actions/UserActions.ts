@@ -4,9 +4,6 @@ import { editUserSchema, PopulatedUser, User, UserInput, userSchema } from "@/ut
 import UserModel from "../models/UserModel";
 import dbConnect from "../dbConnect";
 import { revalidatePath } from "next/cache";
-import { getIronSession } from "iron-session";
-import { SessionData, sessionOptions } from "@/lib/session";
-import { cookies } from "next/headers";
 
 /**
  * Creates a new user in the database.
