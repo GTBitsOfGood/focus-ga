@@ -1,44 +1,42 @@
-// netlify/functions/hello.mts
 import { Handler } from '@netlify/functions';
 import { Config } from '@netlify/functions';
 import juno from "juno-sdk";
 import NotificationModel from "../../src/server/db/models/NotificationModel";
+import { AppNotification } from "../../src/utils/types/notification"
+import { Post } from "../../src/utils/types/post";
 import dbConnect from "../../src/server/db/dbConnect";
 import CommentModel from "../../src/server/db/models/CommentModel";
 import PostModel from "../../src/server/db/models/PostModel";
 import UserModel from "../../src/server/db/models/UserModel";
 import { deleteNotification } from "../../src/server/db/actions/NotificationActions";
-import { PopulatedComment } from "../../src/utils/types/comment";
+import nunjucks from 'nunjucks';
+import { User } from '../../src/utils/types/user';
 
-async function generateEmailContents(commentIds: string[]) {
-  const postsToComments: { [postId: string]: PopulatedComment[] } = {};
-  let content = "";
+nunjucks.configure('email/templates', { autoescape: true });
+
+async function generateEmailContents(user: User[], commentIds: string[]) {
+  const posts: Post[] = []
+  const postToComments = {};
   const comments = await CommentModel.find({ _id: { $in: commentIds } }).populate('author');
   for (const comment of comments) {
     const postId = comment.post._id.toString();
-    if (!postsToComments[postId]) {
-      postsToComments[postId] = [];
+    if (!postToComments[postId]) {
+      postToComments[postId] = [];
+      
+      const post = await PostModel.findById(postId);
+      posts.push(post);
     }
-    postsToComments[postId].push(comment);
+    postToComments[postId].push(comment);
   }
-  for (const postId in postsToComments) {
-    const post = await PostModel.findById(postId); // Fetch the post title
-    if (post) {
-      content += `<strong>${post.title}</strong><br>`;
-      const postComments = postsToComments[postId];
-      for (const comment of postComments) {
-        content += `${comment.author?.lastName} family commented: ${comment.content}<br>`;
-      }
-      content += "<br><br>";
-    }
-  }
+
+  const content = nunjucks.render('comment_notification.html', { user, posts, postToComments });
   return {
     type: "text/html",
     value: content,
   };
 }
 
-const handler: Handler = async (event, context) => {
+const handler: Handler = async () => {
   try {
     juno.init({
       apiKey: process.env.JUNO_API_KEY as string,
@@ -46,8 +44,8 @@ const handler: Handler = async (event, context) => {
     });
 
     await dbConnect();
-    const notifications = await NotificationModel.find({});
-    const usersToNotify: { [userId: string]: string[] } = {};
+    const notifications: AppNotification[] = await NotificationModel.find({});
+    const usersToNotify = {};
 
     for (const notification of notifications) {
       const userId = notification.author.toString();
@@ -68,12 +66,12 @@ const handler: Handler = async (event, context) => {
           }
         }
       } else {
-        const emailContents = await generateEmailContents(usersToNotify[userId]);
-        const response = await juno.email.sendEmail({
+        const emailContents = await generateEmailContents(user, usersToNotify[userId]);
+        await juno.email.sendEmail({
           recipients: [
             {
-              email: `{user.email}`,
-              name: `{user.lastName} Family`,
+              email: `${user.email}`,
+              name: `${user.lastName} Family`,
             },
           ],
           bcc: [],

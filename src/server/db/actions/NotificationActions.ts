@@ -19,18 +19,18 @@ export async function createNotification(notification: NotificationInput): Promi
 }
 
 export async function deleteNotification(comment_id: string): Promise<void> {
-    try {
-        await dbConnect();
-        if (!mongoose.Types.ObjectId.isValid(comment_id)) {
-          throw new Error("Invalid comment ID");
-        }
-
-        const result = await NotificationModel.findOneAndDelete({ comment: comment_id });
-
-        if (!result) {
-          throw new Error("Notification not found");
-        }
-    } catch (e) {
-      throw new Error("Failed to delete notification");
+  try {
+    await dbConnect();
+    if (!mongoose.Types.ObjectId.isValid(comment_id)) {
+      throw new Error("Invalid comment ID");
     }
+
+    const result = await NotificationModel.findOneAndDelete({ comment: comment_id });
+
+    if (!result) {
+      throw new Error("Notification not found");
+    }
+  } catch (e) {
+    throw new Error("Failed to delete notification");
+  }
 }

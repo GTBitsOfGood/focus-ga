@@ -1,0 +1,21 @@
+<!-- TODO: finish design -->
+
+<p>Hi {{ user.lastName }} Family,</p>
+{% set totalComments = 0 %}
+{% for post in posts %}
+  {% set postComments = postToComments[post._id.toString()] %}
+  {% set totalComments = totalComments + postComments|length %}
+{% endfor %}
+{% if totalComments == 1 %}
+  <p>You have received 1 new reply to your posts.</p>
+{% else %}
+  <p>You have received {{ totalComments }} new replies to your posts.</p>
+{% endif %}
+
+{% for post in posts %}
+  {% set postComments = postToComments[post._id.toString()] %}
+  <h1>{{ post.title }}</h1>
+  {% for comment in postComments %}
+    <p>{{ comment.author.lastName }} family commented: {{ comment.content }}</p>
+  {% endfor %}
+{% endfor %}
