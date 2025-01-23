@@ -7,12 +7,15 @@ import { PostDeletionTimeline, ProfileColors } from "@/utils/consts";
 export const userSchema = z.object({
   username: z.string(),
   isAdmin: z.boolean().default(false),
+  isBanned: z.boolean().default(false),
   lastName: z.string(),
   email: z.string().email(),
   childAge: z.number().min(0),
   childDisabilities: z.string().array().transform(ids => ids.map(id => new Types.ObjectId(id))),
   city: z.string(),
   bio: z.string().optional(),
+
+  salesforce_uid: z.string().optional(),
 
   notificationPreference: z.boolean().default(true), // true = "Email about post replies", false = "Never email"
   defaultDisabilityTags: z.string().array().transform(ids => ids.map(id => new Types.ObjectId(id))).default([]),

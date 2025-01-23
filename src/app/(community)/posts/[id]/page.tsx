@@ -2,7 +2,6 @@ import PostCommentsContainer from "@/components/PostPage/PostCommentsContainer";
 import { getAuthenticatedUser } from "@/server/db/actions/AuthActions";
 import { getPostComments } from "@/server/db/actions/CommentActions";
 import { getPopulatedPost } from "@/server/db/actions/PostActions";
-import { User } from "@/utils/types/user";
 import { notFound } from 'next/navigation';
 
 type PostPageProps = {

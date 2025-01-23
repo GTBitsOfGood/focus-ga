@@ -73,11 +73,19 @@ function CommunityLayout({ children }: LayoutProps) {
 
   if (!user) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center h-screen flex-col">
         <Image src={focusLogo} alt="focus logo" width={200} priority={true} />
+        <p className="absolute bottom-16">Please refresh this page if it does not load in 10 seconds</p>
       </div>
     );
   }
+
+  const bannedView = (
+    <div className="h-[calc(100vh-250px)] flex items-center justify-center text-center text-2xl text-theme-gray font-bold">
+      This account has been banned from viewing any posts.<br/>
+      Please contact us if you believe this is a mistake.
+    </div>
+  );
 
   return (
     <>
@@ -91,7 +99,7 @@ function CommunityLayout({ children }: LayoutProps) {
         tags={user.defaultDisabilityTags}
       />
       <div className="mx-32 sm:mx-0 mt-[100px] p-4">
-        {children}
+        {user.isBanned ? bannedView : children}
         <Toaster />
       </div>
       <ProgressBar height="3px" color="#475CC6" shallowRouting options={{ showSpinner: false }} />

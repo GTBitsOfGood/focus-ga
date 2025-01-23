@@ -1,9 +1,10 @@
 'use server'
 
-import { reportSchema, editReportSchema, Report, ReportInput } from "@/utils/types/report";
+import { reportSchema, editReportSchema, Report, ReportInput, PopulatedReport } from "@/utils/types/report";
 import dbConnect from "../dbConnect";
 import ReportModel from "../models/ReportModel";
 import mongoose from "mongoose";
+import UserModel from "../models/UserModel";
 
 /**
  * Retrieves all reports from the database, sorted by date in descending order.
@@ -18,6 +19,29 @@ export async function getReports(): Promise<Report[]> {
   } catch (error) {
     console.error("Failed to retrieve reports:", error);
     throw new Error("Failed to retrieve reports");
+  }
+}
+
+/**
+ * Fetches a list of reports associated with a specific content ID.
+ * @param contentId The unique identifier of the content for which reports are being retrieved.
+ * @returns A promise that resolves to an array of reports associated with the provided content ID.
+ */
+export async function getReportsByContentId(contentId: string): Promise<PopulatedReport[]> {
+  if (!mongoose.Types.ObjectId.isValid(contentId)) {
+    throw new Error("Invalid contentId");
+  }
+
+  try {
+    await dbConnect();
+    const reports = await ReportModel
+      .find({ reportedContent: contentId })
+      .populate({ path: 'sourceUser', model: UserModel })
+      .sort({ date: 'desc' });
+    return reports.map(report => report.toObject())
+  } catch (error) {
+    console.error(`Failed to retrieve reports for contentId ${contentId}:`, error);
+    throw new Error(`Failed to retrieve reports for contentId ${contentId}`);
   }
 }
 

@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { Disability } from "@/utils/types/disability";
 import { MAX_POST_DISABILITY_TAGS, MAX_FILTER_DISABILITY_TAGS } from "@/utils/consts";
 import DropdownWithDisplay from '@/components/DropdownWithDisplay';
-import { editUser, signOut } from "@/server/db/actions/UserActions";
+import { editUser } from "@/server/db/actions/UserActions";
+import { signOut } from '@/server/db/actions/AuthActions';
 import { useRouter } from 'next/navigation';
 import { PostDeletionTimeline } from "@/utils/consts";
 import { useUser } from '@/contexts/UserContext';
@@ -29,6 +30,7 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
   const [defaultDisabilityTags, setDefaultDisabilityTags] = useState<Disability[]>(user.defaultDisabilityTags);
   const [defaultDisabilityFilters, setDefaultDisabilityFilters] = useState<Disability[]>(user.defaultDisabilityFilters);
   const [postDeletionTimeline, setPostDeletionTimeline] = useState(user.postDeletionTimeline);
+  const [isAdmin, setIsAdmin] = useState(user.isAdmin);
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -42,7 +44,8 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
           notificationPreference: notificationPreference,
           defaultDisabilityTags: defaultDisabilityTags.map(disability => disability._id.toString()),
           defaultDisabilityFilters: defaultDisabilityFilters.map(disability => disability._id.toString()),
-          postDeletionTimeline: postDeletionTimeline
+          postDeletionTimeline: postDeletionTimeline,
+          isAdmin,
         });
         const newUser = { ...user, notificationPreference, defaultDisabilityTags, defaultDisabilityFilters, postDeletionTimeline };
         setUser(newUser);
@@ -61,7 +64,7 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
     };
 
     handleUpdateUser();
-  }, [notificationPreference, defaultDisabilityTags, defaultDisabilityFilters, postDeletionTimeline])
+  }, [notificationPreference, defaultDisabilityTags, defaultDisabilityFilters, postDeletionTimeline, isAdmin])
 
   return (
     <div>
@@ -149,14 +152,45 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
             </label>
           ))}
         </div>
-
+        {/* DEV PURPOSES: Admin status change */}
+      <div>
+          <label htmlFor="title" className="block text-m font-bold text-black">**Dev** Set Admin Status</label>
+          <label className="block mt-2">
+            <input
+              type="radio"
+              name="isAdmin"
+              value="false"
+              checked={isAdmin === false}
+              onChange={() => {
+                setIsAdmin(false)
+                window.location.reload()
+              }}
+              className="mr-2"
+            />
+            Member
+          </label>    
+          <label className="block mt-2">
+            <input
+              type="radio"
+              name="isAdmin"
+              value="true"
+              checked={isAdmin === true}
+              onChange={() => {
+                setIsAdmin(true)
+                window.location.reload()
+              }}
+              className="mr-2"
+            />
+            Admin
+          </label>
+        </div>
         <div>
           <button
             onClick={async () => {
               await signOut();
-              router.push('/login');
+              router.refresh();
             }}
-            className="w-auto px-4 py-2 text-theme-blue rounded-lg border border-theme-blue"
+            className="w-auto px-4 py-2 mb-8 text-theme-blue rounded-md border border-theme-blue hover:bg-blue-100 transition"
           >
             Sign out
           </button>

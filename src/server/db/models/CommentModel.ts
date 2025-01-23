@@ -10,6 +10,7 @@ const CommentSchema = new Schema<Comment>({
   content: { type: String, required: true },
   likes: { type: Number, default: 0 },
   replyTo: { type: Schema.Types.ObjectId, ref: 'Comment', default: null },
+  isFlagged: { type: Boolean, default: false },
   isDeleted: { type: Boolean, default: false }
 });
 
@@ -17,7 +18,6 @@ CommentSchema.post("save", async function (comment) {
   try {
     const post = await PostModel.findById(comment.post).populate("author");
     if (post?.author && post.author.notificationPreference && post.author._id.toString() != comment.author.toString()) {
-      // Create a notification
       await createNotification({
         author: post.author._id.toString(),
         post: post._id.toString(),

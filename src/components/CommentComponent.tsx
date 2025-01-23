@@ -1,15 +1,20 @@
 import { getDateDifferenceString } from "@/utils/dateUtils";
 import { PopulatedComment } from "@/utils/types/comment";
-import { MessageSquare, Ellipsis, Heart } from "lucide-react";
+import { MessageSquare, Ellipsis, Heart, ShieldCheck, OctagonAlert, ChevronRight } from "lucide-react";
 import MarkdownRenderer from "./MarkdownRenderer";
 import MarkdownIt from "markdown-it";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
-import Link from "next/link";
-import { ProfileColors } from "@/utils/consts";
 import { PopulatedUser, User } from "@/utils/types/user";
 import { cn } from "@/lib/utils";
+import { useUser } from "@/contexts/UserContext";
+import { createReport, getReportsByContentId } from "@/server/db/actions/ReportActions";
+import { ContentType, ReportReason, PopulatedReport } from "@/utils/types/report";
+import ReportContentModal from "./ReportContentModal";
+import ContentReportsModal from "./ContentReportsModal";
+import { useToast } from "@/hooks/use-toast";
+import UserIcon from "./UserIconComponent";
 
 type CommentComponentProps = {
   className?: string;
@@ -39,6 +44,7 @@ export default function CommentComponent(props: CommentComponentProps) {
     likes: initialLikes,
     liked: initialLiked,
     replyTo,
+    isFlagged :initialIsFlagged,
     isDeleted: initialIsDeleted
   } = comment;
 
@@ -48,8 +54,27 @@ export default function CommentComponent(props: CommentComponentProps) {
   const [liked, setLiked] = useState<boolean>(initialLiked);
   const [likeLoading, setLikeLoading] = useState<boolean>(false);
   const [isDeleted, setIsDeleted] = useState<boolean>(initialIsDeleted);
+  const [isFlagged, setIsFlagged] = useState<boolean>(initialIsFlagged);
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
+  const [showReportModal, setShowReportModal] = useState<boolean>(false);
+  const [reports, setReports] = useState<PopulatedReport[]>([]);
+  const [showContentReports, setShowContentReports] = useState(false);
+  const { toast } = useToast();
+  const { user } = useUser();
+
+  const fetchReports = async () => {
+    try {
+      const reportsData = await getReportsByContentId(comment._id);
+      setReports(reportsData);
+    } catch (error) {
+      console.error('Error fetching reports:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchReports();
+  }, []);
 
   async function handleLikeClick() {
     if (likeLoading) return;
@@ -91,6 +116,25 @@ export default function CommentComponent(props: CommentComponentProps) {
     }
   }
 
+  async function handleReportClick(reason: string, description: string) {
+    if (author && user) {
+      const reportData = {
+        reason: reason as ReportReason,
+        description: description,
+        reportedUser: author?._id,
+        sourceUser: user?._id,
+        reportedContent: comment._id,
+        contentType: ContentType.COMMENT,
+      }
+      await createReport(reportData);
+      toast({
+        title: "Report Submitted",
+        description: "Thank you for reporting this content. Our team will review it shortly.",
+      });
+      fetchReports();
+    }
+  }
+
   const bottomRow = [
     {
       label: likes.toString(),
@@ -108,50 +152,66 @@ export default function CommentComponent(props: CommentComponentProps) {
   const deletedText = "This comment has been deleted.";
 
   return (
-    <div className="flex gap-2.5">
-      <Link href={`/family/${author?._id}`}>
-        <span className={cn("w-6 h-6 rounded-full inline-block", author?.profileColor ? `bg-${author.profileColor}` : `bg-${ProfileColors.ProfileDefault}`)} />
-      </Link>
-      <div className={`flex-grow flex flex-col gap-2 text-theme-gray ${className}`}>
+    <div>
+      <div className={cn("flex-grow flex flex-col gap-2 text-theme-gray", className)}>
         <div className="flex items-center justify-between">
-          {isDeleted ? deletedText : <Link className="font-bold text-black" href={`/family/${author?._id}`}>
-            {author ? `${author.lastName} Family` : 'Deleted User'}
-          </Link>}
+          {isDeleted ? (
+          <div className="flex gap-2">
+            {profilePicture} {deletedText}
+          </div>
+          ) : (
+          <UserIcon user={author} clickable={false} boldText />
+          )}
           <p className="text-sm" suppressHydrationWarning>{getDateDifferenceString(new Date(), date)}</p>
         </div>
-        {!isDeleted && <>
-          <MarkdownRenderer
-            className="leading-5"
-            markdown={content}
-            parse={markdown => mdParser.render(markdown)}
-          />
-          <div className="flex items-center pt-2 gap-6 text-sm">
-            {bottomRow.map((item, index) => (
-              <div key={index} className="flex items-center gap-1.5 px-1">
-                <button disabled={!item.onClick} onClick={item.onClick}>
-                  <div className="w-5 h-5 [&>*]:w-full [&>*]:h-full">
-                    {item.icon}
-                  </div>
-                </button>
-                <button disabled={!item.onClick} onClick={item.onClick}>
-                  {item.label}
-                </button>
+        <div className="flex flex-col pl-8 gap-2">
+          {!isDeleted && <>
+            <MarkdownRenderer
+              className="leading-5"
+              markdown={content}
+              parse={markdown => mdParser.render(markdown)}
+            />
+            <div className="flex items-center pt-2 gap-6 text-sm">
+              {bottomRow.map((item, index) => (
+                <div key={index} className="flex items-center gap-1.5">
+                  <button disabled={!item.onClick} onClick={item.onClick}>
+                <div className="w-5 h-5 [&>*]:w-full [&>*]:h-full">
+                  {item.icon}
+                </div>
+                  </button>
+                  <button disabled={!item.onClick} onClick={item.onClick}>
+                {item.label}
+                  </button>
+                </div>
+              ))}
+              <div className="flex items-center gap-1.5 px-1">
+                {onDeleteClick && (
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger>
+                      <Ellipsis className="w-5 h-5" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="bottom" align="start">
+                      <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
-            ))}
-            <div className="flex items-center gap-1.5 px-1">
-              <DropdownMenu modal={false}>
-                <DropdownMenuTrigger>
-                  <Ellipsis className="w-5 h-5" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent side="bottom" align="start">
-                  {onDeleteClick ? <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>Delete</DropdownMenuItem> : undefined}
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
-          </div>
-        </>}
-        {nestedContent}
+          </>}
+          {nestedContent}
+        </div>
       </div>
+      {showReportModal && <ReportContentModal
+        isOpen={showReportModal}
+        closeModal={() => setShowReportModal(false)}
+        onSubmit={handleReportClick}
+      />}
+      {showContentReports && <ContentReportsModal
+        isOpen={showContentReports}
+        reports={reports}
+        closeModal={() => setShowContentReports(false)}
+        onDeleteContent={handleDeleteClick}
+      />}
       <AlertDialog open={showDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>

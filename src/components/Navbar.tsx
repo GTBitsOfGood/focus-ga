@@ -6,11 +6,13 @@ import Image from "next/image";
 import { SquarePen, Search, ChevronDown, ChevronUp, X } from "lucide-react";
 import Link from "next/link";
 import useClickOff from "@/hooks/useClickOff";
-import { signOut } from "@/server/db/actions/UserActions";
+import { signOut } from "@/server/db/actions/AuthActions";
 import { ProfileColors } from "@/utils/consts";
 import { useUser } from "@/contexts/UserContext";
 import { useSearch } from "@/contexts/SearchContext";
 import { useRouter } from "next/navigation";
+import { ShieldCheck } from "lucide-react";
+import { Tooltip } from 'react-tooltip'
 
 interface NavbarProps {
   openModal: () => void;
@@ -21,7 +23,7 @@ export default function Navbar({ openModal }: NavbarProps) {
   const [inputValue, setInputValue] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dropdownButtonRef = useRef<HTMLDivElement>(null);
-  const { user } = useUser()
+  const { user, setUser } = useUser()
   const { searchTerm, setSearchTerm } = useSearch();
   const router = useRouter();
 
@@ -48,12 +50,12 @@ export default function Navbar({ openModal }: NavbarProps) {
   }
 
   return (
-    <div className="w-full h-[100px] bg-white flex items-center justify-between fixed top-0 z-50 border-b border-gray-300">
+    <div className="w-full h-[100px] bg-white flex items-center justify-between fixed top-0 z-50 border-b border-gray-300 md:gap-12 gap-4 pl-8">
       {/* Logo plus search bar*/}
       <Link href="/" className="cursor-pointer">
-        <Image src={focusLogo} width={121} height={58} alt="focus-logo" className="mx-12 mb-2" />
+        <Image src={focusLogo} alt="focus-logo" className="mb-2 min-w-24 w-24" />
       </Link>
-      <div className="relative flex-grow mx-20">
+      <div className="relative flex-grow">
         <input
           type="text"
           placeholder="Search for a post"
@@ -76,16 +78,16 @@ export default function Navbar({ openModal }: NavbarProps) {
       </div>
 
       {/* Create Post*/}
-      <button
-        className="bg-theme-blue text-base py-2 px-[18px] mr-10 text-white font-semibold rounded-[12px] gap-2 flex flex-row justify-center items-center transition hover:opacity-90 whitespace-nowrap"
+      {!user.isBanned && <button
+        className="bg-theme-blue text-base py-2 px-4 text-white font-semibold rounded-[12px] gap-2 flex flex-row justify-center items-center transition hover:opacity-90 whitespace-nowrap"
         onClick={() => openModal()}
       >
         <SquarePen className="w-6 h-6" color="#ffffff" /> Create Post
-      </button>
+      </button>}
 
       {/* Profile Picture menu button */}
       <div
-        className="flex items-center justify-center mx-6 mr-2 w-[88px] h-full relative group hover:bg-gray-100 transition-colors duration-200 cursor-pointer m-1 pr-16 pl-12"
+        className="flex items-center justify-center w-[88px] h-full relative group hover:bg-gray-100 transition-colors duration-200 cursor-pointer pr-16 pl-12"
         onClick={toggleDropdown}
         ref={dropdownButtonRef}
       >
@@ -104,13 +106,17 @@ export default function Navbar({ openModal }: NavbarProps) {
 
       {/* Dropdown Menu */}
       {menuIsOpen && (
-        <div className="absolute right-[10px] top-[110px] w-[218px] h-[307] bg-white z-10 border border-theme-medlight-gray rounded-lg" ref={dropdownRef}>
+        <div className="absolute right-[10px] top-[110px] w-[218px] bg-white z-10 border border-theme-medlight-gray rounded-lg" ref={dropdownRef}>
           <div className={`w-[64px] h-[64px] bg-${user.profileColor? user.profileColor: ProfileColors.ProfileDefault} rounded-full flex items-center justify-center m-auto mt-[21px]`}>
             <span className="text-black font-bold text-3xl select-none">{user.lastName.charAt(0).toUpperCase()}</span>
           </div>
 
           <div className="p-2 text-center text-theme-gray">
-            <p className="text-lg">{user.lastName} Family</p>
+            <div className="flex flex-row justify-center">
+              <p className="text-lg">{user.lastName} Family</p> 
+              {user?.isAdmin && <ShieldCheck className="admin-icon w-5 h-5 text-white fill-theme-gray mt-1" />}
+              <Tooltip anchorSelect=".admin-icon" className="text-xs py-1">Admin User</Tooltip>
+            </div>
             <p className="text-sm">{user.email}</p>
             <div className="w-44 border-theme-medlight-gray border-t border-sm mt-[18px] mx-auto"/>
             <Link href={`/`} onClick={toggleDropdown} className="block mt-4 ml-4 py-1 hover:underline cursor-pointer transition-colors text-left">
@@ -122,16 +128,22 @@ export default function Navbar({ openModal }: NavbarProps) {
             <Link href="/profile/settings" onClick={toggleDropdown} className="block mt-2 ml-4 py-1 hover:underline cursor-pointer transition-colors text-left">
               Settings & Preferences
             </Link>
+            {user?.isAdmin && 
+              <Link href={`/admin-dashboard/admin-privileges`} onClick={toggleDropdown} className="font-bold block mt-2 ml-4 py-1 hover:underline cursor-pointer transition-colors text-left">
+                Admin Dashboard
+              </Link>
+            }
             <div className="w-44 border-theme-medlight-gray border-t border-sm mt-[18px] mx-auto"/>
-            <Link
-              href="/login"
+            <div
               onClick={async () => {
+                setUser(null);
                 await signOut();
+                router.refresh();
               }} 
               className="text-theme-blue mt-2 mb-2 block ml-4 py-1 hover:underline cursor-pointer transition-colors text-left"
             >
               Sign out
-            </Link>
+            </div>
           </div>
         </div>
       )}

@@ -16,15 +16,69 @@ import { createReport } from '@/server/db/actions/ReportActions';
 import { ReportReason, ContentType } from '@/utils/types/report';
 import { CommentInput } from '@/utils/types/comment';
 import { GEORGIA_CITIES } from "@/utils/cities";
+import { ProfileColors } from "@/utils/consts";
 
-const DISABILITIES = ["Cerebral Palsy", "Autism Spectrum Disorder", "Down Syndrome", "Spina Bifida", "Muscular Dystrophy", "Rett Syndrome", "Fragile X Syndrome", "Epilepsy", "ADHD", "Spinal Muscular Atrophy"];
-const NUM_USERS = 10;
+const DISABILITIES = [
+  "ADHD",
+  "Anxiety Disorder",
+  "Arthritis",
+  "Autism Spectrum Disorder",
+  "Bipolar Disorder",
+  "Cerebral Palsy",
+  "Chronic Fatigue Syndrome",
+  "Chronic Pain Syndrome",
+  "Crohn's Disease",
+  "Depression",
+  "Dyslexia",
+  "Epilepsy",
+  "Fibromyalgia",
+  "Hearing Impairment",
+  "Intellectual Disability",
+  "Learning Disabilities",
+  "Multiple Sclerosis",
+  "Muscular Dystrophy",
+  "Obsessive-Compulsive Disorder",
+  "Parkinson's Disease",
+  "Post-Traumatic Stress Disorder",
+  "Rett Syndrome",
+  "Schizophrenia",
+  "Sickle Cell Disease",
+  "Spina Bifida",
+  "Spinal Muscular Atrophy",
+  "Stroke",
+  "Tourette Syndrome",
+  "Traumatic Brain Injury",
+  "Ulcerative Colitis",
+  "Visual Impairment",
+  "Alzheimer's Disease",
+  "Amputation/Limb Loss",
+  "Asthma",
+  "Cancer (various types)",
+  "Diabetes (Type 1 and 2)",
+  "Heart Disease",
+  "High Blood Pressure",
+  "Hyperlexia",
+  "Irritable Bowel Syndrome (IBS)",
+  "Obesity",
+  "Osteoarthritis",
+  "Post-Concussion Syndrome",
+  "Seizure Disorders",
+  "Sleep Apnea",
+  "Thyroid Disorders",
+  "Vertigo",
+  "Autism",
+  "Cystic Fibrosis",
+  "Down Syndrome",
+  "Fragile X Syndrome"
+];
+const NUM_USERS = 100;
 const MAX_CHILD_AGE = 20;
-const MAX_POSTS_PER_USER = 5;
-const MAX_COMMENTS_PER_POST = 5;
-const MAX_LIKED_SAVED_POSTS_PER_USER = 5;
-const MAX_LIKED_COMMENTS_PER_USER = 5;
-const NUM_REPORTS = 10;
+const MAX_POSTS_PER_USER = 10;
+const MAX_USER_DISABILITIES = 3;
+const MAX_COMMENTS_PER_POST = 15;
+const MAX_LIKED_SAVED_POSTS_PER_USER = 20;
+const MAX_LIKED_COMMENTS_PER_USER = 20;
+const NUM_REPORTS = 20;
 const NUM_REPORT_REASONS = 4;
 const NUM_CONTENT_TYPES = 3;
 const MAX_POST_TAGS = 2;
@@ -55,12 +109,12 @@ export async function POST(request: Request) {
     // create users
     const users = [];
     for (let i = 0; i < NUM_USERS; i++) {
-      const randomDisabilityCount = Math.floor(Math.random() * DISABILITIES.length) + 1;
+      const randomDisabilityCount = Math.floor(Math.random() * MAX_USER_DISABILITIES) + 1;
       const availableDisabilities = [...disabilityIds];
       const selectedDisabilities: string[] = [];
 
       for (let i = 0; i < randomDisabilityCount; i++) {
-        const randomIndex = Math.floor(Math.random() * availableDisabilities.length);
+        const randomIndex = Math.floor(Math.random() * 3);
         selectedDisabilities.push(availableDisabilities[randomIndex]);
         availableDisabilities.splice(randomIndex, 1);
       }
@@ -70,15 +124,23 @@ export async function POST(request: Request) {
       const username = faker.internet.userName({ firstName: firstName, lastName: lastName })
       const email = faker.internet.email({ firstName: firstName, lastName: lastName });
       const cityIndex = Math.floor(Math.random() * GEORGIA_CITIES.length);
-
+      const getRandomProfileColor = () => {
+        const colors = Object.values(ProfileColors);
+        return colors[Math.floor(Math.random() * colors.length)];
+      };
+      
       const userInfo = {
         username: username,
+        isAdmin: false,
+        isBanned: false,
         lastName: lastName,
         email: email,
         childAge: Math.floor(Math.random() * (MAX_CHILD_AGE)),
         childDisabilities: selectedDisabilities,
         city: GEORGIA_CITIES[cityIndex],
         bio: faker.lorem.paragraph({ min: 1, max: 6 }),
+        profileColor: getRandomProfileColor(),
+        salesforce_uid: email,
       }
 
       users.push((await createUser(userInfo)));
@@ -108,7 +170,7 @@ export async function POST(request: Request) {
           title: faker.word.words({count: { min: 3, max: 10 }}),
           content: faker.lorem.paragraph({ min: 3, max: 10 }),
           tags: selectedDisabilities,
-          isPinned: Math.random() < 0.5 ? true : false,
+          isPinned: false,
           isPrivate: Math.random() < 0.5 ? true : false,
           isFlagged: Math.random() < 0.5 ? true : false,
           isDeleted: false
@@ -132,6 +194,7 @@ export async function POST(request: Request) {
           post: post._id,
           date: faker.date.between({ from: post.date, to: new Date(), }),
           content: faker.lorem.sentences(),
+          isFlagged: Math.random() < 0.5 ? true : false,
           isDeleted: false
         }
         
@@ -222,7 +285,6 @@ export async function POST(request: Request) {
       await createReport(reportInfo);
     }
     console.log("Successfully created reports");
-
   } catch (e) {
     console.log(e);
     throw e;
