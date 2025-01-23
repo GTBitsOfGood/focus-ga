@@ -10,7 +10,7 @@ const tabs = [
   { name: "Banned Users", path: "banned-users" },
   { name: "Reported Posts", path: "reported-posts" },
   { name: "Disabilities List", path: "disabilities-list" },
-  { name: "Profanity Filter", path: "profanity-filter" },
+  { name: "Content Flagging", path: "content-flagging" },
 ];
 
 // Try not to change this file or it may cause merge conflicts
