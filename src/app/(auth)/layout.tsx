@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "@/app/globals.css";
 import { ReactNode } from "react";
-import { FOCUS_FONT } from "@/utils/consts";
+import { FOCUS_FONT } from "@/utils/styles";
 
 export const metadata: Metadata = {
   title: "Focus Community Platform",

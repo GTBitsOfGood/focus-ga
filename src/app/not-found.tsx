@@ -1,7 +1,7 @@
 import ErrorPageButtons from "@/components/ErrorPageButtons";
 import Image from 'next/image';
 import focusLogo from "../../public/focus-logo.png";
-import { FOCUS_FONT } from "@/utils/consts";
+import { FOCUS_FONT } from "@/utils/styles";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
