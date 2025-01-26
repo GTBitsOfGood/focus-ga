@@ -15,10 +15,13 @@ export default function Tag(props: TagProps) {
       props.className,
       props.isClickable ? "pl-4 pr-2 cursor-pointer" : "px-4"
     )}
-      onClick={props.isClickable ? props.onClick : undefined}
-      >
+  >
       {props.text}
-      {props.isClickable && <X className="w-3 h-3 ml-2" />}
+      {props.isClickable && (<X 
+        className="w-3 h-3 ml-2" 
+        onClick={props.onClick}
+        />
+    )}
     </div>
   );
 }
