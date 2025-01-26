@@ -81,3 +81,28 @@ export async function editDisability(id: string, updated: Partial<DisabilityInpu
     throw new Error(`Failed to update disability ${id}`);
   }
 }
+
+/**
+ * Deletes a disability record from the database.
+ * @param id - The ID of the disability to delete.
+ * @throws Will throw an error if the deletion fails or if the disability is not found.
+ * @returns The deleted disability object.
+ */
+export async function deleteDisability(id: string): Promise<Disability> {
+  console.log("Received ID:", id); 
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new Error("Invalid disability ID");
+  }
+
+  try {
+    await dbConnect();
+    const deletedDisability = await DisabilityModel.findByIdAndDelete(id);
+    if (!deletedDisability) {
+      throw new Error("Disability not found");
+    }
+    return deletedDisability.toObject();
+  } catch (error) {
+    console.error(`Failed to delete disability ${id}:`, error);
+    throw new Error(`Failed to delete disability ${id}`);
+  }
+}
