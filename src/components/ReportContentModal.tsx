@@ -32,7 +32,6 @@ export default function ReportContentModal(props: ReportContentModalProps) {
   const [description, setDescription] = useState<string>("");
   const [mouseDownOnBackground, setMouseDownOnBackground] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const router = useRouter();
 
   const handleSubmit = async () => {
     try {
@@ -83,7 +82,7 @@ export default function ReportContentModal(props: ReportContentModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}>
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl relative z-50 flex flex-col max-h-[90vh] overflow-y-auto">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full sm:max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl relative z-50 flex flex-col max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-2">
           <div className="text-black text-xl font-bold">Report Content</div>
           <X className="w-6 h-6 cursor-pointer" onClick={handleClose} />
