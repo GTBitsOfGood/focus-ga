@@ -31,7 +31,7 @@ export default function AdminPrivileges({ users } : {users : any[]}) {
         <button className="rounded-md bg-theme-blue text-white pl-[25px] pr-[25px] pt-2 pb-2 text-lg ml-[13px]">Add</button>
         </div>
       </form>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 ">
         <h2 className="text-xl mb-[14px]">Current Admin Accounts</h2>
         {/*REMOVE TEST DATA*/}
         <AdminAccount user={testUser} />
@@ -47,7 +47,7 @@ const AdminAccount = ({ user } : { user : any}) => {
 
 
   return (
-  <div className="text-xl flex justify-between align-middle border-b-[1px] pb-5 mb-2">
+  <div className="text-xl flex justify-between align-middle border-b-[1px] pb-5 mb-2 flex-wrap">
       <UserIcon user={user} showEmail={true} showLargeIcon={true}/>
       <button className="rounded-md bg-[#EAEAEA] text-theme-gray text-lg mt-3 mb-3 pl-4 pr-4  font-bold ml-[13px]">Remove</button>
   </div>
