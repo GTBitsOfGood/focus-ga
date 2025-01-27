@@ -6,9 +6,9 @@ import { User } from "@/utils/types/user";
 /* 
 THIS PAGE USES THE FOLLOW OBJECT PROPERTIES:
   USER:
-    - LASTNAME
-    - EMAIL
-    - ISADMIN
+    - LASTNAME (IN USERICON)
+    - EMAIL (IN USERICON)
+    - ISADMIN (IN USERICON)
 */
 
 //remove test data
