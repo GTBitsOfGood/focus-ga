@@ -110,6 +110,7 @@ export default function PostComponent(props: PostComponentProps) {
   const [showReportModal, setShowReportModal] = useState<boolean>(false);
   const [reports, setReports] = useState<PopulatedReport[]>([]);
   const [showContentReports, setShowContentReports] = useState(false);
+  const [fromReports, setFromReports] = useState(false);
 
   const fetchReports = async () => {
     try {
@@ -365,7 +366,14 @@ export default function PostComponent(props: PostComponentProps) {
         </div>
         {reports.length > 0 && user?.isAdmin ? (
           <button
-            onClick={!clickable ? () => setShowContentReports(true) : undefined}
+            onClick={
+              !clickable
+                ? () => {
+                    setShowContentReports(true);
+                    setFromReports(true);
+                  }
+                : undefined
+            }
             className="flex flex-row items-center gap-x-1.5 rounded-full border-2 border-error-red bg-error-light-red py-1 pl-2 pr-1.5 text-error-red"
           >
             <div className="flex flex-row gap-x-1">
@@ -386,7 +394,7 @@ export default function PostComponent(props: PostComponentProps) {
         <ConfirmationDialog
           handleCancel={() => {
             setShowDeleteDialog(false);
-            // setShowContentReports(true);
+            if (fromReports) setShowContentReports(true);
           }}
           loading={deleteLoading}
           handleConfirm={handleDeleteClick}
@@ -427,9 +435,12 @@ export default function PostComponent(props: PostComponentProps) {
         <ContentReportsModal
           isOpen={showContentReports}
           reports={reports}
-          closeModal={() => setShowContentReports(false)}
-          onDelete={handleDeleteClick}
+          closeModal={() => {
+            setShowContentReports(false);
+          }}
+          onDelete={() => setShowDeleteDialog(true)}
           onIgnore={() => setShowIgnoreDialog(true)}
+          setFromReports={setFromReports}
         />
       )}
     </>

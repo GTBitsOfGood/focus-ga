@@ -11,10 +11,12 @@ type ContentReportsModalProps = {
   closeModal: () => void;
   onDelete: (id: string) => void;
   onIgnore: () => void;
+  setFromReports: (arg0: boolean) => void;
 };
 
 export default function ContentReportsModal(props: ContentReportsModalProps) {
-  const { isOpen, reports, closeModal, onDelete, onIgnore } = props;
+  const { isOpen, reports, closeModal, onDelete, onIgnore, setFromReports } =
+    props;
 
   const [mouseDownOnBackground, setMouseDownOnBackground] = useState(false);
 
@@ -22,6 +24,7 @@ export default function ContentReportsModal(props: ContentReportsModalProps) {
   const contentType = reports[0].contentType;
 
   const handleClose = () => {
+    setFromReports(false);
     closeModal();
   };
 
@@ -73,6 +76,7 @@ export default function ContentReportsModal(props: ContentReportsModalProps) {
             className="flex flex-row items-center gap-x-1.5 text-lg font-bold text-error-red"
             onClick={async () => {
               onDelete(id);
+              setFromReports(true);
               closeModal();
             }}
           >
@@ -83,6 +87,7 @@ export default function ContentReportsModal(props: ContentReportsModalProps) {
             <button
               onClick={async () => {
                 onIgnore();
+                setFromReports(true);
                 closeModal();
               }}
               className="rounded-md bg-gray-300 px-6 py-2 font-bold text-gray-700 transition hover:bg-gray-400"

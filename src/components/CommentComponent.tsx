@@ -81,6 +81,7 @@ export default function CommentComponent(props: CommentComponentProps) {
   const [showReportModal, setShowReportModal] = useState<boolean>(false);
   const [reports, setReports] = useState<PopulatedReport[]>([]);
   const [showContentReports, setShowContentReports] = useState(false);
+  const [fromReports, setFromReports] = useState(false);
   const { toast } = useToast();
   const { user } = useUser();
 
@@ -262,7 +263,10 @@ export default function CommentComponent(props: CommentComponentProps) {
                 </div>
                 {reports.length > 0 && user?.isAdmin ? (
                   <button
-                    onClick={() => setShowContentReports(true)}
+                    onClick={() => {
+                      setFromReports(true);
+                      setShowContentReports(true);
+                    }}
                     className="flex flex-row items-center gap-x-1.5 rounded-full border-2 border-error-red bg-error-light-red py-1 pl-2 pr-1.5 text-error-red"
                   >
                     <div className="flex flex-row gap-x-1">
@@ -294,13 +298,14 @@ export default function CommentComponent(props: CommentComponentProps) {
           }}
           onDelete={() => setShowDeleteDialog(true)}
           onIgnore={() => setShowIgnoreDialog(true)}
+          setFromReports={setFromReports}
         />
       )}
       {showDeleteDialog && (
         <ConfirmationDialog
           handleCancel={() => {
             setShowDeleteDialog(false);
-            // setShowContentReports(true);
+            if (fromReports) setShowContentReports(true);
           }}
           loading={deleteLoading}
           handleConfirm={handleDeleteClick}
