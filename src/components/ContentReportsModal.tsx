@@ -12,11 +12,19 @@ type ContentReportsModalProps = {
   onDelete: (id: string) => void;
   onIgnore: () => void;
   setFromReports: (arg0: boolean) => void;
+  onEdit: () => void;
 };
 
 export default function ContentReportsModal(props: ContentReportsModalProps) {
-  const { isOpen, reports, closeModal, onDelete, onIgnore, setFromReports } =
-    props;
+  const {
+    isOpen,
+    reports,
+    closeModal,
+    onDelete,
+    onIgnore,
+    setFromReports,
+    onEdit,
+  } = props;
 
   const [mouseDownOnBackground, setMouseDownOnBackground] = useState(false);
 
@@ -96,7 +104,7 @@ export default function ContentReportsModal(props: ContentReportsModalProps) {
             </button>
             <button
               onClick={() => {
-                // openEdit();
+                onEdit();
                 setFromReports(true);
                 closeModal();
               }}

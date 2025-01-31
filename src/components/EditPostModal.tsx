@@ -1,9 +1,13 @@
-'use client'
+"use client";
 
 import React, { useEffect, useState, Suspense, useRef } from "react";
 import { Disability } from "@/utils/types/disability";
-import dynamic from 'next/dynamic'
-import { MAX_POST_TITLE_LEN, MAX_POST_CONTENT_LEN, MAX_POST_DISABILITY_TAGS } from "@/utils/consts";
+import dynamic from "next/dynamic";
+import {
+  MAX_POST_TITLE_LEN,
+  MAX_POST_CONTENT_LEN,
+  MAX_POST_DISABILITY_TAGS,
+} from "@/utils/consts";
 import { X } from "lucide-react";
 import { MDXEditorMethods } from "@mdxeditor/editor";
 import { cn, countNonMarkdownCharacters } from "@/lib/utils";
@@ -12,7 +16,7 @@ import { useDisabilities } from "@/contexts/DisabilityContext";
 import { useUser } from "@/contexts/UserContext";
 import { useToast } from "@/hooks/use-toast";
 
-const EditorComp = dynamic(() => import('./EditorComponent'), { ssr: false })
+const EditorComp = dynamic(() => import("./EditorComponent"), { ssr: false });
 
 type EditPostModalProps = {
   isOpen: boolean;
@@ -22,8 +26,12 @@ type EditPostModalProps = {
   title?: string;
   content?: string;
   tags?: Disability[];
-  onSubmit: (title: string, content: string, tags: Disability[]) => Promise<void>;
-}
+  onSubmit: (
+    title: string,
+    content: string,
+    tags: Disability[],
+  ) => Promise<void>;
+};
 
 export default function EditPostModal(props: EditPostModalProps) {
   const {
@@ -34,7 +42,7 @@ export default function EditPostModal(props: EditPostModalProps) {
     title: initialTitle,
     content: initialContent,
     tags: initialTags,
-    onSubmit
+    onSubmit,
   } = props;
 
   const [title, setTitle] = useState<string>(initialTitle || "");
@@ -56,10 +64,11 @@ export default function EditPostModal(props: EditPostModalProps) {
         closeModal();
         editorRef.current?.setMarkdown("");
       }
-    } catch (error) {} finally {
+    } catch (error) {
+    } finally {
       setIsSubmitting(false);
     }
-  }
+  };
 
   const validateSubmission = (): boolean => {
     const isTitleValid = title.length > 0;
@@ -69,13 +78,13 @@ export default function EditPostModal(props: EditPostModalProps) {
     setBodyError(!isContentValid);
 
     return isTitleValid && isContentValid;
-  }
+  };
 
   const handleClose = () => {
     closeModal();
     setBodyError(false);
     setTitleError(false);
-  }
+  };
 
   const handleEditorChange = (text: string) => {
     const textLength = countNonMarkdownCharacters(text);
@@ -84,13 +93,17 @@ export default function EditPostModal(props: EditPostModalProps) {
     } else {
       editorRef.current?.setMarkdown(content);
     }
-  }
+  };
 
   const toggleDisability = (disability: Disability) => {
-    const hasTag = tags.some(d => d._id.toString() === disability._id.toString());
+    const hasTag = tags.some(
+      (d) => d._id.toString() === disability._id.toString(),
+    );
 
     if (hasTag) {
-      setTags(tags.filter(d => d._id.toString() !== disability._id.toString()));
+      setTags(
+        tags.filter((d) => d._id.toString() !== disability._id.toString()),
+      );
     } else if (tags.length < MAX_POST_DISABILITY_TAGS) {
       setTags([...tags, disability]);
     }
@@ -103,7 +116,7 @@ export default function EditPostModal(props: EditPostModalProps) {
       setMouseDownOnBackground(false);
     }
   };
-  
+
   const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
     if (mouseDownOnBackground && e.target === e.currentTarget) {
       handleClose();
@@ -118,57 +131,90 @@ export default function EditPostModal(props: EditPostModalProps) {
   }, [user]);
 
   if (!isOpen) {
-    return <></>
+    return <></>;
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}>
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl relative z-50 flex flex-col max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-2">
-          <div className="text-black text-xl font-bold">{modalTitle}</div>
-          <X className="w-6 h-6 cursor-pointer" onClick={handleClose} />
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+    >
+      <div className="relative z-50 flex max-h-[90vh] w-full max-w-5xl flex-col overflow-y-auto rounded-lg bg-white p-6 shadow-lg">
+        <div className="mb-2 flex items-center justify-between">
+          <div className="text-xl font-bold text-black">{modalTitle}</div>
+          <X className="h-6 w-6 cursor-pointer" onClick={handleClose} />
         </div>
-        
+
         <div className="relative mb-6">
-          <label htmlFor="title" className="block text-sm font-bold text-gray-700">
+          <label
+            htmlFor="title"
+            className="block text-sm font-bold text-gray-700"
+          >
             Title
-            <span className="text-[#ff4e4e] text-base font-medium">*</span>
+            <span className="text-base font-medium text-[#ff4e4e]">*</span>
           </label>
-          <div className={`w-full mt-1 p-3 border ${showTitleError ? 'border-[#ff4e4e]' : 'border-gray-300'} rounded-md flex justify-between items-center`}>
+          <div
+            className={`mt-1 w-full border p-3 ${showTitleError ? "border-[#ff4e4e]" : "border-gray-300"} flex items-center justify-between rounded-md`}
+          >
             <input
               id="title"
               value={title}
               maxLength={100}
               placeholder="Enter post title"
               onChange={(event) => setTitle(event.target.value)}
-              className="focus:outline-none w-[89%]"
+              className="w-[89%] focus:outline-none"
             />
-            <div className="text-gray-400 text-sm">
+            <div className="text-sm text-gray-400">
               {title.length}/{MAX_POST_TITLE_LEN}
             </div>
           </div>
-          
-          {showTitleError ? <div className="text-[#ff4e4e] text-sm font-normal">Required Field</div> : null }
+
+          {showTitleError ? (
+            <div className="text-sm font-normal text-[#ff4e4e]">
+              Required Field
+            </div>
+          ) : null}
         </div>
-        
+
         <div className="relative mb-6">
-          <label htmlFor="title" className="block text-sm font-bold text-gray-700">
+          <label
+            htmlFor="title"
+            className="block text-sm font-bold text-gray-700"
+          >
             Body
-            <span className="text-[#ff4e4e] text-base font-medium">*</span>
+            <span className="text-base font-medium text-[#ff4e4e]">*</span>
           </label>
-          <div className={`mt-1 rounded-lg h-full border ${showBodyError ? 'border-red-300 border-2' : ''}`}>
+          <div
+            className={`mt-1 h-full rounded-lg border ${showBodyError ? "border-2 border-red-300" : ""}`}
+          >
             <Suspense fallback={null}>
-              <EditorComp editorRef={editorRef} markdown={content} handleEditorChange={handleEditorChange} />
+              <EditorComp
+                editorRef={editorRef}
+                markdown={content}
+                handleEditorChange={handleEditorChange}
+              />
             </Suspense>
           </div>
           <div className="flex justify-between">
-            {showBodyError ? <div className="text-[#ff4e4e] text-sm font-normal">Required Field</div> : <div></div> }
-            <p className="text-sm text-gray-400 text-right">{countNonMarkdownCharacters(content)}/{MAX_POST_CONTENT_LEN}</p>
+            {showBodyError ? (
+              <div className="text-sm font-normal text-[#ff4e4e]">
+                Required Field
+              </div>
+            ) : (
+              <div></div>
+            )}
+            <p className="text-right text-sm text-gray-400">
+              {countNonMarkdownCharacters(content)}/{MAX_POST_CONTENT_LEN}
+            </p>
           </div>
         </div>
 
         <div className="relative mb-6">
-          <label htmlFor="title" className="block text-sm font-bold text-gray-700">
+          <label
+            htmlFor="title"
+            className="block text-sm font-bold text-gray-700"
+          >
             Disability Tags
           </label>
           <DropdownWithDisplay
@@ -185,25 +231,27 @@ export default function EditPostModal(props: EditPostModalProps) {
         <div className="flex justify-end space-x-4">
           <button
             onClick={handleClose}
-            className="w-20 py-2 bg-gray-300 text-gray-700 rounded-md transition hover:bg-gray-400 font-bold"
+            className="w-20 rounded-md bg-gray-300 py-2 font-bold text-gray-700 transition hover:bg-gray-400"
           >
             Cancel
           </button>
-          <button 
+          <button
             onClick={handleSubmit}
             disabled={isSubmitting}
             className={cn(
-              "min-w-20 py-2 px-4 bg-theme-blue rounded-lg justify-center items-center gap-2.5 inline-flex",
+              "inline-flex min-w-20 items-center justify-center gap-2.5 rounded-lg bg-theme-blue px-4 py-2",
               {
-              "opacity-50 cursor-not-allowed": isSubmitting,
-              "transition hover:bg-blue-900": !isSubmitting,
-              }
+                "cursor-not-allowed opacity-50": isSubmitting,
+                "transition hover:bg-blue-900": !isSubmitting,
+              },
             )}
           >
-          <div className="text-white font-bold">{isSubmitting ? 'Posting...' : 'Post'}</div>
+            <div className="font-bold text-white">
+              {isSubmitting ? "Posting..." : "Post"}
+            </div>
           </button>
         </div>
-      </div> 
-    </div> 
+      </div>
+    </div>
   );
 }

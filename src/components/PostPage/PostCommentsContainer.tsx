@@ -1,13 +1,24 @@
-'use client'
+"use client";
 
 import PostComponent from "@/components/PostComponent";
 import { createComment } from "@/server/db/actions/CommentActions";
-import { CommentInput, commentSchema, PopulatedComment } from "@/utils/types/comment";
+import {
+  CommentInput,
+  commentSchema,
+  PopulatedComment,
+} from "@/utils/types/comment";
 import { PopulatedPost } from "@/utils/types/post";
 import { useState } from "react";
 import CommentInputComponent from "./CommentInputComponent";
 import CommentTreeContainer from "./CommentTreeContainer";
-import { createPostLike, createPostSave, deletePost, deletePostLike, deletePostSave, editPost } from "@/server/db/actions/PostActions";
+import {
+  createPostLike,
+  createPostSave,
+  deletePost,
+  deletePostLike,
+  deletePostSave,
+  editPost,
+} from "@/server/db/actions/PostActions";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { Disability } from "@/utils/types/disability";
@@ -17,7 +28,7 @@ import { pinPost, unpinPost } from "@/server/db/actions/PostActions";
 
 function buildChildCommentsMap(comments: PopulatedComment[]) {
   const map = new Map<string, PopulatedComment[]>();
-  comments.forEach(comment => {
+  comments.forEach((comment) => {
     if (!comment.replyTo) return;
     if (!map.has(comment.replyTo)) {
       map.set(comment.replyTo, []);
@@ -33,20 +44,26 @@ type PostCommentsContainerProps = {
   authUser: User | PopulatedUser;
 };
 
-export default function PostCommentsContainer(props: PostCommentsContainerProps) {
+export default function PostCommentsContainer(
+  props: PostCommentsContainerProps,
+) {
   const { post, comments: initialComments, authUser } = props;
 
   const router = useRouter();
   const { toast } = useToast();
 
-  const [childComments, setChildComments] = useState<Map<string, PopulatedComment[]>>(
-    buildChildCommentsMap(initialComments)
-  );
+  const [childComments, setChildComments] = useState<
+    Map<string, PopulatedComment[]>
+  >(buildChildCommentsMap(initialComments));
   const [parentComments, setParentComments] = useState<PopulatedComment[]>(
-    initialComments.filter(comment => comment.replyTo === null && (comment.isDeleted === false || childComments.get(comment._id)))
+    initialComments.filter(
+      (comment) =>
+        comment.replyTo === null &&
+        (comment.isDeleted === false || childComments.get(comment._id)),
+    ),
   );
 
-  const showEdit = post.author?._id === authUser._id;
+  const showEdit = post.author?._id === authUser._id || authUser.isAdmin;
   const showDelete = post.author?._id === authUser._id || authUser.isAdmin;
 
   async function onNewCommentSubmit(newCommentBody: string) {
@@ -54,30 +71,30 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
       author: authUser._id,
       content: newCommentBody,
       post: post._id,
-      date: new Date()
+      date: new Date(),
     };
     const newComment: PopulatedComment = {
       ...commentSchema.parse(newCommentInput),
-      _id: '',
+      _id: "",
       author: authUser,
       post: post._id,
       replyTo: null,
-      liked: false
+      liked: false,
     };
-    setParentComments(comments => [newComment, ...comments]);
+    setParentComments((comments) => [newComment, ...comments]);
 
     try {
       const newCommentServer: PopulatedComment = {
-        ...await createComment(newCommentInput),
+        ...(await createComment(newCommentInput)),
         author: authUser,
         post: post._id,
         replyTo: null,
-        liked: false
+        liked: false,
       };
-      setParentComments(comments => [newCommentServer, ...comments.slice(1)]);
+      setParentComments((comments) => [newCommentServer, ...comments.slice(1)]);
     } catch (err) {
-      console.error('Failed to add comment:', err);
-      setParentComments(comments => comments.slice(1));
+      console.error("Failed to add comment:", err);
+      setParentComments((comments) => comments.slice(1));
       throw err;
     }
   }
@@ -90,7 +107,7 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
         await createPostLike(authUser._id, post._id);
       }
     } catch (err) {
-      console.error(`Failed to ${liked ? 'dislike' : 'like'} post:`, err);
+      console.error(`Failed to ${liked ? "dislike" : "like"} post:`, err);
       throw err;
     }
   }
@@ -103,14 +120,22 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
         await createPostSave(authUser._id, post._id);
       }
     } catch (err) {
-      console.error(`Failed to ${saved ? 'unsave' : 'save'} post`, err);
+      console.error(`Failed to ${saved ? "unsave" : "save"} post`, err);
       throw err;
     }
   }
 
-  async function onPostEditClick(title: string, content: string, tags: Disability[]) {
+  async function onPostEditClick(
+    title: string,
+    content: string,
+    tags: Disability[],
+  ) {
     try {
-      await editPost(post._id, { title, content, tags: tags.map(tag => tag._id) });
+      await editPost(post._id, {
+        title,
+        content,
+        tags: tags.map((tag) => tag._id),
+      });
       toast({
         title: "Post successfully edited",
         description: "Your post has been edited successfully.",
@@ -120,7 +145,7 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
         title: "Failed to edit post",
         description: "There was an error editing your post. Please try again.",
       });
-      console.error('Failed to edit post:', err);
+      console.error("Failed to edit post:", err);
       throw err;
     }
   }
@@ -128,13 +153,14 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
   async function onPostDeleteClick() {
     try {
       await deletePost(post._id);
-      router.push('/');
+      router.push("/");
       toast({
         title: "Post successfully deleted",
-        description: "The post has been successfully deleted from the community."
+        description:
+          "The post has been successfully deleted from the community.",
       });
     } catch (err) {
-      console.error('Failed to delete post:', err);
+      console.error("Failed to delete post:", err);
       throw err;
     }
   }
@@ -175,7 +201,7 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
       <div className="mx-16 my-4 text-lg text-[#686868]">
         <BackButton />
       </div>
-      <div className="mx-32 mb-16 p-4 flex flex-col items-stretch gap-4">
+      <div className="mx-32 mb-16 flex flex-col items-stretch gap-4 p-4">
         <PostComponent
           post={post}
           onLikeClick={onPostLikeClick}
@@ -188,7 +214,7 @@ export default function PostCommentsContainer(props: PostCommentsContainerProps)
           placeholder="Add comment"
           onSubmit={onNewCommentSubmit}
         />
-        {parentComments.map(comment => (
+        {parentComments.map((comment) => (
           <CommentTreeContainer
             key={comment._id}
             postId={post._id}

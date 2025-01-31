@@ -27,7 +27,7 @@ export default function BannedUsers() {
   const notifySuccess = () => {
     toast({
       title: "User successfully banned",
-      description: `User account associated with email ${email} will no longer be able to access this website.`,
+      description: `The account associated with email ${email} will no longer be able to access any posts.`,
     });
   };
 

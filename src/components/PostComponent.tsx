@@ -188,6 +188,12 @@ export default function PostComponent(props: PostComponentProps) {
     fetchReports();
   };
 
+  useEffect(() => {
+    if (!fromReports) {
+      setShowContentReports(false);
+    }
+  }, [fromReports]);
+
   async function handleEditClick(
     newTitle: string,
     newContent: string,
@@ -201,6 +207,11 @@ export default function PostComponent(props: PostComponentProps) {
       try {
         await onEditClick(newTitle, newContent, newTags);
         setShowEditModal(false);
+        if (fromReports) {
+          setFromReports(false);
+          setShowContentReports(false);
+          resolveReports();
+        }
       } catch (err) {
         setTitle(title);
         setContent(content);
@@ -394,7 +405,9 @@ export default function PostComponent(props: PostComponentProps) {
         <ConfirmationDialog
           handleCancel={() => {
             setShowDeleteDialog(false);
-            if (fromReports) setShowContentReports(true);
+            if (fromReports) {
+              setShowContentReports(true);
+            }
           }}
           loading={deleteLoading}
           handleConfirm={handleDeleteClick}
@@ -420,8 +433,16 @@ export default function PostComponent(props: PostComponentProps) {
           title={title}
           content={content}
           tags={tags.filter((tag) => tag !== null)}
-          closeModal={() => setShowEditModal(false)}
+          closeModal={() => {
+            setShowEditModal(false);
+            if (fromReports) {
+              setShowContentReports(true);
+            }
+          }}
           onSubmit={handleEditClick}
+          {...(fromReports
+            ? { modalTitle: `Edit ${author?.lastName}'s post` }
+            : {})}
         />
       )}
       {showReportModal && (
@@ -441,6 +462,7 @@ export default function PostComponent(props: PostComponentProps) {
           onDelete={() => setShowDeleteDialog(true)}
           onIgnore={() => setShowIgnoreDialog(true)}
           setFromReports={setFromReports}
+          onEdit={() => setShowEditModal(true)}
         />
       )}
     </>

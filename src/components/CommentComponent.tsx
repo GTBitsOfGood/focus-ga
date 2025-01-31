@@ -299,6 +299,7 @@ export default function CommentComponent(props: CommentComponentProps) {
           onDelete={() => setShowDeleteDialog(true)}
           onIgnore={() => setShowIgnoreDialog(true)}
           setFromReports={setFromReports}
+          onEdit={() => console.log("HI")}
         />
       )}
       {showDeleteDialog && (
