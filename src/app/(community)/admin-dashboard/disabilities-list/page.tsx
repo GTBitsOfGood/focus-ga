@@ -8,6 +8,8 @@ import {
   deleteDisability,
 } from "@/server/db/actions/DisabilityActions";
 import Tag from "@/components/Tag";
+import { Search } from "lucide-react";
+
 
 export default function DisabilitiesList() {
   const [disabilities, setDisabilities] = useState<Disability[]>([]);
@@ -76,52 +78,59 @@ export default function DisabilitiesList() {
   );
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-6">Disabilities List</h1>
+    <div className="container mx-auto ml-10 p-6 max-w-4xl mt-5">
+      <h1 className="text-2xl font-bold mb-7">Disabilities List</h1>
       {error && <div className="text-red-500 mb-4">{error}</div>}
       <h2 className="text-xl mb-3">Add New Disability</h2>
-      <div className="flex items-center gap-2 mb-6">
+      <div className="flex items-center gap-3 mb-6">
         <input
           type="text"
           value={disabilityName}
           onChange={(e) => setDisabilityName(e.target.value)}
           placeholder="Enter disability"
-          className="border p-2 rounded-md w-full py-1.5"
+          className="border p-3 rounded-md w-full py-1.5 text-sm h-10"
         />
         <button
-          onClick={handleAddDisability}
-          className="bg-theme-blue text-white px-6 py-1.5 rounded-md transition hover:opacity-90"
+          className="bg-theme-blue text-white px-6 py-1.5 rounded-md transition hover:opacity-90 h-10"
           disabled={loading}
+          onClick={handleAddDisability}
         >
           Add
         </button>
       </div>
-
-      <div className="flex items-center gap-2 mb-6">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search..."
-          className="border p-2 rounded w-full"
-        />
-      </div>
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl">Current Disability List</h2>
+          <div className="flex items-center gap-1.5">
+            <Search className="text-theme-gray" size={20} />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search..."
+              className="border-b p-1 pl-0 w-60 focus:outline-none focus:border-theme-gray"
+            />
+          </div>
+        </div>
 
       {loading && <div className="text-center text-blue-500">Loading...</div>}
 
-      <h2 className="text-xl mb-3">Current Disability List</h2>
-      <div className="flex flex-wrap gap-2">
-        {Object.values(groupedDisabilities).map((disabilityGroup) =>
-          disabilityGroup.map((disability) => (
-            <Tag
-              key={disability._id}
-              text={disability.name}
-              isClickable={true}
-              onClick={() => handleDeleteDisability(disability._id)}
-            />
-        ))
-      )}
-    </div>
+        {Object.keys(groupedDisabilities).map((letter) => (
+          <div key={letter} className="mb-4">
+            <div className="text-lg mb-2">{letter}</div>
+            <div className="flex flex-wrap gap-3">
+              {groupedDisabilities[letter].map((disability) => (
+                <Tag
+                  key={disability._id}
+                  text={disability.name}
+                  isClickable={true}
+                  onClick={() => handleDeleteDisability(disability._id)}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
