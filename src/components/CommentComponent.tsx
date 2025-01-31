@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { useUser } from "@/contexts/UserContext";
 import {
   createReport,
+  editReport,
   getReportsByContentId,
 } from "@/server/db/actions/ReportActions";
 import {
@@ -32,7 +33,7 @@ import ReportContentModal from "./ReportContentModal";
 import ContentReportsModal from "./ContentReportsModal";
 import { useToast } from "@/hooks/use-toast";
 import UserIcon from "./UserIconComponent";
-import ConfirmDeleteDialog from "./ConfirmDeleteDialog";
+import ConfirmationDialog from "./ConfirmationDialog";
 
 type CommentComponentProps = {
   className?: string;
@@ -74,8 +75,8 @@ export default function CommentComponent(props: CommentComponentProps) {
   const [liked, setLiked] = useState<boolean>(initialLiked);
   const [likeLoading, setLikeLoading] = useState<boolean>(false);
   const [isDeleted, setIsDeleted] = useState<boolean>(initialIsDeleted);
-  const [isFlagged, setIsFlagged] = useState<boolean>(initialIsFlagged);
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
+  const [showIgnoreDialog, setShowIgnoreDialog] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const [showReportModal, setShowReportModal] = useState<boolean>(false);
   const [reports, setReports] = useState<PopulatedReport[]>([]);
@@ -86,7 +87,11 @@ export default function CommentComponent(props: CommentComponentProps) {
   const fetchReports = async () => {
     try {
       const reportsData = await getReportsByContentId(comment._id);
-      setReports(reportsData);
+      setReports(
+        reportsData.filter((report) => {
+          return !report.isResolved;
+        }),
+      );
     } catch (error) {
       console.error("Error fetching reports:", error);
     }
@@ -155,6 +160,13 @@ export default function CommentComponent(props: CommentComponentProps) {
       fetchReports();
     }
   }
+
+  const resolveReports = async () => {
+    for (const report of reports) {
+      await editReport(report._id, { isResolved: true });
+    }
+    fetchReports();
+  };
 
   const bottomRow = [
     {
@@ -279,17 +291,33 @@ export default function CommentComponent(props: CommentComponentProps) {
           reports={reports}
           closeModal={() => {
             setShowContentReports(false);
-            setShowDeleteDialog(true);
           }}
-          onDeleteContent={() => setShowDeleteDialog(true)}
+          onDelete={() => setShowDeleteDialog(true)}
+          onIgnore={() => setShowIgnoreDialog(true)}
         />
       )}
       {showDeleteDialog && (
-        <ConfirmDeleteDialog
-          setShowDeleteDialog={setShowDeleteDialog}
-          deleteLoading={deleteLoading}
-          handleDeleteClick={handleDeleteClick}
+        <ConfirmationDialog
+          handleCancel={() => {
+            setShowDeleteDialog(false);
+            // setShowContentReports(true);
+          }}
+          loading={deleteLoading}
+          handleConfirm={handleDeleteClick}
           type="comment"
+          resolveReports={resolveReports}
+        />
+      )}
+      {showIgnoreDialog && (
+        <ConfirmationDialog
+          handleCancel={() => {
+            setShowIgnoreDialog(false);
+            setShowContentReports(true);
+          }}
+          loading={deleteLoading}
+          handleConfirm={() => setShowIgnoreDialog(false)}
+          type="ignore"
+          resolveReports={resolveReports}
         />
       )}
     </div>

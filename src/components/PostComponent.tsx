@@ -28,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import ReportContentModal from "./ReportContentModal";
 import {
   createReport,
+  editReport,
   getReportsByContentId,
 } from "@/server/db/actions/ReportActions";
 import {
@@ -38,7 +39,7 @@ import {
 import { useUser } from "@/contexts/UserContext";
 import ContentReportsModal from "./ContentReportsModal";
 import UserIcon from "./UserIconComponent";
-import ConfirmDeleteDialog from "./ConfirmDeleteDialog";
+import ConfirmationDialog from "./ConfirmationDialog";
 
 type PostComponentProps = {
   post: PopulatedPost;
@@ -104,6 +105,7 @@ export default function PostComponent(props: PostComponentProps) {
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
+  const [showIgnoreDialog, setShowIgnoreDialog] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const [showReportModal, setShowReportModal] = useState<boolean>(false);
   const [reports, setReports] = useState<PopulatedReport[]>([]);
@@ -112,7 +114,11 @@ export default function PostComponent(props: PostComponentProps) {
   const fetchReports = async () => {
     try {
       const reportsData = await getReportsByContentId(post._id);
-      setReports(reportsData);
+      setReports(
+        reportsData.filter((report) => {
+          return !report.isResolved;
+        }),
+      );
     } catch (error) {
       console.error("Error fetching reports:", error);
     }
@@ -173,6 +179,13 @@ export default function PostComponent(props: PostComponentProps) {
       }
     }
   }
+
+  const resolveReports = async () => {
+    for (const report of reports) {
+      await editReport(report._id, { isResolved: true });
+    }
+    fetchReports();
+  };
 
   async function handleEditClick(
     newTitle: string,
@@ -370,11 +383,27 @@ export default function PostComponent(props: PostComponentProps) {
       )}{" "}
       {/* Divider border*/}
       {showDeleteDialog && (
-        <ConfirmDeleteDialog
-          setShowDeleteDialog={setShowDeleteDialog}
-          deleteLoading={deleteLoading}
-          handleDeleteClick={handleDeleteClick}
+        <ConfirmationDialog
+          handleCancel={() => {
+            setShowDeleteDialog(false);
+            // setShowContentReports(true);
+          }}
+          loading={deleteLoading}
+          handleConfirm={handleDeleteClick}
           type="post"
+          resolveReports={resolveReports}
+        />
+      )}
+      {showIgnoreDialog && (
+        <ConfirmationDialog
+          handleCancel={() => {
+            setShowIgnoreDialog(false);
+            setShowContentReports(true);
+          }}
+          loading={deleteLoading}
+          handleConfirm={() => setShowIgnoreDialog(false)}
+          type="ignore"
+          resolveReports={resolveReports}
         />
       )}
       {showEditModal && (
@@ -399,7 +428,8 @@ export default function PostComponent(props: PostComponentProps) {
           isOpen={showContentReports}
           reports={reports}
           closeModal={() => setShowContentReports(false)}
-          onDeleteContent={handleDeleteClick}
+          onDelete={handleDeleteClick}
+          onIgnore={() => setShowIgnoreDialog(true)}
         />
       )}
     </>

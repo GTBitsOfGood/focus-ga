@@ -1,21 +1,23 @@
 import { useState } from "react";
 import { X } from "lucide-react";
-import { deleteDialogText } from "@/utils/deleteDialogText";
+import { deleteDialogText } from "@/utils/confirmationDialogText";
 
 type DialogType = keyof typeof deleteDialogText;
 
 type DeleteDialogProps = {
-  setShowDeleteDialog: (value: boolean) => void;
-  deleteLoading: boolean;
-  handleDeleteClick: () => void;
+  handleCancel: () => void;
+  loading: boolean;
+  handleConfirm: () => void;
   type: DialogType;
+  resolveReports: () => void;
 };
 
-export default function ConfirmDeleteDialog({
-  setShowDeleteDialog,
-  deleteLoading,
-  handleDeleteClick,
+export default function ConfirmationDialog({
+  handleCancel,
+  loading,
+  handleConfirm,
   type,
+  resolveReports,
 }: DeleteDialogProps) {
   const [mouseDownOnBackground, setMouseDownOnBackground] = useState(false);
   const dialogText = deleteDialogText[type];
@@ -30,7 +32,7 @@ export default function ConfirmDeleteDialog({
 
   const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
     if (mouseDownOnBackground && e.target === e.currentTarget) {
-      setShowDeleteDialog(false);
+      handleCancel();
     }
     setMouseDownOnBackground(false);
   };
@@ -46,7 +48,7 @@ export default function ConfirmDeleteDialog({
           <X
             color="#636363"
             className="h-6 w-6 cursor-pointer"
-            onClick={() => setShowDeleteDialog(false)}
+            onClick={handleCancel}
           />
         </div>
         <div className="mx-6 mb-7 mt-5 text-center text-lg font-semibold leading-[1.4] text-black">
@@ -54,43 +56,24 @@ export default function ConfirmDeleteDialog({
         </div>
         <div className="mb-4 flex justify-center space-x-4">
           <button
-            onClick={() => setShowDeleteDialog(false)}
+            onClick={handleCancel}
             className="w-24 rounded-md bg-gray-300 py-2 font-bold text-gray-700 transition hover:bg-gray-400"
           >
             Cancel
           </button>
           <button
-            onClick={handleDeleteClick}
+            onClick={() => {
+              handleConfirm();
+              resolveReports();
+            }}
             className="inline-flex w-24 items-center justify-center gap-2.5 rounded-lg bg-theme-blue px-4 py-2"
           >
             <div className="font-bold text-white">
-              {deleteLoading ? dialogText.loading : dialogText.button}
+              {loading ? dialogText.loading : dialogText.button}
             </div>
           </button>
         </div>
       </div>
     </div>
-    // <AlertDialog open={showDeleteDialog}>
-    //   <AlertDialogContent>
-    //     <AlertDialogHeader>
-    //       <AlertDialogTitle>Delete Post</AlertDialogTitle>
-    //       <AlertDialogDescription>
-    //         Are you sure you want to delete this post?
-    //       </AlertDialogDescription>
-    //     </AlertDialogHeader>
-    //     <AlertDialogFooter>
-    //       <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>
-    //         Cancel
-    //       </AlertDialogCancel>
-    //       <AlertDialogAction
-    //         disabled={deleteLoading}
-    //         onClick={handleDeleteClick}
-    //         className="bg-theme-blue transition hover:bg-theme-blue hover:opacity-90"
-    //       >
-    //         {deleteLoading ? "Deleting..." : "Delete"}
-    //       </AlertDialogAction>
-    //     </AlertDialogFooter>
-    //   </AlertDialogContent>
-    // </AlertDialog>
   );
 }

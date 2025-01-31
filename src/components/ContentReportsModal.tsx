@@ -9,11 +9,12 @@ type ContentReportsModalProps = {
   isOpen: boolean;
   reports: PopulatedReport[];
   closeModal: () => void;
-  onDeleteContent: (id: string) => void;
+  onDelete: (id: string) => void;
+  onIgnore: () => void;
 };
 
 export default function ContentReportsModal(props: ContentReportsModalProps) {
-  const { isOpen, reports, closeModal, onDeleteContent } = props;
+  const { isOpen, reports, closeModal, onDelete, onIgnore } = props;
 
   const [mouseDownOnBackground, setMouseDownOnBackground] = useState(false);
 
@@ -70,8 +71,8 @@ export default function ContentReportsModal(props: ContentReportsModalProps) {
         <div className="mt-5 flex flex-row items-center justify-between">
           <button
             className="flex flex-row items-center gap-x-1.5 text-lg font-bold text-error-red"
-            onClick={() => {
-              onDeleteContent(id);
+            onClick={async () => {
+              onDelete(id);
               closeModal();
             }}
           >
@@ -79,10 +80,16 @@ export default function ContentReportsModal(props: ContentReportsModalProps) {
             Delete {contentType === ContentType.COMMENT ? "Comment" : "Post"}
           </button>
           <div className="flex justify-end space-x-4">
-            <button className="w-20 rounded-md bg-gray-300 py-2 font-bold text-gray-700 transition hover:bg-gray-400">
+            <button
+              onClick={async () => {
+                onIgnore();
+                closeModal();
+              }}
+              className="rounded-md bg-gray-300 px-6 py-2 font-bold text-gray-700 transition hover:bg-gray-400"
+            >
               Ignore
             </button>
-            <button className="inline-flex min-w-20 items-center justify-center gap-2.5 rounded-lg bg-theme-blue px-4 py-2 transition hover:bg-blue-900">
+            <button className="inline-flex min-w-20 items-center justify-center gap-2.5 rounded-lg bg-theme-blue px-6 py-2 transition hover:bg-blue-900">
               <div className="font-bold text-white">Edit Content</div>
             </button>
           </div>

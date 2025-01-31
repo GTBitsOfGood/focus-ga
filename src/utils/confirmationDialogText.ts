@@ -17,4 +17,10 @@ export const deleteDialogText = {
     button: "Ban",
     loading: "Banning...",
   },
+  ignore: {
+    description:
+      "Are you sure you want to ignore all reports for this content? This action cannot be undone!",
+    button: "Ignore",
+    loading: "Ignoring...",
+  }
 } as const;
