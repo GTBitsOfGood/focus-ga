@@ -109,8 +109,8 @@ export default function PostComponent(props: PostComponentProps) {
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const [showReportModal, setShowReportModal] = useState<boolean>(false);
   const [reports, setReports] = useState<PopulatedReport[]>([]);
-  const [showContentReports, setShowContentReports] = useState(false);
-  const [fromReports, setFromReports] = useState(false);
+  const [showContentReports, setShowContentReports] = useState<boolean>(false);
+  const [fromReports, setFromReports] = useState<boolean>(false);
 
   const fetchReports = async () => {
     try {

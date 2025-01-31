@@ -325,6 +325,18 @@ export default function CommentComponent(props: CommentComponentProps) {
           resolveReports={resolveReports}
         />
       )}
+      {/* {showEditModal && (
+        <ConfirmationDialog
+          handleCancel={() => {
+            setShowIgnoreDialog(false);
+            setShowContentReports(true);
+          }}
+          loading={deleteLoading}
+          handleConfirm={() => setShowIgnoreDialog(false)}
+          type="ignore"
+          resolveReports={resolveReports}
+        />
+      )} */}
     </div>
   );
 }

@@ -1,6 +1,12 @@
-'use server'
+"use server";
 
-import { editUserSchema, PopulatedUser, User, UserInput, userSchema } from "@/utils/types/user";
+import {
+  editUserSchema,
+  PopulatedUser,
+  User,
+  UserInput,
+  userSchema,
+} from "@/utils/types/user";
 import UserModel from "../models/UserModel";
 import dbConnect from "../dbConnect";
 import { revalidatePath } from "next/cache";
@@ -27,19 +33,39 @@ export async function createUser(user: UserInput): Promise<User> {
 export async function getUser(id: string): Promise<User> {
   await dbConnect();
 
-  const user = await UserModel.findById(id)
+  const user = await UserModel.findById(id);
   if (!user) {
     throw new Error("User not found");
   }
   return user.toObject();
 }
 
-export async function getUserBySalesforceUid(salesforceUid: string): Promise<User> {
+export async function getUserBySalesforceUid(
+  salesforceUid: string,
+): Promise<User> {
   await dbConnect();
 
   const user = await UserModel.findOne({ salesforce_uid: salesforceUid });
   if (!user) {
     return user;
+  }
+  return user.toObject();
+}
+
+/**
+ * Retrieves a user from the database by their email (case insensitive).
+ * @param email - The email of the user to retrieve.
+ * @returns A promise that resolves to the user object with extended ID.
+ * @throws Will throw an error if the user is not found.
+ */
+export async function getUserByEmail(email: string): Promise<User> {
+  await dbConnect();
+
+  const user = await UserModel.findOne({
+    email: { $regex: new RegExp("^" + email + "$", "i") },
+  });
+  if (!user) {
+    throw new Error("User not found");
   }
   return user.toObject();
 }
@@ -53,11 +79,10 @@ export async function getUserBySalesforceUid(salesforceUid: string): Promise<Use
 export async function getPopulatedUser(id: string): Promise<PopulatedUser> {
   await dbConnect();
 
-  const user = await UserModel
-    .findById(id)
-    .populate({ path: 'childDisabilities', model: 'Disability' })
-    .populate({ path: 'defaultDisabilityTags', model: 'Disability' })
-    .populate({ path: 'defaultDisabilityFilters', model: 'Disability' });
+  const user = await UserModel.findById(id)
+    .populate({ path: "childDisabilities", model: "Disability" })
+    .populate({ path: "defaultDisabilityTags", model: "Disability" })
+    .populate({ path: "defaultDisabilityFilters", model: "Disability" });
   if (!user) {
     throw new Error("User not found");
   }
@@ -71,15 +96,20 @@ export async function getPopulatedUser(id: string): Promise<PopulatedUser> {
  * @throws Will throw an error if the user update fails or if the user is not found.
  * @returns The updated user object.
  */
-export async function editUser(id: string, updated: Partial<UserInput>): Promise<User> {
+export async function editUser(
+  id: string,
+  updated: Partial<UserInput>,
+): Promise<User> {
   await dbConnect();
 
   const parsedData = editUserSchema.parse(updated);
-  const updatedUser = await UserModel.findByIdAndUpdate(id, parsedData, { new: true });
+  const updatedUser = await UserModel.findByIdAndUpdate(id, parsedData, {
+    new: true,
+  });
   if (!updatedUser) {
     throw new Error("User not found");
   }
 
-  revalidatePath(`/family/${id}`)
+  revalidatePath(`/family/${id}`);
   return updatedUser.toObject();
 }

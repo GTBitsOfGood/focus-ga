@@ -94,7 +94,14 @@ export default function ContentReportsModal(props: ContentReportsModalProps) {
             >
               Ignore
             </button>
-            <button className="inline-flex min-w-20 items-center justify-center gap-2.5 rounded-lg bg-theme-blue px-6 py-2 transition hover:bg-blue-900">
+            <button
+              onClick={() => {
+                // openEdit();
+                setFromReports(true);
+                closeModal();
+              }}
+              className="inline-flex min-w-20 items-center justify-center gap-2.5 rounded-lg bg-theme-blue px-6 py-2 transition hover:bg-blue-900"
+            >
               <div className="font-bold text-white">Edit Content</div>
             </button>
           </div>
