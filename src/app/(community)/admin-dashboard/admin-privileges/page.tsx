@@ -1,7 +1,6 @@
 'use client';
 import UserIcon from "@/components/UserIconComponent";
 import { FormEvent, useState } from "react";
-import { Toaster } from "@/components/ui/toaster"
 import { useToast } from "@/hooks/use-toast";
 import { getUserByEmail, editUser } from "@/server/db/actions/UserActions";
 
@@ -33,6 +32,13 @@ export default function AdminPrivileges({ users } : {users : any[]}) {
     });
   };
 
+  const notifyAlreadyAdmin = (email : string) => {
+    toast({
+      title: `Already Admin!`,
+      description: `User with email ${email} is already an admin.`,
+    });
+  };
+
   const notifyFailure = () => {
     toast({
       title: "Failed to add admin",
@@ -48,6 +54,11 @@ export default function AdminPrivileges({ users } : {users : any[]}) {
     event.preventDefault();
     try {
       const user = await getUserByEmail(email);
+      if (user.isAdmin) {
+        notifyAlreadyAdmin(email);
+        setEmail("");
+        return;
+      }
       await editUser(user._id, {isAdmin: true});
       notifySuccess(email);
       setEmail("");
