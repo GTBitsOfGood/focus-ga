@@ -25,11 +25,52 @@ const testUser : User = {
     profileColor: ProfileColors.ProfileDefault,
     _id: "679db2987e2efaed1c0e9487"
   };
-  const testArr : User[] = [testUser]
+
+  //multiple users to test for alphabetical ONLY
+  const testUser2 : User = {
+    username: "john_doe2",
+    isAdmin: false,
+    isBanned: false,
+    lastName: "Boe",
+    email: "john.doe2@example.com",
+    childAge: 5,
+    childDisabilities: [],
+    city: "New York",
+    bio: "Loving parent and advocate for special needs awareness.",
+    salesforce_uid: "TESTING",
+    notificationPreference: true,
+    defaultDisabilityTags: [],
+    defaultDisabilityFilters: [],
+    postDeletionTimeline: PostDeletionTimeline.FourYears,
+    profileColor: ProfileColors.ProfileDefault,
+    _id: "679db2987e2efaed1c0e9487"
+  };
+  const testUser3 : User = {
+    username: "john_doe",
+    isAdmin: false,
+    isBanned: false,
+    lastName: "Aoe",
+    email: "john.doe@example.com",
+    childAge: 5,
+    childDisabilities: [],
+    city: "New York",
+    bio: "Loving parent and advocate for special needs awareness.",
+    salesforce_uid: "TESTING",
+    notificationPreference: true,
+    defaultDisabilityTags: [],
+    defaultDisabilityFilters: [],
+    postDeletionTimeline: PostDeletionTimeline.FourYears,
+    profileColor: ProfileColors.ProfileDefault,
+    _id: "679db2987e2efaed1c0e9487"
+  };
+  const testArr : User[] = [testUser, testUser2, testUser3]
 
 /* ASSUMES 'USERS' is a User array that is ALREADY FILTERED for admins only*/
 
 export default function AdminPrivileges({ users } : {users : User[]}) {
+  //replace 'testArr' with 'users'
+  testArr.sort((a, b) => a.lastName.localeCompare(b.lastName));
+  
   const [email, setEmail] = useState("");
   const { toast } = useToast();
 
