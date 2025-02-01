@@ -1,27 +1,35 @@
 'use client';
 import UserIcon from "@/components/UserIconComponent";
+import { User } from "@/utils/types/user";
 import { FormEvent, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { getUserByEmail, editUser } from "@/server/db/actions/UserActions";
 
+//remove testing stuff
+import { PostDeletionTimeline, ProfileColors } from "@/utils/consts";
+const testUser : User = {
+    username: "john_doe",
+    isAdmin: false,
+    isBanned: false,
+    lastName: "Doe",
+    email: "john.doe@example.com",
+    childAge: 5,
+    childDisabilities: [],
+    city: "New York",
+    bio: "Loving parent and advocate for special needs awareness.",
+    salesforce_uid: "TESTING",
+    notificationPreference: true,
+    defaultDisabilityTags: [],
+    defaultDisabilityFilters: [],
+    postDeletionTimeline: PostDeletionTimeline.FourYears,
+    profileColor: ProfileColors.ProfileDefault,
+    _id: "679db2987e2efaed1c0e9487"
+  };
+  const testArr : User[] = [testUser]
 
-/* 
-THIS PAGE USES THE FOLLOW OBJECT PROPERTIES:
-  USER:
-    - LASTNAME (IN USERICON)
-    - EMAIL (IN USERICON)
-    - ISADMIN (IN USERICON)
-*/
+/* ASSUMES 'USERS' is a User array that is ALREADY FILTERED for admins only*/
 
-//remove test data
-const testUser : any = {
-  lastName: "Zhang (Winnie)",
-  email: "kdjfalskdjflskjdflkdjfs@gmail.com",
-  isAdmin: true,
-}
-
-
-export default function AdminPrivileges({ users } : {users : any[]}) {
+export default function AdminPrivileges({ users } : {users : User[]}) {
   const [email, setEmail] = useState("");
   const { toast } = useToast();
 
@@ -59,7 +67,7 @@ export default function AdminPrivileges({ users } : {users : any[]}) {
         setEmail("");
         return;
       }
-      await editUser(user._id, {isAdmin: true});
+      const updatedUser = await editUser(user._id, {isAdmin: true});
       notifySuccess(email);
       setEmail("");
 
@@ -67,7 +75,7 @@ export default function AdminPrivileges({ users } : {users : any[]}) {
       notifyFailure();
       throw error;
     }
-    }
+  }
   
   return (
     <div className="mt-9 max-w-[78%] md:ml-10">
@@ -81,20 +89,43 @@ export default function AdminPrivileges({ users } : {users : any[]}) {
       </form>
       <div className="flex flex-col gap-3 ">
         <h2 className="text-xl mb-[14px]">Current Admin Accounts</h2>
-        {/*REMOVE TEST DATA*/}
-        <AdminAccount user={testUser} />
-        <AdminAccount user={testUser} />
-        <AdminAccount user={testUser} />
+        {/*replace testArr with 'users' */}
+        {testArr.map((user, i) => <AdminAccount user={user} key={i}/>)}
       </div>
     </div>
   );
 }
 
-const AdminAccount = ({ user } : { user : any}) => {
+const AdminAccount = ({ user } : { user : User}) => {
+  const { toast } = useToast();
+
+  const notifySuccess = (email : string) => {
+    toast({
+      title: "Successfully removed admin!",
+      description: `User with email ${email} was removed as an admin.`,
+    });
+  };
+
+  const notifyFailure = (email : string) => {
+    toast({
+      title: "Failed to remove admin.",
+      description: `User with email ${email} was failed to be removed as admin.`,
+    });
+  };
+
+  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    try {
+      const updatedUser = await editUser(user._id, {isAdmin: false});
+      notifySuccess(user.email);
+    } catch (error) {
+      notifyFailure(user._id);
+      throw error;
+    }
+  }
   return (
   <div className="text-xl flex justify-between align-middle border-b-[1px] pb-5 mb-2 flex-wrap">
       <UserIcon user={user} showEmail={true} showLargeIcon={true}/>
-      <button className="rounded-md bg-[#EAEAEA] text-theme-gray text-lg mt-3 mb-3 pl-4 pr-4  font-bold ml-[13px]">Remove</button>
+      <button className="rounded-md bg-[#EAEAEA] text-theme-gray text-lg mt-3 mb-3 pl-4 pr-4  font-bold ml-[13px]" onClick={handleSubmit}>Remove</button>
   </div>
   )
 }
