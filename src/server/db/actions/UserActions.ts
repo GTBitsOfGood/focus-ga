@@ -60,6 +60,26 @@ export async function getUserBySalesforceUid(salesforceUid: string): Promise<Use
   return user.toObject();
 }
 
+
+/**
+ * Retrieves all admin users from the database.
+ * @returns A promise that resolves to an array of user objects with extended IDs.
+ * @throws Will throw an error if no admin users are found.
+ */
+export async function getAdminUsers(): Promise<User[]> {
+  await dbConnect();
+
+  const adminUsers = await UserModel.find({ isAdmin: true });
+  
+  if (!adminUsers || adminUsers.length === 0) {
+    throw new Error("No admin users found");
+  }
+
+  // Convert each document to a plain object if needed
+  return adminUsers.map(user => user.toObject());
+}
+
+
 /**
  * Retrieves a user from the database by their ID with child disabilities populated.
  * @param id - The ID of the user to retrieve.

@@ -1,78 +1,30 @@
 'use client';
 import UserIcon from "@/components/UserIconComponent";
 import { User } from "@/utils/types/user";
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { getUserByEmail, editUser } from "@/server/db/actions/UserActions";
+import { getUserByEmail, editUser, getAdminUsers } from "@/server/db/actions/UserActions";
 
-//remove testing stuff
-import { PostDeletionTimeline, ProfileColors } from "@/utils/consts";
-const testUser : User = {
-    username: "john_doe",
-    isAdmin: false,
-    isBanned: false,
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    childAge: 5,
-    childDisabilities: [],
-    city: "New York",
-    bio: "Loving parent and advocate for special needs awareness.",
-    salesforce_uid: "TESTING",
-    notificationPreference: true,
-    defaultDisabilityTags: [],
-    defaultDisabilityFilters: [],
-    postDeletionTimeline: PostDeletionTimeline.FourYears,
-    profileColor: ProfileColors.ProfileDefault,
-    _id: "679db2987e2efaed1c0e9487"
-  };
 
-  //multiple users to test for alphabetical ONLY
-  const testUser2 : User = {
-    username: "john_doe2",
-    isAdmin: false,
-    isBanned: false,
-    lastName: "Boe",
-    email: "john.doe2@example.com",
-    childAge: 5,
-    childDisabilities: [],
-    city: "New York",
-    bio: "Loving parent and advocate for special needs awareness.",
-    salesforce_uid: "TESTING",
-    notificationPreference: true,
-    defaultDisabilityTags: [],
-    defaultDisabilityFilters: [],
-    postDeletionTimeline: PostDeletionTimeline.FourYears,
-    profileColor: ProfileColors.ProfileDefault,
-    _id: "679db2987e2efaed1c0e9487"
-  };
-  const testUser3 : User = {
-    username: "john_doe",
-    isAdmin: false,
-    isBanned: false,
-    lastName: "Aoe",
-    email: "john.doe@example.com",
-    childAge: 5,
-    childDisabilities: [],
-    city: "New York",
-    bio: "Loving parent and advocate for special needs awareness.",
-    salesforce_uid: "TESTING",
-    notificationPreference: true,
-    defaultDisabilityTags: [],
-    defaultDisabilityFilters: [],
-    postDeletionTimeline: PostDeletionTimeline.FourYears,
-    profileColor: ProfileColors.ProfileDefault,
-    _id: "679db2987e2efaed1c0e9487"
-  };
-  const testArr : User[] = [testUser, testUser2, testUser3]
-
-/* ASSUMES 'USERS' is a User array that is ALREADY FILTERED for admins only*/
-
-export default function AdminPrivileges({ users } : {users : User[]}) {
-  //replace 'testArr' with 'users'
-  testArr.sort((a, b) => a.lastName.localeCompare(b.lastName));
+export default function AdminPrivileges() {
   
   const [email, setEmail] = useState("");
+  const [admins, setAdmins] = useState<User[]>([]);
   const { toast } = useToast();
+
+  useEffect(()=> {
+    fetchSortedAdmins();
+  }, [])
+
+  const fetchSortedAdmins = async () => {
+    try {
+      const initAdmins = await getAdminUsers();
+      initAdmins.sort((a,b) => a.lastName.localeCompare(b.lastName));
+      setAdmins(initAdmins);
+    } catch (error) {
+      throw error;
+    }
+  }
 
   const notifySuccess = (email : string) => {
     toast({
@@ -111,7 +63,7 @@ export default function AdminPrivileges({ users } : {users : User[]}) {
       const updatedUser = await editUser(user._id, {isAdmin: true});
       notifySuccess(email);
       setEmail("");
-
+      fetchSortedAdmins();
     } catch (error) {
       notifyFailure();
       throw error;
@@ -130,14 +82,13 @@ export default function AdminPrivileges({ users } : {users : User[]}) {
       </form>
       <div className="flex flex-col gap-3 ">
         <h2 className="text-xl mb-[14px]">Current Admin Accounts</h2>
-        {/*replace testArr with 'users' */}
-        {testArr.map((user, i) => <AdminAccount user={user} key={i}/>)}
+        {admins.map((user, i) => <AdminAccount user={user} fetchAdmins={fetchSortedAdmins} key={i}/>)}
       </div>
     </div>
   );
 }
 
-const AdminAccount = ({ user } : { user : User}) => {
+const AdminAccount = ({ user, fetchAdmins } : { user : User, fetchAdmins : () => Promise<void>}) => {
   const { toast } = useToast();
 
   const notifySuccess = (email : string) => {
@@ -158,6 +109,7 @@ const AdminAccount = ({ user } : { user : User}) => {
     try {
       const updatedUser = await editUser(user._id, {isAdmin: false});
       notifySuccess(user.email);
+      fetchAdmins();
     } catch (error) {
       notifyFailure(user._id);
       throw error;
