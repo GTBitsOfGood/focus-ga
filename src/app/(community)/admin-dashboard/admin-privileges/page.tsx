@@ -1,6 +1,9 @@
 'use client';
 import UserIcon from "@/components/UserIconComponent";
-import { User } from "@/utils/types/user";
+import { FormEvent, useState } from "react";
+import { Toaster } from "@/components/ui/toaster"
+import { useToast } from "@/hooks/use-toast";
+import { getUserByEmail, editUser } from "@/server/db/actions/UserActions";
 
 
 /* 
@@ -20,14 +23,48 @@ const testUser : any = {
 
 
 export default function AdminPrivileges({ users } : {users : any[]}) {
+  const [email, setEmail] = useState("");
+  const { toast } = useToast();
+
+  const notifySuccess = (email : string) => {
+    toast({
+      title: "Successfully added admin!",
+      description: `User with email ${email} was added as an admin.`,
+    });
+  };
+
+  const notifyFailure = () => {
+    toast({
+      title: "Failed to add admin",
+      description: "The user does not exist.",
+    });
+  };
+
+  const handleEmailChange = (event : React.ChangeEvent<HTMLInputElement>) => {
+      setEmail(event.target.value);
+  };
+
+  const handleSubmit = async (event : FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    try {
+      const user = await getUserByEmail(email);
+      await editUser(user._id, {isAdmin: true});
+      notifySuccess(email);
+      setEmail("");
+
+    } catch (error) {
+      notifyFailure();
+      throw error;
+    }
+    }
   
   return (
     <div className="mt-9 max-w-[78%] md:ml-10">
       <h1 className="text-2xl font-bold mb-[33px]">Admin Privileges</h1>
-      <form className="flex flex-col mb-[42px]">
+      <form className="flex flex-col mb-[42px]" onSubmit={handleSubmit}>
         <label className="text-xl mb-[10px]">Add New Admin Account</label>
         <div className="flex justify-between">
-        <input type="text" placeholder="Enter Email Address" className="w-[100%] border-[1px] rounded-md text-sm pl-[13px]"></input>
+        <input type="text" placeholder="Enter Email Address" className="w-[100%] border-[1px] rounded-md text-sm pl-[13px]" value={email} onChange={handleEmailChange}></input>
         <button className="rounded-md bg-theme-blue text-white pl-[25px] pr-[25px] pt-2 pb-2 text-lg ml-[13px]">Add</button>
         </div>
       </form>
@@ -43,9 +80,6 @@ export default function AdminPrivileges({ users } : {users : any[]}) {
 }
 
 const AdminAccount = ({ user } : { user : any}) => {
-
-
-
   return (
   <div className="text-xl flex justify-between align-middle border-b-[1px] pb-5 mb-2 flex-wrap">
       <UserIcon user={user} showEmail={true} showLargeIcon={true}/>

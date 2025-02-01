@@ -34,6 +34,22 @@ export async function getUser(id: string): Promise<User> {
   return user.toObject();
 }
 
+/**
+ * Retrieves a user from the database by their email.
+ * @param email - The email of the user to retrieve.
+ * @returns A promise that resolves to the user object with extended ID.
+ * @throws Will throw an error if the user is not found.
+ */
+export async function getUserByEmail(email: string): Promise<User> {
+  await dbConnect();
+
+  const user = await UserModel.findOne({email: email});
+  if (!user) {
+    throw new Error("User not found");
+  }
+  return user.toObject();
+}
+
 export async function getUserBySalesforceUid(salesforceUid: string): Promise<User> {
   await dbConnect();
 
