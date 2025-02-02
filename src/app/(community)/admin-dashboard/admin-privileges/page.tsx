@@ -77,7 +77,7 @@ export default function AdminPrivileges() {
         <label className="text-xl mb-[10px]">Add New Admin Account</label>
         <div className="flex justify-between">
         <input type="text" placeholder="Enter Email Address" className="w-[100%] border-[1px] rounded-md text-sm pl-[13px]" value={email} onChange={handleEmailChange}></input>
-        <button className="rounded-md bg-theme-blue text-white pl-[25px] pr-[25px] pt-2 pb-2 text-lg ml-[13px]">Add</button>
+        <button className="rounded-md bg-theme-blue text-white pl-[25px] pr-[25px] pt-2 pb-2 text-lg ml-[13px] font-bold">Add</button>
         </div>
       </form>
       <div className="flex flex-col gap-3 ">
@@ -118,7 +118,7 @@ const AdminAccount = ({ user, fetchAdmins } : { user : User, fetchAdmins : () =>
   return (
   <div className="text-xl flex justify-between align-middle border-b-[1px] pb-5 mb-2 flex-wrap">
       <UserIcon user={user} showEmail={true} showLargeIcon={true}/>
-      <button className="rounded-md bg-[#EAEAEA] text-theme-gray text-lg mt-3 mb-3 pl-4 pr-4  font-bold ml-[13px]" onClick={handleSubmit}>Remove</button>
+      <button className="rounded-md bg-[#EAEAEA] text-theme-gray text-lg mt-3 mb-3 pl-4 pr-4 font-bold ml-[13px]" onClick={handleSubmit}>Remove</button>
   </div>
   )
 }
