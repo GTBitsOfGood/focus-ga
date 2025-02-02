@@ -1,9 +1,9 @@
 'use client';
-import UserIcon from "@/components/UserIconComponent";
 import { User } from "@/utils/types/user";
 import { FormEvent, useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { getUserByEmail, editUser, getAdminUsers } from "@/server/db/actions/UserActions";
+import AdminDashboardUser from "@/components/AdminDashboardUserComponent";
 
 
 export default function AdminPrivileges() {
@@ -51,7 +51,7 @@ export default function AdminPrivileges() {
       setEmail(event.target.value);
   };
 
-  const handleSubmit = async (event : FormEvent<HTMLFormElement>) => {
+  const handleAdd = async (event : FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     try {
       const user = await getUserByEmail(email);
@@ -69,11 +69,35 @@ export default function AdminPrivileges() {
       throw error;
     }
   }
+
+  const notifyRemoveSuccess = (email : string) => {
+    toast({
+      title: "Successfully removed admin!",
+      description: `User with email ${email} was removed as an admin.`,
+    });
+  };
+
+  const notifyRemoveFailure = (email : string) => {
+    toast({
+      title: "Failed to remove admin.",
+      description: `User with email ${email} was failed to be removed as admin.`,
+    });
+  };
+
+  const handleRemove = async (event: React.MouseEvent<HTMLButtonElement>, user : User) => {
+    try {
+      const updatedUser = await editUser(user._id, {isAdmin: false});
+      fetchSortedAdmins();
+      notifyRemoveSuccess(user.email);
+    } catch (error) {
+      notifyRemoveFailure(user.email);
+    }
+  }
   
   return (
     <div className="mt-9 max-w-[78%] md:ml-10">
       <h1 className="text-2xl font-bold mb-[33px]">Admin Privileges</h1>
-      <form className="flex flex-col mb-[42px]" onSubmit={handleSubmit}>
+      <form className="flex flex-col mb-[42px]" onSubmit={handleAdd}>
         <label className="text-xl mb-[10px]">Add New Admin Account</label>
         <div className="flex justify-between">
         <input type="text" placeholder="Enter Email Address" className="w-[100%] border-[1px] rounded-md text-sm pl-[13px]" value={email} onChange={handleEmailChange}></input>
@@ -82,44 +106,10 @@ export default function AdminPrivileges() {
       </form>
       <div className="flex flex-col gap-3 ">
         <h2 className="text-xl mb-[14px]">Current Admin Accounts</h2>
-        {admins.map((user, i) => <AdminAccount user={user} fetchAdmins={fetchSortedAdmins} key={i}/>)}
+        {admins.map((user) => <AdminDashboardUser user={user} handleSubmit={handleRemove} buttonText={"Remove"} key={user._id}/>)}
       </div>
     </div>
   );
 }
 
-const AdminAccount = ({ user, fetchAdmins } : { user : User, fetchAdmins : () => Promise<void>}) => {
-  const { toast } = useToast();
-
-  const notifySuccess = (email : string) => {
-    toast({
-      title: "Successfully removed admin!",
-      description: `User with email ${email} was removed as an admin.`,
-    });
-  };
-
-  const notifyFailure = (email : string) => {
-    toast({
-      title: "Failed to remove admin.",
-      description: `User with email ${email} was failed to be removed as admin.`,
-    });
-  };
-
-  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    try {
-      const updatedUser = await editUser(user._id, {isAdmin: false});
-      notifySuccess(user.email);
-      fetchAdmins();
-    } catch (error) {
-      notifyFailure(user._id);
-      throw error;
-    }
-  }
-  return (
-  <div className="text-xl flex justify-between align-middle border-b-[1px] pb-5 mb-2 flex-wrap">
-      <UserIcon user={user} showEmail={true} showLargeIcon={true}/>
-      <button className="rounded-md bg-[#EAEAEA] text-theme-gray text-lg mt-3 mb-3 pl-4 pr-4 font-bold ml-[13px]" onClick={handleSubmit}>Remove</button>
-  </div>
-  )
-}
 
