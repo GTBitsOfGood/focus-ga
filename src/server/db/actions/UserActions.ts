@@ -43,7 +43,9 @@ export async function getUser(id: string): Promise<User> {
 export async function getUserByEmail(email: string): Promise<User> {
   await dbConnect();
 
-  const user = await UserModel.findOne({email: email});
+  const user = await UserModel.findOne({
+    email: { $regex: new RegExp("^" + email + "$", "i") },
+  });
   if (!user) {
     throw new Error("User not found");
   }
