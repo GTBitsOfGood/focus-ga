@@ -106,7 +106,7 @@ export default function AdminPrivileges() {
       </form>
       <div className="flex flex-col gap-3 ">
         <h2 className="text-xl mb-[14px]">Current Admin Accounts</h2>
-        {admins.map((user) => <AdminDashboardUser user={user} handleSubmit={handleRemove} buttonText={"Remove"} key={user._id}/>)}
+        {admins.map((user) => <AdminDashboardUser user={user} handleSubmit={handleRemove} buttonText={"Remove"} clickable={true} key={user._id}/>)}
       </div>
     </div>
   );
