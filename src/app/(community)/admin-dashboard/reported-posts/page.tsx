@@ -21,7 +21,7 @@ export default function ReportedPosts() {
     const unresolvedReportedPostsArr : {postId : Types.ObjectId, date : Date}[] = [];
     initReports.forEach((report) => {
       const reportedContentId = report.reportedContent;
-      if (!report.isResolved && !unresolvedReportedPostsArr.some(item => item.postId.toString() === reportedContentId.toString())) {
+      if (!report.isResolved && !unresolvedReportedPostsArr.some(item => item.postId.toString() === reportedContentId.toString()) && report.contentType === "Post") {
         unresolvedReportedPostsArr.push({postId : reportedContentId, date: report.date});
       }
     });
