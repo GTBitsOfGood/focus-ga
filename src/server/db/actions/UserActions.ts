@@ -73,12 +73,8 @@ export async function getAdminUsers(): Promise<User[]> {
 
   const adminUsers = await UserModel.find({ isAdmin: true });
   
-  if (!adminUsers || adminUsers.length === 0) {
-    throw new Error("No admin users found");
-  }
 
-  // Convert each document to a plain object if needed
-  return adminUsers.map(user => user.toObject());
+  return (!adminUsers || adminUsers.length === 0) ? [] : adminUsers.map(user => user.toObject());
 }
 
 

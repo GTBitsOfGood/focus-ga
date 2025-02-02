@@ -19,7 +19,9 @@ export default function AdminPrivileges() {
   const fetchSortedAdmins = async () => {
     try {
       const initAdmins = await getAdminUsers();
-      initAdmins.sort((a,b) => a.lastName.localeCompare(b.lastName));
+      if (initAdmins.length != 0) { 
+        initAdmins.sort((a,b) => a.lastName.localeCompare(b.lastName));
+      }
       setAdmins(initAdmins);
     } catch (error) {
       throw error;
