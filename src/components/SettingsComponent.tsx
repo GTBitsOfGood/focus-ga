@@ -81,7 +81,7 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
       <div className="mx-16 my-4 text-lg text-theme-gray">
         <BackButton />
       </div>
-      <main className="mx-20 flex flex-col px-16 space-y-6">
+      <main className="sm:mx-20 flex flex-col px-16 space-y-6">
         <div className="text-black text-xl font-bold">Settings & Preferences</div>
 
         <div>

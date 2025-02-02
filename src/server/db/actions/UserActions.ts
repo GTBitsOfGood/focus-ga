@@ -34,6 +34,24 @@ export async function getUser(id: string): Promise<User> {
   return user.toObject();
 }
 
+/**
+ * Retrieves a user from the database by their email.
+ * @param email - The email of the user to retrieve.
+ * @returns A promise that resolves to the user object with extended ID.
+ * @throws Will throw an error if the user is not found.
+ */
+export async function getUserByEmail(email: string): Promise<User> {
+  await dbConnect();
+
+  const user = await UserModel.findOne({
+    email: { $regex: new RegExp("^" + email + "$", "i") },
+  });
+  if (!user) {
+    throw new Error("User not found");
+  }
+  return user.toObject();
+}
+
 export async function getUserBySalesforceUid(salesforceUid: string): Promise<User> {
   await dbConnect();
 
@@ -43,6 +61,22 @@ export async function getUserBySalesforceUid(salesforceUid: string): Promise<Use
   }
   return user.toObject();
 }
+
+
+/**
+ * Retrieves all admin users from the database.
+ * @returns A promise that resolves to an array of user objects with extended IDs.
+ * @throws Will throw an error if no admin users are found.
+ */
+export async function getAdminUsers(): Promise<User[]> {
+  await dbConnect();
+
+  const adminUsers = await UserModel.find({ isAdmin: true });
+  
+
+  return (!adminUsers || adminUsers.length === 0) ? [] : adminUsers.map(user => user.toObject());
+}
+
 
 /**
  * Retrieves a user from the database by their ID with child disabilities populated.
