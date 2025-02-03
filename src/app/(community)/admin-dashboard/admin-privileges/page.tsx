@@ -102,24 +102,24 @@ export default function AdminPrivileges() {
 
   return (
     <div className="mt-9 max-w-[78%] md:ml-10">
-      <h1 className="mb-[33px] text-2xl font-bold">Admin Privileges</h1>
-      <form className="mb-[42px] flex flex-col" onSubmit={handleAdd}>
-        <label className="mb-[10px] text-xl">Add New Admin Account</label>
+      <h1 className="mb-8 text-2xl font-bold">Admin Privileges</h1>
+      <form className="mb-10 flex flex-col" onSubmit={handleAdd}>
+        <label className="mb-2.5 text-xl">Add New Admin Account</label>
         <div className="flex justify-between">
           <input
             type="text"
-            placeholder="Enter Email Address"
-            className="w-[100%] rounded-md border-[1px] pl-[13px] text-sm"
+            placeholder="Enter email address"
+            className="w-full rounded-md border px-3 text-sm"
             value={email}
             onChange={handleEmailChange}
           ></input>
-          <button className="ml-[13px] rounded-md bg-theme-blue pb-2 pl-[25px] pr-[25px] pt-2 text-lg font-bold text-white">
+          <button className="ml-3 h-10 rounded-lg bg-theme-blue px-6 text-base font-bold text-white transition hover:opacity-90">
             Add
           </button>
         </div>
       </form>
       <div className="flex flex-col gap-3">
-        <h2 className="mb-[14px] text-xl">Current Admin Accounts</h2>
+        <h2 className="mb-3.5 text-xl">Current Admin Accounts</h2>
         {admins.map((user) => (
           <AdminDashboardUser
             user={user}

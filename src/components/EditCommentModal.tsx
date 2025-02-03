@@ -4,14 +4,13 @@ import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/contexts/UserContext";
-import { useToast } from "@/hooks/use-toast";
 
 type EditCommentModalProps = {
   isOpen: boolean;
   closeModal: () => void;
   modalTitle?: string;
   comment: string;
-  // onSubmit: (comment: string) => Promise<void>;
+  onSubmit: (newComment: string) => Promise<void>;
 };
 
 export default function EditCommentModal(props: EditCommentModalProps) {
@@ -20,7 +19,7 @@ export default function EditCommentModal(props: EditCommentModalProps) {
     closeModal,
     modalTitle = "Edit Comment",
     comment: initialComment,
-    // onSubmit,
+    onSubmit,
   } = props;
 
   const [showTitleError, setTitleError] = useState(false);
@@ -31,12 +30,12 @@ export default function EditCommentModal(props: EditCommentModalProps) {
 
   const handleSubmit = async () => {
     try {
-      // if (validateSubmission()) {
-      //   setIsSubmitting(true);
-      //   await onSubmit(title, content, tags);
-      //   closeModal();
-      //   editorRef.current?.setMarkdown("");
-      // }
+      if (comment.length != 0) {
+        console.log("HI");
+        setIsSubmitting(true);
+        await onSubmit(comment);
+        closeModal();
+      }
     } catch (error) {
     } finally {
       setIsSubmitting(false);
@@ -81,7 +80,7 @@ export default function EditCommentModal(props: EditCommentModalProps) {
 
         <div className="relative mb-6">
           <div
-            className={`mt-1 w-full border p-3 ${showTitleError ? "border-[#ff4e4e]" : "border-gray-300"} flex items-center justify-between rounded-md`}
+            className={`mt-1 w-full border p-3 ${showTitleError ? "border-error-red" : "border-gray-300"} flex items-center justify-between rounded-md`}
           >
             <textarea
               id="title"
@@ -93,7 +92,7 @@ export default function EditCommentModal(props: EditCommentModalProps) {
           </div>
 
           {showTitleError ? (
-            <div className="text-sm font-normal text-[#ff4e4e]">
+            <div className="text-sm font-normal text-error-red">
               Required Field
             </div>
           ) : null}

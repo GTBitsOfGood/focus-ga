@@ -34,6 +34,8 @@ import ContentReportsModal from "./ContentReportsModal";
 import { useToast } from "@/hooks/use-toast";
 import UserIcon from "./UserIconComponent";
 import ConfirmationDialog from "./ConfirmationDialog";
+import EditCommentModal from "./EditCommentModal";
+import { editComment } from "@/server/db/actions/CommentActions";
 
 type CommentComponentProps = {
   className?: string;
@@ -77,6 +79,7 @@ export default function CommentComponent(props: CommentComponentProps) {
   const [isDeleted, setIsDeleted] = useState<boolean>(initialIsDeleted);
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
   const [showIgnoreDialog, setShowIgnoreDialog] = useState<boolean>(false);
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
   const [showReportModal, setShowReportModal] = useState<boolean>(false);
   const [reports, setReports] = useState<PopulatedReport[]>([]);
@@ -102,6 +105,12 @@ export default function CommentComponent(props: CommentComponentProps) {
     fetchReports();
   }, []);
 
+  useEffect(() => {
+    if (!fromReports) {
+      setShowContentReports(false);
+    }
+  }, [fromReports]);
+
   async function handleLikeClick() {
     if (likeLoading) return;
 
@@ -122,6 +131,19 @@ export default function CommentComponent(props: CommentComponentProps) {
       } finally {
         setLikeLoading(false);
       }
+    }
+  }
+
+  async function handleEditClick(newComment: string) {
+    setContent(newComment);
+
+    try {
+      await editComment(comment._id, { content: newComment });
+      setFromReports(false);
+      resolveReports();
+      fetchReports();
+    } catch (e) {
+      console.error(e);
     }
   }
 
@@ -245,6 +267,13 @@ export default function CommentComponent(props: CommentComponentProps) {
                         <Ellipsis className="h-5 w-5" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent side="bottom" align="start">
+                        {user?._id === comment.author?._id || user?.isAdmin ? (
+                          <DropdownMenuItem
+                            onClick={() => setShowEditModal(true)}
+                          >
+                            Edit
+                          </DropdownMenuItem>
+                        ) : null}
                         <DropdownMenuItem
                           onClick={() => setShowDeleteDialog(true)}
                         >
@@ -299,7 +328,7 @@ export default function CommentComponent(props: CommentComponentProps) {
           onDelete={() => setShowDeleteDialog(true)}
           onIgnore={() => setShowIgnoreDialog(true)}
           setFromReports={setFromReports}
-          onEdit={() => console.log("HI")}
+          onEdit={() => setShowEditModal(true)}
         />
       )}
       {showDeleteDialog && (
@@ -326,18 +355,22 @@ export default function CommentComponent(props: CommentComponentProps) {
           resolveReports={resolveReports}
         />
       )}
-      {/* {showEditModal && (
-        <ConfirmationDialog
-          handleCancel={() => {
-            setShowIgnoreDialog(false);
-            setShowContentReports(true);
+      {showEditModal && (
+        <EditCommentModal
+          isOpen={showEditModal}
+          comment={comment.content}
+          closeModal={() => {
+            setShowEditModal(false);
+            if (fromReports) {
+              setShowContentReports(true);
+            }
           }}
-          loading={deleteLoading}
-          handleConfirm={() => setShowIgnoreDialog(false)}
-          type="ignore"
-          resolveReports={resolveReports}
+          onSubmit={handleEditClick}
+          {...(fromReports || user?._id != author?._id
+            ? { modalTitle: `Edit ${author?.lastName}'s comment` }
+            : {})}
         />
-      )} */}
+      )}
     </div>
   );
 }

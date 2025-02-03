@@ -152,10 +152,10 @@ export default function EditPostModal(props: EditPostModalProps) {
             className="block text-sm font-bold text-gray-700"
           >
             Title
-            <span className="text-base font-medium text-[#ff4e4e]">*</span>
+            <span className="text-base font-medium text-error-red">*</span>
           </label>
           <div
-            className={`mt-1 w-full border p-3 ${showTitleError ? "border-[#ff4e4e]" : "border-gray-300"} flex items-center justify-between rounded-md`}
+            className={`mt-1 w-full border p-3 ${showTitleError ? "border-error-red" : "border-gray-300"} flex items-center justify-between rounded-md`}
           >
             <input
               id="title"
@@ -171,7 +171,7 @@ export default function EditPostModal(props: EditPostModalProps) {
           </div>
 
           {showTitleError ? (
-            <div className="text-sm font-normal text-[#ff4e4e]">
+            <div className="text-sm font-normal text-error-red">
               Required Field
             </div>
           ) : null}
@@ -183,7 +183,7 @@ export default function EditPostModal(props: EditPostModalProps) {
             className="block text-sm font-bold text-gray-700"
           >
             Body
-            <span className="text-base font-medium text-[#ff4e4e]">*</span>
+            <span className="text-base font-medium text-error-red">*</span>
           </label>
           <div
             className={`mt-1 h-full rounded-lg border ${showBodyError ? "border-2 border-red-300" : ""}`}
@@ -198,7 +198,7 @@ export default function EditPostModal(props: EditPostModalProps) {
           </div>
           <div className="flex justify-between">
             {showBodyError ? (
-              <div className="text-sm font-normal text-[#ff4e4e]">
+              <div className="text-sm font-normal text-error-red">
                 Required Field
               </div>
             ) : (

@@ -71,21 +71,6 @@ export async function getUserBySalesforceUid(
 }
 
 /**
- * Retrieves all admin users from the database.
- * @returns A promise that resolves to an array of user objects with extended IDs.
- * @throws Will throw an error if no admin users are found.
- */
-export async function getAdminUsers(): Promise<User[]> {
-  await dbConnect();
-
-  const adminUsers = await UserModel.find({ isAdmin: true });
-
-  return !adminUsers || adminUsers.length === 0
-    ? []
-    : adminUsers.map((user) => user.toObject());
-}
-
-/**
  * Retrieves a user from the database by their ID with child disabilities populated.
  * @param id - The ID of the user to retrieve.
  * @returns A promise that resolves to the populated user object.
@@ -102,6 +87,34 @@ export async function getPopulatedUser(id: string): Promise<PopulatedUser> {
     throw new Error("User not found");
   }
   return user.toObject();
+}
+
+/**
+ * Retrieves all admin users from the database.
+ * @returns A promise that resolves to an array of user objects with extended IDs.
+ */
+export async function getAdminUsers(): Promise<User[]> {
+  await dbConnect();
+
+  const adminUsers = await UserModel.find({ isAdmin: true });
+
+  return !adminUsers || adminUsers.length === 0
+    ? []
+    : adminUsers.map((user) => user.toObject());
+}
+
+/**
+ * Retrieves all banned users from the database.
+ * @returns A promise that resolves to an array of user objects with extended IDs.
+ */
+export async function getBannedUsers(): Promise<User[]> {
+  await dbConnect();
+
+  const bannedUsers = await UserModel.find({ isBanned: true });
+
+  return !bannedUsers || bannedUsers.length === 0
+    ? []
+    : bannedUsers.map((user) => user.toObject());
 }
 
 /**
