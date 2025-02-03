@@ -201,7 +201,7 @@ export default function PostCommentsContainer(
       <div className="mx-16 my-4 text-lg text-[#686868]">
         <BackButton />
       </div>
-      <div className="mx-32 mb-16 flex flex-col items-stretch gap-4 p-4">
+      <div className="mx-0 sm:mx-32 mb-16 p-4 flex flex-col items-stretch gap-4">
         <PostComponent
           post={post}
           onLikeClick={onPostLikeClick}
