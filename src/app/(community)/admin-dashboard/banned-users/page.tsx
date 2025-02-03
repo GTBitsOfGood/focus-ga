@@ -120,7 +120,6 @@ export default function BannedUsers() {
             user={user}
             handleSubmit={handleRemove}
             buttonText={"Unban"}
-            clickable={true}
             key={user._id}
           />
         ))}

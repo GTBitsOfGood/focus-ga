@@ -9,7 +9,6 @@ type AdminDashboardUser = {
   user: User | PopulatedUser | null;
   buttonText: string;
   handleSubmit: any;
-  clickable?: boolean;
   boldText?: boolean;
 };
 
@@ -17,7 +16,6 @@ export default function AdminDashboardUser({
   user,
   buttonText,
   handleSubmit,
-  clickable,
   boldText,
 }: AdminDashboardUser) {
   const inner = (
@@ -51,7 +49,7 @@ export default function AdminDashboardUser({
   return (
     <div className="mb-2 flex flex-wrap items-center justify-between border-b pb-5 align-middle text-xl">
       <div className="flex items-center gap-1">
-        {clickable ? <Link href={`/family/${user?._id}`}>{inner}</Link> : inner}
+        <Link href={`/family/${user?._id}`}>{inner}</Link>
         <Tooltip anchorSelect=".admin-icon" className="py-1 text-xs">
           Admin User
         </Tooltip>

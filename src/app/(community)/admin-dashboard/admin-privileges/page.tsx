@@ -125,7 +125,6 @@ export default function AdminPrivileges() {
             user={user}
             handleSubmit={handleRemove}
             buttonText={"Remove"}
-            clickable={true}
             key={user._id}
           />
         ))}
