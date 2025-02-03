@@ -9,6 +9,7 @@ import {
 } from "@/server/db/actions/DisabilityActions";
 import Tag from "@/components/Tag";
 import { Search } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 
 export default function DisabilitiesList() {
@@ -16,18 +17,15 @@ export default function DisabilitiesList() {
   const [disabilityName, setDisabilityName] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     async function fetchDisabilities() {
       try {
-        setLoading(true);
         const response = await getDisabilities();
         setDisabilities(response.sort((a, b) => a.name.localeCompare(b.name)));
       } catch (error) {
         setError("Failed to load disabilities.");
-      } finally {
-        setLoading(false);
       }
     }
     fetchDisabilities();
@@ -36,28 +34,34 @@ export default function DisabilitiesList() {
   const handleAddDisability = async () => {
     if (!disabilityName.trim()) return;
     try {
-      setLoading(true);
       const newDisability = await createDisability({ name: disabilityName });
       setDisabilities((prev) =>
         [...prev, newDisability].sort((a, b) => a.name.localeCompare(b.name))
       );
       setDisabilityName("");
+      toast({
+        title: "Disability Added",
+      });
     } catch (error) {
-      setError("Failed to add disability.");
-    } finally {
-      setLoading(false);
+      toast({
+        title: "Failed to add disability",
+        description: "An error occurred while adding the disability. Please try again.",
+      });
     }
   };
 
   const handleDeleteDisability = async (id: string) => {
     try {
-      setLoading(true);
       await deleteDisability(id);
       setDisabilities((prev) => prev.filter((d) => d._id !== id));
+      toast({
+        title: "Disability Deleted",
+      });
     } catch (error) {
-      setError("Failed to delete disability.");
-    } finally {
-      setLoading(false);
+      toast({
+        title: "Failed to delete disability",
+        description: "An error occurred while deleting the disability. Please try again.",
+      });
     }
   };
 
@@ -92,7 +96,6 @@ export default function DisabilitiesList() {
         />
         <button
           className="bg-theme-blue text-white px-6 py-1.5 rounded-md transition hover:opacity-90 h-10"
-          disabled={loading}
           onClick={handleAddDisability}
         >
           Add
@@ -112,8 +115,6 @@ export default function DisabilitiesList() {
             />
           </div>
         </div>
-
-      {loading && <div className="text-center text-blue-500">Loading...</div>}
 
         {Object.keys(groupedDisabilities).map((letter) => (
           <div key={letter} className="mb-4">
