@@ -7,6 +7,8 @@ import dbConnect from "../dbConnect";
 import mongoose from "mongoose";
 import PostModel from "../models/PostModel";
 import UserModel from "../models/UserModel";
+import { getAllProfanities } from "./ProfanityActions";
+import { containsProfanity } from "@/utils/profanityChecker";
 import { revalidatePath } from "next/cache";
 
 /**
@@ -21,7 +23,14 @@ export async function createComment(comment: CommentInput): Promise<Comment> {
 
   try {
     await dbConnect();
-    const parsedData = commentSchema.parse(comment);
+    const profanities = await getAllProfanities();
+    const profanityWords = profanities.map(profanity => profanity.name);
+
+    const isFlagged = containsProfanity(comment.content, profanityWords);
+    const parsedData = commentSchema.parse({
+      ...comment,
+      isFlagged
+    });
     const createdComment = await CommentModel.create([parsedData], { session });
 
     await PostModel.findByIdAndUpdate(
