@@ -12,6 +12,7 @@ import AdminDashboardUser from "@/components/AdminDashboardUser";
 export default function AdminPrivileges() {
   const [email, setEmail] = useState("");
   const [admins, setAdmins] = useState<User[]>([]);
+  const [emailError, setEmailError] = useState<boolean>(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -44,19 +45,12 @@ export default function AdminPrivileges() {
     });
   };
 
-  const notifyFailure = () => {
-    toast({
-      title: "Failed to add admin",
-      description: `User with email ${email} does not exist.`,
-    });
-  };
-
   const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value);
+    setEmailError(false);
   };
 
-  const handleAdd = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleAdd = async () => {
     try {
       const user = await getUserByEmail(email);
       if (user.isAdmin) {
@@ -69,7 +63,7 @@ export default function AdminPrivileges() {
       setEmail("");
       fetchSortedAdmins();
     } catch (error) {
-      notifyFailure();
+      setEmailError(true);
     }
   };
 
@@ -102,30 +96,35 @@ export default function AdminPrivileges() {
 
   return (
     <div className="mt-9 max-w-[78%] md:ml-10">
-      <h1 className="mb-[33px] text-2xl font-bold">Admin Privileges</h1>
-      <form className="mb-[42px] flex flex-col" onSubmit={handleAdd}>
-        <label className="mb-[10px] text-xl">Add New Admin Account</label>
-        <div className="flex justify-between">
-          <input
-            type="text"
-            placeholder="Enter Email Address"
-            className="w-[100%] rounded-md border-[1px] pl-[13px] text-sm"
-            value={email}
-            onChange={handleEmailChange}
-          ></input>
-          <button className="ml-[13px] rounded-md bg-theme-blue pb-2 pl-[25px] pr-[25px] pt-2 text-lg font-bold text-white">
-            Add
-          </button>
+      <h1 className="mb-8 text-2xl font-bold">Admin Privileges</h1>
+      <label className="mb-2.5 text-xl">Add New Admin Account</label>
+      <div className="mt-2.5 flex justify-between text-sm">
+        <input
+          type="text"
+          placeholder="Enter email address"
+          className={`border ${emailError ? "border-error-red" : "border-gray-300"} h-10 w-full rounded-lg bg-white px-3`}
+          value={email}
+          onChange={handleEmailChange}
+        ></input>
+        <button
+          onClick={handleAdd}
+          className="ml-3 h-10 rounded-lg bg-theme-blue px-6 text-base font-bold text-white transition hover:opacity-90"
+        >
+          Add
+        </button>
+      </div>
+      {emailError ? (
+        <div className="absolute text-sm font-normal text-error-red">
+          Invalid user email
         </div>
-      </form>
+      ) : null}
       <div className="flex flex-col gap-3">
-        <h2 className="mb-[14px] text-xl">Current Admin Accounts</h2>
+        <h2 className="mb-3.5 mt-10 text-xl">Current Admin Accounts</h2>
         {admins.map((user) => (
           <AdminDashboardUser
             user={user}
             handleSubmit={handleRemove}
             buttonText={"Remove"}
-            clickable={true}
             key={user._id}
           />
         ))}

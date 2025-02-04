@@ -9,7 +9,6 @@ type AdminDashboardUser = {
   user: User | PopulatedUser | null;
   buttonText: string;
   handleSubmit: any;
-  clickable?: boolean;
   boldText?: boolean;
 };
 
@@ -17,14 +16,13 @@ export default function AdminDashboardUser({
   user,
   buttonText,
   handleSubmit,
-  clickable,
   boldText,
 }: AdminDashboardUser) {
   const inner = (
     <div className="flex items-center gap-2">
       <div
         className={cn(
-          `flex h-[64px] w-[64px] cursor-pointer items-center justify-center rounded-full`,
+          `flex h-16 w-16 cursor-pointer items-center justify-center rounded-full`,
           `bg-${user?.profileColor || ProfileColors.ProfileDefault}`,
         )}
       >
@@ -49,15 +47,15 @@ export default function AdminDashboardUser({
   );
 
   return (
-    <div className="mb-2 flex flex-wrap justify-between border-b-[1px] pb-5 align-middle text-xl">
+    <div className="mb-2 flex flex-wrap items-center justify-between border-b pb-5 align-middle text-xl">
       <div className="flex items-center gap-1">
-        {clickable ? <Link href={`/family/${user?._id}`}>{inner}</Link> : inner}
+        <Link href={`/family/${user?._id}`}>{inner}</Link>
         <Tooltip anchorSelect=".admin-icon" className="py-1 text-xs">
           Admin User
         </Tooltip>
       </div>
       <button
-        className="mb-3 ml-[13px] mt-3 rounded-md bg-[#EAEAEA] pl-4 pr-4 text-lg font-bold text-theme-gray"
+        className="h-[38px] rounded-md bg-[#EAEAEA] pl-4 pr-4 text-base font-bold text-theme-gray"
         onClick={(event) => {
           handleSubmit(event, user);
         }}
