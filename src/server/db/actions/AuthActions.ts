@@ -36,7 +36,9 @@ export async function getAuthenticatedUser(refresh = false): Promise<PopulatedUs
  */
 export async function loginUser(email: string, uid: string) {
   let user = await getUserBySalesforceUid(uid);
+  let isFirstTime = false
   if (!user) {
+    isFirstTime = true
     user = await createUser({ 
       email,
       username: email,
@@ -55,7 +57,7 @@ export async function loginUser(email: string, uid: string) {
   session.isLoggedIn = true;
   await session.save();
 
-  return { success: true };
+  return { success: true, isFirstTime };
 }
 
 /**
