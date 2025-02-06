@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import React from "react";
 import { ChevronLeftIcon } from "lucide-react";
+import { useUser } from "@/contexts/UserContext";
 
 const tabs = [
   { name: "Admin Privileges", path: "admin-privileges" },
@@ -15,14 +17,23 @@ const tabs = [
 
 // Try not to change this file or it may cause merge conflicts
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const pathname = usePathname();
+  const { user: currUser, setUser } = useUser(); 
+  
+  useEffect(() => {
+    if (!currUser?.isAdmin) {
+      router.replace("/");
+    }
+  }, [currUser, router]);
+  if (!currUser?.isAdmin) return null;
 
   return (
     <div className="flex flex-col md:flex-row h-full">
       <aside className="w-full md:w-1/6 p-4">
         <Link
           href="/"
-          className="flex items-center gap-1 w-min text-lg p-2 cursor-pointer ml-0 md:ml-16 lg:ml-32"
+          className="flex items-center gap-1 w-min text-lg p-2 cursor-pointer ml-0 md:ml-16 lg:ml-32 text-theme-gray"
         >
           <ChevronLeftIcon className="w-6 h-6" /> Back
         </Link>

@@ -8,10 +8,12 @@ import {
   getAdminUsers,
 } from "@/server/db/actions/UserActions";
 import AdminDashboardUser from "@/components/AdminDashboardUser";
+import { LoaderCircle } from "lucide-react";
 
 export default function AdminPrivileges() {
   const [email, setEmail] = useState("");
   const [admins, setAdmins] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
   const [emailError, setEmailError] = useState<boolean>(false);
   const { toast } = useToast();
 
@@ -21,11 +23,13 @@ export default function AdminPrivileges() {
 
   const fetchSortedAdmins = async () => {
     try {
+      setLoading(true);
       const initAdmins = await getAdminUsers();
       if (initAdmins.length != 0) {
         initAdmins.sort((a, b) => a.lastName.localeCompare(b.lastName));
       }
       setAdmins(initAdmins);
+      setLoading(false);
     } catch (error) {
       console.error(error);
     }
@@ -129,6 +133,11 @@ export default function AdminPrivileges() {
           />
         ))}
       </div>
+          {loading &&
+            <div className="flex items-center justify-center mt-8">
+              <LoaderCircle className="animate-spin" size={32} color="#475CC6"/>
+            </div>
+          }
     </div>
   );
 }

@@ -185,7 +185,7 @@ export default function Navbar({ openModal }: NavbarProps) {
               onClick={async () => {
                 setUser(null);
                 await signOut();
-                router.refresh();
+                router.push("/");
               }}
               className="mb-2 ml-4 mt-2 block cursor-pointer py-1 text-left text-theme-blue transition-colors hover:underline"
             >

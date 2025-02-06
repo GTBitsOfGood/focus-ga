@@ -188,7 +188,7 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
           <button
             onClick={async () => {
               await signOut();
-              router.refresh();
+              router.push("/");
             }}
             className="w-auto px-4 py-2 mb-8 text-theme-blue rounded-md border border-theme-blue hover:bg-blue-100 transition"
           >

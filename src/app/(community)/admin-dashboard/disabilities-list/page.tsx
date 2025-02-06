@@ -85,7 +85,7 @@ export default function DisabilitiesList() {
   );
 
   return (
-    <div className="container mx-auto ml-10 mt-5 max-w-4xl p-6">
+    <div className="mt-9 max-w-[78%] md:ml-10">
       <h1 className="mb-7 text-2xl font-bold">Disabilities List</h1>
       {error && <div className="mb-4 text-red-500">{error}</div>}
       <h2 className="mb-3 text-xl">Add New Disability</h2>

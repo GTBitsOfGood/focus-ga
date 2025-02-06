@@ -75,7 +75,16 @@ function CommunityLayout({ children }: LayoutProps) {
     return (
       <div className="flex justify-center items-center h-screen flex-col">
         <Image src={focusLogo} alt="focus logo" width={200} priority={true} />
-        <p className="absolute bottom-16">Please refresh this page if it does not load in 10 seconds</p>
+        <p className="absolute bottom-16">
+          Please{" "}
+          <button
+            className="text-theme-blue font-bold hover:underline"
+            onClick={() => window.location.reload()}
+          >
+            refresh
+          </button>{" "}
+          this page if it does not load in 10 seconds
+        </p>
       </div>
     );
   }

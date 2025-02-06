@@ -5,11 +5,13 @@ import { getReports } from "@/server/db/actions/ReportActions";
 import { useUser } from "@/contexts/UserContext";
 import { useState, useEffect } from "react";
 import { Types } from "mongoose";
+import { LoaderCircle } from "lucide-react";
 import { PopulatedPost } from "@/utils/types/post";
 
 export default function ReportedPosts() {
   const [posts, setPosts] = useState<PopulatedPost[]>([]);
   const { user } = useUser();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchUnresolvedPosts();
@@ -17,6 +19,7 @@ export default function ReportedPosts() {
 
   const fetchUnresolvedPosts = async () => {
     if (!user) return;
+    setLoading(true);
     const initReports = await getReports();
     const unresolvedReportedPostsArr: { postId: Types.ObjectId; date: Date }[] =
       [];
@@ -45,6 +48,7 @@ export default function ReportedPosts() {
         return await getPopulatedPost(idAsString, user._id);
       }),
     );
+    setLoading(false);
     setPosts(postsArr);
   };
 
@@ -54,6 +58,11 @@ export default function ReportedPosts() {
       {posts.map((post, index) => {
         return <PostComponent key={post._id} post={post} clickable={true} />;
       })}
+      {loading &&
+            <div className="flex items-center justify-center mt-8">
+              <LoaderCircle className="animate-spin" size={32} color="#475CC6"/>
+            </div>
+          }
     </div>
   );
 }
