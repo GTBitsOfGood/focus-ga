@@ -165,7 +165,7 @@ export async function createPost(post: PostInput): Promise<Post> {
   const profanities = await getAllProfanities();
   const profanityWords = profanities.map(profanity => profanity.name);
 
-  const isFlagged = containsProfanity(post.content, profanityWords);
+  const isFlagged = containsProfanity(post.content, profanityWords) || containsProfanity(post.title, profanityWords);
 
   const validatedPost = postSchema.parse({
     ...post,

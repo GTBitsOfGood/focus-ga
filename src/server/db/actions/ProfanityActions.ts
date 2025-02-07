@@ -12,7 +12,10 @@ export async function getAllProfanities(): Promise<Profanity[]> {
 
 export async function addProfanity(profanity: ProfanityInput): Promise<Profanity> {
   await dbConnect();
-  let createdProfanity = await ProfanityModel.create(profanity)
+  let trimmed : ProfanityInput = {
+    name: profanity.name.trim()
+  }
+  let createdProfanity = await ProfanityModel.create(trimmed)
   return createdProfanity.toObject();
 }
 

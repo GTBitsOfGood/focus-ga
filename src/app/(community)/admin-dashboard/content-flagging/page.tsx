@@ -1,9 +1,6 @@
-'use client';
+  'use client';
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@/contexts/UserContext';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Profanity, ProfanityInput } from "@/utils/types/profanity";
@@ -70,7 +67,7 @@ export default function ProfanityList() {
 
   const groupedProfanities = filteredProfanities.reduce(
     (acc: Record<string, Profanity[]>, profanity) => {
-      const firstLetter = profanity.name[0].toUpperCase();
+      const firstLetter = /^[a-zA-Z]/.test(profanity.name) ? profanity.name[0].toUpperCase() : "Other";
       if (!acc[firstLetter]) {
         acc[firstLetter] = [];
       }
@@ -79,6 +76,12 @@ export default function ProfanityList() {
     },
     {},
   );
+
+  const sortedLetters = Object.keys(groupedProfanities).sort((a, b) => {
+    if (a === "Other") return 1;
+    if (b === "Other") return -1;
+    return a.localeCompare(b);
+  });
 
   return (
     <div className="container mx-auto ml-10 mt-5 max-w-4xl p-6">
@@ -115,7 +118,7 @@ export default function ProfanityList() {
           </div>
         </div>
 
-        {Object.keys(groupedProfanities).map((letter) => (
+        {sortedLetters.map((letter) => (
           <div key={letter} className="mb-4">
             <div className="mb-2 text-lg">{letter}</div>
             <div className="flex flex-wrap gap-3">
