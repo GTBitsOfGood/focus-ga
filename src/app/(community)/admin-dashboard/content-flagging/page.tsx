@@ -40,7 +40,7 @@ export default function ProfanityList() {
     } catch (error) {
       toast({
         title: "Failed to add profanity",
-        description: "An error occurred while adding the profanity. Please try again.",
+        description: `An error occurred while adding the profanity. "${profanityName}" may have already been added.`,
       });
     }
   };
