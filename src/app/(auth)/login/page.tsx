@@ -9,6 +9,7 @@ import focusLogo from "../../../../public/focus-logo.png";
 import transparencyBadge from "../../../../public/transparency-badge.png";
 import { deflateRawSync } from "zlib";
 import { loginUser } from "@/server/db/actions/AuthActions";
+import { getAuthenticatedUser } from '@/server/db/actions/AuthActions';
 
 export default function Login() {
   const router = useRouter();
@@ -22,7 +23,12 @@ export default function Login() {
     try {
       const result = await loginUser(email, email);
       if (result.success) {
-        router.push("/");
+        const authenticatedUser = await getAuthenticatedUser();
+        if (result.isFirstTime && authenticatedUser?.childDisabilities.length === 0) {
+          router.push("/?setup=true");
+        } else {
+          router.push("/");
+        }
       }
     } catch (error) {
       setCredentialsError(true);

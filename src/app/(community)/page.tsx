@@ -17,6 +17,10 @@ import ContactButton from "@/components/ContactButton";
 import { useDisabilities } from "@/contexts/DisabilityContext";
 import { getPopulatedPinnedPosts } from "@/server/db/actions/PostActions";
 import PinnedPosts from "@/components/PinnedPosts";
+import { useSearchParams, usePathname, useRouter } from 'next/navigation';
+import AccountSetupModal from "@/components/AccountSetupModal";
+import DisclaimerModal from "@/components/DisclaimerModal";
+
 
 export const dynamic = 'force-dynamic';
 
@@ -38,12 +42,44 @@ export default function Home() {
   const [totalPostsCount, setTotalPostsCount] = useState(0);
   const [pinnedPostContents, setPinnedPostContents] = useState<PopulatedPost[]>([]);
 
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isSetupModalVisible, setIsSetupModalVisible] = useState(false);
+  const [isDisclaimerVisible, setIsDisclaimerVisible] = useState(false);
+
+
   useEffect(() => {
     if (!user) return;
 
     setSelectedDisabilities(user.defaultDisabilityFilters);
     setFiltersLoading(false);
   }, [user]);
+
+  useEffect(() => {
+    const setup = searchParams.get('setup');
+    if (setup === "true") {
+      setIsSetupModalVisible(true);
+    }
+  }, [searchParams]);
+
+  const handleCloseModal = () => {
+    setIsSetupModalVisible(false);
+    setIsDisclaimerVisible(true);
+  };
+
+  const handleDisclaimerAccept = () => {
+    setIsDisclaimerVisible(false);
+    removeParam();
+  };
+
+  const removeParam = () => {
+    const nextSearchParams = new URLSearchParams(searchParams.toString())
+    nextSearchParams.delete('setup')
+    router.replace(`${pathname}?${nextSearchParams}`)
+  };
+
+
 
   const handleSelected = <T extends { _id: string }>(
     selected: T, 
@@ -161,6 +197,14 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center px-16">
+      <AccountSetupModal
+        isOpen={isSetupModalVisible}
+        closeModal={handleCloseModal}
+      ></AccountSetupModal>
+      <DisclaimerModal
+        isOpen={isDisclaimerVisible}
+        onAccept={handleDisclaimerAccept}
+      />
       <div className="w-full max-w-4xl space-y-8">
         {
           searchTerm && searchTerm.length ? (
