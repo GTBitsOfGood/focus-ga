@@ -117,8 +117,13 @@ export default function Login() {
             Log in
           </button>
 
-          <button onClick={handleSalesforceLogin} className="rounded-sm h-[51px] mt-2 bg-green-500 text-white w-[295px]">Log in with Salesforce</button>
-          <a href="https://focus-ga.my.site.com/s/login/ForgotPassword" className="mt-8 text-left w-[295px]">
+          <button
+            onClick={handleSalesforceLogin}
+            className="rounded-sm h-[51px] mt-2 bg-theme-blue text-white w-[295px] hover:bg-opacity-80"
+          >
+            Log in with Salesforce
+          </button>
+          <a href="https://focus-ga.my.site.com/s/login/ForgotPassword" className="mt-8 text-left w-[295px] hover:text-blue-500 hover:underline">
             Forgot your password?
           </a>
         </div>

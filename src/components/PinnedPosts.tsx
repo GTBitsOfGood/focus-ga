@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
 import { PopulatedPost } from '@/utils/types/post';
 import PostComponent from './PostComponent';
-import { Pin } from 'lucide-react';
+import { Pin, ChevronDown, ChevronUp } from 'lucide-react';
 
 type PinnedPostsProps = {
   posts: PopulatedPost[];
 };
 
 const PinnedPosts: React.FC<PinnedPostsProps> = ({ posts }) => {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   const toggleOpen = () => {
     setIsOpen((prev) => !prev);
   };
 
   return (
-    <div className="pinned-posts border-2 border-light-gray rounded-lg p-4">
+    <div className="relative pinned-posts border-2 border-light-gray rounded-lg p-4">
       <button onClick={toggleOpen} className="flex justify-between w-full">
         <div className='flex justify-between space-x-2'>
           <Pin/>
@@ -25,7 +25,7 @@ const PinnedPosts: React.FC<PinnedPostsProps> = ({ posts }) => {
         </div>
 
         <div>
-          {isOpen ? '▲' : '▼'}
+          {isOpen ? <ChevronUp /> : <ChevronDown />}
         </div>
       </button>
       {isOpen && (
@@ -35,8 +35,11 @@ const PinnedPosts: React.FC<PinnedPostsProps> = ({ posts }) => {
           ))}
         </div>
       )}
+
+      {/* Horizontal Bar */}
+      <div className="absolute bottom-3 left-0 right-0 h-1 bg-white" />
     </div>
   );
 };
 
-export default PinnedPosts; 
+export default PinnedPosts;

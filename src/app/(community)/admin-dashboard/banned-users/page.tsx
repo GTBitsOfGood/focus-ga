@@ -105,6 +105,7 @@ export default function BannedUsers() {
           type="text"
           placeholder="Enter email address"
           className={`border ${emailError ? "border-error-red" : "border-gray-300"} h-10 w-full rounded-lg bg-white px-3`}
+          onKeyDown={(e) => e.key === "Enter" && handleBanClick()}
           value={email}
           onChange={(e) => {
             setEmail(e.target.value);
@@ -141,6 +142,7 @@ export default function BannedUsers() {
               <LoaderCircle className="animate-spin" size={32} color="#475CC6"/>
             </div>
           }
+          {!(bannedUsers.length === 0) || <p className="text-center font-bold text-theme-med-gray">No banned users!</p> }
     </div>
   );
 }
