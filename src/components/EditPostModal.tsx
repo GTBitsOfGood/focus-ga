@@ -26,6 +26,7 @@ type EditPostModalProps = {
   title?: string;
   content?: string;
   tags?: Disability[];
+  isPrivate?: boolean;
   onSubmit: (
     title: string,
     content: string,
@@ -42,6 +43,7 @@ export default function EditPostModal(props: EditPostModalProps) {
     title: initialTitle,
     content: initialContent,
     tags: initialTags,
+    isPrivate: initialIsPrivate,
     onSubmit,
   } = props;
 
@@ -51,6 +53,7 @@ export default function EditPostModal(props: EditPostModalProps) {
   const [showTitleError, setTitleError] = useState(false);
   const [showBodyError, setBodyError] = useState(false);
   const disabilities = useDisabilities();
+  const [isPrivate, setIsPrivate] = useState<boolean | undefined>(initialIsPrivate);
   const [mouseDownOnBackground, setMouseDownOnBackground] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const editorRef = useRef<MDXEditorMethods | null>(null);
@@ -226,6 +229,37 @@ export default function EditPostModal(props: EditPostModalProps) {
             maxSelectionCount={5}
             typeDropdown="disabilities"
           />
+        </div>
+
+        <div className="relative mb-6">
+          <label
+            htmlFor="title"
+            className="block text-sm text-gray-700 mb-2"
+          >
+            Make your post <span className="font-bold">public</span> or <span className="font-bold">private</span>
+          </label>
+          <form className="flex flex-col items-start border-[1px] border-theme-medlight-gray rounded-[8px] p-[16px] gap-[16px]">
+            <label className="flex gap-2">
+              <div>
+                <input type="radio" className="border-theme-medlight-gray"/>
+              </div>
+              <div>
+                Private
+                <br></br>
+                <span className="text-[#A3A3A3] font-[400]">Only you and FOCUS admin can see your post</span>
+              </div>
+            </label>
+            <label className="flex gap-2">
+              <div>
+                <input type="radio" className="border-theme-medlight-gray"/>
+              </div>
+              <div>
+                Public
+                <br></br>
+                <span className="text-[#A3A3A3] font-[400]">Everyone in FOCUS group can see your post</span>
+              </div>
+            </label>
+          </form>
         </div>
 
         <div className="flex justify-end space-x-4">

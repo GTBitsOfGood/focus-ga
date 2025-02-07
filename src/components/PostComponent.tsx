@@ -90,6 +90,7 @@ export default function PostComponent(props: PostComponentProps) {
     likes: initialLikes,
     liked: initialLiked,
     saved: initialSaved,
+    isPrivate: initialIsPrivate,
     comments,
   } = post;
 
@@ -97,6 +98,7 @@ export default function PostComponent(props: PostComponentProps) {
 
   const [title, setTitle] = useState<string>(initialTitle);
   const [content, setContent] = useState<string>(initialContent);
+  const [isPrivate, setIsPrivate] = useState<boolean>(initialIsPrivate);
   const [tags, setTags] = useState<(Disability | null)[]>(initialTags);
   const [likes, setLikes] = useState<number>(initialLikes);
   const [liked, setLiked] = useState<boolean>(initialLiked);
