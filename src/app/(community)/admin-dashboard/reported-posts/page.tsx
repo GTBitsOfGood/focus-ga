@@ -63,7 +63,7 @@ export default function ReportedPosts() {
 
   useEffect(() => {
     fetchUnresolvedPosts();
-  });
+  }, []);
 
   return (
     <div className="mt-9 max-w-[78%] md:ml-10">
