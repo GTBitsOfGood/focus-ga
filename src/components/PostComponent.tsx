@@ -383,7 +383,7 @@ export default function PostComponent(props: PostComponentProps) {
         )}
       </div>
       <MarkdownRenderer
-        className={cn("text-lg leading-5", {
+        className={cn("text-lg leading-7", {
           "max-h-36 overflow-hidden": clickable,
         })}
         markdown={content}
