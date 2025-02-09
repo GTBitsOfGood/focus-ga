@@ -76,7 +76,7 @@ export default function ReportedPosts() {
           <LoaderCircle className="animate-spin" size={32} color="#475CC6"/>
         </div>
       }
-      {hasUnresolvedReport || <p className="text-center font-bold text-theme-med-gray">No reported posts!</p>      }
+    {(hasUnresolvedReport && !loading) || <p className="text-center font-bold text-theme-med-gray">No reported posts!</p>      }
     </div>
   );
 }
