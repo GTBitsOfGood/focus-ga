@@ -110,7 +110,7 @@ export default function Home() {
         const locations = selectedLocations.map((location) => location.name);
 
         const filters = { tags, locations, searchTerm };
-        const {count, posts: newPosts } = await getPopulatedPosts(user._id, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, filters);
+        const {count, posts: newPosts } = await getPopulatedPosts(user._id, user.isAdmin, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, filters);
         setTotalPostsCount(count);
         if (newPosts.length > 0) {
           setPosts(clear ? newPosts : [...posts, ...newPosts]);

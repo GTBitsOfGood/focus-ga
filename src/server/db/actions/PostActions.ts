@@ -14,6 +14,7 @@ import { revalidatePath } from "next/cache";
 // A MongoDB aggregation pipeline that efficiently populates a post
 type PipelineArgs = {
   authUserId: string,
+  isAdmin?: boolean,
   offset?: number,
   limit?: number,
   tags?: string[],
@@ -27,7 +28,7 @@ type PostAggregationResult = {
   posts: PopulatedPost[];
 };
 
-function postPopulationPipeline({ authUserId, offset, limit, tags, locations, postId, searchTerm }: PipelineArgs): mongoose.PipelineStage[] {
+function postPopulationPipeline({ authUserId, isAdmin, offset, limit, tags, locations, postId, searchTerm }: PipelineArgs): mongoose.PipelineStage[] {
   return [
     // Apply search
     ...(searchTerm ? [
@@ -51,6 +52,9 @@ function postPopulationPipeline({ authUserId, offset, limit, tags, locations, po
 
     // Filter by tags
     ...(tags && tags.length ? [{ $match: { tags: { $in: tags.map((t) => new mongoose.Types.ObjectId(t)) } } }] : []),
+
+    ...(!isAdmin ? [{ $match: { isPrivate: false } }] : []),
+
 
     // Use $facet to perform two separate aggregations: totalPostCount and posts (paginated)
     {
@@ -270,10 +274,10 @@ type Filters = {
   searchTerm?: string,
 }
 
-export async function getPopulatedPosts(authUserId: string, offset: number, limit: number, {tags, locations, searchTerm}: Filters): Promise<PostAggregationResult> {
+export async function getPopulatedPosts(authUserId: string, isAdmin : boolean, offset: number, limit: number, {tags, locations, searchTerm}: Filters): Promise<PostAggregationResult> {
   await dbConnect();
 
-  const postsInfo = await PostModel.aggregate(postPopulationPipeline({authUserId, offset, limit, tags, locations, searchTerm}));
+  const postsInfo = await PostModel.aggregate(postPopulationPipeline({authUserId, isAdmin, offset, limit, tags, locations, searchTerm}));
   return {
     count: postsInfo[0].count.length ? postsInfo[0].count[0].count : 0,
     posts: postsInfo[0].posts,
