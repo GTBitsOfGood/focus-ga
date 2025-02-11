@@ -53,6 +53,7 @@ function postPopulationPipeline({ authUserId, isAdmin, offset, limit, tags, loca
     // Filter by tags
     ...(tags && tags.length ? [{ $match: { tags: { $in: tags.map((t) => new mongoose.Types.ObjectId(t)) } } }] : []),
 
+    //User is not an admin, so returns post that are not private, else return all posts
     ...(!isAdmin ? [{ $match: { isPrivate: false } }] : []),
 
 
@@ -313,14 +314,14 @@ export async function getPopulatedUserPosts(userId: string): Promise<PopulatedPo
  * @returns A promise that resolves to a populated post object containing author and disability objects (or null if they are not found)
  * @throws Will throw an error if the post is not found.
  */
-export async function getPopulatedPost(id: string, authUserId: string): Promise<PopulatedPost> {
+export async function getPopulatedPost(id: string, authUserId: string, isAdmin : boolean,): Promise<PopulatedPost> {
   await dbConnect();
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new Error("Invalid post ID");
   }
 
-  const aggregationResult = await PostModel.aggregate(postPopulationPipeline({authUserId, postId: id}));
+  const aggregationResult = await PostModel.aggregate(postPopulationPipeline({authUserId, isAdmin, postId: id}));
   const post = aggregationResult[0].posts[0];
   if (!post) {
     throw new Error("Post not found");
