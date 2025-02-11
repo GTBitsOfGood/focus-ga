@@ -9,11 +9,13 @@ import {
   Heart,
   OctagonAlert,
   ChevronRight,
+  Eye,
 } from "lucide-react";
 import { getDateDifferenceString } from "@/utils/dateUtils";
 import MarkdownIt from "markdown-it";
 import MarkdownRenderer from "./MarkdownRenderer";
 import { cn } from "@/lib/utils";
+import VisiblityIcon from "./ui/visibilityIcon";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import {
@@ -317,7 +319,14 @@ export default function PostComponent(props: PostComponentProps) {
         </p>
       </div>
       <div className="flex items-center justify-between py-0.5">
-        <h2 className="text-2xl font-bold text-black">{title}</h2>
+          <h2 className="text-2xl font-bold text-black flex gap-4">{title}
+            {isPrivate && 
+            <span className="flex text-sm items-center gap-2 text-theme-gray font-normal"> 
+              <VisiblityIcon />
+              <p>Private</p>
+            </span>
+            }
+          </h2>
         {!clickable && (
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger>
