@@ -290,15 +290,17 @@ export async function getPopulatedPosts(authUserId: string, isAdmin : boolean, o
  * @param userId 
  * @returns 
  */
-export async function getPopulatedUserPosts(userId: string): Promise<PopulatedPost[]> {
+export async function getPopulatedUserPosts(userId: string, currUserId?: string, isAdmin?: boolean): Promise<PopulatedPost[]> {
   await dbConnect();
+
+  const postsShown = (currUserId === userId || isAdmin) ? {author: userId} : {author: userId, isPrivate: false}
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     throw new Error("Invalid user ID");
   }
 
   const posts = await PostModel
-    .find({ author: userId })
+    .find(postsShown)
     .populate({ path: 'author', model: UserModel })
     .populate({ path: 'tags', model: DisabilityModel });
 
