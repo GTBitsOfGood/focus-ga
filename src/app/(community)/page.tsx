@@ -8,6 +8,7 @@ import { LoaderCircle } from "lucide-react";
 import FilterComponent from "@/components/FilterComponent";
 import { Disability } from "@/utils/types/disability";
 import { Location } from "@/utils/types/location";
+import { Visiblity } from "@/utils/types/visibility"; 
 import { Filter } from "@/utils/types/common";
 import { PAGINATION_LIMIT } from "@/utils/consts";
 import { useUser } from "@/contexts/UserContext";

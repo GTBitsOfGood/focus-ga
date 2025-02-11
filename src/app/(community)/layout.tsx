@@ -54,14 +54,15 @@ function CommunityLayout({ children }: LayoutProps) {
     });
   };
 
-  async function onPostSubmit(title: string, content: string, tags: Disability[]) {
+  async function onPostSubmit(title: string, content: string, tags: Disability[], isPrivate: boolean) {
     if (!user) return;
     try {
       const formattedData = {
         author: user._id,
         title,
         content,
-        tags: tags.map((tag) => tag._id)
+        tags: tags.map((tag) => tag._id),
+        isPrivate
       };
       await createPost(formattedData);
       notifySuccess();

@@ -31,6 +31,7 @@ type EditPostModalProps = {
     title: string,
     content: string,
     tags: Disability[],
+    isPrivate: boolean
   ) => Promise<void>;
 };
 
@@ -53,7 +54,7 @@ export default function EditPostModal(props: EditPostModalProps) {
   const [showTitleError, setTitleError] = useState(false);
   const [showBodyError, setBodyError] = useState(false);
   const disabilities = useDisabilities();
-  const [isPrivate, setIsPrivate] = useState<boolean | undefined>(initialIsPrivate);
+  const [isPrivate, setIsPrivate] = useState<boolean>(initialIsPrivate || false);
   const [mouseDownOnBackground, setMouseDownOnBackground] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const editorRef = useRef<MDXEditorMethods | null>(null);
@@ -63,7 +64,7 @@ export default function EditPostModal(props: EditPostModalProps) {
     try {
       if (validateSubmission()) {
         setIsSubmitting(true);
-        await onSubmit(title, content, tags);
+        await onSubmit(title, content, tags, isPrivate);
         closeModal();
         editorRef.current?.setMarkdown("");
       }
@@ -241,7 +242,9 @@ export default function EditPostModal(props: EditPostModalProps) {
           <form className="flex flex-col items-start border-[1px] border-theme-medlight-gray rounded-[8px] p-[16px] gap-[16px]">
             <label className="flex gap-2">
               <div>
-                <input type="radio" className="border-theme-medlight-gray"/>
+                <input type="radio" className="border-theme-medlight-gray" id="editPrivate" checked={isPrivate} onChange={() => {
+                  setIsPrivate(true)
+                }} name="postVisibility"/>
               </div>
               <div>
                 Private
@@ -251,7 +254,9 @@ export default function EditPostModal(props: EditPostModalProps) {
             </label>
             <label className="flex gap-2">
               <div>
-                <input type="radio" className="border-theme-medlight-gray"/>
+                <input type="radio" className="border-theme-medlight-gray" id="editPublic" checked={!isPrivate} onChange={() => {
+                  setIsPrivate(false)
+                }} name="postVisibility"/>
               </div>
               <div>
                 Public
