@@ -40,7 +40,7 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
       setUserPosts(await getPopulatedUserPosts(user._id));
     };
     const fetchSavedPosts = async () => {
-      setSavedPosts(await getPopulatedSavedPosts(user._id));
+      setSavedPosts(await getPopulatedSavedPosts(user._id, user.isAdmin));
     };
 
     if (user) {
