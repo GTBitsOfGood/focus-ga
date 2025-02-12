@@ -45,7 +45,7 @@ export default function ReportedPosts() {
     let postsArr: PopulatedPost[] = await Promise.all(
       unresolvedReportedPostsArr.map(async (postInfo) => {
         const idAsString = postInfo.postId.toString();
-        return await getPopulatedPost(idAsString, user._id);
+        return await getPopulatedPost(idAsString, user._id, user.isAdmin);
       }),
     );
     setLoading(false);
