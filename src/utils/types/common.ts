@@ -4,4 +4,5 @@ export type Filter<T> = {
     data: T[];
     selected: T[];
     setSelected: (selected: T) => void;
+    searchable?: boolean;
 }

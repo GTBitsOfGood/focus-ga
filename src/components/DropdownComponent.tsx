@@ -28,6 +28,9 @@ export default function DropdownComponent (
   const [showData, setShowData] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
+  const label = props.filter.label;
+  const searchable = props.filter.searchable;
+
   const handleItemClick = (item: any) => {
     props.filter.setSelected(item);
   };
@@ -36,6 +39,19 @@ export default function DropdownComponent (
     setShowData(open);
     setIsDisabled(true);
     setTimeout(() => setIsDisabled(false), 300);
+  };
+
+  const getFilterText = () => {
+    if (searchable) {
+      const count = props.filter.selected.length;
+      return `${label}${count > 0 ? ` (${count})` : ""}`;
+    }
+    if (label === "Visibility") {
+      const currVisibility = props.filter.selected[0]?.visibility ?? label;
+      return currVisibility === "All" ? "Visibility" : currVisibility;
+    }
+
+    return label;
   };
 
   return (
@@ -49,7 +65,7 @@ export default function DropdownComponent (
           )}
         >
           <div className="text-black text-sm font-normal">
-            {props.filter.label} {props.filter.selected.length > 0 ? `(${props.filter.selected.length})` : ""}
+            {getFilterText()}
           </div>
 
           {!showData ? (
@@ -60,11 +76,12 @@ export default function DropdownComponent (
         </div>
       </PopoverTrigger>
 
+      {searchable && 
       <PopoverContent align="start" className="p-2">
         <Command>
-          <CommandInput placeholder={`Search ${props.filter.label.toLowerCase()}`} />
+          <CommandInput placeholder={`Search ${label.toLowerCase()}`} />
           <CommandList>
-            <CommandEmpty>No {props.filter.label.toLowerCase()} found.</CommandEmpty>
+            <CommandEmpty>No {label.toLowerCase()} found.</CommandEmpty>
             <CommandGroup>
                 {props.filter.data
                 .sort((a, b) => a.name.localeCompare(b.name))
@@ -91,7 +108,37 @@ export default function DropdownComponent (
             </CommandGroup>
           </CommandList>
         </Command>
-      </PopoverContent>
+      </PopoverContent>}
+      {label === "Visibility" &&
+      <PopoverContent className="w-[160px]">
+        <Command>
+          <CommandList>
+          <CommandGroup>
+                <form className="flex flex-col gap-4 [&>*]:flex [&>*]:gap-2">
+                  <label>
+                    <input type="radio" name="visibilityFilter" checked={props.filter.selected[0].visibility === 'All'} onChange={() => {
+                      props.filter.setSelected({visibility: "All", _id: "All"})
+                    }} tabIndex={-1}/>
+                    All visibility
+                  </label>
+                  <label>
+                    <input type="radio" name="visibilityFilter" checked={props.filter.selected[0].visibility === 'Public'} onChange={() => {
+                      props.filter.setSelected({visibility: "Public", _id: "Public"})
+                    }} tabIndex={-1}/>
+                    Public only
+                  </label>
+                  <label>
+                    <input type="radio" name="visibilityFilter" checked={props.filter.selected[0].visibility === 'Private'} onChange={() => {
+                      props.filter.setSelected({visibility: "Private", _id: "Private"})
+                    }} tabIndex={-1}/>
+                    Private only
+                  </label>
+                </form>
+              </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent> 
+      }
     </Popover>
   );
 }

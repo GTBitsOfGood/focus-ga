@@ -2,7 +2,7 @@ import { z } from "zod";
 import { ExtendId } from "./common";
 
 export const visibilitySchema = z.object({
-  name: z.boolean()
+  visibility: z.enum(['All', 'Public', 'Private'])
 });
 
 export const editVisiblitySchema = visibilitySchema.partial();

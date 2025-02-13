@@ -14,7 +14,8 @@ import { revalidatePath } from "next/cache";
 // A MongoDB aggregation pipeline that efficiently populates a post
 type PipelineArgs = {
   authUserId: string,
-  isAdmin?: boolean,
+  isAdmin?: boolean
+  visibility?: string,
   offset?: number,
   limit?: number,
   tags?: string[],
@@ -28,7 +29,7 @@ type PostAggregationResult = {
   posts: PopulatedPost[];
 };
 
-function postPopulationPipeline({ authUserId, isAdmin, offset, limit, tags, locations, postId, searchTerm }: PipelineArgs): mongoose.PipelineStage[] {
+function postPopulationPipeline({ authUserId, isAdmin, visibility, offset, limit, tags, locations, postId, searchTerm }: PipelineArgs): mongoose.PipelineStage[] {
   return [
     // Apply search
     ...(searchTerm ? [
@@ -55,6 +56,9 @@ function postPopulationPipeline({ authUserId, isAdmin, offset, limit, tags, loca
 
     //User is not an admin, so returns post that are not private, else return all posts
     ...(!isAdmin ? [{ $match: { isPrivate: false } }] : []),
+    ...(visibility === "Public" ? [{ $match: { isPrivate: false } }] : []),
+    ...(visibility === "Private" ? [{ $match: { isPrivate: true } }] : []),
+    ...(visibility === "All" ? [] : []),
 
 
     // Use $facet to perform two separate aggregations: totalPostCount and posts (paginated)
@@ -273,12 +277,13 @@ type Filters = {
   tags?: string[],
   locations?: string[],
   searchTerm?: string,
+  visibility?: string,
 }
 
-export async function getPopulatedPosts(authUserId: string, isAdmin : boolean, offset: number, limit: number, {tags, locations, searchTerm}: Filters): Promise<PostAggregationResult> {
+export async function getPopulatedPosts(authUserId: string, isAdmin : boolean, offset: number, limit: number, {tags, locations, searchTerm, visibility}: Filters): Promise<PostAggregationResult> {
   await dbConnect();
 
-  const postsInfo = await PostModel.aggregate(postPopulationPipeline({authUserId, isAdmin, offset, limit, tags, locations, searchTerm}));
+  const postsInfo = await PostModel.aggregate(postPopulationPipeline({authUserId, isAdmin, visibility, offset, limit, tags, locations, searchTerm}));
   return {
     count: postsInfo[0].count.length ? postsInfo[0].count[0].count : 0,
     posts: postsInfo[0].posts,
