@@ -7,7 +7,6 @@ export const MAX_DESCRIPTION_LEN = 200;
 export const PAGINATION_LIMIT = 10;
 
 export enum PostDeletionTimeline {
-  OneMinute = "1 minute",
   OneMonth = "1 month",
   ThreeMonths = "3 months",
   SixMonths = "6 months",
@@ -16,9 +15,8 @@ export enum PostDeletionTimeline {
   FourYears = "4 years",
 }
 
-// Deletion durations in days
+// Deletion durations in milliseconds
 export const PostDeletionDurations = {
-  [PostDeletionTimeline.OneMinute]: 60 * 1000,
   [PostDeletionTimeline.OneMonth]: 30 * 24 * 60 * 60 * 1000,
   [PostDeletionTimeline.ThreeMonths]: 90 * 24 * 60 * 60 * 1000,
   [PostDeletionTimeline.SixMonths]: 180 * 24 * 60 * 60 * 1000,
