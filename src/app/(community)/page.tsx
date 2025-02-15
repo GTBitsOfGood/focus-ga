@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { getPopulatedPosts } from "@/server/db/actions/PostActions";
 import PostComponent from "@/components/PostComponent";
@@ -17,12 +17,11 @@ import ContactButton from "@/components/ContactButton";
 import { useDisabilities } from "@/contexts/DisabilityContext";
 import { getPopulatedPinnedPosts } from "@/server/db/actions/PostActions";
 import PinnedPosts from "@/components/PinnedPosts";
-import { useSearchParams, usePathname, useRouter } from 'next/navigation';
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import AccountSetupModal from "@/components/AccountSetupModal";
 import DisclaimerModal from "@/components/DisclaimerModal";
 
-
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default function Home() {
   const [posts, setPosts] = useState<PopulatedPost[]>([]);
@@ -30,24 +29,27 @@ export default function Home() {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
   const { user } = useUser();
-  
+
   const disabilities = useDisabilities();
-  const [selectedDisabilities, setSelectedDisabilities] = useState<Disability[]>([]);
+  const [selectedDisabilities, setSelectedDisabilities] = useState<
+    Disability[]
+  >([]);
   const [filtersLoading, setFiltersLoading] = useState(true);
 
-  const locations = GEORGIA_CITIES.map(city => ({ name: city, _id: city }));
+  const locations = GEORGIA_CITIES.map((city) => ({ name: city, _id: city }));
   const [selectedLocations, setSelectedLocations] = useState<Location[]>([]);
 
   const { searchTerm } = useSearch();
   const [totalPostsCount, setTotalPostsCount] = useState(0);
-  const [pinnedPostContents, setPinnedPostContents] = useState<PopulatedPost[]>([]);
+  const [pinnedPostContents, setPinnedPostContents] = useState<PopulatedPost[]>(
+    [],
+  );
 
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const [isSetupModalVisible, setIsSetupModalVisible] = useState(false);
   const [isDisclaimerVisible, setIsDisclaimerVisible] = useState(false);
-
 
   useEffect(() => {
     if (!user) return;
@@ -57,13 +59,13 @@ export default function Home() {
   }, [user]);
 
   useEffect(() => {
-    const setup = searchParams.get('setup');
+    const setup = searchParams.get("setup");
     if (setup === "true") {
       setIsSetupModalVisible(true);
     }
   }, [searchParams]);
 
-  const handleCloseModal = () => {
+  const handleCloseSetupModal = () => {
     setIsSetupModalVisible(false);
     setIsDisclaimerVisible(true);
   };
@@ -74,16 +76,14 @@ export default function Home() {
   };
 
   const removeParam = () => {
-    const nextSearchParams = new URLSearchParams(searchParams.toString())
-    nextSearchParams.delete('setup')
-    router.replace(`${pathname}?${nextSearchParams}`)
+    const nextSearchParams = new URLSearchParams(searchParams.toString());
+    nextSearchParams.delete("setup");
+    router.replace(`${pathname}?${nextSearchParams}`);
   };
 
-
-
   const handleSelected = <T extends { _id: string }>(
-    selected: T, 
-    setSelected: React.Dispatch<React.SetStateAction<T[]>>
+    selected: T,
+    setSelected: React.Dispatch<React.SetStateAction<T[]>>,
   ) => {
     setSelected((prevSelected) => {
       if (prevSelected.some((item) => item._id === selected._id)) {
@@ -98,14 +98,16 @@ export default function Home() {
     label: "Disability",
     data: disabilities,
     selected: selectedDisabilities,
-    setSelected: (selected: Disability) => handleSelected(selected, setSelectedDisabilities)
+    setSelected: (selected: Disability) =>
+      handleSelected(selected, setSelectedDisabilities),
   };
 
   const locationFilter: Filter<Location> = {
     label: "Location",
     data: locations,
     selected: selectedLocations,
-    setSelected: (selected: Location) => handleSelected(selected, setSelectedLocations)
+    setSelected: (selected: Location) =>
+      handleSelected(selected, setSelectedLocations),
   };
 
   //TODO: update once demographics are added
@@ -114,14 +116,14 @@ export default function Home() {
     data: [],
     selected: [],
     setSelected: (selected) => {
-      console.log("age selected")
-    }
+      console.log("age selected");
+    },
   };
 
   // fetch posts when filter changes
   useEffect(() => {
     fetchPosts(true);
-  }, [selectedDisabilities, selectedLocations, searchTerm])
+  }, [selectedDisabilities, selectedLocations, searchTerm]);
 
   // fetch posts when page changes
   const fetchPosts = async (clear: boolean = false) => {
@@ -140,12 +142,17 @@ export default function Home() {
     while (retries > 0) {
       try {
         const newPage = clear ? 0 : page;
-  
+
         const tags = selectedDisabilities.map((disability) => disability._id);
         const locations = selectedLocations.map((location) => location.name);
 
         const filters = { tags, locations, searchTerm };
-        const {count, posts: newPosts } = await getPopulatedPosts(user._id, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, filters);
+        const { count, posts: newPosts } = await getPopulatedPosts(
+          user._id,
+          newPage * PAGINATION_LIMIT,
+          PAGINATION_LIMIT,
+          filters,
+        );
         setTotalPostsCount(count);
         if (newPosts.length > 0) {
           setPosts(clear ? newPosts : [...posts, ...newPosts]);
@@ -181,9 +188,9 @@ export default function Home() {
 
       if (node) observer.current.observe(node);
     },
-    [loading, hasMore]
+    [loading, hasMore],
   );
-  
+
   useEffect(() => {
     const fetchPinnedPosts = async () => {
       if (user) {
@@ -199,63 +206,71 @@ export default function Home() {
     <main className="flex flex-col items-center px-16">
       <AccountSetupModal
         isOpen={isSetupModalVisible}
-        closeModal={handleCloseModal}
+        closeModal={handleCloseSetupModal}
       ></AccountSetupModal>
       <DisclaimerModal
         isOpen={isDisclaimerVisible}
         onAccept={handleDisclaimerAccept}
       />
       <div className="w-full max-w-4xl space-y-8">
-        {
-          searchTerm && searchTerm.length ? (
-            <div className="flex flex-row justify-between">
-              <p className="text-lg">
-                <span className="font-bold">Showing results for: </span>
-                <span>{searchTerm}</span>
-              </p>
-              <p className="font-bold text-theme-gray">{totalPostsCount} {totalPostsCount !== 1 ? "Results" : "Result"}</p>
-            </div>
-          ) : null
-        }
-        <FilterComponent filters={[disabilityFilter, locationFilter, demographicFilter]}/>
-        { pinnedPostContents.length > 0 && <PinnedPosts posts={pinnedPostContents} />}
+        {searchTerm && searchTerm.length ? (
+          <div className="flex flex-row justify-between">
+            <p className="text-lg">
+              <span className="font-bold">Showing results for: </span>
+              <span>{searchTerm}</span>
+            </p>
+            <p className="font-bold text-theme-gray">
+              {totalPostsCount} {totalPostsCount !== 1 ? "Results" : "Result"}
+            </p>
+          </div>
+        ) : null}
+        <FilterComponent
+          filters={[disabilityFilter, locationFilter, demographicFilter]}
+        />
+        {pinnedPostContents.length > 0 && (
+          <PinnedPosts posts={pinnedPostContents} />
+        )}
         <div>
-          {
-            posts.length ? (
-              posts.map((post, index) => {
-                if (posts.length <= index + 2) {
-                  // Attach observer to the second-to-last post
-                  return (
-                    <div ref={secondLastPostRef} key={post._id}>
-                      <PostComponent post={post} clickable={true} />
-                    </div>
-                  );
-                } else {
-                  return <PostComponent key={post._id} post={post} clickable={true} />;
-                }
-              })
-            ) : (
-              <>
-                {!loading && searchTerm && searchTerm.length ? (
-                  <div className="text-center font-bold text-theme-gray text-[22px]">
-                    <p>No results found for &quot;{searchTerm}&quot;.</p>
-                    <p>Please try another search!</p>
+          {posts.length ? (
+            posts.map((post, index) => {
+              if (posts.length <= index + 2) {
+                // Attach observer to the second-to-last post
+                return (
+                  <div ref={secondLastPostRef} key={post._id}>
+                    <PostComponent post={post} clickable={true} />
                   </div>
-                ) : null}
+                );
+              } else {
+                return (
+                  <PostComponent key={post._id} post={post} clickable={true} />
+                );
+              }
+            })
+          ) : (
+            <>
+              {!loading && searchTerm && searchTerm.length ? (
+                <div className="text-center text-[22px] font-bold text-theme-gray">
+                  <p>No results found for &quot;{searchTerm}&quot;.</p>
+                  <p>Please try another search!</p>
+                </div>
+              ) : null}
 
-                {!loading && !searchTerm && (
-                  <div className="text-center font-bold text-theme-gray text-[22px]">
-                    <p>No posts found.</p>
-                  </div>
-                )}
-              </>
-            )
-          }
-          {loading &&
-            <div className="flex items-center justify-center mt-8">
-              <LoaderCircle className="animate-spin" size={32} color="#475CC6"/>
+              {!loading && !searchTerm && (
+                <div className="text-center text-[22px] font-bold text-theme-gray">
+                  <p>No posts found.</p>
+                </div>
+              )}
+            </>
+          )}
+          {loading && (
+            <div className="mt-8 flex items-center justify-center">
+              <LoaderCircle
+                className="animate-spin"
+                size={32}
+                color="#475CC6"
+              />
             </div>
-          }
+          )}
         </div>
       </div>
       <ContactButton />

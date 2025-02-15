@@ -9,7 +9,7 @@ const UserSchema = new Schema<User>({
   isBanned: { type: Boolean, default: false },
   lastName: { type: String, required: true },
   email: { type: String, required: true},
-  childAge: { type: Number, min: 0, required: true },
+  childBirthdates: [{ type: Schema.Types.Date, required: true }],
   childDisabilities: [{ type: Schema.Types.ObjectId, ref: 'Disability', required: true }],
   city: { type: String, enum: GEORGIA_CITIES, required: true },
   bio: { type: String },

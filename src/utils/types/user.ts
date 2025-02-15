@@ -10,7 +10,7 @@ export const userSchema = z.object({
   isBanned: z.boolean().default(false),
   lastName: z.string(),
   email: z.string().email(),
-  childAge: z.number().min(0),
+  childBirthdates: z.array(z.date()).transform(dates => dates.map(date => new Date(date))).default([]),
   childDisabilities: z.string().array().transform(ids => ids.map(id => new Types.ObjectId(id))),
   city: z.string(),
   bio: z.string().optional(),

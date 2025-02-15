@@ -2,14 +2,14 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Image from 'next/image';
+import Image from "next/image";
 import lock from "../../../../public/lock.png";
 import user from "../../../../public/user.png";
 import focusLogo from "../../../../public/focus-logo.png";
 import transparencyBadge from "../../../../public/transparency-badge.png";
 import { deflateRawSync } from "zlib";
 import { loginUser } from "@/server/db/actions/AuthActions";
-import { getAuthenticatedUser } from '@/server/db/actions/AuthActions';
+import { getAuthenticatedUser } from "@/server/db/actions/AuthActions";
 
 export default function Login() {
   const router = useRouter();
@@ -24,7 +24,10 @@ export default function Login() {
       const result = await loginUser(email, email);
       if (result.success) {
         const authenticatedUser = await getAuthenticatedUser();
-        if (result.isFirstTime && authenticatedUser?.childDisabilities.length === 0) {
+        if (
+          result.isFirstTime &&
+          authenticatedUser?.childDisabilities.length === 0
+        ) {
           router.push("/?setup=true");
         } else {
           router.push("/");
@@ -37,7 +40,7 @@ export default function Login() {
     }
   };
 
-  const handleKeyDown = (e: { key: string; }) => {
+  const handleKeyDown = (e: { key: string }) => {
     if (e.key === "Enter") {
       handleLogin();
     }
@@ -60,33 +63,39 @@ export default function Login() {
       />
     </samlp:AuthnRequest>
   `.trim();
-  
+
     const deflated = deflateRawSync(request);
     const b64Encoded = Buffer.from(deflated).toString("base64");
     const uriEncoded = encodeURIComponent(b64Encoded);
-  
+
     return uriEncoded;
   }
 
   const handleSalesforceLogin = () => {
     window.location.href = `https://focus-ga.my.site.com/idp/endpoint/HttpRedirect?SAMLRequest=${generateEncodedRequest()}`; // Replace with actual Salesforce login URL
-  }
+  };
 
   return (
-    <div className="bg-[url('/Portal_Background.avif')] bg-cover min-h-screen w-screen">
+    <div className="min-h-screen w-screen bg-[url('/Portal_Background.avif')] bg-cover">
       <a href="https://focus-ga.org/">
-        <Image src={focusLogo} width={181} height={87} alt="focus-logo" className="mt-6 ml-[60px] fixed" />
+        <Image
+          src={focusLogo}
+          width={181}
+          height={87}
+          alt="focus-logo"
+          className="fixed ml-[60px] mt-6"
+        />
       </a>
-      <div className="flex flex-col justify-center items-center">
-        <div className="mx-[24vw] flex flex-col justify-center items-center mt-[16vh]">
+      <div className="flex flex-col items-center justify-center">
+        <div className="mx-[24vw] mt-[16vh] flex flex-col items-center justify-center">
           <Image src={focusLogo} width={295} height={145} alt="focus-logo" />
           <div className="relative mt-3">
-            <i className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">
+            <i className="absolute left-4 top-1/2 -translate-y-1/2 transform text-gray-500">
               <Image src={user} width={17} alt="user-icon" />
             </i>
-            
+
             <input
-              className="border-[1px] border-gray-300 rounded-sm pr-3.5 pl-10 h-[51px] w-[295px] placeholder-med-gray text-med-gray focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="placeholder-med-gray text-med-gray h-[51px] w-[295px] rounded-sm border-[1px] border-gray-300 pl-10 pr-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
               type="email"
               placeholder="Email"
               value={email}
@@ -96,11 +105,11 @@ export default function Login() {
           </div>
 
           <div className="relative mt-4">
-            <i className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">
+            <i className="absolute left-4 top-1/2 -translate-y-1/2 transform text-gray-500">
               <Image src={lock} width={17} alt="lock-icon" />
             </i>
             <input
-              className="border-[1px] border-gray-300 rounded-sm pr-3.5 pl-10 h-[51px] w-[295px] placeholder-med-gray text-med-gray focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="placeholder-med-gray text-med-gray h-[51px] w-[295px] rounded-sm border-[1px] border-gray-300 pl-10 pr-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
               type="password"
               placeholder="Password"
               value={password}
@@ -110,25 +119,35 @@ export default function Login() {
           </div>
 
           {credentialsError && (
-            <p className="text-red-500 text-sm mt-2">Invalid username or password. Please try again.</p>
+            <p className="mt-2 text-sm text-red-500">
+              Invalid username or password. Please try again.
+            </p>
           )}
 
           <button
             onClick={handleLogin}
             disabled={isLoading}
-            className={`rounded-sm h-[51px] mt-5 bg-theme-blue text-white w-[295px] ${
+            className={`mt-5 h-[51px] w-[295px] rounded-sm bg-theme-blue text-white ${
               isLoading ? "bg-opacity-80" : "hover:bg-opacity-80"
             }`}
           >
             Log in
           </button>
 
-          <button onClick={handleSalesforceLogin} className="rounded-sm h-[51px] mt-2 bg-green-500 text-white w-[295px]">Log in with Salesforce</button>
-          <a href="https://focus-ga.my.site.com/s/login/ForgotPassword" className="mt-8 text-left w-[295px]">
+          <button
+            onClick={handleSalesforceLogin}
+            className="mt-2 h-[51px] w-[295px] rounded-sm bg-green-500 text-white"
+          >
+            Log in with Salesforce
+          </button>
+          <a
+            href="https://focus-ga.my.site.com/s/login/ForgotPassword"
+            className="mt-8 w-[295px] text-left"
+          >
             Forgot your password?
           </a>
         </div>
-        <div className="flex flex-row justify-between mx-[17vw] mt-12 mb-0 items-center">
+        <div className="mx-[17vw] mb-0 mt-12 flex flex-row items-center justify-between">
           <div className="w-[33%] text-base">
             <p>770-234-9111 (phone)</p>
             <p>770-234-9131 (fax)</p>
@@ -137,20 +156,26 @@ export default function Login() {
             <p>Atlanta, GA 30340</p>
             <p className="mt-2">inquiry@focus-ga.org</p>
           </div>
-          <div className="w-[33%] flex flex-row justify-center items-center">
-            <div className="w-[85px] h-[85px]">
-              <Image src={transparencyBadge} width={85} height={85} alt="transparency-badge" />
+          <div className="flex w-[33%] flex-row items-center justify-center">
+            <div className="h-[85px] w-[85px]">
+              <Image
+                src={transparencyBadge}
+                width={85}
+                height={85}
+                alt="transparency-badge"
+              />
             </div>
           </div>
-          <div className="flex flex-col justify-center items-center w-[33%]">
+          <div className="flex w-[33%] flex-col items-center justify-center">
             <button
               onClick={() => router.push("https://focus-ga.org/donate/")}
-              className="bg-theme-blue text-white w-[171px] h-[57px] rounded-sm hover:bg-opacity-80"
+              className="h-[57px] w-[171px] rounded-sm bg-theme-blue text-white hover:bg-opacity-80"
             >
               Donate
             </button>
-            <p className="text-center mt-6 mb-6">
-              FOCUS (Families of Children Under Stress) is a 501(c)(3) nonprofit organization with tax ID&nbsp;
+            <p className="mb-6 mt-6 text-center">
+              FOCUS (Families of Children Under Stress) is a 501(c)(3) nonprofit
+              organization with tax ID&nbsp;
               <span className="whitespace-nowrap">#58-1577602</span>.
             </p>
           </div>
