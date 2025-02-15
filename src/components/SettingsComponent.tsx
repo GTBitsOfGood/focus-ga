@@ -5,6 +5,7 @@ import { Disability } from "@/utils/types/disability";
 import {
   MAX_POST_DISABILITY_TAGS,
   MAX_FILTER_DISABILITY_TAGS,
+  PostDeletionDurations,
 } from "@/utils/consts";
 import DropdownWithDisplay from "@/components/DropdownWithDisplay";
 import { editUser } from "@/server/db/actions/UserActions";
@@ -16,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PopulatedUser } from "@/utils/types/user";
 import BackButton from "./BackButton";
 import { getAuthenticatedUser } from "@/server/db/actions/AuthActions";
+import ConfirmationDialog from "./ConfirmationDialog";
 
 type SettingsProps = {
   user: PopulatedUser;
@@ -41,6 +43,10 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
     user.postDeletionTimeline,
   );
   const [isAdmin, setIsAdmin] = useState(user.isAdmin);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [changeLoading, setChangeLoading] = useState<boolean>(false);
+  const [selectedTimeline, setSelectedTimeline] =
+    useState<PostDeletionTimeline>(user.postDeletionTimeline);
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -94,7 +100,21 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
   ]);
 
   const handleTimelineChange = async (option: PostDeletionTimeline) => {
+    setSelectedTimeline(option);
+    if (
+      PostDeletionDurations[option] <
+        PostDeletionDurations[postDeletionTimeline] &&
+      !showConfirmDialog
+    ) {
+      setShowConfirmDialog(true);
+    } else {
+      await confirmTimelineChange(option);
+    }
+  };
+
+  const confirmTimelineChange = async (option: PostDeletionTimeline) => {
     setPostDeletionTimeline(option);
+    setShowConfirmDialog(false);
     await editUser(user._id, { postDeletionTimeline: option });
   };
 
@@ -242,6 +262,17 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
           </button>
         </div>
       </main>
+      {showConfirmDialog && (
+        <ConfirmationDialog
+          handleCancel={() => {
+            setShowConfirmDialog(false);
+          }}
+          loading={changeLoading}
+          handleConfirm={() => confirmTimelineChange(selectedTimeline)}
+          type="changeDeletionTimeline"
+          duration={selectedTimeline}
+        />
+      )}
     </div>
   );
 }

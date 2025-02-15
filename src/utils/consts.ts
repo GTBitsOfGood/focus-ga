@@ -7,19 +7,31 @@ export const MAX_DESCRIPTION_LEN = 200;
 export const PAGINATION_LIMIT = 10;
 
 export enum PostDeletionTimeline {
-  OneMonth = '1 month',
-  ThreeMonths = '3 months',
-  SixMonths = '6 months',
-  OneYear = '1 year',
-  TwoYears = '2 years',
-  FourYears = '4 years',
-};
+  OneMinute = "1 minute",
+  OneMonth = "1 month",
+  ThreeMonths = "3 months",
+  SixMonths = "6 months",
+  OneYear = "1 year",
+  TwoYears = "2 years",
+  FourYears = "4 years",
+}
+
+// Deletion durations in days
+export const PostDeletionDurations = {
+  [PostDeletionTimeline.OneMinute]: 60 * 1000,
+  [PostDeletionTimeline.OneMonth]: 30 * 24 * 60 * 60 * 1000,
+  [PostDeletionTimeline.ThreeMonths]: 90 * 24 * 60 * 60 * 1000,
+  [PostDeletionTimeline.SixMonths]: 180 * 24 * 60 * 60 * 1000,
+  [PostDeletionTimeline.OneYear]: 365 * 24 * 60 * 60 * 1000,
+  [PostDeletionTimeline.TwoYears]: 2 * 365 * 24 * 60 * 60 * 1000,
+  [PostDeletionTimeline.FourYears]: 4 * 365 * 24 * 60 * 60 * 1000,
+} as const;
 
 export enum ProfileColors {
-  ProfileOrange = 'profile-orange',
-  ProfileYellow = 'profile-yellow',
-  ProfileGreen = 'profile-green',
-  ProfileTeal = 'profile-teal',
-  ProfileIndigo = 'profile-indigo',
-  ProfileDefault = 'profile-pink',
-};
+  ProfileOrange = "profile-orange",
+  ProfileYellow = "profile-yellow",
+  ProfileGreen = "profile-green",
+  ProfileTeal = "profile-teal",
+  ProfileIndigo = "profile-indigo",
+  ProfileDefault = "profile-pink",
+}

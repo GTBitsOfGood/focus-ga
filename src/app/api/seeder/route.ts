@@ -23,7 +23,8 @@ import { createReport } from "@/server/db/actions/ReportActions";
 import { ReportReason, ContentType } from "@/utils/types/report";
 import { CommentInput } from "@/utils/types/comment";
 import { GEORGIA_CITIES } from "@/utils/cities";
-import { ProfileColors } from "@/utils/consts";
+import { PostDeletionDurations, ProfileColors } from "@/utils/consts";
+import dayjs from "dayjs";
 
 const DISABILITIES = [
   "ADHD",
@@ -184,9 +185,12 @@ export async function POST(request: Request) {
           availableDisabilities.splice(randomIndex, 1);
         }
 
+        const creationDate: Date =
+          Math.random() < 0.5 ? faker.date.past({ years: 4 }) : new Date();
+
         const postInfo = {
           author: userId,
-          date: Math.random() < 0.5 ? faker.date.past({ years: 4 }) : undefined,
+          date: creationDate,
           title: faker.word.words({ count: { min: 3, max: 10 } }),
           content: faker.lorem.paragraph({ min: 3, max: 10 }),
           tags: selectedDisabilities,
@@ -194,6 +198,7 @@ export async function POST(request: Request) {
           isPrivate: Math.random() < 0.5 ? true : false,
           isFlagged: Math.random() < 0.5 ? true : false,
           isDeleted: false,
+          expiresAt: dayjs(creationDate).add(4, "years").toDate(),
         };
 
         posts.push(await createPost(postInfo));
