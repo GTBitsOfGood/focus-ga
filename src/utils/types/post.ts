@@ -28,7 +28,7 @@ export const postSchema = z.object({
   isPrivate: z.boolean().default(false),
   isFlagged: z.boolean().default(false),
   isDeleted: z.boolean().default(false),
-  expiresAt: z.date(),
+  expiresAt: z.date().optional(),
 });
 
 export const editPostSchema = postSchema.partial();
