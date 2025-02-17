@@ -206,8 +206,6 @@ export default function PostCommentsContainer(
       <div className="mx-0 sm:mx-32 mb-16 p-4 flex flex-col items-stretch gap-4">
         <PostComponent
           post={post}
-          onLikeClick={onPostLikeClick}
-          onSaveClick={onPostSaveClick}
           onEditClick={showEdit ? onPostEditClick : undefined}
           onDeleteClick={showDelete ? onPostDeleteClick : undefined}
           onPostPin={authUser.isAdmin ? onPostPin : undefined}

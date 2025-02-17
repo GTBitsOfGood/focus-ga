@@ -16,7 +16,16 @@ import MarkdownIt from "markdown-it";
 import MarkdownRenderer from "./MarkdownRenderer";
 import { cn } from "@/lib/utils";
 import VisiblityIcon from "./ui/visibilityIcon";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import {
+  createPostLike,
+  createPostSave,
+  deletePost,
+  deletePostLike,
+  deletePostSave,
+  editPost,
+} from "@/server/db/actions/PostActions";
 import { useState, useEffect } from "react";
 import {
   DropdownMenu,
@@ -65,6 +74,7 @@ export default function PostComponent(props: PostComponentProps) {
   });
 
   const { user } = useUser();
+  const router = useRouter();
 
   const {
     className = "",
@@ -130,12 +140,40 @@ export default function PostComponent(props: PostComponentProps) {
     }
   };
 
+  async function onPostLikeClick(liked: boolean) {
+      try {
+        if (!user) return;
+        if (liked) {
+          await deletePostLike(user._id, post._id);
+        } else {
+          await createPostLike(user._id, post._id);
+        }
+      } catch (err) {
+        console.error(`Failed to ${liked ? "dislike" : "like"} post:`, err);
+        throw err;
+      }
+    }
+  
+    async function onPostSaveClick(saved: boolean) {
+      try {
+        if (!user) return;
+        if (saved) {
+          await deletePostSave(user._id, post._id);
+        } else {
+          await createPostSave(user._id, post._id);
+        }
+      } catch (err) {
+        console.error(`Failed to ${saved ? "unsave" : "save"} post`, err);
+        throw err;
+      }
+    }
+
   useEffect(() => {
     fetchReports();
   }, []);
 
   async function handleLikeClick() {
-    if (likeLoading || clickable) return;
+    if (likeLoading) return;
 
     if (liked) {
       setLikes((likes) => likes - 1);
@@ -143,11 +181,10 @@ export default function PostComponent(props: PostComponentProps) {
       setLikes((likes) => likes + 1);
     }
     setLiked((liked) => !liked);
-
-    if (onLikeClick) {
+    if (onPostLikeClick) {
       setLikeLoading(true);
       try {
-        await onLikeClick(liked);
+        await onPostLikeClick(liked);
       } catch (err) {
         setLikes(likes);
         setLiked(liked);
@@ -158,13 +195,13 @@ export default function PostComponent(props: PostComponentProps) {
   }
 
   async function handleSaveClick() {
-    if (saveLoading || clickable) return;
+    if (saveLoading) return;
     setSaved((saved) => !saved);
 
-    if (onSaveClick) {
+    if (onPostSaveClick) {
       setSaveLoading(true);
       try {
-        await onSaveClick(saved);
+        await onPostSaveClick(saved);
       } catch (err) {
         setSaved(saved);
       } finally {
@@ -361,7 +398,7 @@ export default function PostComponent(props: PostComponentProps) {
         )}
       </div>
       <MarkdownRenderer
-        className={cn("text-lg leading-5", {
+        className={cn("text-lg leading-7", {
           "max-h-36 overflow-hidden": clickable,
         })}
         markdown={content}
@@ -381,11 +418,23 @@ export default function PostComponent(props: PostComponentProps) {
               key={`${post._id}-${index}`}
               className="flex items-center gap-1.5 px-2"
             >
-              <button disabled={!item.onClick} onClick={item.onClick}>
-                <div className="h-6 w-6 [&>*]:h-full [&>*]:w-full">
-                  {item.icon}
-                </div>
-              </button>
+              <div
+                onClick={(e) => {
+                  // Allow Liking and Saving outside of post page
+                  e.stopPropagation();
+                  item.onClick?.();
+                }}
+                className="inline-block"
+              >
+                <button
+                  disabled={!item.onClick}
+                  className={` ${item.onClick && "transition-transform hover:scale-105"}`}
+                >
+                  <div className="h-6 w-6 [&>*]:h-full [&>*]:w-full">
+                    {item.icon}
+                  </div>
+                </button>
+              </div>
               {item.label}
             </div>
           ))}
@@ -491,9 +540,9 @@ export default function PostComponent(props: PostComponentProps) {
   );
 
   return clickable ? (
-    <Link className={classes} href={`/posts/${post._id}`}>
+    <div className={classes} onClick={() => router.push(`/posts/${post._id}`)}>
       {reactContent}
-    </Link>
+    </div>
   ) : (
     <div className={classes}>{reactContent}</div>
   );

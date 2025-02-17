@@ -4,10 +4,12 @@ import { postSchema, editPostSchema, Post, PostInput, PostSaveInput, PostLikeInp
 import PostModel from "../models/PostModel";
 import PostSaveModel from "../models/PostSaveModel";
 import PostLikeModel from "../models/PostLikeModel";
+import { getAllProfanities } from "./ProfanityActions";
 import { postSaveSchema, postLikeSchema } from "@/utils/types/post";
 import dbConnect from "../dbConnect";
 import mongoose from "mongoose";
 import UserModel from "../models/UserModel";
+import { containsProfanity } from "@/utils/profanityChecker";
 import DisabilityModel from "../models/DisabilityModel";
 import { revalidatePath } from "next/cache";
 
@@ -169,7 +171,16 @@ function postPopulationPipeline({ authUserId, isAdmin, visibility, offset, limit
 export async function createPost(post: PostInput): Promise<Post> {
   await dbConnect();
 
-  const validatedPost = postSchema.parse(post);
+  const profanities = await getAllProfanities();
+  const profanityWords = profanities.map(profanity => profanity.name);
+
+  const isFlagged = containsProfanity(post.content, profanityWords) || containsProfanity(post.title, profanityWords);
+
+  const validatedPost = postSchema.parse({
+    ...post,
+    isFlagged
+  });
+
   const createdPost = await PostModel.create(validatedPost);
 
   revalidatePath("/");

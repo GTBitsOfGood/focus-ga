@@ -14,6 +14,7 @@ import EditPostModal from "@/components/EditPostModal";
 import Image from "next/image";
 import focusLogo from "../../../public/focus-logo.png";
 import { DisabilityProvider } from "@/contexts/DisabilityContext";
+import { useRouter } from "next/navigation";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -39,6 +40,7 @@ function CommunityLayout({ children }: LayoutProps) {
   const closeCreatePostModal = () => setCreatePostModal(false);
   const { toast } = useToast();
   const { user } = useUser();
+  const router = useRouter();
 
   const notifySuccess = () => {
     toast({
@@ -80,7 +82,7 @@ function CommunityLayout({ children }: LayoutProps) {
           Please{" "}
           <button
             className="text-theme-blue font-bold hover:underline"
-            onClick={() => window.location.reload()}
+            onClick={() => router.push("/")}
           >
             refresh
           </button>{" "}
