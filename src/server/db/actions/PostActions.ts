@@ -348,7 +348,6 @@ export async function getPopulatedPinnedPosts(
  * @param authUserId - The ID of the currently authenticated user, to determine whether they have liked each post.
  * @returns A promise that resolves to an array of populated post objects.
  */
-type Filters = {
 
 export async function getPopulatedPosts(authUserId: string, isAdmin : boolean, offset: number, limit: number, {tags, locations, searchTerm, visibility}: Filters): Promise<PostAggregationResult> {
   await dbConnect();
