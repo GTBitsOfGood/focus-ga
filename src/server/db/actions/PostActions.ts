@@ -349,6 +349,13 @@ export async function getPopulatedPinnedPosts(
  * @returns A promise that resolves to an array of populated post objects.
  */
 
+type Filters = {
+  tags?: string[],
+  locations?: string[],
+  searchTerm?: string,
+  visibility?: string,
+}
+
 export async function getPopulatedPosts(authUserId: string, isAdmin : boolean, offset: number, limit: number, {tags, locations, searchTerm, visibility}: Filters): Promise<PostAggregationResult> {
   await dbConnect();
 
