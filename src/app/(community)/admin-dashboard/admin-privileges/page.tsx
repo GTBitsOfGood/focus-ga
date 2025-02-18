@@ -8,12 +8,16 @@ import {
   getAdminUsers,
 } from "@/server/db/actions/UserActions";
 import AdminDashboardUser from "@/components/AdminDashboardUser";
+import { LoaderCircle } from "lucide-react";
+import { useUser } from "@/contexts/UserContext";
 
 export default function AdminPrivileges() {
   const [email, setEmail] = useState("");
   const [admins, setAdmins] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
   const [emailError, setEmailError] = useState<boolean>(false);
   const { toast } = useToast();
+  const { user: currUser } = useUser();
 
   useEffect(() => {
     fetchSortedAdmins();
@@ -21,11 +25,13 @@ export default function AdminPrivileges() {
 
   const fetchSortedAdmins = async () => {
     try {
+      setLoading(true);
       const initAdmins = await getAdminUsers();
       if (initAdmins.length != 0) {
         initAdmins.sort((a, b) => a.lastName.localeCompare(b.lastName));
       }
       setAdmins(initAdmins);
+      setLoading(false);
     } catch (error) {
       console.error(error);
     }
@@ -81,11 +87,22 @@ export default function AdminPrivileges() {
     });
   };
 
+  const notifyRemoveSelfFailure = (email: string) => {
+    toast({
+      title: "Admin can not remove self.",
+      description: `User with email ${email} can not be removed by self.`,
+    });
+  };
+
   const handleRemove = async (
     event: React.MouseEvent<HTMLButtonElement>,
     user: User,
   ) => {
     try {
+      if (currUser?._id === user._id) {
+        notifyRemoveSelfFailure(user.email);
+        return
+      }
       await editUser(user._id, { isAdmin: false });
       fetchSortedAdmins();
       notifyRemoveSuccess(user.email);
@@ -104,6 +121,7 @@ export default function AdminPrivileges() {
           placeholder="Enter email address"
           className={`border ${emailError ? "border-error-red" : "border-gray-300"} h-10 w-full rounded-lg bg-white px-3`}
           value={email}
+          onKeyDown={(e) => e.key === "Enter" && handleAdd()}
           onChange={handleEmailChange}
         ></input>
         <button
@@ -129,6 +147,11 @@ export default function AdminPrivileges() {
           />
         ))}
       </div>
+          {loading &&
+            <div className="flex items-center justify-center mt-8">
+              <LoaderCircle className="animate-spin" size={32} color="#475CC6"/>
+            </div>
+          }
     </div>
   );
 }

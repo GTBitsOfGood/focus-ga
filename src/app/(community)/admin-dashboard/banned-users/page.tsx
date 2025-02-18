@@ -9,11 +9,16 @@ import {
 } from "@/server/db/actions/UserActions";
 import { User } from "@/utils/types/user";
 import { useState, useEffect } from "react";
+import { useUser } from "@/contexts/UserContext";
+import { LoaderCircle } from "lucide-react";
 
 export default function BannedUsers() {
   const [bannedUsers, setBannedUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState<string>("");
   const [emailError, setEmailError] = useState<boolean>(false);
+  const [selfBanError, setSelfBanError] = useState<boolean>(false);
+  const { user: currUser, setUser } = useUser(); 
 
   useEffect(() => {
     fetchBannedUsers();
@@ -21,10 +26,12 @@ export default function BannedUsers() {
 
   const fetchBannedUsers = async () => {
     try {
+      setLoading(true);
       const users = await getBannedUsers();
       if (users.length != 0) {
         users.sort((a, b) => a.lastName.localeCompare(b.lastName));
       }
+      setLoading(false);
       setBannedUsers(users);
     } catch (error) {
       console.error(error);
@@ -33,6 +40,11 @@ export default function BannedUsers() {
 
   const handleBanClick = async () => {
     try {
+      if (email === currUser?.email) {
+        setEmailError(true);
+        setSelfBanError(true);
+        return;
+      }
       const user = await getUserByEmail(email);
       setEmailError(false);
       await editUser(user._id, { isBanned: true });
@@ -93,6 +105,7 @@ export default function BannedUsers() {
           type="text"
           placeholder="Enter email address"
           className={`border ${emailError ? "border-error-red" : "border-gray-300"} h-10 w-full rounded-lg bg-white px-3`}
+          onKeyDown={(e) => e.key === "Enter" && handleBanClick()}
           value={email}
           onChange={(e) => {
             setEmail(e.target.value);
@@ -100,7 +113,7 @@ export default function BannedUsers() {
           }}
         />
         <button
-          className="ml-3 h-10 rounded-lg bg-theme-gray px-6 text-base font-bold text-white"
+          className="ml-3 h-10 rounded-lg bg-theme-gray px-6 text-base font-bold text-white transition-colors duration-200 hover:bg-gray-500"
           onClick={handleBanClick}
         >
           Ban
@@ -108,7 +121,7 @@ export default function BannedUsers() {
       </div>
       {emailError ? (
         <div className="absolute text-sm font-normal text-error-red">
-          Invalid user email
+          Invalid user email{selfBanError ? ": unable to ban self" : ""}
         </div>
       ) : null}
       <div className="flex flex-col gap-3">
@@ -124,6 +137,12 @@ export default function BannedUsers() {
           />
         ))}
       </div>
+          {loading &&
+            <div className="flex items-center justify-center mt-8">
+              <LoaderCircle className="animate-spin" size={32} color="#475CC6"/>
+            </div>
+          }
+          {(!(bannedUsers.length === 0) && !loading) || <p className="text-center font-bold text-theme-med-gray">No banned users!</p> }
     </div>
   );
 }

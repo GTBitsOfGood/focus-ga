@@ -32,6 +32,16 @@ export default function DisabilitiesList() {
 
   const handleAddDisability = async () => {
     if (!disabilityName.trim()) return;
+    
+    // Check if disability already exists
+    if (disabilities.some(d => d.name.toLowerCase() === disabilityName.toLowerCase())) {
+      toast({
+        title: "Duplicate disability",
+        description: `${disabilityName} already exists in the list.`,
+      });
+      return;
+    }
+  
     try {
       const newDisability = await createDisability({ name: disabilityName });
       setDisabilities((prev) =>
@@ -75,17 +85,25 @@ export default function DisabilitiesList() {
   const groupedDisabilities = filteredDisabilities.reduce(
     (acc: Record<string, Disability[]>, disability) => {
       const firstLetter = disability.name[0].toUpperCase();
-      if (!acc[firstLetter]) {
-        acc[firstLetter] = [];
+      const category = /^[A-Z]$/.test(firstLetter) ? firstLetter : "Other";
+      
+      if (!acc[category]) {
+        acc[category] = [];
       }
-      acc[firstLetter].push(disability);
+      acc[category].push(disability);
       return acc;
     },
     {},
   );
 
+  const categoryKeys = Object.keys(groupedDisabilities).sort((a, b) => {
+    if (a === "Other") return 1;
+    if (b === "Other") return -1;
+    return a.localeCompare(b);
+  });
+  
   return (
-    <div className="container mx-auto ml-10 mt-5 max-w-4xl p-6">
+    <div className="mt-9 max-w-[78%] md:ml-10">
       <h1 className="mb-7 text-2xl font-bold">Disabilities List</h1>
       {error && <div className="mb-4 text-red-500">{error}</div>}
       <h2 className="mb-3 text-xl">Add New Disability</h2>
@@ -94,6 +112,7 @@ export default function DisabilitiesList() {
           type="text"
           value={disabilityName}
           onChange={(e) => setDisabilityName(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleAddDisability()}
           placeholder="Enter disability"
           className="h-10 w-full rounded-md border p-3 py-1.5 text-sm"
         />
@@ -119,7 +138,7 @@ export default function DisabilitiesList() {
           </div>
         </div>
 
-        {Object.keys(groupedDisabilities).map((letter) => (
+        {categoryKeys.map((letter) => (
           <div key={letter} className="mb-4">
             <div className="mb-2 text-lg">{letter}</div>
             <div className="flex flex-wrap gap-3">

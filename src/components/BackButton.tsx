@@ -18,7 +18,6 @@ export default function BackButton() {
     <div onClick={() => {
       if (!isExternalReferrer) {
         router.back();
-        console.log('back');
       } else {
         router.push("/");
       }

@@ -14,6 +14,7 @@ import EditPostModal from "@/components/EditPostModal";
 import Image from "next/image";
 import focusLogo from "../../../public/focus-logo.png";
 import { DisabilityProvider } from "@/contexts/DisabilityContext";
+import { useRouter } from "next/navigation";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -39,6 +40,7 @@ function CommunityLayout({ children }: LayoutProps) {
   const closeCreatePostModal = () => setCreatePostModal(false);
   const { toast } = useToast();
   const { user } = useUser();
+  const router = useRouter();
 
   const notifySuccess = () => {
     toast({
@@ -75,7 +77,16 @@ function CommunityLayout({ children }: LayoutProps) {
     return (
       <div className="flex justify-center items-center h-screen flex-col">
         <Image src={focusLogo} alt="focus logo" width={200} priority={true} />
-        <p className="absolute bottom-16">Please refresh this page if it does not load in 10 seconds</p>
+        <p className="absolute bottom-16">
+          Please{" "}
+          <button
+            className="text-theme-blue font-bold hover:underline"
+            onClick={() => router.push("/")}
+          >
+            refresh
+          </button>{" "}
+          this page if it does not load in 10 seconds
+        </p>
       </div>
     );
   }

@@ -23,6 +23,22 @@ export async function getReports(): Promise<Report[]> {
 }
 
 /**
+ * Returns if there are any unresolved reports
+ * @returns True if there are unresolved reports, otherwise false
+ * @throws Will throw an error if the database connection fails.
+ */
+export async function hasUnresolvedReports(): Promise<boolean> {
+  try {
+    await dbConnect();
+    const count = await ReportModel.countDocuments({ isResolved: 'false' });
+    return count > 0;
+  } catch (error) {
+    console.error("Failed to retrieve reports:", error);
+    throw new Error("Failed to retrieve reports");
+  }
+}
+
+/**
  * Fetches a list of reports associated with a specific content ID.
  * @param contentId The unique identifier of the content for which reports are being retrieved.
  * @returns A promise that resolves to an array of reports associated with the provided content ID.
