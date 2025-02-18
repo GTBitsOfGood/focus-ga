@@ -2,6 +2,7 @@ import { decodeSAMLResponse, validateSAMLResponse } from "@/server/db/actions/ss
 import { NextRequest } from 'next/server';
 import { loginUser } from '@/server/db/actions/AuthActions';
 import { redirect } from 'next/navigation'
+import { getAuthenticatedUser } from "@/server/db/actions/AuthActions";
 
 const SALESFORCE_CERTIFICATE = process.env["SALESFORCE_CERTIFICATE"];
 if (!SALESFORCE_CERTIFICATE && process.env["NODE_ENV"] === "production")
@@ -28,7 +29,16 @@ export async function POST(request : NextRequest) {
     return redirect(`/login?error=${encodeURIComponent("Could not determine username")}`);
   }
 
-  await loginUser(result.username, result.userId);
+  const userLogin = await loginUser(result.username, result.userId);
 
+  if (userLogin.success) {
+    const authenticatedUser = await getAuthenticatedUser();
+    if (
+      userLogin.isFirstTime &&
+      authenticatedUser?.childDisabilities.length === 0
+    ) {
+      return redirect('/?setup=true');
+    }
+  }
   return redirect('/');
 }

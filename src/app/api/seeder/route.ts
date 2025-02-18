@@ -78,8 +78,9 @@ const DISABILITIES = [
   "Down Syndrome",
   "Fragile X Syndrome",
 ];
-const NUM_USERS = 100;
+const NUM_USERS = 100; 
 const MAX_CHILD_AGE = 20;
+const MAX_CHILD_BIRTHDATES_PER_USER = 10;
 const MAX_POSTS_PER_USER = 10;
 const MAX_USER_DISABILITIES = 3;
 const MAX_COMMENTS_PER_POST = 15;
@@ -143,13 +144,23 @@ export async function POST(request: Request) {
         return colors[Math.floor(Math.random() * colors.length)];
       };
 
+      const childBirthdates: Date[] = [];
+      const today = new Date();
+      const randomBirthdatesCount = Math.floor(Math.random() * MAX_CHILD_BIRTHDATES_PER_USER) + 1;
+      const maxDate = new Date(today.getFullYear() - MAX_CHILD_AGE, today.getMonth(), today.getDate());
+      for (let i = 0; i < randomBirthdatesCount; i++) {
+          const minDate = today;
+          childBirthdates.push(new Date(maxDate.getTime() + Math.random() * (minDate.getTime() - maxDate.getTime())));
+      }
+ 
+
       const userInfo = {
         username: username,
         isAdmin: false,
         isBanned: false,
         lastName: lastName,
         email: email,
-        childAge: Math.floor(Math.random() * MAX_CHILD_AGE),
+        childBirthdates: childBirthdates,
         childDisabilities: selectedDisabilities,
         city: GEORGIA_CITIES[cityIndex],
         bio: faker.lorem.paragraph({ min: 1, max: 6 }),

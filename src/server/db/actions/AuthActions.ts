@@ -43,7 +43,6 @@ export async function loginUser(email: string, uid: string) {
       email,
       username: email,
       lastName: "BoG", 
-      childAge: 10, 
       childDisabilities: [],
       city: "Atlanta",
       bio: "Hello World!",
