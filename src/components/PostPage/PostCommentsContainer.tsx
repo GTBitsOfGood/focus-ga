@@ -129,12 +129,14 @@ export default function PostCommentsContainer(
     title: string,
     content: string,
     tags: Disability[],
+    isPrivate: boolean
   ) {
     try {
       await editPost(post._id, {
         title,
         content,
         tags: tags.map((tag) => tag._id),
+        isPrivate
       });
       toast({
         title: "Post successfully edited",

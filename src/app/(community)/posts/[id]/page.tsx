@@ -20,7 +20,7 @@ export default async function PostPage(props: PostPageProps) {
   }
 
   try {
-    post = await getPopulatedPost(id, user._id);
+    post = await getPopulatedPost(id, user._id, user.isAdmin);
   } catch (e) {}
 
   if (!post) {

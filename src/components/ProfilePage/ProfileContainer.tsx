@@ -37,10 +37,10 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
 
   useEffect(() => {
     const fetchUserPosts = async () => {
-      setUserPosts(await getPopulatedUserPosts(user._id));
+      setUserPosts(await getPopulatedUserPosts(user._id, currUser?._id, currUser?.isAdmin));
     };
     const fetchSavedPosts = async () => {
-      setSavedPosts(await getPopulatedSavedPosts(user._id));
+      setSavedPosts(await getPopulatedSavedPosts(user._id, user.isAdmin));
     };
 
     if (user) {

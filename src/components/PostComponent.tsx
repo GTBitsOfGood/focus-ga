@@ -9,11 +9,13 @@ import {
   Heart,
   OctagonAlert,
   ChevronRight,
+  Eye,
 } from "lucide-react";
 import { getDateDifferenceString } from "@/utils/dateUtils";
 import MarkdownIt from "markdown-it";
 import MarkdownRenderer from "./MarkdownRenderer";
 import { cn } from "@/lib/utils";
+import VisiblityIcon from "./ui/visibilityIcon";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -60,6 +62,7 @@ type PostComponentProps = {
     title: string,
     content: string,
     tags: Disability[],
+    isPrivate: boolean
   ) => Promise<void>;
   onDeleteClick?: () => Promise<void>;
   onPostPin?: () => Promise<void>;
@@ -100,6 +103,7 @@ export default function PostComponent(props: PostComponentProps) {
     likes: initialLikes,
     liked: initialLiked,
     saved: initialSaved,
+    isPrivate: initialIsPrivate,
     comments,
   } = post;
 
@@ -107,6 +111,7 @@ export default function PostComponent(props: PostComponentProps) {
 
   const [title, setTitle] = useState<string>(initialTitle);
   const [content, setContent] = useState<string>(initialContent);
+  const [isPrivate, setIsPrivate] = useState<boolean>(initialIsPrivate);
   const [tags, setTags] = useState<(Disability | null)[]>(initialTags);
   const [likes, setLikes] = useState<number>(initialLikes);
   const [liked, setLiked] = useState<boolean>(initialLiked);
@@ -235,14 +240,16 @@ export default function PostComponent(props: PostComponentProps) {
     newTitle: string,
     newContent: string,
     newTags: Disability[],
+    newVisibility: boolean
   ) {
     setTitle(newTitle);
     setContent(newContent);
     setTags(newTags);
+    setIsPrivate(newVisibility);
 
     if (onEditClick) {
       try {
-        await onEditClick(newTitle, newContent, newTags);
+        await onEditClick(newTitle, newContent, newTags, newVisibility);
         setShowEditModal(false);
         if (fromReports) {
           setFromReports(false);
@@ -253,6 +260,7 @@ export default function PostComponent(props: PostComponentProps) {
         setTitle(title);
         setContent(content);
         setTags(tags);
+        setIsPrivate(isPrivate);
         throw err;
       }
     }
@@ -348,7 +356,14 @@ export default function PostComponent(props: PostComponentProps) {
         </p>
       </div>
       <div className="flex items-center justify-between py-0.5">
-        <h2 className="text-2xl font-bold text-black">{title}</h2>
+          <h2 className="text-2xl font-bold text-black flex gap-4">{title}
+            {isPrivate && 
+            <span className="flex text-sm items-center gap-2 text-theme-gray font-normal"> 
+              <VisiblityIcon />
+              <p>Private</p>
+            </span>
+            }
+          </h2>
         {!clickable && (
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger>
@@ -368,12 +383,12 @@ export default function PostComponent(props: PostComponentProps) {
               <DropdownMenuItem onClick={handleShareClick}>
                 Share
               </DropdownMenuItem>
-              {showReport && (
+              {(showReport && !isPrivate) && (
                 <DropdownMenuItem onClick={() => setShowReportModal(true)}>
                   Report
                 </DropdownMenuItem>
               )}
-              {onPostPin && (
+              {(onPostPin && !isPrivate) && (
                 <DropdownMenuItem onClick={onPostPin}>
                   {post.isPinned ? "Unpin Post" : "Pin Post"}
                 </DropdownMenuItem>
@@ -482,6 +497,7 @@ export default function PostComponent(props: PostComponentProps) {
           title={title}
           content={content}
           tags={tags.filter((tag) => tag !== null)}
+          isPrivate={isPrivate}
           closeModal={() => {
             setShowEditModal(false);
             if (fromReports) {
