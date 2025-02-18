@@ -126,7 +126,7 @@ export default function Home() {
   
         const tags = selectedDisabilities.map((disability) => disability._id);
         const locations = selectedLocations.map((location) => location.name);
-        const visibility = user.isAdmin ? selectedVisibility[0].visibility : "Public";
+        const visibility = user.isAdmin ? selectedVisibility[0].visibility : "All";
 
         const filters = { tags, locations, searchTerm, visibility };
         const {count, posts: newPosts } = await getPopulatedPosts(user._id, user.isAdmin, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, filters);

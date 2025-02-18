@@ -56,8 +56,10 @@ function postPopulationPipeline({ authUserId, isAdmin, visibility, offset, limit
     // Filter by tags
     ...(tags && tags.length ? [{ $match: { tags: { $in: tags.map((t) => new mongoose.Types.ObjectId(t)) } } }] : []),
 
-    //User is not an admin, so returns post that are not private, else return all posts
-    ...(!isAdmin ? [{ $match: { isPrivate: false } }] : []),
+    //User is not an admin, so returns all posts that are not private or are private but made by the user, else return all posts
+    ...(!isAdmin ? [{$match: {$or: [{ isPrivate: false },{$and: [{ isPrivate: true },{ author: new mongoose.Types.ObjectId(authUserId)}]}]}}] : []),
+
+    //Visibility filter
     ...(visibility === "Public" ? [{ $match: { isPrivate: false } }] : []),
     ...(visibility === "Private" ? [{ $match: { isPrivate: true } }] : []),
     ...(visibility === "All" ? [] : []),
@@ -261,7 +263,7 @@ export async function getPopulatedPinnedPosts(authUserId: string): Promise<PostA
   await dbConnect();
 
   const pipeline = [
-    { $match: { isPinned: true } },
+    { $match: { isPinned: true, isPrivate: false } },
     ...postPopulationPipeline({
       authUserId,
       tags: [],
