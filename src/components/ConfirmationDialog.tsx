@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { X } from "lucide-react";
-import { deleteDialogText } from "@/utils/confirmationDialogText";
+import { ConfirmationDialogText } from "@/utils/confirmationDialogText";
 
-type DialogType = keyof typeof deleteDialogText;
+type DialogType = keyof typeof ConfirmationDialogText;
 
-type DeleteDialogProps = {
+type ConfirmationDialogProps = {
   handleCancel: () => void;
   loading: boolean;
   handleConfirm: () => void;
   type: DialogType;
-  resolveReports: () => void;
+  resolveReports?: () => void;
+  duration?: string;
 };
 
 export default function ConfirmationDialog({
@@ -18,9 +19,14 @@ export default function ConfirmationDialog({
   handleConfirm,
   type,
   resolveReports,
-}: DeleteDialogProps) {
+  duration,
+}: ConfirmationDialogProps) {
   const [mouseDownOnBackground, setMouseDownOnBackground] = useState(false);
-  const dialogText = deleteDialogText[type];
+  const dialogText = ConfirmationDialogText[type];
+  const description =
+    type === "changeDeletionTimeline" && duration
+      ? dialogText.description.replace("[duration]", duration)
+      : dialogText.description;
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
@@ -52,7 +58,7 @@ export default function ConfirmationDialog({
           />
         </div>
         <div className="mx-6 mb-7 mt-5 text-center text-lg font-semibold leading-[1.4] text-black">
-          {dialogText.description}
+          {description}
         </div>
         <div className="mb-4 flex justify-center space-x-4">
           <button
@@ -64,7 +70,7 @@ export default function ConfirmationDialog({
           <button
             onClick={() => {
               handleConfirm();
-              resolveReports();
+              if (resolveReports) resolveReports();
             }}
             className="inline-flex w-24 items-center justify-center gap-2.5 rounded-lg bg-theme-blue px-4 py-2"
           >

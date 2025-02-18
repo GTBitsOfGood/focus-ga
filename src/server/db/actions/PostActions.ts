@@ -1,6 +1,15 @@
-'use server'
+"use server";
 
-import { postSchema, editPostSchema, Post, PostInput, PostSaveInput, PostLikeInput, PostLike, PopulatedPost } from "@/utils/types/post";
+import {
+  postSchema,
+  editPostSchema,
+  Post,
+  PostInput,
+  PostSaveInput,
+  PostLikeInput,
+  PostLike,
+  PopulatedPost,
+} from "@/utils/types/post";
 import PostModel from "../models/PostModel";
 import PostSaveModel from "../models/PostSaveModel";
 import PostLikeModel from "../models/PostLikeModel";
@@ -12,6 +21,8 @@ import UserModel from "../models/UserModel";
 import { containsProfanity } from "@/utils/profanityChecker";
 import DisabilityModel from "../models/DisabilityModel";
 import { revalidatePath } from "next/cache";
+import dayjs from "dayjs";
+import { PostDeletionDurations } from "@/utils/consts";
 
 // A MongoDB aggregation pipeline that efficiently populates a post
 type PipelineArgs = {
@@ -34,27 +45,36 @@ type PostAggregationResult = {
 function postPopulationPipeline({ authUserId, isAdmin, visibility, offset, limit, tags, locations, postId, searchTerm }: PipelineArgs): mongoose.PipelineStage[] {
   return [
     // Apply search
-    ...(searchTerm ? [
-      {
-        $search: {
-          index: "focus-fuzzy-search-posts",
-          text: {
-            query: searchTerm,
-            path: ["title", "content"],
-            fuzzy: {},
-          }
-        }
-      },
-    ] : postId ? [
-      // Match specific post ID if given
-      { $match: { _id: new mongoose.Types.ObjectId(postId) } }
-    ] : [
-      { $match: { isDeleted: false } },
-      { $sort: { date: -1 as const } }
-    ]),
+    ...(searchTerm
+      ? [
+          {
+            $search: {
+              index: "focus-fuzzy-search-posts",
+              text: {
+                query: searchTerm,
+                path: ["title", "content"],
+                fuzzy: {},
+              },
+            },
+          },
+        ]
+      : postId
+        ? [
+            // Match specific post ID if given
+            { $match: { _id: new mongoose.Types.ObjectId(postId) } },
+          ]
+        : [{ $match: { isDeleted: false } }, { $sort: { date: -1 as const } }]),
 
     // Filter by tags
-    ...(tags && tags.length ? [{ $match: { tags: { $in: tags.map((t) => new mongoose.Types.ObjectId(t)) } } }] : []),
+    ...(tags && tags.length
+      ? [
+          {
+            $match: {
+              tags: { $in: tags.map((t) => new mongoose.Types.ObjectId(t)) },
+            },
+          },
+        ]
+      : []),
 
     //User is not an admin, so returns all posts that are not private or are private but made by the user, else return all posts
     ...(!isAdmin ? [{$match: {$or: [{ isPrivate: false },{$and: [{ isPrivate: true },{ author: new mongoose.Types.ObjectId(authUserId)}]}]}}] : []),
@@ -68,9 +88,7 @@ function postPopulationPipeline({ authUserId, isAdmin, visibility, offset, limit
     // Use $facet to perform two separate aggregations: totalPostCount and posts (paginated)
     {
       $facet: {
-        count: [
-          { $count: "count" }
-        ],
+        count: [{ $count: "count" }],
         posts: [
           ...(offset ? [{ $skip: offset }] : []),
           ...(limit ? [{ $limit: limit }] : []),
@@ -78,89 +96,103 @@ function postPopulationPipeline({ authUserId, isAdmin, visibility, offset, limit
           {
             $lookup: {
               from: UserModel.collection.name,
-              localField: 'author',
-              foreignField: '_id',
-              pipeline: [{ $addFields: { _id: { $toString: '$_id' } } }],
-              as: 'author'
-            }
+              localField: "author",
+              foreignField: "_id",
+              pipeline: [{ $addFields: { _id: { $toString: "$_id" } } }],
+              as: "author",
+            },
           },
-          { $unwind: { path: '$author', preserveNullAndEmptyArrays: true } },
+          { $unwind: { path: "$author", preserveNullAndEmptyArrays: true } },
 
           // Filter by author location
-          ...(locations && locations.length ? [
-            { $match: { 'author.city': { $in: locations } } }
-          ] : []),
+          ...(locations && locations.length
+            ? [{ $match: { "author.city": { $in: locations } } }]
+            : []),
 
           // Populate tags
           {
             $lookup: {
               from: DisabilityModel.collection.name,
-              localField: 'tags',
-              foreignField: '_id',
-              pipeline: [{ $addFields: { _id: { $toString: '$_id' } } }],
-              as: 'tags'
-            }
+              localField: "tags",
+              foreignField: "_id",
+              pipeline: [{ $addFields: { _id: { $toString: "$_id" } } }],
+              as: "tags",
+            },
           },
 
           // Replace author and tags with default values if necessary
           {
             $addFields: {
-              author: { $ifNull: ['$author', null] },
-              tags: { $ifNull: ['$tags', []] }
-            }
+              author: { $ifNull: ["$author", null] },
+              tags: { $ifNull: ["$tags", []] },
+            },
           },
 
           // Determine whether user has liked post
           {
             $lookup: {
               from: PostLikeModel.collection.name,
-              let: { postId: '$_id' },
+              let: { postId: "$_id" },
               pipeline: [
-                { $match: {
-                  $expr: {
-                    $and: [
-                      { $eq: ['$post', '$$postId'] },
-                      { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
-                    ]
-                  }
-                } }
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        { $eq: ["$post", "$$postId"] },
+                        {
+                          $eq: [
+                            "$user",
+                            new mongoose.Types.ObjectId(authUserId),
+                          ],
+                        },
+                      ],
+                    },
+                  },
+                },
               ],
-              as: 'liked'
-            }
+              as: "liked",
+            },
           },
           {
             $addFields: {
-              liked: { $gt: [{ $size: '$liked' }, 0] }
-            }
+              liked: { $gt: [{ $size: "$liked" }, 0] },
+            },
           },
 
           // Determine whether user has saved post
           {
             $lookup: {
               from: PostSaveModel.collection.name,
-              let: { postId: '$_id' },
+              let: { postId: "$_id" },
               pipeline: [
-                { $match: {
-                  $expr: {
-                    $and: [
-                      { $eq: ['$post', '$$postId'] },
-                      { $eq: ['$user', new mongoose.Types.ObjectId(authUserId)] }
-                    ]
-                  }
-                } }
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        { $eq: ["$post", "$$postId"] },
+                        {
+                          $eq: [
+                            "$user",
+                            new mongoose.Types.ObjectId(authUserId),
+                          ],
+                        },
+                      ],
+                    },
+                  },
+                },
               ],
-              as: 'saved'
-            }
+              as: "saved",
+            },
           },
           {
             $addFields: {
-              saved: { $gt: [{ $size: '$saved' }, 0] },
-              _id: { $toString: '$_id' }
-            }
-          }
-        ]
-      }
-    }
+              saved: { $gt: [{ $size: "$saved" }, 0] },
+              _id: { $toString: "$_id" },
+            },
+          },
+        ],
+      },
+    },
   ];
 }
 
@@ -174,13 +206,25 @@ export async function createPost(post: PostInput): Promise<Post> {
   await dbConnect();
 
   const profanities = await getAllProfanities();
-  const profanityWords = profanities.map(profanity => profanity.name);
+  const profanityWords = profanities.map((profanity) => profanity.name);
 
-  const isFlagged = containsProfanity(post.content, profanityWords) || containsProfanity(post.title, profanityWords);
+  const isFlagged =
+    containsProfanity(post.content, profanityWords) ||
+    containsProfanity(post.title, profanityWords);
+
+  const author = await UserModel.findById(post.author);
 
   const validatedPost = postSchema.parse({
     ...post,
-    isFlagged
+    expiresAt: dayjs(post.date)
+      .add(
+        PostDeletionDurations[
+          author.postDeletionTimeline as keyof typeof PostDeletionDurations
+        ],
+        "ms",
+      )
+      .toDate(),
+    isFlagged,
   });
 
   const createdPost = await PostModel.create(validatedPost);
@@ -194,7 +238,10 @@ export async function createPost(post: PostInput): Promise<Post> {
  * @param postId - The ID of the post to pin.
  * @throws Will throw an error if the post pinning fails or if the post is not found.
  */
-export async function pinPost(authUserId: string, postId: string): Promise<{ success: boolean; error?: string }> {
+export async function pinPost(
+  authUserId: string,
+  postId: string,
+): Promise<{ success: boolean; error?: string }> {
   await dbConnect();
 
   if (!mongoose.Types.ObjectId.isValid(postId)) {
@@ -206,7 +253,9 @@ export async function pinPost(authUserId: string, postId: string): Promise<{ suc
     return { success: false, error: "Only admins can pin posts" };
   }
 
-  const existingPinnedPosts = await PostModel.countDocuments({ isPinned: true });
+  const existingPinnedPosts = await PostModel.countDocuments({
+    isPinned: true,
+  });
   if (existingPinnedPosts >= 5) {
     return { success: false, error: "Cannot pin more than 5 posts" };
   }
@@ -216,7 +265,11 @@ export async function pinPost(authUserId: string, postId: string): Promise<{ suc
     return { success: false, error: "Post is already pinned" };
   }
 
-  const updatedPost = await PostModel.findByIdAndUpdate(postId, { isPinned: true }, { new: true });
+  const updatedPost = await PostModel.findByIdAndUpdate(
+    postId,
+    { isPinned: true },
+    { new: true },
+  );
   if (!updatedPost) {
     return { success: false, error: "Post not found" };
   }
@@ -232,7 +285,10 @@ export async function pinPost(authUserId: string, postId: string): Promise<{ suc
  * @param postId - The ID of the post to unpin.
  * @returns A promise that resolves to an object indicating success or failure.
  */
-export async function unpinPost(authUserId: string, postId: string): Promise<{ success: boolean; error?: string }> {
+export async function unpinPost(
+  authUserId: string,
+  postId: string,
+): Promise<{ success: boolean; error?: string }> {
   await dbConnect();
 
   if (!mongoose.Types.ObjectId.isValid(postId)) {
@@ -244,7 +300,11 @@ export async function unpinPost(authUserId: string, postId: string): Promise<{ s
     return { success: false, error: "Only admins can unpin posts" };
   }
 
-  const updatedPost = await PostModel.findByIdAndUpdate(postId, { isPinned: false }, { new: true });
+  const updatedPost = await PostModel.findByIdAndUpdate(
+    postId,
+    { isPinned: false },
+    { new: true },
+  );
   if (!updatedPost) {
     return { success: false, error: "Post not found" };
   }
@@ -259,7 +319,9 @@ export async function unpinPost(authUserId: string, postId: string): Promise<{ s
  * @param authUserId - The ID of the currently authenticated user to determine their like and save statuses.
  * @returns A promise that resolves to an object containing the count and an array of populated post objects.
  */
-export async function getPopulatedPinnedPosts(authUserId: string): Promise<PostAggregationResult> {
+export async function getPopulatedPinnedPosts(
+  authUserId: string,
+): Promise<PostAggregationResult> {
   await dbConnect();
 
   const pipeline = [
@@ -287,11 +349,6 @@ export async function getPopulatedPinnedPosts(authUserId: string): Promise<PostA
  * @returns A promise that resolves to an array of populated post objects.
  */
 type Filters = {
-  tags?: string[],
-  locations?: string[],
-  searchTerm?: string,
-  visibility?: string,
-}
 
 export async function getPopulatedPosts(authUserId: string, isAdmin : boolean, offset: number, limit: number, {tags, locations, searchTerm, visibility}: Filters): Promise<PostAggregationResult> {
   await dbConnect();
@@ -304,9 +361,9 @@ export async function getPopulatedPosts(authUserId: string, isAdmin : boolean, o
 }
 
 /**
- * 
- * @param userId 
- * @returns 
+ *
+ * @param userId
+ * @returns
  */
 export async function getPopulatedUserPosts(userId: string, currUserId?: string, isAdmin?: boolean): Promise<PopulatedPost[]> {
   await dbConnect();
@@ -316,13 +373,12 @@ export async function getPopulatedUserPosts(userId: string, currUserId?: string,
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     throw new Error("Invalid user ID");
   }
-
   const posts = await PostModel
     .find(postsShown)
     .populate({ path: 'author', model: UserModel })
     .populate({ path: 'tags', model: DisabilityModel });
 
-  const plainPosts = posts ? posts.map(post => post.toObject()) : [];
+  const plainPosts = posts ? posts.map((post) => post.toObject()) : [];
 
   return plainPosts;
 }
@@ -356,7 +412,10 @@ export async function getPopulatedPost(id: string, authUserId: string, isAdmin :
  * @throws Will throw an error if the post update fails or if the post is not found.
  * @returns The updated post object.
  */
-export async function editPost(id: string, post: Partial<PostInput>): Promise<PostInput> {
+export async function editPost(
+  id: string,
+  post: Partial<PostInput>,
+): Promise<PostInput> {
   await dbConnect();
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -364,7 +423,9 @@ export async function editPost(id: string, post: Partial<PostInput>): Promise<Po
   }
 
   const validatedPost = editPostSchema.parse(post);
-  const updatedPost = await PostModel.findByIdAndUpdate(id, validatedPost, { new: true });
+  const updatedPost = await PostModel.findByIdAndUpdate(id, validatedPost, {
+    new: true,
+  });
   if (!updatedPost) {
     throw new Error("Post not found");
   }
@@ -387,11 +448,11 @@ export async function deletePost(id: string): Promise<void> {
   }
 
   const updatedPost = await PostModel.findByIdAndUpdate(id, {
-    title: '[deleted]',
-    content: '[deleted]',
-    author: new mongoose.Types.ObjectId('000000000000000000000000'),
+    title: "[deleted]",
+    content: "[deleted]",
+    author: new mongoose.Types.ObjectId("000000000000000000000000"),
     tags: [],
-    isDeleted: true
+    isDeleted: true,
   });
   if (!updatedPost) {
     throw new Error("Post not found");
@@ -408,14 +469,23 @@ export async function deletePost(id: string): Promise<void> {
  * @throws Will throw an error if the post save creation fails or if the post is already saved.
  * @returns The created post save object.
  */
-export async function createPostSave(userId: string, postId: string): Promise<PostSaveInput> {
+export async function createPostSave(
+  userId: string,
+  postId: string,
+): Promise<PostSaveInput> {
   await dbConnect();
 
-  if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(postId)) {
+  if (
+    !mongoose.Types.ObjectId.isValid(userId) ||
+    !mongoose.Types.ObjectId.isValid(postId)
+  ) {
     throw new Error("Invalid user ID or post ID");
   }
 
-  const existingSave = await PostSaveModel.findOne({ user: userId, post: postId });
+  const existingSave = await PostSaveModel.findOne({
+    user: userId,
+    post: postId,
+  });
   if (existingSave) {
     throw new Error("Post already saved by this user");
   }
@@ -443,9 +513,9 @@ export async function getSavedPosts(userId: string): Promise<Post[]> {
 
   const savedPosts = await PostSaveModel.find({ user: userId })
     .sort({ date: -1 })
-    .populate('post')
+    .populate("post")
     .exec();
-  return savedPosts.map(save => save.post.toObject());
+  return savedPosts.map((save) => save.post.toObject());
 }
 
 /**
@@ -485,14 +555,23 @@ export async function getPopulatedSavedPosts(userId: string, isAdmin: boolean): 
  * @param postId - The ID of the post being unsaved.
  * @throws Will throw an error if the post save deletion fails or if the save is not found.
  */
-export async function deletePostSave(userId: string, postId: string): Promise<void> {
+export async function deletePostSave(
+  userId: string,
+  postId: string,
+): Promise<void> {
   await dbConnect();
 
-  if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(postId)) {
+  if (
+    !mongoose.Types.ObjectId.isValid(userId) ||
+    !mongoose.Types.ObjectId.isValid(postId)
+  ) {
     throw new Error("Invalid user ID or post ID");
   }
 
-  const deletedSave = await PostSaveModel.findOneAndDelete({ user: userId, post: postId });
+  const deletedSave = await PostSaveModel.findOneAndDelete({
+    user: userId,
+    post: postId,
+  });
   if (!deletedSave) {
     throw new Error("Post save not found");
   }
@@ -506,10 +585,16 @@ export async function deletePostSave(userId: string, postId: string): Promise<vo
  * @throws Will throw an error if the post like creation fails or if the post is already liked.
  * @returns The created post like object and the updated post.
  */
-export async function createPostLike(userId: string, postId: string): Promise<PostLike> {
+export async function createPostLike(
+  userId: string,
+  postId: string,
+): Promise<PostLike> {
   await dbConnect();
 
-  if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(postId)) {
+  if (
+    !mongoose.Types.ObjectId.isValid(userId) ||
+    !mongoose.Types.ObjectId.isValid(postId)
+  ) {
     throw new Error("Invalid user ID or post ID");
   }
 
@@ -517,7 +602,10 @@ export async function createPostLike(userId: string, postId: string): Promise<Po
   session.startTransaction();
 
   try {
-    const existingLike = await PostLikeModel.findOne({ user: userId, post: postId });
+    const existingLike = await PostLikeModel.findOne({
+      user: userId,
+      post: postId,
+    });
     if (existingLike) {
       await session.abortTransaction();
       throw new Error("Post already liked by this user");
@@ -525,9 +613,15 @@ export async function createPostLike(userId: string, postId: string): Promise<Po
 
     const postLikeInput: PostLikeInput = { user: userId, post: postId };
     const validatedPostLike = postLikeSchema.parse(postLikeInput);
-    const createdPostLike = await PostLikeModel.create([validatedPostLike], { session });
+    const createdPostLike = await PostLikeModel.create([validatedPostLike], {
+      session,
+    });
 
-    const updatedPost = await PostModel.findByIdAndUpdate(postId, { $inc: { likes: 1 } }, { session, new: true });
+    const updatedPost = await PostModel.findByIdAndUpdate(
+      postId,
+      { $inc: { likes: 1 } },
+      { session, new: true },
+    );
     if (!updatedPost) {
       throw new Error("Post not found");
     }
@@ -549,10 +643,16 @@ export async function createPostLike(userId: string, postId: string): Promise<Po
  * @param postId - The ID of the post being unliked.
  * @throws Will throw an error if the post like deletion fails or if the like is not found.
  */
-export async function deletePostLike(userId: string, postId: string): Promise<void> {
+export async function deletePostLike(
+  userId: string,
+  postId: string,
+): Promise<void> {
   await dbConnect();
 
-  if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(postId)) {
+  if (
+    !mongoose.Types.ObjectId.isValid(userId) ||
+    !mongoose.Types.ObjectId.isValid(postId)
+  ) {
     throw new Error("Invalid user ID or post ID");
   }
 
@@ -560,13 +660,20 @@ export async function deletePostLike(userId: string, postId: string): Promise<vo
   session.startTransaction();
 
   try {
-    const deletedLike = await PostLikeModel.findOneAndDelete({ user: userId, post: postId }, { session });
+    const deletedLike = await PostLikeModel.findOneAndDelete(
+      { user: userId, post: postId },
+      { session },
+    );
     if (!deletedLike) {
       await session.abortTransaction();
       throw new Error("Post like not found");
     }
 
-    const updatedPost = await PostModel.findByIdAndUpdate(postId, { $inc: { likes: -1 } }, { session, new: true });
+    const updatedPost = await PostModel.findByIdAndUpdate(
+      postId,
+      { $inc: { likes: -1 } },
+      { session, new: true },
+    );
     if (!updatedPost) {
       throw new Error("Post not found");
     }

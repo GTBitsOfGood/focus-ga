@@ -23,7 +23,8 @@ import { createReport } from "@/server/db/actions/ReportActions";
 import { ReportReason, ContentType } from "@/utils/types/report";
 import { CommentInput } from "@/utils/types/comment";
 import { GEORGIA_CITIES } from "@/utils/cities";
-import { ProfileColors } from "@/utils/consts";
+import { PostDeletionDurations, ProfileColors } from "@/utils/consts";
+import dayjs from "dayjs";
 
 const DISABILITIES = [
   "ADHD",
@@ -78,8 +79,9 @@ const DISABILITIES = [
   "Down Syndrome",
   "Fragile X Syndrome",
 ];
-const NUM_USERS = 100;
+const NUM_USERS = 100; 
 const MAX_CHILD_AGE = 20;
+const MAX_CHILD_BIRTHDATES_PER_USER = 10;
 const MAX_POSTS_PER_USER = 10;
 const MAX_USER_DISABILITIES = 3;
 const MAX_COMMENTS_PER_POST = 15;
@@ -143,13 +145,23 @@ export async function POST(request: Request) {
         return colors[Math.floor(Math.random() * colors.length)];
       };
 
+      const childBirthdates: Date[] = [];
+      const today = new Date();
+      const randomBirthdatesCount = Math.floor(Math.random() * MAX_CHILD_BIRTHDATES_PER_USER) + 1;
+      const maxDate = new Date(today.getFullYear() - MAX_CHILD_AGE, today.getMonth(), today.getDate());
+      for (let i = 0; i < randomBirthdatesCount; i++) {
+          const minDate = today;
+          childBirthdates.push(new Date(maxDate.getTime() + Math.random() * (minDate.getTime() - maxDate.getTime())));
+      }
+ 
+
       const userInfo = {
         username: username,
         isAdmin: false,
         isBanned: false,
         lastName: lastName,
         email: email,
-        childAge: Math.floor(Math.random() * MAX_CHILD_AGE),
+        childBirthdates: childBirthdates,
         childDisabilities: selectedDisabilities,
         city: GEORGIA_CITIES[cityIndex],
         bio: faker.lorem.paragraph({ min: 1, max: 6 }),
@@ -184,9 +196,12 @@ export async function POST(request: Request) {
           availableDisabilities.splice(randomIndex, 1);
         }
 
+        const creationDate: Date =
+          Math.random() < 0.5 ? faker.date.past({ years: 4 }) : new Date();
+
         const postInfo = {
           author: userId,
-          date: Math.random() < 0.5 ? faker.date.past({ years: 4 }) : undefined,
+          date: creationDate,
           title: faker.word.words({ count: { min: 3, max: 10 } }),
           content: faker.lorem.paragraph({ min: 3, max: 10 }),
           tags: selectedDisabilities,
@@ -194,6 +209,7 @@ export async function POST(request: Request) {
           isPrivate: Math.random() < 0.5 ? true : false,
           isFlagged: Math.random() < 0.5 ? true : false,
           isDeleted: false,
+          expiresAt: dayjs(creationDate).add(4, "years").toDate(),
         };
 
         posts.push(await createPost(postInfo));
