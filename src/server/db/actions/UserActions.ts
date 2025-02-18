@@ -10,6 +10,8 @@ import {
 import UserModel from "../models/UserModel";
 import dbConnect from "../dbConnect";
 import { revalidatePath } from "next/cache";
+import PostModel from "../models/PostModel";
+import { PostDeletionDurations } from "@/utils/consts";
 
 /**
  * Creates a new user in the database.
@@ -136,6 +138,21 @@ export async function editUser(
   });
   if (!updatedUser) {
     throw new Error("User not found");
+  }
+
+  if (updated.postDeletionTimeline) {
+    await PostModel.updateMany({ author: id }, [
+      {
+        $set: {
+          expiresAt: {
+            $add: [
+              "$date",
+              PostDeletionDurations[updated.postDeletionTimeline],
+            ],
+          },
+        },
+      },
+    ]);
   }
 
   revalidatePath(`/family/${id}`);

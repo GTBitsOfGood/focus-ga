@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
 import "@/app/globals.css";
 import Navbar from "@/components/Navbar";
 import React, { useState } from "react";
-import { Toaster } from "@/components/ui/toaster"
-import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
+import { Toaster } from "@/components/ui/toaster";
+import { AppProgressBar as ProgressBar } from "next-nprogress-bar";
 import { UserProvider, useUser } from "@/contexts/UserContext";
 import { SearchProvider } from "@/contexts/SearchContext";
 import { Disability } from "@/utils/types/disability";
@@ -15,19 +15,18 @@ import Image from "next/image";
 import focusLogo from "../../../public/focus-logo.png";
 import { DisabilityProvider } from "@/contexts/DisabilityContext";
 import { useRouter } from "next/navigation";
+import { PostDeletionDurations } from "@/utils/consts";
 
 type LayoutProps = {
   children: React.ReactNode;
-}
+};
 
 export default function ContextWrapper({ children }: LayoutProps) {
   return (
     <SearchProvider>
       <UserProvider>
         <DisabilityProvider>
-          <CommunityLayout>
-            {children}
-          </CommunityLayout>
+          <CommunityLayout>{children}</CommunityLayout>
         </DisabilityProvider>
       </UserProvider>
     </SearchProvider>
@@ -56,14 +55,18 @@ function CommunityLayout({ children }: LayoutProps) {
     });
   };
 
-  async function onPostSubmit(title: string, content: string, tags: Disability[]) {
+  async function onPostSubmit(
+    title: string,
+    content: string,
+    tags: Disability[],
+  ) {
     if (!user) return;
     try {
       const formattedData = {
         author: user._id,
         title,
         content,
-        tags: tags.map((tag) => tag._id)
+        tags: tags.map((tag) => tag._id),
       };
       await createPost(formattedData);
       notifySuccess();
@@ -75,12 +78,12 @@ function CommunityLayout({ children }: LayoutProps) {
 
   if (!user) {
     return (
-      <div className="flex justify-center items-center h-screen flex-col">
+      <div className="flex h-screen flex-col items-center justify-center">
         <Image src={focusLogo} alt="focus logo" width={200} priority={true} />
         <p className="absolute bottom-16">
           Please{" "}
           <button
-            className="text-theme-blue font-bold hover:underline"
+            className="font-bold text-theme-blue hover:underline"
             onClick={() => router.push("/")}
           >
             refresh
@@ -92,15 +95,16 @@ function CommunityLayout({ children }: LayoutProps) {
   }
 
   const bannedView = (
-    <div className="h-[calc(100vh-250px)] flex items-center justify-center text-center text-2xl text-theme-gray font-bold">
-      This account has been banned from viewing any posts.<br/>
+    <div className="flex h-[calc(100vh-250px)] items-center justify-center text-center text-2xl font-bold text-theme-gray">
+      This account has been banned from viewing any posts.
+      <br />
       Please contact us if you believe this is a mistake.
     </div>
   );
 
   return (
     <>
-      <Navbar openModal={openCreatePostModal}/>
+      <Navbar openModal={openCreatePostModal} />
       <EditPostModal
         modalTitle="Create New Post"
         isOpen={isCreatePostModalOpen}
@@ -113,7 +117,12 @@ function CommunityLayout({ children }: LayoutProps) {
         {user.isBanned ? bannedView : children}
         <Toaster />
       </div>
-      <ProgressBar height="3px" color="#475CC6" shallowRouting options={{ showSpinner: false }} />
+      <ProgressBar
+        height="3px"
+        color="#475CC6"
+        shallowRouting
+        options={{ showSpinner: false }}
+      />
     </>
-  )
+  );
 }
