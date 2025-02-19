@@ -71,12 +71,13 @@ export default function ReportedPosts() {
       {posts.map((post, index) => {
         return <PostComponent key={post._id} post={post} clickable={true} />;
       })}
-      {loading &&
+      {loading ?
         <div className="flex items-center justify-center mt-8">
           <LoaderCircle className="animate-spin" size={32} color="#475CC6"/>
         </div>
+        :
+        (hasUnresolvedReport) || <p className="text-center font-bold text-theme-med-gray">No reported posts!</p>
       }
-    {(hasUnresolvedReport && !loading) || <p className="text-center font-bold text-theme-med-gray">No reported posts!</p>      }
     </div>
   );
 }
