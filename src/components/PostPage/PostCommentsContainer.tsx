@@ -129,14 +129,16 @@ export default function PostCommentsContainer(
     title: string,
     content: string,
     tags: Disability[],
-    isPrivate: boolean
+    isPrivate: boolean,
+    editedByAdmin: boolean | undefined,
   ) {
     try {
       await editPost(post._id, {
         title,
         content,
         tags: tags.map((tag) => tag._id),
-        isPrivate
+        isPrivate,
+        editedByAdmin,
       });
       toast({
         title: "Post successfully edited",
@@ -203,7 +205,7 @@ export default function PostCommentsContainer(
       <div className="mx-16 my-4 text-lg text-[#686868]">
         <BackButton />
       </div>
-      <div className="mx-0 sm:mx-32 mb-16 p-4 flex flex-col items-stretch gap-4">
+      <div className="mx-0 mb-16 flex flex-col items-stretch gap-4 p-4 sm:mx-32">
         <PostComponent
           post={post}
           onEditClick={showEdit ? onPostEditClick : undefined}

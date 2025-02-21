@@ -15,6 +15,7 @@ const PostSchema = new Schema<Post>({
   isFlagged: { type: Boolean, default: false },
   isDeleted: { type: Boolean, default: false },
   expiresAt: { type: Date, required: true, index: { expireAfterSeconds: 0 } },
+  editedByAdmin: {type: Boolean, default: false },
 });
 
 const PostModel = mongoose.models.Post || mongoose.model("Post", PostSchema);

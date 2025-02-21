@@ -62,7 +62,8 @@ type PostComponentProps = {
     title: string,
     content: string,
     tags: Disability[],
-    isPrivate: boolean
+    isPrivate: boolean,
+    editedByAdmin: boolean | undefined,
   ) => Promise<void>;
   onDeleteClick?: () => Promise<void>;
   onPostPin?: () => Promise<void>;
@@ -105,6 +106,7 @@ export default function PostComponent(props: PostComponentProps) {
     saved: initialSaved,
     isPrivate: initialIsPrivate,
     comments,
+    editedByAdmin: initialEditedByAdmin,
   } = post;
 
   const { toast } = useToast();
@@ -126,6 +128,9 @@ export default function PostComponent(props: PostComponentProps) {
   const [reports, setReports] = useState<PopulatedReport[]>([]);
   const [showContentReports, setShowContentReports] = useState<boolean>(false);
   const [fromReports, setFromReports] = useState<boolean>(false);
+  const [editedByAdmin, setEditedByAdmin] = useState<boolean | undefined>(
+    initialEditedByAdmin || undefined,
+  );
 
   const fetchReports = async () => {
     try {
@@ -141,32 +146,32 @@ export default function PostComponent(props: PostComponentProps) {
   };
 
   async function onPostLikeClick(liked: boolean) {
-      try {
-        if (!user) return;
-        if (liked) {
-          await deletePostLike(user._id, post._id);
-        } else {
-          await createPostLike(user._id, post._id);
-        }
-      } catch (err) {
-        console.error(`Failed to ${liked ? "dislike" : "like"} post:`, err);
-        throw err;
+    try {
+      if (!user) return;
+      if (liked) {
+        await deletePostLike(user._id, post._id);
+      } else {
+        await createPostLike(user._id, post._id);
       }
+    } catch (err) {
+      console.error(`Failed to ${liked ? "dislike" : "like"} post:`, err);
+      throw err;
     }
-  
-    async function onPostSaveClick(saved: boolean) {
-      try {
-        if (!user) return;
-        if (saved) {
-          await deletePostSave(user._id, post._id);
-        } else {
-          await createPostSave(user._id, post._id);
-        }
-      } catch (err) {
-        console.error(`Failed to ${saved ? "unsave" : "save"} post`, err);
-        throw err;
+  }
+
+  async function onPostSaveClick(saved: boolean) {
+    try {
+      if (!user) return;
+      if (saved) {
+        await deletePostSave(user._id, post._id);
+      } else {
+        await createPostSave(user._id, post._id);
       }
+    } catch (err) {
+      console.error(`Failed to ${saved ? "unsave" : "save"} post`, err);
+      throw err;
     }
+  }
 
   useEffect(() => {
     fetchReports();
@@ -236,20 +241,29 @@ export default function PostComponent(props: PostComponentProps) {
     }
   }, [fromReports]);
 
+  const editedByAdminText = editedByAdmin ? "(Edited by FOCUS)" : "";
   async function handleEditClick(
     newTitle: string,
     newContent: string,
     newTags: Disability[],
-    newVisibility: boolean
+    newVisibility: boolean,
+    newEditedByAdmin: boolean | undefined,
   ) {
     setTitle(newTitle);
     setContent(newContent);
     setTags(newTags);
     setIsPrivate(newVisibility);
+    setEditedByAdmin(newEditedByAdmin);
 
     if (onEditClick) {
       try {
-        await onEditClick(newTitle, newContent, newTags, newVisibility);
+        await onEditClick(
+          newTitle,
+          newContent,
+          newTags,
+          newVisibility,
+          newEditedByAdmin,
+        );
         setShowEditModal(false);
         if (fromReports) {
           setFromReports(false);
@@ -261,6 +275,7 @@ export default function PostComponent(props: PostComponentProps) {
         setContent(content);
         setTags(tags);
         setIsPrivate(isPrivate);
+        setEditedByAdmin(editedByAdmin);
         throw err;
       }
     }
@@ -352,18 +367,19 @@ export default function PostComponent(props: PostComponentProps) {
       <div className="flex items-center justify-between text-sm">
         <UserIcon user={author} clickable={clickable} />
         <p suppressHydrationWarning>
-          {getDateDifferenceString(new Date(), date)}
+          {getDateDifferenceString(new Date(), date)} {editedByAdminText}
         </p>
       </div>
       <div className="flex items-center justify-between py-0.5">
-          <h2 className="text-2xl font-bold text-black flex gap-4">{title}
-            {isPrivate && 
-            <span className="flex text-sm items-center gap-2 text-theme-gray font-normal"> 
+        <h2 className="flex gap-4 text-2xl font-bold text-black">
+          {title}
+          {isPrivate && (
+            <span className="flex items-center gap-2 text-sm font-normal text-theme-gray">
               <VisiblityIcon />
               <p>Private</p>
             </span>
-            }
-          </h2>
+          )}
+        </h2>
         {!clickable && (
           <DropdownMenu modal={false}>
             <DropdownMenuTrigger>
@@ -383,12 +399,12 @@ export default function PostComponent(props: PostComponentProps) {
               <DropdownMenuItem onClick={handleShareClick}>
                 Share
               </DropdownMenuItem>
-              {(showReport && !isPrivate) && (
+              {showReport && !isPrivate && (
                 <DropdownMenuItem onClick={() => setShowReportModal(true)}>
                   Report
                 </DropdownMenuItem>
               )}
-              {(onPostPin && !isPrivate) && (
+              {onPostPin && !isPrivate && (
                 <DropdownMenuItem onClick={onPostPin}>
                   {post.isPinned ? "Unpin Post" : "Pin Post"}
                 </DropdownMenuItem>
