@@ -8,7 +8,11 @@ import { ChevronLeftIcon } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import { hasUnresolvedReports } from "@/server/db/actions/ReportActions";
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const { user: currUser, setUser } = useUser();
@@ -29,22 +33,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, []);
 
   if (!currUser?.isAdmin) return null;
-  
+
   return (
-    <div className="flex flex-col md:flex-row h-full">
-      <aside className="w-full md:w-1/6 p-4">
+    <div className="flex h-full flex-col md:flex-row">
+      <aside className="w-full p-4 md:w-1/6">
         <Link
           href="/"
-          className="flex items-center gap-1 w-min text-lg p-2 cursor-pointer ml-0 md:ml-16 lg:ml-32 text-theme-gray"
+          className="ml-0 flex w-min cursor-pointer items-center gap-1 p-2 text-lg text-theme-gray md:ml-16 lg:ml-32"
         >
-          <ChevronLeftIcon className="w-6 h-6" /> Back
+          <ChevronLeftIcon className="h-6 w-6" /> Back
         </Link>
-        <nav className="mt-4 md:mt-24 space-y-1 ml-0 md:ml-4 flex flex-col items-start">
+        <nav className="ml-0 mt-4 flex flex-col items-start space-y-1 md:ml-4 md:mt-24">
           <Link
             href="/admin-dashboard/admin-privileges"
-            className={`px-4 rounded-lg text-[14px] transform transition-transform duration-200 ${
+            className={`transform rounded-lg px-4 text-[14px] transition-transform duration-200 ${
               pathname === "/admin-dashboard/admin-privileges"
-                ? "text-theme-blue scale-[1.05]"
+                ? "scale-[1.05] text-theme-blue"
                 : "text-theme-gray"
             } hover:scale-[1.08] hover:text-theme-blue`}
             style={{ marginTop: "2vh", marginLeft: "3vw" }}
@@ -54,9 +58,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           <Link
             href="/admin-dashboard/banned-users"
-            className={`px-4 rounded-lg text-[14px] transform transition-transform duration-200 ${
+            className={`transform rounded-lg px-4 text-[14px] transition-transform duration-200 ${
               pathname === "/admin-dashboard/banned-users"
-                ? "text-theme-blue scale-[1.05]"
+                ? "scale-[1.05] text-theme-blue"
                 : "text-theme-gray"
             } hover:scale-[1.08] hover:text-theme-blue`}
             style={{ marginTop: "2vh", marginLeft: "3vw" }}
@@ -66,24 +70,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           <Link
             href="/admin-dashboard/reported-posts"
-            className={`flex items-center gap-2 px-4 rounded-lg text-[14px] transform transition-transform duration-200 ${
+            className={`flex transform items-center gap-2 rounded-lg px-4 text-[14px] transition-transform duration-200 ${
               pathname === "/admin-dashboard/reported-posts"
-                ? "text-theme-blue scale-[1.05]"
+                ? "scale-[1.05] text-theme-blue"
                 : "text-theme-gray"
             } hover:scale-[1.08] hover:text-theme-blue`}
             style={{ marginTop: "2vh", marginLeft: "3vw" }}
           >
-            Reported Posts
+            Reported Content
             {hasUnresolvedReport && (
-              <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+              <span className="h-2 w-2 rounded-full bg-red-500"></span>
             )}
           </Link>
 
           <Link
             href="/admin-dashboard/disabilities-list"
-            className={`px-4 rounded-lg text-[14px] transform transition-transform duration-200 ${
+            className={`transform rounded-lg px-4 text-[14px] transition-transform duration-200 ${
               pathname === "/admin-dashboard/disabilities-list"
-                ? "text-theme-blue scale-[1.05]"
+                ? "scale-[1.05] text-theme-blue"
                 : "text-theme-gray"
             } hover:scale-[1.08] hover:text-theme-blue`}
             style={{ marginTop: "2vh", marginLeft: "3vw" }}
@@ -93,9 +97,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           <Link
             href="/admin-dashboard/content-flagging"
-            className={`px-4 rounded-lg text-[14px] transform transition-transform duration-200 ${
+            className={`transform rounded-lg px-4 text-[14px] transition-transform duration-200 ${
               pathname === "/admin-dashboard/content-flagging"
-                ? "text-theme-blue scale-[1.05]"
+                ? "scale-[1.05] text-theme-blue"
                 : "text-theme-gray"
             } hover:scale-[1.08] hover:text-theme-blue`}
             style={{ marginTop: "2vh", marginLeft: "3vw" }}
@@ -104,7 +108,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Link>
         </nav>
       </aside>
-      <main className="flex-1 overflow-auto p-8 mr-20">{children}</main>
+      <main className="mr-20 flex-1 overflow-auto p-8">{children}</main>
     </div>
   );
 }

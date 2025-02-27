@@ -8,13 +8,15 @@ import { Types } from "mongoose";
 import { LoaderCircle } from "lucide-react";
 import { PopulatedPost } from "@/utils/types/post";
 import { hasUnresolvedReports } from "@/server/db/actions/ReportActions";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import CommentComponent from "@/components/CommentComponent";
 
 export default function ReportedPosts() {
   const [posts, setPosts] = useState<PopulatedPost[]>([]);
+  const [comments, setComments] = useState<PopulatedPost[]>([]);
   const { user } = useUser();
   const [loading, setLoading] = useState(true);
   const [hasUnresolvedReport, setHasUnresolvedReport] = useState(false);
-
 
   useEffect(() => {
     const fetchReports = async () => {
@@ -22,9 +24,10 @@ export default function ReportedPosts() {
       setHasUnresolvedReport(bool);
     };
     fetchReports();
+    fetchUnresolvedReports();
   }, []);
 
-  const fetchUnresolvedPosts = async () => {
+  const fetchUnresolvedReports = async () => {
     if (!user) return;
     setLoading(true);
     const initReports = await getReports();
@@ -45,8 +48,6 @@ export default function ReportedPosts() {
         });
       }
     });
-    
-
 
     unresolvedReportedPostsArr.sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
@@ -61,23 +62,45 @@ export default function ReportedPosts() {
     setPosts(postsArr);
   };
 
-  useEffect(() => {
-    fetchUnresolvedPosts();
-  }, []);
-
   return (
     <div className="mt-9 max-w-[78%] md:ml-10">
-      <h1 className="mb-[33px] text-2xl font-bold">Reported Posts</h1>
-      {posts.map((post, index) => {
-        return <PostComponent key={post._id} post={post} clickable={true} />;
-      })}
-      {loading ?
-        <div className="flex items-center justify-center mt-8">
-          <LoaderCircle className="animate-spin" size={32} color="#475CC6"/>
-        </div>
-        :
-        (hasUnresolvedReport) || <p className="text-center font-bold text-theme-med-gray">No reported posts!</p>
-      }
+      <Tabs defaultValue="posts">
+        <TabsList className="mb-4">
+          <TabsTrigger size="base" value="posts">
+            Reported Posts
+          </TabsTrigger>
+          <TabsTrigger size="base" value="comments">
+            Reported Comments
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="posts">
+          <div>
+            {posts.map((post) => {
+              return (
+                <PostComponent key={post._id} post={post} clickable={true} />
+              );
+            })}
+            {loading ? (
+              <div className="mt-8 flex items-center justify-center">
+                <LoaderCircle
+                  className="animate-spin"
+                  size={32}
+                  color="#475CC6"
+                />
+              </div>
+            ) : (
+              hasUnresolvedReport || (
+                <p className="text-center font-bold text-theme-med-gray">
+                  No reported posts!
+                </p>
+              )
+            )}
+          </div>
+        </TabsContent>
+        <TabsContent value="comments">
+          <div></div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
