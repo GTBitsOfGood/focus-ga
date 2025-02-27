@@ -67,6 +67,7 @@ export default function CommentComponent(props: CommentComponentProps) {
     replyTo,
     isFlagged: initialIsFlagged,
     isDeleted: initialIsDeleted,
+    editedByAdmin: initialEditedByAdmin,
   } = comment;
 
   const [author, setAuthor] = useState<User | PopulatedUser | null>(
@@ -85,6 +86,9 @@ export default function CommentComponent(props: CommentComponentProps) {
   const [reports, setReports] = useState<PopulatedReport[]>([]);
   const [showContentReports, setShowContentReports] = useState(false);
   const [fromReports, setFromReports] = useState(false);
+  const [editedByAdmin, setEditedByAdmin] = useState<boolean | undefined>(
+    initialEditedByAdmin || undefined,
+  );
   const { toast } = useToast();
   const { user } = useUser();
 
@@ -133,12 +137,18 @@ export default function CommentComponent(props: CommentComponentProps) {
       }
     }
   }
-
-  async function handleEditClick(newComment: string) {
+  const editedByAdminText = editedByAdmin ? "(Edited by FOCUS)" : "";
+  async function handleEditClick(
+    newComment: string,
+    newEditedByAdmin: boolean | undefined,
+  ) {
     setContent(newComment);
-
+    setEditedByAdmin(newEditedByAdmin);
     try {
-      await editComment(comment._id, { content: newComment });
+      await editComment(comment._id, {
+        content: newComment,
+        editedByAdmin: newEditedByAdmin,
+      });
       setFromReports(false);
       resolveReports();
       fetchReports();
@@ -236,7 +246,7 @@ export default function CommentComponent(props: CommentComponentProps) {
             <UserIcon user={author} clickable={false} boldText />
           )}
           <p className="text-sm" suppressHydrationWarning>
-            {getDateDifferenceString(new Date(), date)}
+            {getDateDifferenceString(new Date(), date)} {editedByAdminText}
           </p>
         </div>
         <div className="flex flex-col gap-2 pl-8">

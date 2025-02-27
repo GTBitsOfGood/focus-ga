@@ -12,6 +12,7 @@ export const commentSchema = z.object({
   replyTo: z.string().transform(id => new Types.ObjectId(id)).optional(),
   isFlagged: z.boolean().default(false),
   isDeleted: z.boolean().default(false),
+  editedByAdmin: z.boolean().default(false).optional()
 });
 
 export const commentLikeSchema = z.object({

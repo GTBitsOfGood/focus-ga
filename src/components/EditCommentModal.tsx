@@ -10,7 +10,11 @@ type EditCommentModalProps = {
   closeModal: () => void;
   modalTitle?: string;
   comment: string;
-  onSubmit: (newComment: string) => Promise<void>;
+  editedByAdmin?: boolean | undefined;
+  onSubmit: (
+    newComment: string,
+    editedByAdmin: boolean | undefined,
+  ) => Promise<void>;
 };
 
 export default function EditCommentModal(props: EditCommentModalProps) {
@@ -19,6 +23,7 @@ export default function EditCommentModal(props: EditCommentModalProps) {
     closeModal,
     modalTitle = "Edit Comment",
     comment: initialComment,
+    editedByAdmin: initialEditedByAdmin,
     onSubmit,
   } = props;
 
@@ -27,13 +32,16 @@ export default function EditCommentModal(props: EditCommentModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [comment, setComment] = useState(initialComment);
   const { user } = useUser();
+  const [editedByAdmin] = useState<boolean | undefined>(initialEditedByAdmin);
 
   const handleSubmit = async () => {
     try {
       if (comment.length != 0) {
         console.log("HI");
         setIsSubmitting(true);
-        await onSubmit(comment);
+        const isAdmin = user?.isAdmin;
+        console.log("is Admin: " + isAdmin);
+        await onSubmit(comment, isAdmin || editedByAdmin);
         closeModal();
       }
     } catch (error) {
