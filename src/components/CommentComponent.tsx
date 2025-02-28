@@ -36,6 +36,7 @@ import UserIcon from "./UserIconComponent";
 import ConfirmationDialog from "./ConfirmationDialog";
 import EditCommentModal from "./EditCommentModal";
 import { editComment } from "@/server/db/actions/CommentActions";
+import { useRouter } from "next/navigation";
 
 type CommentComponentProps = {
   className?: string;
@@ -89,6 +90,7 @@ export default function CommentComponent(props: CommentComponentProps) {
   const [fromReports, setFromReports] = useState(false);
   const { toast } = useToast();
   const { user } = useUser();
+  const router = useRouter();
 
   const fetchReports = async () => {
     try {
@@ -222,7 +224,16 @@ export default function CommentComponent(props: CommentComponentProps) {
   const deletedText = "This comment has been deleted.";
 
   return (
-    <div>
+    <div
+      className={`${clickable ? "cursor-pointer rounded-lg p-4 hover:bg-gray-100" : ""}`}
+      onClick={
+        clickable
+          ? () => {
+              router.push(`/posts/${comment.post}`);
+            }
+          : undefined
+      }
+    >
       <div
         className={cn(
           "flex flex-grow flex-col gap-2 text-theme-gray",
@@ -235,7 +246,7 @@ export default function CommentComponent(props: CommentComponentProps) {
               {profilePicture} {deletedText}
             </div>
           ) : (
-            <UserIcon user={author} clickable={false} boldText />
+            <UserIcon user={author} clickable={clickable} boldText />
           )}
           <p className="text-sm" suppressHydrationWarning>
             {getDateDifferenceString(new Date(), date)}
@@ -349,6 +360,11 @@ export default function CommentComponent(props: CommentComponentProps) {
           resolveReports={resolveReports}
         />
       )}
+      {clickable ? (
+        <div className="relative bottom-[-17px] h-[1px] w-full bg-theme-medlight-gray" />
+      ) : (
+        <></>
+      )}{" "}
       {showIgnoreDialog && (
         <ConfirmationDialog
           handleCancel={() => {
