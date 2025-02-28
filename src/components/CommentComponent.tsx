@@ -44,6 +44,7 @@ type CommentComponentProps = {
   onReplyClick?: () => void;
   onDeleteClick?: () => Promise<void>;
   nestedContent?: ReactNode;
+  clickable?: boolean;
 };
 
 export default function CommentComponent(props: CommentComponentProps) {
@@ -56,6 +57,7 @@ export default function CommentComponent(props: CommentComponentProps) {
     onReplyClick,
     onDeleteClick,
     nestedContent,
+    clickable,
   } = props;
 
   const {
@@ -292,10 +294,14 @@ export default function CommentComponent(props: CommentComponentProps) {
                 </div>
                 {reports.length > 0 && user?.isAdmin ? (
                   <button
-                    onClick={() => {
-                      setFromReports(true);
-                      setShowContentReports(true);
-                    }}
+                    onClick={
+                      clickable
+                        ? undefined
+                        : () => {
+                            setFromReports(true);
+                            setShowContentReports(true);
+                          }
+                    }
                     className="flex flex-row items-center gap-x-1.5 rounded-full border-2 border-error-red bg-error-light-red py-1 pl-2 pr-1.5 text-error-red"
                   >
                     <div className="flex flex-row gap-x-1">

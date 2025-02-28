@@ -69,9 +69,9 @@ export default function AdminLayout({
           </Link>
 
           <Link
-            href="/admin-dashboard/reported-posts"
+            href="/admin-dashboard/reported-content"
             className={`flex transform items-center gap-2 rounded-lg px-4 text-[14px] transition-transform duration-200 ${
-              pathname === "/admin-dashboard/reported-posts"
+              pathname === "/admin-dashboard/reported-content"
                 ? "scale-[1.05] text-theme-blue"
                 : "text-theme-gray"
             } hover:scale-[1.08] hover:text-theme-blue`}
