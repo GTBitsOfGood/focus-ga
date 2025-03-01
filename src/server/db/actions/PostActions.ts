@@ -26,23 +26,33 @@ import { PostDeletionDurations } from "@/utils/consts";
 
 // A MongoDB aggregation pipeline that efficiently populates a post
 type PipelineArgs = {
-  authUserId: string,
-  isAdmin?: boolean
-  visibility?: string,
-  offset?: number,
-  limit?: number,
-  tags?: string[],
-  locations?: string[],
-  postId?: string,
-  searchTerm?: string,
-}
+  authUserId: string;
+  isAdmin?: boolean;
+  visibility?: string;
+  offset?: number;
+  limit?: number;
+  tags?: string[];
+  locations?: string[];
+  postId?: string;
+  searchTerm?: string;
+};
 
 type PostAggregationResult = {
   count: number;
   posts: PopulatedPost[];
 };
 
-function postPopulationPipeline({ authUserId, isAdmin, visibility, offset, limit, tags, locations, postId, searchTerm }: PipelineArgs): mongoose.PipelineStage[] {
+function postPopulationPipeline({
+  authUserId,
+  isAdmin,
+  visibility,
+  offset,
+  limit,
+  tags,
+  locations,
+  postId,
+  searchTerm,
+}: PipelineArgs): mongoose.PipelineStage[] {
   return [
     // Apply search
     ...(searchTerm
@@ -77,13 +87,28 @@ function postPopulationPipeline({ authUserId, isAdmin, visibility, offset, limit
       : []),
 
     //User is not an admin, so returns all posts that are not private or are private but made by the user, else return all posts
-    ...(!isAdmin ? [{$match: {$or: [{ isPrivate: false },{$and: [{ isPrivate: true },{ author: new mongoose.Types.ObjectId(authUserId)}]}]}}] : []),
+    ...(!isAdmin
+      ? [
+          {
+            $match: {
+              $or: [
+                { isPrivate: false },
+                {
+                  $and: [
+                    { isPrivate: true },
+                    { author: new mongoose.Types.ObjectId(authUserId) },
+                  ],
+                },
+              ],
+            },
+          },
+        ]
+      : []),
 
     //Visibility filter
     ...(visibility === "Public" ? [{ $match: { isPrivate: false } }] : []),
     ...(visibility === "Private" ? [{ $match: { isPrivate: true } }] : []),
     ...(visibility === "All" ? [] : []),
-
 
     // Use $facet to perform two separate aggregations: totalPostCount and posts (paginated)
     {
@@ -103,6 +128,8 @@ function postPopulationPipeline({ authUserId, isAdmin, visibility, offset, limit
             },
           },
           { $unwind: { path: "$author", preserveNullAndEmptyArrays: true } },
+
+          { $match: { "author.isBanned": false } },
 
           // Filter by author location
           ...(locations && locations.length
@@ -350,16 +377,33 @@ export async function getPopulatedPinnedPosts(
  */
 
 type Filters = {
-  tags?: string[],
-  locations?: string[],
-  searchTerm?: string,
-  visibility?: string,
-}
+  tags?: string[];
+  locations?: string[];
+  searchTerm?: string;
+  visibility?: string;
+};
 
-export async function getPopulatedPosts(authUserId: string, isAdmin : boolean, offset: number, limit: number, {tags, locations, searchTerm, visibility}: Filters): Promise<PostAggregationResult> {
+export async function getPopulatedPosts(
+  authUserId: string,
+  isAdmin: boolean,
+  offset: number,
+  limit: number,
+  { tags, locations, searchTerm, visibility }: Filters,
+): Promise<PostAggregationResult> {
   await dbConnect();
 
-  const postsInfo = await PostModel.aggregate(postPopulationPipeline({authUserId, isAdmin, visibility, offset, limit, tags, locations, searchTerm}));
+  const postsInfo = await PostModel.aggregate(
+    postPopulationPipeline({
+      authUserId,
+      isAdmin,
+      visibility,
+      offset,
+      limit,
+      tags,
+      locations,
+      searchTerm,
+    }),
+  );
   return {
     count: postsInfo[0].count.length ? postsInfo[0].count[0].count : 0,
     posts: postsInfo[0].posts,
@@ -371,18 +415,24 @@ export async function getPopulatedPosts(authUserId: string, isAdmin : boolean, o
  * @param userId
  * @returns
  */
-export async function getPopulatedUserPosts(userId: string, currUserId?: string, isAdmin?: boolean): Promise<PopulatedPost[]> {
+export async function getPopulatedUserPosts(
+  userId: string,
+  currUserId?: string,
+  isAdmin?: boolean,
+): Promise<PopulatedPost[]> {
   await dbConnect();
 
-  const postsShown = (currUserId === userId || isAdmin) ? {author: userId} : {author: userId, isPrivate: false}
+  const postsShown =
+    currUserId === userId || isAdmin
+      ? { author: userId }
+      : { author: userId, isPrivate: false };
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     throw new Error("Invalid user ID");
   }
-  const posts = await PostModel
-    .find(postsShown)
-    .populate({ path: 'author', model: UserModel })
-    .populate({ path: 'tags', model: DisabilityModel });
+  const posts = await PostModel.find(postsShown)
+    .populate({ path: "author", model: UserModel })
+    .populate({ path: "tags", model: DisabilityModel });
 
   const plainPosts = posts ? posts.map((post) => post.toObject()) : [];
 
@@ -396,14 +446,20 @@ export async function getPopulatedUserPosts(userId: string, currUserId?: string,
  * @returns A promise that resolves to a populated post object containing author and disability objects (or null if they are not found)
  * @throws Will throw an error if the post is not found.
  */
-export async function getPopulatedPost(id: string, authUserId: string, isAdmin : boolean,): Promise<PopulatedPost> {
+export async function getPopulatedPost(
+  id: string,
+  authUserId: string,
+  isAdmin: boolean,
+): Promise<PopulatedPost> {
   await dbConnect();
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new Error("Invalid post ID");
   }
 
-  const aggregationResult = await PostModel.aggregate(postPopulationPipeline({authUserId, isAdmin, postId: id}));
+  const aggregationResult = await PostModel.aggregate(
+    postPopulationPipeline({ authUserId, isAdmin, postId: id }),
+  );
   const post = aggregationResult[0].posts[0];
   if (!post) {
     throw new Error("Post not found");
@@ -530,7 +586,10 @@ export async function getSavedPosts(userId: string): Promise<Post[]> {
  * @returns A promise that resolves to an array of populated post objects.
  * @throws Will throw an error if the user ID is invalid.
  */
-export async function getPopulatedSavedPosts(userId: string, isAdmin: boolean): Promise<PopulatedPost[]> {
+export async function getPopulatedSavedPosts(
+  userId: string,
+  isAdmin: boolean,
+): Promise<PopulatedPost[]> {
   await dbConnect();
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -540,15 +599,21 @@ export async function getPopulatedSavedPosts(userId: string, isAdmin: boolean): 
   const pipeline: mongoose.PipelineStage[] = [
     { $match: { user: new mongoose.Types.ObjectId(userId) } },
     { $sort: { date: -1 as const } },
-    { $lookup: {
-      from: PostModel.collection.name,
-      localField: 'post',
-      foreignField: '_id',
-      as: 'post'
-    } },
-    { $unwind: { path: '$post' } },
-    { $replaceRoot: { newRoot: '$post' } }
-  ].concat(postPopulationPipeline({ authUserId: userId, isAdmin: isAdmin }).slice(2) satisfies mongoose.PipelineStage[] as any);
+    {
+      $lookup: {
+        from: PostModel.collection.name,
+        localField: "post",
+        foreignField: "_id",
+        as: "post",
+      },
+    },
+    { $unwind: { path: "$post" } },
+    { $replaceRoot: { newRoot: "$post" } },
+  ].concat(
+    postPopulationPipeline({ authUserId: userId, isAdmin: isAdmin }).slice(
+      2,
+    ) satisfies mongoose.PipelineStage[] as any,
+  );
 
   const pipelineResult = await PostSaveModel.aggregate(pipeline);
   const savedPosts = pipelineResult[0].posts;
