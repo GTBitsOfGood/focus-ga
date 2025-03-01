@@ -78,7 +78,23 @@ function postPopulationPipeline({ authUserId, isFlagged, isAdmin, visibility, of
       : []),
 
     //User is not an admin, so returns all posts that are not private or are private but made by the user, else return all posts
-    ...(!isAdmin ? [{$match: {$or: [{ isPrivate: false },{$and: [{ isPrivate: true },{ author: new mongoose.Types.ObjectId(authUserId)}]}]}}] : []),
+    ...(!isAdmin
+      ? [
+          {
+            $match: {
+              $or: [
+                { isPrivate: false },
+                {
+                  $and: [
+                    { isPrivate: true },
+                    { author: new mongoose.Types.ObjectId(authUserId) },
+                  ],
+                },
+              ],
+            },
+          },
+        ]
+      : []),
 
     //Visibility filter
     ...(visibility === "Public" ? [{ $match: { isPrivate: false } }] : []),
@@ -106,6 +122,8 @@ function postPopulationPipeline({ authUserId, isFlagged, isAdmin, visibility, of
             },
           },
           { $unwind: { path: "$author", preserveNullAndEmptyArrays: true } },
+
+          { $match: { "author.isBanned": false } },
 
           // Filter by author location
           ...(locations && locations.length
@@ -376,18 +394,24 @@ export async function getPopulatedPosts(authUserId: string, isAdmin : boolean, o
  * @param userId
  * @returns
  */
-export async function getPopulatedUserPosts(userId: string, currUserId?: string, isAdmin?: boolean): Promise<PopulatedPost[]> {
+export async function getPopulatedUserPosts(
+  userId: string,
+  currUserId?: string,
+  isAdmin?: boolean,
+): Promise<PopulatedPost[]> {
   await dbConnect();
 
-  const postsShown = (currUserId === userId || isAdmin) ? {author: userId} : {author: userId, isPrivate: false}
+  const postsShown =
+    currUserId === userId || isAdmin
+      ? { author: userId }
+      : { author: userId, isPrivate: false };
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     throw new Error("Invalid user ID");
   }
-  const posts = await PostModel
-    .find(postsShown)
-    .populate({ path: 'author', model: UserModel })
-    .populate({ path: 'tags', model: DisabilityModel });
+  const posts = await PostModel.find(postsShown)
+    .populate({ path: "author", model: UserModel })
+    .populate({ path: "tags", model: DisabilityModel });
 
   const plainPosts = posts ? posts.map((post) => post.toObject()) : [];
 
@@ -401,7 +425,11 @@ export async function getPopulatedUserPosts(userId: string, currUserId?: string,
  * @returns A promise that resolves to a populated post object containing author and disability objects (or null if they are not found)
  * @throws Will throw an error if the post is not found.
  */
-export async function getPopulatedPost(id: string, authUserId: string, isAdmin : boolean,): Promise<PopulatedPost> {
+export async function getPopulatedPost(
+  id: string,
+  authUserId: string,
+  isAdmin: boolean,
+): Promise<PopulatedPost> {
   await dbConnect();
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -535,7 +563,10 @@ export async function getSavedPosts(userId: string): Promise<Post[]> {
  * @returns A promise that resolves to an array of populated post objects.
  * @throws Will throw an error if the user ID is invalid.
  */
-export async function getPopulatedSavedPosts(userId: string, isAdmin: boolean): Promise<PopulatedPost[]> {
+export async function getPopulatedSavedPosts(
+  userId: string,
+  isAdmin: boolean,
+): Promise<PopulatedPost[]> {
   await dbConnect();
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {

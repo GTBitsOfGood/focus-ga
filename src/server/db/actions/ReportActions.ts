@@ -1,6 +1,12 @@
-'use server'
+"use server";
 
-import { reportSchema, editReportSchema, Report, ReportInput, PopulatedReport } from "@/utils/types/report";
+import {
+  reportSchema,
+  editReportSchema,
+  Report,
+  ReportInput,
+  PopulatedReport,
+} from "@/utils/types/report";
 import dbConnect from "../dbConnect";
 import ReportModel from "../models/ReportModel";
 import mongoose from "mongoose";
@@ -14,7 +20,7 @@ import UserModel from "../models/UserModel";
 export async function getReports(): Promise<Report[]> {
   try {
     await dbConnect();
-    const reports = await ReportModel.find().sort({ date: 'desc' });
+    const reports = await ReportModel.find().sort({ date: "desc" });
     return reports;
   } catch (error) {
     console.error("Failed to retrieve reports:", error);
@@ -30,7 +36,7 @@ export async function getReports(): Promise<Report[]> {
 export async function hasUnresolvedReports(): Promise<boolean> {
   try {
     await dbConnect();
-    const count = await ReportModel.countDocuments({ isResolved: 'false' });
+    const count = await ReportModel.countDocuments({ isResolved: "false" });
     return count > 0;
   } catch (error) {
     console.error("Failed to retrieve reports:", error);
@@ -43,20 +49,24 @@ export async function hasUnresolvedReports(): Promise<boolean> {
  * @param contentId The unique identifier of the content for which reports are being retrieved.
  * @returns A promise that resolves to an array of reports associated with the provided content ID.
  */
-export async function getReportsByContentId(contentId: string): Promise<PopulatedReport[]> {
+export async function getReportsByContentId(
+  contentId: string,
+): Promise<PopulatedReport[]> {
   if (!mongoose.Types.ObjectId.isValid(contentId)) {
     throw new Error("Invalid contentId");
   }
 
   try {
     await dbConnect();
-    const reports = await ReportModel
-      .find({ reportedContent: contentId })
-      .populate({ path: 'sourceUser', model: UserModel })
-      .sort({ date: 'desc' });
-    return reports.map(report => report.toObject())
+    const reports = await ReportModel.find({ reportedContent: contentId })
+      .populate({ path: "sourceUser", model: UserModel })
+      .sort({ date: "desc" });
+    return reports.map((report) => report.toObject());
   } catch (error) {
-    console.error(`Failed to retrieve reports for contentId ${contentId}:`, error);
+    console.error(
+      `Failed to retrieve reports for contentId ${contentId}:`,
+      error,
+    );
     throw new Error(`Failed to retrieve reports for contentId ${contentId}`);
   }
 }
@@ -67,14 +77,18 @@ export async function getReportsByContentId(contentId: string): Promise<Populate
  * @returns A promise that resolves to an array of report objects.
  * @throws Will throw an error if the userId is invalid or if the database connection fails.
  */
-export async function getReportsByReportedUser(userId: string): Promise<Report[]> {
+export async function getReportsByReportedUser(
+  userId: string,
+): Promise<Report[]> {
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     throw new Error("Invalid userId");
   }
 
   try {
     await dbConnect();
-    const reports = await ReportModel.find({ reportedUser: userId }).sort({ date: 'desc' });
+    const reports = await ReportModel.find({ reportedUser: userId }).sort({
+      date: "desc",
+    });
     return reports;
   } catch (error) {
     console.error(`Failed to retrieve reports for user ${userId}:`, error);
@@ -112,7 +126,10 @@ export async function createReport(report: ReportInput): Promise<Report> {
  * @throws Will throw an error if the report update fails, if the input data is invalid, or if the report is not found.
  * @returns The updated report object.
  */
-export async function editReport(id: string, report: Partial<ReportInput>): Promise<Report> {
+export async function editReport(
+  id: string,
+  report: Partial<ReportInput>,
+): Promise<Report> {
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new Error("Invalid report ID");
   }
@@ -120,7 +137,9 @@ export async function editReport(id: string, report: Partial<ReportInput>): Prom
   try {
     await dbConnect();
     const parsedData = editReportSchema.parse(report);
-    const updatedReport = await ReportModel.findByIdAndUpdate(id, parsedData, { new: true });
+    const updatedReport = await ReportModel.findByIdAndUpdate(id, parsedData, {
+      new: true,
+    });
     if (!updatedReport) {
       throw new Error("Report not found");
     }

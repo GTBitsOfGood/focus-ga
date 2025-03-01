@@ -171,6 +171,24 @@ export default function Navbar({ openModal }: NavbarProps) {
             >
               Settings & Preferences
             </Link>
+            <Link
+              href="https://mapscout.io/focus"
+              onClick={toggleDropdown}
+              target="_blank"
+              className="ml-4 mt-2 block cursor-pointer py-1 text-left transition-colors hover:underline"
+            >
+              Resource Map
+            </Link>
+            {user?.isAdmin && (
+              <Link
+                href={`https://mapscout.io/auth`}
+                onClick={toggleDropdown}
+                target="_blank"
+                className="ml-4 mt-2 block cursor-pointer py-1 text-left font-bold transition-colors hover:underline"
+              >
+                Resource Map (Admin)
+              </Link>
+            )}
             {user?.isAdmin && (
               <Link
                 href={`/admin-dashboard/admin-privileges`}
