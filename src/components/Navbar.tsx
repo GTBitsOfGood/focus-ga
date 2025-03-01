@@ -177,7 +177,7 @@ export default function Navbar({ openModal }: NavbarProps) {
               target="_blank"
               className="ml-4 mt-2 block cursor-pointer py-1 text-left transition-colors hover:underline"
             >
-              Map of Resources
+              Resource Map
             </Link>
             {user?.isAdmin && (
               <Link
@@ -186,7 +186,7 @@ export default function Navbar({ openModal }: NavbarProps) {
                 target="_blank"
                 className="ml-4 mt-2 block cursor-pointer py-1 text-left font-bold transition-colors hover:underline"
               >
-                Edit Map of Resources
+                Resource Map (Admin)
               </Link>
             )}
             {user?.isAdmin && (
