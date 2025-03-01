@@ -79,7 +79,7 @@ export default function AdminLayout({
           >
             Reported Content
             {hasUnresolvedReport && (
-              <span className="h-2 w-2 rounded-full bg-red-500"></span>
+              <span className="w-2 h-2 aspect-square rounded-full bg-red-500"></span>
             )}
           </Link>
 
