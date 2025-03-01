@@ -86,10 +86,10 @@ export default function ReportedContent() {
     <div className="mt-9 max-w-[78%] md:ml-10">
       <Tabs defaultValue="posts" onValueChange={fetchUnresolvedReports}>
         <TabsList className="mb-4">
-          <TabsTrigger size="base" value="posts">
+          <TabsTrigger size="large" className="text-lg font-semibold" value="posts">
             Reported Posts
           </TabsTrigger>
-          <TabsTrigger size="base" value="comments">
+          <TabsTrigger size="large" className="text-lg font-semibold" value="comments">
             Reported Comments
           </TabsTrigger>
         </TabsList>
@@ -121,7 +121,6 @@ export default function ReportedContent() {
           <div>
             {comments.map((comment: PopulatedComment) => {
               return (
-                // <div className="mb-8" key={comment._id}>
                 <div key={comment._id}>
                   <CommentComponent comment={comment} clickable={true} />
                 </div>
