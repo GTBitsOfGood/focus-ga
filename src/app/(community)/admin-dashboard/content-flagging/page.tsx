@@ -26,7 +26,6 @@ export default function ProfanityList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [postsLoading, setPostsLoading] = useState(true);
   const [commentsLoading, setCommentsLoading] = useState(true);
-  const [totalPostsCount, setTotalPostsCount] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
   const [page, setPage] = useState(0);
@@ -78,7 +77,6 @@ export default function ProfanityList() {
           PAGINATION_LIMIT,
           filters,
         );
-        setTotalPostsCount(count);
         if (newPosts.length > 0) {
           setPosts(clear ? newPosts : [...posts, ...newPosts]);
         } else {
