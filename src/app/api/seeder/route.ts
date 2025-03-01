@@ -79,7 +79,7 @@ const DISABILITIES = [
   "Down Syndrome",
   "Fragile X Syndrome",
 ];
-const NUM_USERS = 100; 
+const NUM_USERS = 100;
 const MAX_CHILD_AGE = 20;
 const MAX_CHILD_BIRTHDATES_PER_USER = 10;
 const MAX_POSTS_PER_USER = 10;
@@ -147,13 +147,22 @@ export async function POST(request: Request) {
 
       const childBirthdates: Date[] = [];
       const today = new Date();
-      const randomBirthdatesCount = Math.floor(Math.random() * MAX_CHILD_BIRTHDATES_PER_USER) + 1;
-      const maxDate = new Date(today.getFullYear() - MAX_CHILD_AGE, today.getMonth(), today.getDate());
+      const randomBirthdatesCount =
+        Math.floor(Math.random() * MAX_CHILD_BIRTHDATES_PER_USER) + 1;
+      const maxDate = new Date(
+        today.getFullYear() - MAX_CHILD_AGE,
+        today.getMonth(),
+        today.getDate(),
+      );
       for (let i = 0; i < randomBirthdatesCount; i++) {
-          const minDate = today;
-          childBirthdates.push(new Date(maxDate.getTime() + Math.random() * (minDate.getTime() - maxDate.getTime())));
+        const minDate = today;
+        childBirthdates.push(
+          new Date(
+            maxDate.getTime() +
+              Math.random() * (minDate.getTime() - maxDate.getTime()),
+          ),
+        );
       }
- 
 
       const userInfo = {
         username: username,
@@ -210,6 +219,7 @@ export async function POST(request: Request) {
           isFlagged: Math.random() < 0.5 ? true : false,
           isDeleted: false,
           expiresAt: dayjs(creationDate).add(4, "years").toDate(),
+          editedByAdmin: false,
         };
 
         posts.push(await createPost(postInfo));
