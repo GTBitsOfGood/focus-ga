@@ -129,6 +129,8 @@ function postPopulationPipeline({
           },
           { $unwind: { path: "$author", preserveNullAndEmptyArrays: true } },
 
+          { $match: { "author.isBanned": false } },
+
           // Filter by author location
           ...(locations && locations.length
             ? [{ $match: { "author.city": { $in: locations } } }]
