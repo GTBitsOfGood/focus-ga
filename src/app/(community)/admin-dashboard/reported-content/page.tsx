@@ -54,7 +54,6 @@ export default function ReportedContent() {
         }
       }
     });
-
     sortByDate(unresolvedReportedPosts);
     let postsArr: PopulatedPost[] = await Promise.all(
       unresolvedReportedPosts.map(async (postInfo) => {

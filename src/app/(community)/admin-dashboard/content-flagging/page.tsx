@@ -15,6 +15,9 @@ import { useUser } from "@/contexts/UserContext";
 import { PAGINATION_LIMIT } from "@/utils/consts";
 import { PopulatedPost } from "@/utils/types/post";
 import PostComponent from "@/components/PostComponent";
+import { getFlaggedComments } from "@/server/db/actions/CommentActions";
+import { PopulatedComment } from "@/utils/types/comment";
+import CommentComponent from "@/components/CommentComponent";
 
 export default function ProfanityList() {
   const [profanities, setProfanities] = useState<Profanity[]>([]);
@@ -22,15 +25,18 @@ export default function ProfanityList() {
   const [profanityName, setProfanityName] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [postsLoading, setPostsLoading] = useState(true);
+  const [commentsLoading, setCommentsLoading] = useState(true);
   const [totalPostsCount, setTotalPostsCount] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
   const [page, setPage] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<"words" | "flagged">("words");
+  const [activeTab, setActiveTab] = useState<"words" | "flagged" | "comments">("words");
 
   const { user } = useUser();
+
+  const [flaggedComments, setFlaggedComments] = useState<PopulatedComment[]>([]);
 
   useEffect(() => {
     async function fetchProfanities() {
@@ -169,6 +175,22 @@ export default function ProfanityList() {
     return a.localeCompare(b);
   });
 
+  const fetchFlaggedComments = async () => {
+    if (!user) return;
+    try {
+      setCommentsLoading(true);
+      const comments = await getFlaggedComments(user._id);
+      setFlaggedComments(comments);
+      setCommentsLoading(false);
+    } catch (error) {
+      console.error("Failed to load flagged comments.");
+    }
+  };
+
+  useEffect(() => {
+    fetchFlaggedComments();
+  }, [user]);
+
   const renderContent = () => {
     if (activeTab === "words") {
       return (
@@ -245,6 +267,33 @@ export default function ProfanityList() {
           </div>
         </div>
       );
+    } else if (activeTab === "comments") {
+      return (
+        <div>
+            {flaggedComments.map((comment: PopulatedComment) => {
+              return (
+                <div key={comment._id}>
+                  <CommentComponent comment={comment} clickable={true} />
+                </div>
+              );
+            })}
+            {commentsLoading ? (
+              <div className="mt-8 flex items-center justify-center">
+                <LoaderCircle
+                  className="animate-spin"
+                  size={32}
+                  color="#475CC6"
+                />
+              </div>
+            ) : (
+              flaggedComments.length != 0 || (
+                <p className="text-center font-bold text-theme-med-gray">
+                  No reported comments!
+                </p>
+              )
+            )}
+          </div>
+      );
     }
   };
 
@@ -281,6 +330,12 @@ export default function ProfanityList() {
           onClick={() => setActiveTab("flagged")}
         >
           Flagged Posts
+        </button>
+        <button
+          className={`px-4 py-2 transition-colors duration-200 ${activeTab === "comments" ? "border-b-2 border-blue-500 font-bold" : "text-gray-500 hover:text-blue-500"}`}
+          onClick={() => setActiveTab("comments")}
+        >
+          Flagged Comments
         </button>
       </div>
       {renderContent()}
