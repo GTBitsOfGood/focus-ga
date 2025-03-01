@@ -23,7 +23,7 @@ export default function ReportComponent({
         <div className="flex items-center gap-2">
           <div
             className={cn(
-              "flex h-6 w-6 cursor-pointer items-center justify-center rounded-full",
+              "flex h-6 w-6 items-center justify-center rounded-full",
               `bg-${sourceUser?.profileColor || ProfileColors.ProfileDefault}`,
             )}
           >
