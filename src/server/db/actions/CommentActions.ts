@@ -106,11 +106,10 @@ export async function editComment(
   try {
     await dbConnect();
     const parsedData = commentSchema.partial().parse(comment);
-    const updatedComment = await CommentModel.findByIdAndUpdate(
-      id,
-      parsedData,
-      { new: true },
-    );
+    if (comment.editedByAdmin !== undefined) {
+      parsedData.editedByAdmin = comment.editedByAdmin;
+    }
+    const updatedComment = await CommentModel.findByIdAndUpdate(id, parsedData, { new: true });
     if (!updatedComment) {
       throw new Error("Comment not found");
     }

@@ -485,18 +485,23 @@ export async function editPost(
   }
 
   const validatedPost = editPostSchema.parse(post);
+  if (post.editedByAdmin !== undefined) {
+    validatedPost.editedByAdmin = post.editedByAdmin;
+  }
   const updatedPost = await PostModel.findByIdAndUpdate(id, validatedPost, {
     new: true,
   });
+  console.log(updatedPost);
+  console.log("HI");
   if (!updatedPost) {
     throw new Error("Post not found");
   }
   return {
     ...updatedPost.toObject(),
     author: updatedPost.author.toString(),
+    editedByAdmin: updatedPost.editedByAdmin,
   };
 }
-
 /**
  * Marks a post as deleted in the database and deletes its associated likes and saves.
  * @param id - The ID of the post to delete.

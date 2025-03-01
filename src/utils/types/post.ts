@@ -29,9 +29,12 @@ export const postSchema = z.object({
   isFlagged: z.boolean().default(false),
   isDeleted: z.boolean().default(false),
   expiresAt: z.date().optional(),
+  editedByAdmin: z.boolean().default(false).optional()
 });
 
-export const editPostSchema = postSchema.partial();
+export const editPostSchema = postSchema.partial().extend({
+  editedByAdmin: z.boolean().optional(), // made it mandatory if edited
+});
 
 export const postSaveSchema = z.object({
   post: z.string().transform((id) => new Types.ObjectId(id)),

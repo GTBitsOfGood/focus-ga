@@ -11,7 +11,8 @@ const CommentSchema = new Schema<Comment>({
   likes: { type: Number, default: 0 },
   replyTo: { type: Schema.Types.ObjectId, ref: 'Comment', default: null },
   isFlagged: { type: Boolean, default: false },
-  isDeleted: { type: Boolean, default: false }
+  isDeleted: { type: Boolean, default: false },
+  editedByAdmin: {type: Boolean, default: false },
 });
 
 CommentSchema.post("save", async function (comment) {

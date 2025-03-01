@@ -27,11 +27,13 @@ type EditPostModalProps = {
   content?: string;
   tags?: Disability[];
   isPrivate?: boolean;
+  editedByAdmin?: boolean | undefined;
   onSubmit: (
     title: string,
     content: string,
     tags: Disability[],
-    isPrivate: boolean
+    isPrivate: boolean,
+    editedByAdmin: boolean | undefined,
   ) => Promise<void>;
 };
 
@@ -45,6 +47,7 @@ export default function EditPostModal(props: EditPostModalProps) {
     content: initialContent,
     tags: initialTags,
     isPrivate: initialIsPrivate,
+    editedByAdmin: initialEditedByAdmin,
     onSubmit,
   } = props;
 
@@ -54,17 +57,27 @@ export default function EditPostModal(props: EditPostModalProps) {
   const [showTitleError, setTitleError] = useState(false);
   const [showBodyError, setBodyError] = useState(false);
   const disabilities = useDisabilities();
-  const [isPrivate, setIsPrivate] = useState<boolean>(initialIsPrivate || false);
+  const [isPrivate, setIsPrivate] = useState<boolean>(
+    initialIsPrivate || false,
+  );
   const [mouseDownOnBackground, setMouseDownOnBackground] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const editorRef = useRef<MDXEditorMethods | null>(null);
   const { user } = useUser();
+  const [editedByAdmin] = useState<boolean | undefined>(initialEditedByAdmin);
 
   const handleSubmit = async () => {
     try {
       if (validateSubmission()) {
         setIsSubmitting(true);
-        await onSubmit(title, content, tags, isPrivate);
+        const isAdmin = user?.isAdmin;
+        await onSubmit(
+          title,
+          content,
+          tags,
+          isPrivate,
+          isAdmin || editedByAdmin,
+        );
         closeModal();
         editorRef.current?.setMarkdown("");
       }
@@ -233,35 +246,51 @@ export default function EditPostModal(props: EditPostModalProps) {
         </div>
 
         <div className="relative mb-6">
-          <label
-            htmlFor="title"
-            className="block text-sm text-gray-700 mb-2"
-          >
-            Make your post <span className="font-bold">public</span> or <span className="font-bold">private</span>
+          <label htmlFor="title" className="mb-2 block text-sm text-gray-700">
+            Make your post <span className="font-bold">public</span> or{" "}
+            <span className="font-bold">private</span>
           </label>
-          <form className="flex flex-col items-start border-[1px] border-theme-medlight-gray rounded-[8px] p-[16px] gap-[16px]">
+          <form className="flex flex-col items-start gap-[16px] rounded-[8px] border-[1px] border-theme-medlight-gray p-[16px]">
             <label className="flex gap-2">
               <div>
-                <input type="radio" className="border-theme-medlight-gray" id="editPrivate" checked={isPrivate} onChange={() => {
-                  setIsPrivate(true)
-                }} name="postVisibility"/>
+                <input
+                  type="radio"
+                  className="border-theme-medlight-gray"
+                  id="editPrivate"
+                  checked={isPrivate}
+                  onChange={() => {
+                    setIsPrivate(true);
+                  }}
+                  name="postVisibility"
+                />
               </div>
               <div>
                 Private
                 <br></br>
-                <span className="text-[#A3A3A3] font-[400]">Only you and FOCUS admin can see your post</span>
+                <span className="font-[400] text-[#A3A3A3]">
+                  Only you and FOCUS admin can see your post
+                </span>
               </div>
             </label>
             <label className="flex gap-2">
               <div>
-                <input type="radio" className="border-theme-medlight-gray" id="editPublic" checked={!isPrivate} onChange={() => {
-                  setIsPrivate(false)
-                }} name="postVisibility"/>
+                <input
+                  type="radio"
+                  className="border-theme-medlight-gray"
+                  id="editPublic"
+                  checked={!isPrivate}
+                  onChange={() => {
+                    setIsPrivate(false);
+                  }}
+                  name="postVisibility"
+                />
               </div>
               <div>
                 Public
                 <br></br>
-                <span className="text-[#A3A3A3] font-[400]">Everyone in FOCUS group can see your post</span>
+                <span className="font-[400] text-[#A3A3A3]">
+                  Everyone in FOCUS group can see your post
+                </span>
               </div>
             </label>
           </form>
