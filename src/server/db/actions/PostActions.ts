@@ -23,6 +23,7 @@ import DisabilityModel from "../models/DisabilityModel";
 import { revalidatePath } from "next/cache";
 import dayjs from "dayjs";
 import { PostDeletionDurations } from "@/utils/consts";
+import { AgeSelection } from "@/utils/types/common";
 
 // A MongoDB aggregation pipeline that efficiently populates a post
 type PipelineArgs = {
@@ -35,6 +36,7 @@ type PipelineArgs = {
   locations?: string[];
   postId?: string;
   searchTerm?: string;
+  age?: AgeSelection;
 };
 
 type PostAggregationResult = {
@@ -52,7 +54,13 @@ function postPopulationPipeline({
   locations,
   postId,
   searchTerm,
+  age,
 }: PipelineArgs): mongoose.PipelineStage[] {
+
+  if (age && age.maxAge && age.maxAge === 20) {
+    age.maxAge = 100;
+  }
+
   return [
     // Apply search
     ...(searchTerm
@@ -130,6 +138,46 @@ function postPopulationPipeline({
           { $unwind: { path: "$author", preserveNullAndEmptyArrays: true } },
 
           { $match: { "author.isBanned": false } },
+          
+          // Age filter - lookup childBirthdates and filter by age
+          ...(age && age.minAge !== undefined && age.maxAge !== undefined
+            ? [
+                // First, we need to get the childBirthdates which aren't included in the current author lookup
+                {
+                  $lookup: {
+                    from: UserModel.collection.name,
+                    let: { authorId: "$author._id" },
+                    pipeline: [
+                      { $match: { $expr: { $eq: ["$_id", { $toObjectId: "$$authorId" }] } } },
+                      { $project: { childBirthdates: 1, _id: 0 } }
+                    ],
+                    as: "ageData"
+                  }
+                },
+                { $unwind: { path: "$ageData", preserveNullAndEmptyArrays: true } },
+                
+                // Now filter based on the age range
+                {
+                  $match: {
+                    $or: [
+                      // No childBirthdates - include these posts
+                      { "ageData.childBirthdates": { $exists: false } },
+                      { "ageData.childBirthdates": { $size: 0 } },
+                      
+                      // Has at least one child in the age range
+                      {
+                        "ageData.childBirthdates": {
+                          $elemMatch: {
+                            $lte: new Date(new Date().getFullYear() - age.minAge, new Date().getMonth(), new Date().getDate()),
+                            $gte: new Date(new Date().getFullYear() - age.maxAge - 1, new Date().getMonth(), new Date().getDate())
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            : []),
 
           // Filter by author location
           ...(locations && locations.length
@@ -381,6 +429,7 @@ type Filters = {
   locations?: string[];
   searchTerm?: string;
   visibility?: string;
+  age?: AgeSelection;
 };
 
 export async function getPopulatedPosts(
@@ -388,7 +437,7 @@ export async function getPopulatedPosts(
   isAdmin: boolean,
   offset: number,
   limit: number,
-  { tags, locations, searchTerm, visibility }: Filters,
+  { tags, locations, searchTerm, visibility, age }: Filters,
 ): Promise<PostAggregationResult> {
   await dbConnect();
 
@@ -402,6 +451,7 @@ export async function getPopulatedPosts(
       tags,
       locations,
       searchTerm,
+      age,
     }),
   );
   return {

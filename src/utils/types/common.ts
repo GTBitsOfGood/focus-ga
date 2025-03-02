@@ -6,3 +6,8 @@ export type Filter<T> = {
     setSelected: (selected: T) => void;
     searchable?: boolean;
 }
+
+export type AgeSelection = {
+    minAge: number;
+    maxAge: number;
+}
