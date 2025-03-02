@@ -106,6 +106,7 @@ export default function CommentComponent(props: CommentComponentProps) {
   };
 
   useEffect(() => {
+    console.log(comment)
     fetchReports();
   }, []);
 

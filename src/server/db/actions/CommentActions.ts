@@ -339,21 +339,6 @@ export const getFlaggedComments = async (
   // Fetch flagged comments from the database and populate the author field
   const comments = await CommentModel.find({ isFlagged: true })
     .populate("author")
-    .populate({
-      path: "post",
-      populate: {
-        path: "author",
-        model: UserModel,
-      },
-    })
-    .populate({
-      path: "replyTo",
-      model: CommentModel,
-      populate: {
-        path: "author",
-        model: UserModel,
-      },
-    })
     .exec();
 
   const populatedComments = await Promise.all(
