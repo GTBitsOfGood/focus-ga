@@ -234,10 +234,11 @@ export async function getPostComments(
   await dbConnect();
 
   const comments = await CommentModel.aggregate([
-    // Match post ID and filter out deleted child comments (but not deleted parent comments)
+    // Match post ID and filter out deleted child comments (but not deleted parent comments) and flagged comments
     {
       $match: {
         post: new mongoose.Types.ObjectId(postId),
+        isFlagged: false, // Only fetch comments that are not flagged
         $or: [{ replyTo: null }, { isDeleted: false }],
       },
     },
@@ -296,7 +297,6 @@ export async function getPostComments(
 
   return comments;
 }
-
 /**
  * Retrieves a single post from the database by its ID with its author and disability fields populated.
  * @param id - The ID of the post to retrieve.
@@ -330,4 +330,36 @@ export async function getPopulatedComment(
     replyTo: comment.replyTo ? comment.replyTo.toString() : null,
     liked: !!liked,
   };
+}
+
+export const getFlaggedComments = async (
+  userId: string,
+): Promise<PopulatedComment[]> => {
+  // Fetch flagged comments from the database and populate the author field
+  const comments = await CommentModel.find({ isFlagged: true })
+    .populate("author")
+    .exec();
+
+  const populatedComments = await Promise.all(
+    comments.map(async (comment) => {
+      const liked = await CommentLikeModel.exists({
+        comment: comment._id,
+        user: userId,
+      });
+      return {
+        ...comment.toObject(),
+        liked: !!liked,
+        post: comment.post.toString(),
+        replyTo: comment.replyTo ? comment.replyTo.toString() : null,
+      };
+    }),
+  );
+
+  return populatedComments;
+};
+
+
+export const hasFlaggedComments = async (): Promise<boolean> => {
+  const count = await CommentModel.countDocuments({ isFlagged: true });
+  return count > 0;
 }
