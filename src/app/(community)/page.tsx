@@ -163,7 +163,8 @@ export default function Home() {
         const visibility = user.isAdmin ? selectedVisibility[0].visibility : "All";
         const age = selectedAge[0];
 
-        const filters = { tags, locations, searchTerm, visibility, age };
+        const filters = { tags, locations, searchTerm, visibility, age, isFlagged: [false]};
+
         const {count, posts: newPosts } = await getPopulatedPosts(user._id, user.isAdmin, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, filters);
         setTotalPostsCount(count);
         if (newPosts.length > 0) {

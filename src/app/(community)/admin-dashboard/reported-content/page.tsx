@@ -54,7 +54,6 @@ export default function ReportedContent() {
         }
       }
     });
-
     sortByDate(unresolvedReportedPosts);
     let postsArr: PopulatedPost[] = await Promise.all(
       unresolvedReportedPosts.map(async (postInfo) => {
@@ -84,6 +83,7 @@ export default function ReportedContent() {
 
   return (
     <div className="mt-9 max-w-[78%] md:ml-10">
+      <h1 className="mb-7 text-2xl font-bold">Reported Content</h1>
       <Tabs defaultValue="posts" onValueChange={fetchUnresolvedReports}>
         <TabsList className="mb-4">
           <TabsTrigger size="large" className="text-lg font-semibold" value="posts">

@@ -27,17 +27,18 @@ import { AgeSelection } from "@/utils/types/common";
 
 // A MongoDB aggregation pipeline that efficiently populates a post
 type PipelineArgs = {
-  authUserId: string;
-  isAdmin?: boolean;
-  visibility?: string;
-  offset?: number;
-  limit?: number;
-  tags?: string[];
-  locations?: string[];
-  postId?: string;
-  searchTerm?: string;
-  age?: AgeSelection;
-};
+  authUserId: string,
+  isFlagged: boolean[],
+  isAdmin?: boolean,
+  visibility?: string,
+  offset?: number,
+  limit?: number,
+  tags?: string[],
+  locations?: string[],
+  postId?: string,
+  searchTerm?: string,
+  age?: AgeSelection,
+}
 
 type PostAggregationResult = {
   count: number;
@@ -46,6 +47,7 @@ type PostAggregationResult = {
 
 function postPopulationPipeline({
   authUserId,
+  isFlagged,
   isAdmin,
   visibility,
   offset,
@@ -117,6 +119,9 @@ function postPopulationPipeline({
     ...(visibility === "Public" ? [{ $match: { isPrivate: false } }] : []),
     ...(visibility === "Private" ? [{ $match: { isPrivate: true } }] : []),
     ...(visibility === "All" ? [] : []),
+
+    // Filter by isFlagged
+    ...(isFlagged.length ? [{ $match: { isFlagged: { $in: isFlagged } } }] : []),
 
     // Use $facet to perform two separate aggregations: totalPostCount and posts (paginated)
     {
@@ -395,7 +400,7 @@ export async function unpinPost(
  * @returns A promise that resolves to an object containing the count and an array of populated post objects.
  */
 export async function getPopulatedPinnedPosts(
-  authUserId: string,
+  authUserId: string
 ): Promise<PostAggregationResult> {
   await dbConnect();
 
@@ -403,6 +408,7 @@ export async function getPopulatedPinnedPosts(
     { $match: { isPinned: true, isPrivate: false } },
     ...postPopulationPipeline({
       authUserId,
+      isFlagged: [false],
       tags: [],
       locations: [],
       searchTerm: undefined,
@@ -425,35 +431,19 @@ export async function getPopulatedPinnedPosts(
  */
 
 type Filters = {
-  tags?: string[];
-  locations?: string[];
-  searchTerm?: string;
-  visibility?: string;
-  age?: AgeSelection;
-};
+  tags?: string[],
+  locations?: string[],
+  searchTerm?: string,
+  visibility?: string,
+  isFlagged?: boolean[],
+  age?: AgeSelection,
+}
 
-export async function getPopulatedPosts(
-  authUserId: string,
-  isAdmin: boolean,
-  offset: number,
-  limit: number,
-  { tags, locations, searchTerm, visibility, age }: Filters,
-): Promise<PostAggregationResult> {
+export async function getPopulatedPosts(authUserId: string, isAdmin : boolean, offset: number, limit: number, {tags, locations, searchTerm, visibility, isFlagged, age}: Filters): Promise<PostAggregationResult> {
   await dbConnect();
 
-  const postsInfo = await PostModel.aggregate(
-    postPopulationPipeline({
-      authUserId,
-      isAdmin,
-      visibility,
-      offset,
-      limit,
-      tags,
-      locations,
-      searchTerm,
-      age,
-    }),
-  );
+  const postsInfo = await PostModel.aggregate(postPopulationPipeline({authUserId, isFlagged : (isFlagged ?? [true, false]), isAdmin, visibility, offset, limit, tags, locations, searchTerm, age}));
+
   return {
     count: postsInfo[0].count.length ? postsInfo[0].count[0].count : 0,
     posts: postsInfo[0].posts,
@@ -507,9 +497,7 @@ export async function getPopulatedPost(
     throw new Error("Invalid post ID");
   }
 
-  const aggregationResult = await PostModel.aggregate(
-    postPopulationPipeline({ authUserId, isAdmin, postId: id }),
-  );
+  const aggregationResult = await PostModel.aggregate(postPopulationPipeline({authUserId, isAdmin, postId: id, isFlagged: [true, false]}));
   const post = aggregationResult[0].posts[0];
   if (!post) {
     throw new Error("Post not found");
@@ -653,21 +641,15 @@ export async function getPopulatedSavedPosts(
   const pipeline: mongoose.PipelineStage[] = [
     { $match: { user: new mongoose.Types.ObjectId(userId) } },
     { $sort: { date: -1 as const } },
-    {
-      $lookup: {
-        from: PostModel.collection.name,
-        localField: "post",
-        foreignField: "_id",
-        as: "post",
-      },
-    },
-    { $unwind: { path: "$post" } },
-    { $replaceRoot: { newRoot: "$post" } },
-  ].concat(
-    postPopulationPipeline({ authUserId: userId, isAdmin: isAdmin }).slice(
-      2,
-    ) satisfies mongoose.PipelineStage[] as any,
-  );
+    { $lookup: {
+      from: PostModel.collection.name,
+      localField: 'post',
+      foreignField: '_id',
+      as: 'post'
+    } },
+    { $unwind: { path: '$post' } },
+    { $replaceRoot: { newRoot: '$post' } }
+  ].concat(postPopulationPipeline({ authUserId: userId, isAdmin: isAdmin, isFlagged: [true, false] }).slice(2) satisfies mongoose.PipelineStage[] as any);
 
   const pipelineResult = await PostSaveModel.aggregate(pipeline);
   const savedPosts = pipelineResult[0].posts;
@@ -811,4 +793,15 @@ export async function deletePostLike(
     session.endSession();
     revalidatePath(`/posts/${postId}`);
   }
+}
+
+/**
+ * Checks if there are any flagged posts or comments in the database.
+ * This is useful for administrators to know if there's any content that needs moderation.
+ * @returns A promise that resolves to a boolean indicating whether there are any flagged posts or comments.
+ */
+export async function hasFlaggedPosts(): Promise<boolean> {
+  await dbConnect();
+  const flaggedPostsCount = await PostModel.countDocuments({ isFlagged: true });
+  return flaggedPostsCount > 0;
 }
