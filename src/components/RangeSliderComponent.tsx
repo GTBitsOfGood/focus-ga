@@ -1,5 +1,4 @@
-"use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import {
   Popover,
   PopoverContent,
@@ -34,6 +33,10 @@ export default function RangeSliderComponent({
   const sliderRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef<string | null>(null);
 
+  // Ref to store the dragging min and max age values
+  const currentMinAgeRef = useRef(currentMinAge);
+  const currentMaxAgeRef = useRef(currentMaxAge);
+
   const debounceOpenDropdown = (open: boolean) => {
     setShowPopover(open);
     setIsDisabled(true);
@@ -63,14 +66,19 @@ export default function RangeSliderComponent({
     const position = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
 
     if (isDraggingRef.current === 'min') {
-      setCurrentMinAge(Math.min(calculateAge(position), currentMaxAge) === 20 ? 19 : Math.min(calculateAge(position), currentMaxAge));
+      currentMinAgeRef.current = Math.min(calculateAge(position), currentMaxAgeRef.current);
     } else {
-      setCurrentMaxAge(Math.max(calculateAge(position), currentMinAge) === 0 ? 1 : Math.max(calculateAge(position), currentMinAge));
+      currentMaxAgeRef.current = Math.max(calculateAge(position), currentMinAgeRef.current);
     }
+
+    // Update the displayed min/max positions smoothly during dragging
+    setCurrentMinAge(currentMinAgeRef.current);
+    setCurrentMaxAge(currentMaxAgeRef.current);
   };
 
   const handlePointerUp = () => {
-    onChange(currentMinAge, currentMaxAge);
+    // Update state after dragging ends
+    onChange(currentMinAgeRef.current, currentMaxAgeRef.current);
     isDraggingRef.current = null;
     window.removeEventListener('pointermove', handlePointerMove);
     window.removeEventListener('pointerup', handlePointerUp);
@@ -101,17 +109,17 @@ export default function RangeSliderComponent({
         </div>
       </PopoverTrigger>
 
-      <PopoverContent className="w-[300px] p-5 shadow-lg rounded-md">
-        <div className="space-y-5">
+      <PopoverContent className="w-[300px] p-6 pb-0 shadow-lg rounded-md">
+        <div className="space-y-3">
           <h3 className="text-base font-medium text-gray-700">Range for age filter</h3>
           <div className="relative h-16 pt-6">
             <div
               ref={sliderRef}
-              className="absolute inset-x-0 h-[5px] bg-gray-200 rounded cursor-pointer"
+              className="absolute mx-2 inset-x-0 h-[5px] bg-gray-200 rounded cursor-pointer"
               style={{ top: "24px" }}
             >
               <div
-                className="absolute h-full bg-theme-blue rounded"
+                className="absolute h-full bg-theme-blue rounded opacity-80"
                 style={{
                   left: `${Math.max(0, minPosition)}%`,
                   width: `${maxPosition - Math.max(0, minPosition)}%`
@@ -120,9 +128,9 @@ export default function RangeSliderComponent({
               <div className="absolute flex flex-col items-center" style={{
                 left: `${minPosition}%`,
                 transform: 'translateX(-50%)',
-                top: "-25px",
+                top: "-30px",
               }}>
-                <span className="text-xs text-gray-600 mb-1">{currentMinAge}</span>
+                <span className="text-sm text-gray-600 mb-1">{currentMinAge}</span>
                 <div
                   className="w-4 h-4 -mb-1.5 bg-theme-blue rounded-full shadow cursor-grab z-10"
                   onPointerDown={(e) => handlePointerDown(e, 'min')}
@@ -131,9 +139,9 @@ export default function RangeSliderComponent({
               <div className="absolute flex flex-col items-center" style={{
                 left: `${maxPosition}%`,
                 transform: 'translateX(-50%)',
-                top: "-25px",
+                top: "-30px",
               }}>
-                <span className="text-xs text-gray-600 mb-1">{currentMaxAge === maxAge ? `${maxAge}+` : currentMaxAge}</span>
+                <span className="text-sm text-gray-600 mb-1">{currentMaxAge === maxAge ? `${maxAge}+` : currentMaxAge}</span>
                 <div
                   className="w-4 h-4 -mb-1.5 bg-theme-blue rounded-full shadow cursor-grab z-10"
                   onPointerDown={(e) => handlePointerDown(e, 'max')}

@@ -20,7 +20,6 @@ export default function FilterComponent( props: FilterProps ) {
             minAge={0}
             maxAge={20}
             onChange={(minAge, maxAge) => {
-              console.log('on change called')
               filter.setSelected({ minAge, maxAge, _id: `age-${minAge}-${maxAge}` });
             }}
             initialMinAge={filter.selected.length > 0 ? filter.selected[0].minAge : 3}

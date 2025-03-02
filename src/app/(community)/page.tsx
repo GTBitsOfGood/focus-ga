@@ -132,7 +132,6 @@ export default function Home() {
     data: [],
     selected: selectedAge,
     setSelected: (selected) => {
-      console.log(selected)
       handleVisibility(selected, setSelectedAge);
     }
   };

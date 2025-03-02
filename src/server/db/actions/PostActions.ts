@@ -542,7 +542,6 @@ export async function editPost(
     new: true,
   });
   console.log(updatedPost);
-  console.log("HI");
   if (!updatedPost) {
     throw new Error("Post not found");
   }
