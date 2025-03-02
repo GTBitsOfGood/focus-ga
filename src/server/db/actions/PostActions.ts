@@ -802,6 +802,6 @@ export async function deletePostLike(
  */
 export async function hasFlaggedPosts(): Promise<boolean> {
   await dbConnect();
-  const flaggedPostsCount = await PostModel.countDocuments({ isFlagged: true });
+  const flaggedPostsCount = await PostModel.countDocuments({ isFlagged: true, isDeleted: false});
   return flaggedPostsCount > 0;
 }
