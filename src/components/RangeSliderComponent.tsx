@@ -66,9 +66,9 @@ export default function RangeSliderComponent({
     const position = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
 
     if (isDraggingRef.current === 'min') {
-      currentMinAgeRef.current = Math.min(calculateAge(position), currentMaxAgeRef.current);
+      currentMinAgeRef.current = Math.min(calculateAge(position), currentMaxAgeRef.current - 1);
     } else {
-      currentMaxAgeRef.current = Math.max(calculateAge(position), currentMinAgeRef.current);
+      currentMaxAgeRef.current = Math.max(calculateAge(position), currentMinAgeRef.current + 1);
     }
 
     // Update the displayed min/max positions smoothly during dragging
