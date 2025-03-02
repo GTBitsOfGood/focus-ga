@@ -373,3 +373,9 @@ export const getFlaggedComments = async (
 
   return populatedComments;
 };
+
+
+export const hasFlaggedComments = async (): Promise<boolean> => {
+  const count = await CommentModel.countDocuments({ isFlagged: true });
+  return count > 0;
+}

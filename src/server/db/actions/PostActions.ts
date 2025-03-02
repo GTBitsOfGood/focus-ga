@@ -729,3 +729,14 @@ export async function deletePostLike(
     revalidatePath(`/posts/${postId}`);
   }
 }
+
+/**
+ * Checks if there are any flagged posts or comments in the database.
+ * This is useful for administrators to know if there's any content that needs moderation.
+ * @returns A promise that resolves to a boolean indicating whether there are any flagged posts or comments.
+ */
+export async function hasFlaggedPosts(): Promise<boolean> {
+  await dbConnect();
+  const flaggedPostsCount = await PostModel.countDocuments({ isFlagged: true });
+  return flaggedPostsCount > 0;
+}

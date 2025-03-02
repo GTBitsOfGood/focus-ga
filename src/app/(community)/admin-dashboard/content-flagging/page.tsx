@@ -193,6 +193,24 @@ export default function ProfanityList() {
     if (activeTab === "words") {
       return (
         <>
+          {error && <div className="mb-4 text-red-500">{error}</div>}
+          <h2 className="mb-3 text-xl">Add New Word</h2>
+          <div className="mb-6 flex items-center gap-3">
+            <input
+              type="text"
+              value={profanityName}
+              onChange={(e) => setProfanityName(e.target.value)}
+              placeholder="Enter profanity"
+              onKeyDown={(e) => e.key === "Enter" && handleAddProfanity()}
+              className="h-10 w-full rounded-md border p-3 py-1.5 text-sm"
+            />
+            <button
+              className="h-10 rounded-md bg-theme-blue px-6 py-1.5 text-white transition hover:opacity-90"
+              onClick={handleAddProfanity}
+            >
+              Add
+            </button>
+          </div>
           <h2 className="mb-3 text-xl">Current Profanity List</h2>
           <div className="mb-6">
             <div className="mb-6 flex items-center justify-between">
@@ -229,7 +247,6 @@ export default function ProfanityList() {
     } else if (activeTab === "flagged") {
       return (
         <div>
-          <h2 className="mb-3 text-xl">Flagged Posts</h2>
           <div>
             {posts.length ? (
               posts.map((post, index) => {
@@ -251,7 +268,9 @@ export default function ProfanityList() {
                 }
               })
             ) : (
-              <></>
+              <p className="text-center font-bold text-theme-med-gray">
+                No flagged posts!
+              </p>
             )}
             {postsLoading && (
               <div className="mt-8 flex items-center justify-center">
@@ -268,29 +287,29 @@ export default function ProfanityList() {
     } else if (activeTab === "comments") {
       return (
         <div>
-            {flaggedComments.map((comment: PopulatedComment) => {
-              return (
-                <div key={comment._id}>
-                  <CommentComponent comment={comment} clickable={true} />
-                </div>
-              );
-            })}
-            {commentsLoading ? (
-              <div className="mt-8 flex items-center justify-center">
-                <LoaderCircle
-                  className="animate-spin"
-                  size={32}
-                  color="#475CC6"
-                />
+          {flaggedComments.map((comment: PopulatedComment) => {
+            return (
+              <div key={comment._id}>
+                <CommentComponent comment={comment} clickable={true} />
               </div>
-            ) : (
-              flaggedComments.length != 0 || (
-                <p className="text-center font-bold text-theme-med-gray">
-                  No reported comments!
-                </p>
-              )
-            )}
-          </div>
+            );
+          })}
+          {commentsLoading ? (
+            <div className="mt-8 flex items-center justify-center">
+              <LoaderCircle
+                className="animate-spin"
+                size={32}
+                color="#475CC6"
+              />
+            </div>
+          ) : (
+            flaggedComments.length != 0 || (
+              <p className="text-center font-bold text-theme-med-gray">
+                No flagged comments!
+              </p>
+            )
+          )}
+        </div>
       );
     }
   };
@@ -298,39 +317,21 @@ export default function ProfanityList() {
   return (
     <div className="mt-9 max-w-[78%] md:ml-10">
       <h1 className="mb-7 text-2xl font-bold">Content Flagging</h1>
-      {error && <div className="mb-4 text-red-500">{error}</div>}
-      <h2 className="mb-3 text-xl">Add New Word</h2>
-      <div className="mb-6 flex items-center gap-3">
-        <input
-          type="text"
-          value={profanityName}
-          onChange={(e) => setProfanityName(e.target.value)}
-          placeholder="Enter profanity"
-          onKeyDown={(e) => e.key === "Enter" && handleAddProfanity()}
-          className="h-10 w-full rounded-md border p-3 py-1.5 text-sm"
-        />
+      <div className="mb-4 flex space-x-4">
         <button
-          className="h-10 rounded-md bg-theme-blue px-6 py-1.5 text-white transition hover:opacity-90"
-          onClick={handleAddProfanity}
-        >
-          Add
-        </button>
-      </div>
-      <div className="mb-4 flex space-x-4 border-b">
-        <button
-          className={`px-4 py-2 transition-colors duration-200 ${activeTab === "words" ? "border-b-2 border-blue-500 font-bold" : "text-gray-500 hover:text-blue-500"}`}
+          className={`px-4 py-2 transition-colors duration-200 text-lg font-semibold ${activeTab === "words" ? "border-b-4 border-blue-600 font-bold" : "text-gray-500 hover:text-blue-500"}`}
           onClick={() => setActiveTab("words")}
         >
           Current Words
         </button>
         <button
-          className={`px-4 py-2 transition-colors duration-200 ${activeTab === "flagged" ? "border-b-2 border-blue-500 font-bold" : "text-gray-500 hover:text-blue-500"}`}
+          className={`px-4 py-2 transition-colors duration-200 text-lg font-semibold ${activeTab === "flagged" ? "border-b-4 border-blue-600 font-bold" : "text-gray-500 hover:text-blue-500"}`}
           onClick={() => setActiveTab("flagged")}
         >
           Flagged Posts
         </button>
         <button
-          className={`px-4 py-2 transition-colors duration-200 ${activeTab === "comments" ? "border-b-2 border-blue-500 font-bold" : "text-gray-500 hover:text-blue-500"}`}
+          className={`px-4 py-2 transition-colors duration-200 text-lg font-semibold ${activeTab === "comments" ? "border-b-4 border-blue-600 font-bold" : "text-gray-500 hover:text-blue-500"}`}
           onClick={() => setActiveTab("comments")}
         >
           Flagged Comments
