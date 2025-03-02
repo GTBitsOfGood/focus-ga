@@ -17,7 +17,7 @@ export default function FilterComponent( props: FilterProps ) {
           <RangeSliderComponent 
             key={index}
             label={filter.label}
-            minAge={3}
+            minAge={0}
             maxAge={20}
             onChange={(minAge, maxAge) => {
               console.log('on change called')

@@ -1,5 +1,4 @@
-'use client'
-
+"use client";
 import React, { useState, useEffect, useRef } from "react";
 import {
   Popover,
@@ -28,18 +27,12 @@ export default function RangeSliderComponent({
 }: AgeFilterProps) {
   const [showPopover, setShowPopover] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
-  
+
   const [currentMinAge, setCurrentMinAge] = useState(initialMinAge);
   const [currentMaxAge, setCurrentMaxAge] = useState(initialMaxAge);
-  
-  const sliderRef = useRef<HTMLDivElement>(null);
-  const minThumbRef = useRef<HTMLDivElement>(null);
-  const maxThumbRef = useRef<HTMLDivElement>(null);
-  const isDraggingRef = useRef<string | null>(null);
 
-  useEffect(() => {
-    onChange(currentMinAge, currentMaxAge);
-  }, [currentMinAge, currentMaxAge]);
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef<string | null>(null);
 
   const debounceOpenDropdown = (open: boolean) => {
     setShowPopover(open);
@@ -53,10 +46,7 @@ export default function RangeSliderComponent({
   };
 
   const calculateAge = (position: number): number => {
-    // Calculate age from percentage position
-    const rawAge = Math.round(((position / 100) * (maxAge - minAge)) + minAge);
-    // Ensure the result is within bounds
-    return Math.max(minAge, Math.min(maxAge, rawAge));
+    return Math.max(minAge, Math.min(maxAge, Math.round(((position / 100) * (maxAge - minAge)) + minAge)));
   };
 
   const handlePointerDown = (e: React.PointerEvent, thumb: string) => {
@@ -68,50 +58,23 @@ export default function RangeSliderComponent({
 
   const handlePointerMove = (e: PointerEvent) => {
     if (!isDraggingRef.current || !sliderRef.current) return;
-    
-    const slider = sliderRef.current;
-    const rect = slider.getBoundingClientRect();
+
+    const rect = sliderRef.current.getBoundingClientRect();
     const position = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-    
+
     if (isDraggingRef.current === 'min') {
-      const newAge = calculateAge(position);
-      setCurrentMinAge(Math.min(newAge, currentMaxAge));
-    } else if (isDraggingRef.current === 'max') {
-      const newAge = calculateAge(position);
-      setCurrentMaxAge(Math.max(newAge, currentMinAge));
+      setCurrentMinAge(Math.min(calculateAge(position), currentMaxAge) === 20 ? 19 : Math.min(calculateAge(position), currentMaxAge));
+    } else {
+      setCurrentMaxAge(Math.max(calculateAge(position), currentMinAge) === 0 ? 1 : Math.max(calculateAge(position), currentMinAge));
     }
   };
 
   const handlePointerUp = () => {
+    onChange(currentMinAge, currentMaxAge);
     isDraggingRef.current = null;
     window.removeEventListener('pointermove', handlePointerMove);
     window.removeEventListener('pointerup', handlePointerUp);
   };
-
-  const handleSliderClick = (e: React.MouseEvent) => {
-    if (!sliderRef.current) return;
-    
-    const slider = sliderRef.current;
-    const rect = slider.getBoundingClientRect();
-    const position = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-    const clickedAge = calculateAge(position);
-    
-    const minDistance = Math.abs(clickedAge - currentMinAge);
-    const maxDistance = Math.abs(clickedAge - currentMaxAge);
-    
-    if (minDistance <= maxDistance) {
-      setCurrentMinAge(Math.min(clickedAge, currentMaxAge));
-    } else {
-      setCurrentMaxAge(Math.max(clickedAge, currentMinAge));
-    }
-  };
-
-  useEffect(() => {
-    return () => {
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerup', handlePointerUp);
-    };
-  }, []);
 
   const minPosition = calculatePosition(currentMinAge);
   const maxPosition = calculatePosition(currentMaxAge);
@@ -127,7 +90,7 @@ export default function RangeSliderComponent({
           )}
         >
           <div className="text-black text-sm font-normal">
-            Age
+            {label}
           </div>
 
           {!showPopover ? (
@@ -141,42 +104,42 @@ export default function RangeSliderComponent({
       <PopoverContent className="w-[300px] p-5 shadow-lg rounded-md">
         <div className="space-y-5">
           <h3 className="text-base font-medium text-gray-700">Range for age filter</h3>
-          <div className="relative h-10 pt-4">
-            <div 
-              ref={sliderRef} 
-              className="absolute inset-0 h-2 bg-gray-200 rounded cursor-pointer" 
-              onClick={handleSliderClick}
+          <div className="relative h-16 pt-6">
+            <div
+              ref={sliderRef}
+              className="absolute inset-x-0 h-[5px] bg-gray-200 rounded cursor-pointer"
+              style={{ top: "24px" }}
             >
-              <div 
-                className="absolute h-full bg-blue-500 rounded"
-                style={{ 
-                  left: `${Math.max(0, minPosition)}%`, 
-                  width: `${maxPosition - Math.max(0, minPosition)}%` 
+              <div
+                className="absolute h-full bg-theme-blue rounded"
+                style={{
+                  left: `${Math.max(0, minPosition)}%`,
+                  width: `${maxPosition - Math.max(0, minPosition)}%`
                 }}
               />
-              <div 
-                ref={minThumbRef}
-                className="absolute w-5 h-5 -mt-1.5 bg-blue-500 rounded-full shadow cursor-grab border-2 border-white z-10"
-                style={{ 
-                  left: `${minPosition}%`, 
-                  transform: 'translateX(-50%)'
-                }}
-                onPointerDown={(e) => handlePointerDown(e, 'min')}
-              />
-              <div 
-                ref={maxThumbRef}
-                className="absolute w-5 h-5 -mt-1.5 bg-blue-500 rounded-full shadow cursor-grab border-2 border-white z-10"
-                style={{ 
-                  left: `${maxPosition}%`, 
-                  transform: 'translateX(-50%)'
-                }}
-                onPointerDown={(e) => handlePointerDown(e, 'max')}
-              />
+              <div className="absolute flex flex-col items-center" style={{
+                left: `${minPosition}%`,
+                transform: 'translateX(-50%)',
+                top: "-25px",
+              }}>
+                <span className="text-xs text-gray-600 mb-1">{currentMinAge}</span>
+                <div
+                  className="w-4 h-4 -mb-1.5 bg-theme-blue rounded-full shadow cursor-grab z-10"
+                  onPointerDown={(e) => handlePointerDown(e, 'min')}
+                />
+              </div>
+              <div className="absolute flex flex-col items-center" style={{
+                left: `${maxPosition}%`,
+                transform: 'translateX(-50%)',
+                top: "-25px",
+              }}>
+                <span className="text-xs text-gray-600 mb-1">{currentMaxAge === maxAge ? `${maxAge}+` : currentMaxAge}</span>
+                <div
+                  className="w-4 h-4 -mb-1.5 bg-theme-blue rounded-full shadow cursor-grab z-10"
+                  onPointerDown={(e) => handlePointerDown(e, 'max')}
+                />
+              </div>
             </div>
-          </div>
-          <div className="flex justify-between text-sm text-gray-600 px-1 pt-2">
-            <span>{currentMinAge}</span>
-            <span>{currentMaxAge === maxAge ? `${maxAge}+` : currentMaxAge}</span>
           </div>
         </div>
       </PopoverContent>
