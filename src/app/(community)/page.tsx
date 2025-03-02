@@ -9,7 +9,7 @@ import FilterComponent from "@/components/FilterComponent";
 import { Disability } from "@/utils/types/disability";
 import { Location } from "@/utils/types/location";
 import { Visiblity } from "@/utils/types/visibility"; 
-import { Filter } from "@/utils/types/common";
+import { AgeSelection, Filter } from "@/utils/types/common";
 import { PAGINATION_LIMIT } from "@/utils/consts";
 import { useUser } from "@/contexts/UserContext";
 import { GEORGIA_CITIES } from "@/utils/cities";
@@ -43,6 +43,7 @@ export default function Home() {
   const { searchTerm } = useSearch();
 
   const [selectedVisibility, setSelectedVisibility] = useState<Visiblity[]>([{visibility: 'All', _id: 'All'}]);
+  const [selectedAge, setSelectedAge] = useState<AgeSelection[]>([{ minAge: 0, maxAge: 20 }]);
 
   const [totalPostsCount, setTotalPostsCount] = useState(0);
   const [pinnedPostContents, setPinnedPostContents] = useState<PopulatedPost[]>(
@@ -126,21 +127,19 @@ export default function Home() {
     setSelected: (selected: Visiblity) => handleVisibility(selected, setSelectedVisibility)
   };
 
-  //TODO: update once demographics are added
   const demographicFilter: Filter<any> = {
     label: "Age",
     data: [],
-    selected: [],
+    selected: selectedAge,
     setSelected: (selected) => {
-      console.log("age selected")
-    },
-    searchable: true
+      handleVisibility(selected, setSelectedAge);
+    }
   };
 
   // fetch posts when filter changes
   useEffect(() => {
     fetchPosts(true);
-  }, [selectedDisabilities, selectedLocations, searchTerm, selectedVisibility])
+  }, [selectedDisabilities, selectedLocations, searchTerm, selectedVisibility, selectedAge])
 
   // fetch posts when page changes
   const fetchPosts = async (clear: boolean = false) => {
@@ -159,12 +158,13 @@ export default function Home() {
     while (retries > 0) {
       try {
         const newPage = clear ? 0 : page;
-
         const tags = selectedDisabilities.map((disability) => disability._id);
         const locations = selectedLocations.map((location) => location.name);
         const visibility = user.isAdmin ? selectedVisibility[0].visibility : "All";
+        const age = selectedAge[0];
 
-        const filters = { tags, locations, searchTerm, visibility, isFlagged: [false]};
+        const filters = { tags, locations, searchTerm, visibility, age, isFlagged: [false]};
+
         const {count, posts: newPosts } = await getPopulatedPosts(user._id, user.isAdmin, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, filters);
         setTotalPostsCount(count);
         if (newPosts.length > 0) {

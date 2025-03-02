@@ -37,10 +37,8 @@ export default function EditCommentModal(props: EditCommentModalProps) {
   const handleSubmit = async () => {
     try {
       if (comment.length != 0) {
-        console.log("HI");
         setIsSubmitting(true);
         const isAdmin = user?.isAdmin;
-        console.log("is Admin: " + isAdmin);
         await onSubmit(comment, isAdmin || editedByAdmin);
         closeModal();
       }
