@@ -70,7 +70,9 @@ const handler: Handler = async () => {
         await juno.email.sendEmail({
           recipients: [
             {
-              email: `${user.email}`,
+              email: `${user.email.endsWith('@focus.com')
+                ? user.email.replace('@focus.com', '')
+                : user.email}`,
               name: `${user.lastName} Family`,
             },
           ],
