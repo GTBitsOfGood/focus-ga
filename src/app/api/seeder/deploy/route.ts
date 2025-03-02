@@ -206,8 +206,8 @@ export async function POST(request: Request) {
           content: faker.lorem.paragraph({ min: 3, max: 10 }),
           tags: selectedDisabilities,
           isPinned: false,
-          isPrivate: Math.random() < 0.5 ? true : false,
-          isFlagged: Math.random() < 0.5 ? true : false,
+          isPrivate: Math.random() < 0.1 ? true : false,
+          isFlagged: false,
           isDeleted: false,
           expiresAt: dayjs(creationDate).add(4, "years").toDate(),
         };
