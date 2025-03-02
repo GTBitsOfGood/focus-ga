@@ -79,7 +79,7 @@ const DISABILITIES = [
   "Down Syndrome",
   "Fragile X Syndrome",
 ];
-const NUM_USERS = 4; 
+const NUM_USERS = 3; 
 const MAX_CHILD_AGE = 20;
 const MAX_CHILD_BIRTHDATES_PER_USER = 10;
 const MAX_POSTS_PER_USER = 2;
@@ -87,7 +87,7 @@ const MAX_USER_DISABILITIES = 3;
 const MAX_COMMENTS_PER_POST = 2;
 const MAX_LIKED_SAVED_POSTS_PER_USER = 2;
 const MAX_LIKED_COMMENTS_PER_USER = 2;
-const NUM_REPORTS = 2;
+const NUM_REPORTS = 1;
 const NUM_REPORT_REASONS = 4;
 const NUM_CONTENT_TYPES = 3;
 const MAX_POST_TAGS = 2;
