@@ -316,22 +316,22 @@ export default function ProfanityList() {
 
   return (
     <div className="mt-9 max-w-[78%] md:ml-10">
-      <h1 className="mb-7 text-2xl font-bold">Content Flagging</h1>
-      <div className="mb-4 flex space-x-4">
+      <h1 className="mb-8 text-2xl font-bold">Content Flagging</h1>
+      <div className="mb-6 flex space-x-16">
         <button
-          className={`px-4 py-2 transition-colors duration-200 text-lg font-semibold ${activeTab === "words" ? "border-b-4 border-blue-600 font-bold" : "text-gray-500 hover:text-blue-500"}`}
+          className={`pb-1 text-lg font-semibold ${activeTab === "words" ? "border-b-4 border-theme-blue font-bold pb-0" : ""}`}
           onClick={() => setActiveTab("words")}
         >
           Current Words
         </button>
         <button
-          className={`px-4 py-2 transition-colors duration-200 text-lg font-semibold ${activeTab === "flagged" ? "border-b-4 border-blue-600 font-bold" : "text-gray-500 hover:text-blue-500"}`}
+          className={`pb-1 text-lg font-semibold mr-10 ${activeTab === "flagged" ? "border-b-4 border-theme-blue font-bold pb-0" : ""}`}
           onClick={() => setActiveTab("flagged")}
         >
           Flagged Posts
         </button>
         <button
-          className={`px-4 py-2 transition-colors duration-200 text-lg font-semibold ${activeTab === "comments" ? "border-b-4 border-blue-600 font-bold" : "text-gray-500 hover:text-blue-500"}`}
+          className={`pb-1 text-lg font-semibold ${activeTab === "comments" ? "border-b-4 border-theme-blue font-bold pb-0" : ""}`}
           onClick={() => setActiveTab("comments")}
         >
           Flagged Comments
