@@ -108,7 +108,7 @@ export default function AdminLayout({
 
           <Link
             href="/admin-dashboard/content-flagging"
-            className={`flex transform items-center gap-2 rounded-lg px-4 text-[14px] transition-transform duration-200${
+            className={`flex transform items-center gap-2 rounded-lg px-4 text-[14px] transition-transform duration-200 ${
               pathname === "/admin-dashboard/content-flagging"
                 ? "scale-[1.05] text-theme-blue"
                 : "text-theme-gray"
