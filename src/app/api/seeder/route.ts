@@ -8,6 +8,7 @@ import PostModel from "@/server/db/models/PostModel";
 import PostSaveModel from "@/server/db/models/PostSaveModel";
 import ReportModel from "@/server/db/models/ReportModel";
 import UserModel from "@/server/db/models/UserModel";
+import NotificationModel from "@/server/db/models/NotificationModel";
 import { createDisability } from "@/server/db/actions/DisabilityActions";
 import { createUser } from "@/server/db/actions/UserActions";
 import {
@@ -105,6 +106,7 @@ export async function POST(request: Request) {
     await PostSaveModel.deleteMany({});
     await ReportModel.deleteMany({});
     await UserModel.deleteMany({});
+    await NotificationModel.deleteMany({});
     console.log("Successfully cleared database.");
 
     // create disabilities
