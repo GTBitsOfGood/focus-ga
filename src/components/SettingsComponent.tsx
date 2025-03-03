@@ -216,40 +216,6 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
             </label>
           ))}
         </div>
-        {/* DEV PURPOSES: Admin status change */}
-        <div>
-          <label htmlFor="title" className="text-m block font-bold text-black">
-            **Dev** Set Admin Status
-          </label>
-          <label className="mt-2 block">
-            <input
-              type="radio"
-              name="isAdmin"
-              value="false"
-              checked={isAdmin === false}
-              onChange={() => {
-                setIsAdmin(false);
-                window.location.reload();
-              }}
-              className="mr-2"
-            />
-            Member
-          </label>
-          <label className="mt-2 block">
-            <input
-              type="radio"
-              name="isAdmin"
-              value="true"
-              checked={isAdmin === true}
-              onChange={() => {
-                setIsAdmin(true);
-                window.location.reload();
-              }}
-              className="mr-2"
-            />
-            Admin
-          </label>
-        </div>
         <div>
           <button
             onClick={async () => {

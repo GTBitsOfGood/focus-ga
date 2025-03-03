@@ -81,7 +81,7 @@ function CommunityLayout({ children }: LayoutProps) {
           Please{" "}
           <button
             className="font-bold text-theme-blue hover:underline"
-            onClick={() => router.push("/login")}
+            onClick={() => window.location.reload()}
           >
             refresh
           </button>{" "}
