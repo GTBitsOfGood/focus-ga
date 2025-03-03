@@ -74,6 +74,36 @@
 
 <br>
 
+### Issue: Login in deploy preview is unresponsive
+
+**Resolution:**
+
+The data in the database is stale, and your database needs "reseeding". Copy the base url of your deploy preview, such as:
+
+```sh
+https://deploy-preview-81--focus-ga.netlify.app
+```
+
+Then, go to [this website](https://reqbin.com/post-online) to send a post request in the following format:
+
+```sh
+https://[YOUR URL]/api/seeder/deploy
+```
+
+<br>
+
+### Issue: Login in localhost is unresponsive
+
+**Resolution:**
+
+The data in the local database is stale, and your database needs "reseeding". Go to Postman and send a POST request to:
+
+```sh
+https://localhost:3000/api/seeder
+```
+
+<br>
+
 ### Issue: `MongoServerError[NotPrimaryOrSecondary]: node is not in primary or recovering state`
 
 **Resolution:**
