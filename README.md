@@ -1,5 +1,7 @@
 # Focus GA
 
+- Production Link: https://focus-ga.netlify.app/
+- Development Link: https://focus-ga-dev.netlify.app/
 ## Development Setup (Try to Follow This in Order)
 
 - Install [Node.js](https://nodejs.org/en/download/package-manager)
