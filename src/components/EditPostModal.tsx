@@ -79,6 +79,7 @@ export default function EditPostModal(props: EditPostModalProps) {
           isAdmin || editedByAdmin,
         );
         closeModal();
+        window.location.reload();
         editorRef.current?.setMarkdown("");
       }
     } catch (error) {
