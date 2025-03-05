@@ -667,5 +667,6 @@ export const GEORGIA_CITIES = [
   'Yatesville',
   'Yonah',
   'Young Harris',
-  'Zebulon'
+  'Zebulon',
+  'N/A',
 ] as const;

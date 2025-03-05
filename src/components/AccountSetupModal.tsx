@@ -90,17 +90,6 @@ export default function AccountSetupModal({
       return;
     }
 
-    if (
-      children.some((child) => !child.name || !child.dob || !child.disability)
-    ) {
-      toast({
-        title: "Failed to save",
-        description: "Please enter all child information.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       const authenticatedUser = await getAuthenticatedUser();
       const childBirthdates = children
@@ -146,7 +135,9 @@ export default function AccountSetupModal({
           }}
         >
           <div className="mb-4">
-            <label className="mb-2 block">Location</label>
+            <label className="mb-2 block">
+              Location <span className="text-red-500">*</span>
+            </label>
             <DropdownWithDisplay
               items={[...GEORGIA_CITIES]
                 .sort()
@@ -253,18 +244,12 @@ export default function AccountSetupModal({
           </div>
         </main>
 
-        <footer className="flex flex-col items-center space-y-2 bg-white px-6 py-2">
+        <footer className="flex flex-col items-center space-y-2 bg-white px-6 pb-6 pt-3">
           <button
             onClick={handleSave}
             className="w-full rounded-lg bg-theme-blue px-6 py-2 text-white transition hover:opacity-90"
           >
             Save
-          </button>
-          <button
-            onClick={closeModal}
-            className="w-40 rounded-lg px-6 pb-3 pt-1 text-sm text-theme-blue transition hover:opacity-90"
-          >
-            Set up later
           </button>
         </footer>
       </div>

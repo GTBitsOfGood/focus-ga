@@ -25,10 +25,7 @@ export default function Login() {
       const result = await loginUser(email, email);
       if (result.success) {
         const authenticatedUser = await getAuthenticatedUser();
-        if (
-          result.isFirstTime &&
-          authenticatedUser?.childDisabilities.length === 0
-        ) {
+        if (result.isFirstTime) {
           router.push("/?setup=true");
         } else {
           router.push("/");
@@ -178,13 +175,12 @@ export default function Login() {
               FOCUS (Families of Children Under Stress) is a 501(c)(3) nonprofit
               organization with tax ID&nbsp;
               <span className="whitespace-nowrap">#58-1577602</span>.
-              
               <Image
                 src={netlify_logo}
                 height={40}
                 alt="focus-logo"
                 className="fixed ml-[60px] mt-6"
-                style={{ left: "0px", bottom: "40px"}}
+                style={{ left: "0px", bottom: "40px" }}
               />
             </p>
           </div>

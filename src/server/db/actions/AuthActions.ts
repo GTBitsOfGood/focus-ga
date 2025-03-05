@@ -44,10 +44,14 @@ export async function loginUser(email: string, uid: string) {
       username: email,
       lastName: "BoG", 
       childDisabilities: [],
-      city: "Atlanta",
+      city: "N/A",
       bio: "Hello World!",
       salesforce_uid: uid
     });
+  }
+  else if (user.city == "N/A") {
+    //user found but city not set
+    isFirstTime = true;
   }
 
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);

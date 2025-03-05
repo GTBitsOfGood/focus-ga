@@ -141,7 +141,10 @@ export async function POST(request: Request) {
         firstName: firstName,
         lastName: lastName,
       });
-      const cityIndex = Math.floor(Math.random() * GEORGIA_CITIES.length);
+      let cityIndex = Math.floor(Math.random() * GEORGIA_CITIES.length);
+      while (GEORGIA_CITIES[cityIndex] === "N/A") {
+        cityIndex = Math.floor(Math.random() * GEORGIA_CITIES.length);
+      }
       const getRandomProfileColor = () => {
         const colors = Object.values(ProfileColors);
         return colors[Math.floor(Math.random() * colors.length)];

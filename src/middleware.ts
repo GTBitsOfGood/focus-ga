@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { getIronSession } from "iron-session";
 import { SessionData, sessionOptions } from "@/lib/session";
 import { cookies } from "next/headers";
-
 /**
  * Middleware to handle session-based redirects.
  * 
  * Redirects authenticated users away from the login page to the home page.
  * Redirects unauthenticated users to the login page from any other page.
+ * Redirects users who haven't set up yet away from any other page
  * 
  * @param request - The incoming Next.js request object.
  * @returns A Next.js response object that either redirects or allows the request to proceed.
@@ -22,6 +22,11 @@ export async function middleware(request: NextRequest) {
   if (request.nextUrl.pathname !== "/login" && !session.isLoggedIn) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
+
+  // if (session.isLoggedIn && !session.isSetUp){
+  //   return NextResponse.redirect(new URL("/?setup=true", request.url));
+  // }
+  
 
   return NextResponse.next();
 }
