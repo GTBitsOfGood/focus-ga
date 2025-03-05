@@ -23,8 +23,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // if (session.isLoggedIn && !session.isSetUp){
-  //   return NextResponse.redirect(new URL("/?setup=true", request.url));
+  // if (session.isLoggedIn && !session.isSetUp) {
+  //   const url = new URL(request.url);
+  //   if (url.searchParams.get("setup") !== "true") {
+  //     return NextResponse.redirect(new URL("/?setup=true", request.url));
+  //   }
   // }
   
 

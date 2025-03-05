@@ -424,6 +424,7 @@ export const GEORGIA_CITIES = [
   'Mountain City',
   'Mountain Park',
   'Musella',
+  'N/A',
   'Nahunta',
   'Nashville',
   'Naylor',
@@ -667,6 +668,5 @@ export const GEORGIA_CITIES = [
   'Yatesville',
   'Yonah',
   'Young Harris',
-  'Zebulon',
-  'N/A',
+  'Zebulon'
 ] as const;
