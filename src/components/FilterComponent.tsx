@@ -25,40 +25,38 @@ export default function FilterComponent(props: FilterProps) {
   };
 
   return (
-    <div className="flex flex-row justify-between">
-      <div className="relative inline-block flex w-full items-center space-x-4">
-        <label className="block text-sm font-medium">Filter By:</label>
-        {props.filters.map((filter, index) =>
-          filter.label === "Age" ? (
-            <RangeSliderComponent
-              key={index}
-              label={filter.label}
-              minAge={MIN_FILTER_AGE}
-              maxAge={MAX_FILTER_AGE}
-              onChange={(minAge, maxAge) => {
-                filter.setSelected({
-                  minAge,
-                  maxAge,
-                  _id: `age-${minAge}-${maxAge}`,
-                });
-              }}
-              initialMinAge={
-                filter.selected.length > 0 ? filter.selected[0].minAge : 3
-              }
-              initialMaxAge={
-                filter.selected.length > 0 ? filter.selected[0].maxAge : 20
-              }
-            />
-          ) : (
-            <DropdownComponent key={index} filter={filter} />
-          ),
-        )}
-      </div>
+    <div className="relative inline-block flex w-full items-center space-x-4">
+      <label className="block text-sm font-medium">Filter By:</label>
+      {props.filters.map((filter, index) =>
+        filter.label === "Age" ? (
+          <RangeSliderComponent
+            key={index}
+            label={filter.label}
+            minAge={MIN_FILTER_AGE}
+            maxAge={MAX_FILTER_AGE}
+            onChange={(minAge, maxAge) => {
+              filter.setSelected({
+                minAge,
+                maxAge,
+                _id: `age-${minAge}-${maxAge}`,
+              });
+            }}
+            initialMinAge={
+              filter.selected.length > 0 ? filter.selected[0].minAge : 3
+            }
+            initialMaxAge={
+              filter.selected.length > 0 ? filter.selected[0].maxAge : 20
+            }
+          />
+        ) : (
+          <DropdownComponent key={index} filter={filter} />
+        ),
+      )}
       <button
         onClick={handleClearFilters}
-        className="whitespace-nowrap rounded-full border-2 border-theme-blue px-3 py-1 text-sm font-medium text-theme-blue"
+        className="text-sm font-medium text-theme-gray"
       >
-        Clear Filters
+        Clear All
       </button>
     </div>
   );
