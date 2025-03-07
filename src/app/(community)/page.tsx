@@ -8,7 +8,7 @@ import { LoaderCircle } from "lucide-react";
 import FilterComponent from "@/components/FilterComponent";
 import { Disability } from "@/utils/types/disability";
 import { Location } from "@/utils/types/location";
-import { Visiblity } from "@/utils/types/visibility"; 
+import { Visiblity } from "@/utils/types/visibility";
 import { Filter } from "@/utils/types/common";
 import { PAGINATION_LIMIT } from "@/utils/consts";
 import { useUser } from "@/contexts/UserContext";
@@ -42,7 +42,9 @@ export default function Home() {
 
   const { searchTerm } = useSearch();
 
-  const [selectedVisibility, setSelectedVisibility] = useState<Visiblity[]>([{visibility: 'All', _id: 'All'}]);
+  const [selectedVisibility, setSelectedVisibility] = useState<Visiblity[]>([
+    { visibility: "All", _id: "All" },
+  ]);
 
   const [totalPostsCount, setTotalPostsCount] = useState(0);
   const [pinnedPostContents, setPinnedPostContents] = useState<PopulatedPost[]>(
@@ -89,6 +91,10 @@ export default function Home() {
     selected: T,
     setSelected: React.Dispatch<React.SetStateAction<T[]>>,
   ) => {
+    if (!selected) {
+      setSelected([]);
+      return [];
+    }
     setSelected((prevSelected) => {
       if (prevSelected.some((item) => item._id === selected._id)) {
         return prevSelected.filter((item) => item._id !== selected._id);
@@ -99,31 +105,37 @@ export default function Home() {
   };
 
   //Max one element in array at time
-  const handleVisibility = <T extends {_id: string}>(selected: T, setSelected: React.Dispatch<React.SetStateAction<T[]>>) => {
-    setSelected([selected])
-  }
+  const handleVisibility = <T extends { _id: string }>(
+    selected: T,
+    setSelected: React.Dispatch<React.SetStateAction<T[]>>,
+  ) => {
+    setSelected([selected]);
+  };
 
   const disabilityFilter: Filter<Disability> = {
     label: "Disability",
     data: disabilities,
     selected: selectedDisabilities,
-    setSelected: (selected: Disability) => handleSelected(selected, setSelectedDisabilities),
-    searchable: true
+    setSelected: (selected: Disability) =>
+      handleSelected(selected, setSelectedDisabilities),
+    searchable: true,
   };
 
   const locationFilter: Filter<Location> = {
     label: "Location",
     data: locations,
     selected: selectedLocations,
-    setSelected: (selected: Location) => handleSelected(selected, setSelectedLocations),
-    searchable: true
+    setSelected: (selected: Location) =>
+      handleSelected(selected, setSelectedLocations),
+    searchable: true,
   };
 
   const visibilityFilter: Filter<Visiblity> = {
     label: "Visibility",
     data: [],
     selected: selectedVisibility,
-    setSelected: (selected: Visiblity) => handleVisibility(selected, setSelectedVisibility)
+    setSelected: (selected: Visiblity) =>
+      handleVisibility(selected, setSelectedVisibility),
   };
 
   //TODO: update once demographics are added
@@ -132,15 +144,15 @@ export default function Home() {
     data: [],
     selected: [],
     setSelected: (selected) => {
-      console.log("age selected")
+      console.log("age selected");
     },
-    searchable: true
+    searchable: true,
   };
 
   // fetch posts when filter changes
   useEffect(() => {
     fetchPosts(true);
-  }, [selectedDisabilities, selectedLocations, searchTerm, selectedVisibility])
+  }, [selectedDisabilities, selectedLocations, searchTerm, selectedVisibility]);
 
   // fetch posts when page changes
   const fetchPosts = async (clear: boolean = false) => {
@@ -162,10 +174,18 @@ export default function Home() {
 
         const tags = selectedDisabilities.map((disability) => disability._id);
         const locations = selectedLocations.map((location) => location.name);
-        const visibility = user.isAdmin ? selectedVisibility[0].visibility : "All";
+        const visibility = user.isAdmin
+          ? selectedVisibility[0].visibility
+          : "All";
 
         const filters = { tags, locations, searchTerm, visibility };
-        const {count, posts: newPosts } = await getPopulatedPosts(user._id, user.isAdmin, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, filters);
+        const { count, posts: newPosts } = await getPopulatedPosts(
+          user._id,
+          user.isAdmin,
+          newPage * PAGINATION_LIMIT,
+          PAGINATION_LIMIT,
+          filters,
+        );
         setTotalPostsCount(count);
         if (newPosts.length > 0) {
           setPosts(clear ? newPosts : [...posts, ...newPosts]);
@@ -226,19 +246,28 @@ export default function Home() {
         onAccept={handleDisclaimerAccept}
       />
       <div className="w-full max-w-4xl space-y-8">
-        {
-          searchTerm && searchTerm.length ? (
-            <div className="flex flex-row justify-between">
-              <p className="text-lg">
-                <span className="font-bold">Showing results for: </span>
-                <span>{searchTerm}</span>
-              </p>
-              <p className="font-bold text-theme-gray">{totalPostsCount} {totalPostsCount !== 1 ? "Results" : "Result"}</p>
-            </div>
-          ) : null
-        }
-        <FilterComponent filters={[disabilityFilter, locationFilter, demographicFilter, visibilityFilter].filter((filter) => user?.isAdmin || filter !== visibilityFilter)}/>
-        { pinnedPostContents.length > 0 && <PinnedPosts posts={pinnedPostContents} />}
+        {searchTerm && searchTerm.length ? (
+          <div className="flex flex-row justify-between">
+            <p className="text-lg">
+              <span className="font-bold">Showing results for: </span>
+              <span>{searchTerm}</span>
+            </p>
+            <p className="font-bold text-theme-gray">
+              {totalPostsCount} {totalPostsCount !== 1 ? "Results" : "Result"}
+            </p>
+          </div>
+        ) : null}
+        <FilterComponent
+          filters={[
+            disabilityFilter,
+            locationFilter,
+            demographicFilter,
+            visibilityFilter,
+          ].filter((filter) => user?.isAdmin || filter !== visibilityFilter)}
+        />
+        {pinnedPostContents.length > 0 && (
+          <PinnedPosts posts={pinnedPostContents} />
+        )}
         <div>
           {posts.length ? (
             posts.map((post, index) => {
