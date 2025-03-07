@@ -7,6 +7,7 @@ import PostLikeModel from "@/server/db/models/PostLikeModel";
 import PostModel from "@/server/db/models/PostModel";
 import PostSaveModel from "@/server/db/models/PostSaveModel";
 import ReportModel from "@/server/db/models/ReportModel";
+import NotificationModel from "@/server/db/models/NotificationModel";
 import UserModel from "@/server/db/models/UserModel";
 import { createDisability } from "@/server/db/actions/DisabilityActions";
 import { createUser } from "@/server/db/actions/UserActions";
@@ -79,7 +80,7 @@ const DISABILITIES = [
   "Down Syndrome",
   "Fragile X Syndrome",
 ];
-const NUM_USERS = 4; 
+const NUM_USERS = 3; 
 const MAX_CHILD_AGE = 20;
 const MAX_CHILD_BIRTHDATES_PER_USER = 10;
 const MAX_POSTS_PER_USER = 2;
@@ -87,7 +88,7 @@ const MAX_USER_DISABILITIES = 3;
 const MAX_COMMENTS_PER_POST = 2;
 const MAX_LIKED_SAVED_POSTS_PER_USER = 2;
 const MAX_LIKED_COMMENTS_PER_USER = 2;
-const NUM_REPORTS = 0;
+const NUM_REPORTS = 1;
 const NUM_REPORT_REASONS = 4;
 const NUM_CONTENT_TYPES = 3;
 const MAX_POST_TAGS = 2;
@@ -105,6 +106,7 @@ export async function POST(request: Request) {
     await PostSaveModel.deleteMany({});
     await ReportModel.deleteMany({});
     await UserModel.deleteMany({});
+    await NotificationModel.deleteMany({});
     console.log("Successfully cleared database.");
 
     // create disabilities
@@ -206,8 +208,8 @@ export async function POST(request: Request) {
           content: faker.lorem.paragraph({ min: 3, max: 10 }),
           tags: selectedDisabilities,
           isPinned: false,
-          isPrivate: Math.random() < 0.5 ? true : false,
-          isFlagged: Math.random() < 0.5 ? true : false,
+          isPrivate: Math.random() < 0.1 ? true : false,
+          isFlagged: false,
           isDeleted: false,
           expiresAt: dayjs(creationDate).add(4, "years").toDate(),
         };

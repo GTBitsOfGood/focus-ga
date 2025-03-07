@@ -6,6 +6,7 @@ import Image from "next/image";
 import lock from "../../../../public/lock.png";
 import user from "../../../../public/user.png";
 import focusLogo from "../../../../public/focus-logo.png";
+import netlify_logo from "../../../../public/netlify_logo.png";
 import transparencyBadge from "../../../../public/transparency-badge.png";
 import { deflateRawSync } from "zlib";
 import { loginUser } from "@/server/db/actions/AuthActions";
@@ -177,6 +178,14 @@ export default function Login() {
               FOCUS (Families of Children Under Stress) is a 501(c)(3) nonprofit
               organization with tax ID&nbsp;
               <span className="whitespace-nowrap">#58-1577602</span>.
+              
+              <Image
+                src={netlify_logo}
+                height={40}
+                alt="focus-logo"
+                className="fixed ml-[60px] mt-6"
+                style={{ left: "0px", bottom: "40px"}}
+              />
             </p>
           </div>
         </div>

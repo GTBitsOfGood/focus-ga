@@ -168,7 +168,7 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
 
         <div>
           <label htmlFor="title" className="text-m block font-bold text-black">
-            Default Disability Tag on Create Post
+            Set a default disability tag to attach to your posts
           </label>
           <DropdownWithDisplay
             items={disabilities}
@@ -183,7 +183,7 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
 
         <div>
           <label htmlFor="title" className="text-m block font-bold text-black">
-            Default Disability Filter on Feed
+            Set a default disability tag filter for your main feed
           </label>
           <DropdownWithDisplay
             items={disabilities}

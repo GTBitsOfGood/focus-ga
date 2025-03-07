@@ -1,5 +1,7 @@
 # Focus GA
 
+- Production Link: https://focus-ga.netlify.app/
+- Development Link: https://focus-ga-dev.netlify.app/
 ## Development Setup (Try to Follow This in Order)
 
 - Install [Node.js](https://nodejs.org/en/download/package-manager)
@@ -69,6 +71,36 @@
 ## Troubleshooting
 
 > This section is meant for resolving issues that have previously been encountered and fixed. If you encounter an issue that isn't on this list, please inform your EM.
+
+<br>
+
+### Issue: Login in deploy preview is unresponsive
+
+**Resolution:**
+
+The data in the database is stale, and your database needs "reseeding". Copy the base url of your deploy preview, such as:
+
+```sh
+https://deploy-preview-81--focus-ga.netlify.app
+```
+
+Then, go to [this website](https://reqbin.com/post-online) to send a post request in the following format:
+
+```sh
+https://[YOUR URL]/api/seeder/deploy
+```
+
+<br>
+
+### Issue: Login in localhost is unresponsive
+
+**Resolution:**
+
+The data in the local database is stale, and your database needs "reseeding". Go to Postman and send a POST request to:
+
+```sh
+https://localhost:3000/api/seeder
+```
 
 <br>
 

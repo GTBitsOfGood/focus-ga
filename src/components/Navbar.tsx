@@ -184,18 +184,20 @@ export default function Navbar({ openModal }: NavbarProps) {
                 href={`https://mapscout.io/auth`}
                 onClick={toggleDropdown}
                 target="_blank"
-                className="ml-4 mt-2 block cursor-pointer py-1 text-left font-bold transition-colors hover:underline"
+                className="ml-4 mt-2 block cursor-pointer py-1 text-left font-bold transition-colors hover:underline flex row"
               >
-                Resource Map (Admin)
+                Edit Resource Map
+                <ShieldCheck className="admin-icon mt-1 h-5 w-5 fill-theme-gray text-white" />
               </Link>
             )}
             {user?.isAdmin && (
               <Link
                 href={`/admin-dashboard/admin-privileges`}
                 onClick={toggleDropdown}
-                className="ml-4 mt-2 block cursor-pointer py-1 text-left font-bold transition-colors hover:underline"
+                className="ml-4 mt-2 block cursor-pointer py-1 text-left font-bold transition-colors hover:underline flex row"
               >
                 Admin Dashboard
+                <ShieldCheck className="admin-icon mt-1 h-5 w-5 fill-theme-gray text-white" />
               </Link>
             )}
             <div className="border-sm mx-auto mt-[18px] w-44 border-t border-theme-medlight-gray" />

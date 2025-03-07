@@ -7,6 +7,8 @@ import React from "react";
 import { ChevronLeftIcon } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import { hasUnresolvedReports } from "@/server/db/actions/ReportActions";
+import { hasFlaggedPosts } from "@/server/db/actions/PostActions";
+import { hasFlaggedComments } from "@/server/db/actions/CommentActions";
 
 export default function AdminLayout({
   children,
@@ -17,6 +19,7 @@ export default function AdminLayout({
   const pathname = usePathname();
   const { user: currUser, setUser } = useUser();
   const [hasUnresolvedReport, setHasUnresolvedReport] = useState(false);
+  const [flaggedContent, setFlaggedContent] = useState(false);
 
   useEffect(() => {
     if (!currUser?.isAdmin) {
@@ -29,7 +32,16 @@ export default function AdminLayout({
       const bool = await hasUnresolvedReports();
       setHasUnresolvedReport(bool);
     };
+
+    const fetchFlaggedContent = async () => {
+      const posts = await hasFlaggedPosts();
+      const comments = await hasFlaggedComments();
+      console.log(posts, comments)
+      setFlaggedContent(posts || comments);
+    };
+
     fetchReports();
+    fetchFlaggedContent();
   }, []);
 
   if (!currUser?.isAdmin) return null;
@@ -97,7 +109,7 @@ export default function AdminLayout({
 
           <Link
             href="/admin-dashboard/content-flagging"
-            className={`transform rounded-lg px-4 text-[14px] transition-transform duration-200 ${
+            className={`flex transform items-center gap-2 rounded-lg px-4 text-[14px] transition-transform duration-200 ${
               pathname === "/admin-dashboard/content-flagging"
                 ? "scale-[1.05] text-theme-blue"
                 : "text-theme-gray"
@@ -105,6 +117,9 @@ export default function AdminLayout({
             style={{ marginTop: "2vh", marginLeft: "3vw" }}
           >
             Content Flagging
+            {flaggedContent && (
+              <span className="w-2 h-2 aspect-square rounded-full bg-red-500"></span>
+            )}
           </Link>
         </nav>
       </aside>
