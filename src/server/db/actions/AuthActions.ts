@@ -6,6 +6,7 @@ import { SessionData, sessionOptions } from "@/lib/session";
 import { createUser, getPopulatedUser, getUserBySalesforceUid } from './UserActions';
 import { PopulatedUser } from '@/utils/types/user';
 import { redirect } from 'next/navigation';
+import { generateRandomColor } from '@/utils/consts';
 
 /**
  * Retrieves the authenticated user from the session.
@@ -39,14 +40,16 @@ export async function loginUser(email: string, uid: string) {
   let isFirstTime = false
   if (!user) {
     isFirstTime = true
+    const lastName = email.split('@')[0]; 
     user = await createUser({ 
       email,
       username: email,
-      lastName: "BoG", 
+      lastName, 
       childDisabilities: [],
       city: "Atlanta",
       bio: "Hello World!",
-      salesforce_uid: uid
+      salesforce_uid: uid,
+      profileColor: generateRandomColor(),
     });
   }
 

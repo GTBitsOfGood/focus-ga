@@ -35,3 +35,8 @@ export enum ProfileColors {
   ProfileIndigo = "profile-indigo",
   ProfileDefault = "profile-pink",
 }
+
+export function generateRandomColor(): ProfileColors {
+  const colors = Object.values(ProfileColors);
+  return colors[Math.floor(Math.random() * colors.length)];
+}
