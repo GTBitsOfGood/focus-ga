@@ -15,7 +15,6 @@ import Image from "next/image";
 import focusLogo from "../../../public/focus-logo.png";
 import { DisabilityProvider } from "@/contexts/DisabilityContext";
 import { useRouter } from "next/navigation";
-import { PostDeletionDurations } from "@/utils/consts";
 
 type LayoutProps = {
   children: React.ReactNode;

@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import React from "react";
-import { ChevronLeftIcon } from "lucide-react";
 import { useUser } from "@/contexts/UserContext";
 import { hasUnresolvedReports } from "@/server/db/actions/ReportActions";
 import { hasFlaggedPosts } from "@/server/db/actions/PostActions";
 import { hasFlaggedComments } from "@/server/db/actions/CommentActions";
+import BackButton from "@/components/BackButton";
 
 export default function AdminLayout({
   children,
@@ -49,12 +49,9 @@ export default function AdminLayout({
   return (
     <div className="flex h-full flex-col md:flex-row">
       <aside className="w-full p-4 md:w-1/6">
-        <Link
-          href="/"
-          className="ml-0 flex w-min cursor-pointer items-center gap-1 p-2 text-lg text-theme-gray md:ml-16 lg:ml-32"
-        >
-          <ChevronLeftIcon className="h-6 w-6" /> Back
-        </Link>
+        <div className="mx-16 my-4 text-lg text-theme-gray">
+          <BackButton overrideToHome/>
+        </div>
         <nav className="ml-0 mt-4 flex flex-col items-start space-y-1 md:ml-4 md:mt-24">
           <Link
             href="/admin-dashboard/admin-privileges"

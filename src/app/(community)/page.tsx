@@ -1,30 +1,31 @@
 "use client";
 
-import { getPopulatedPosts } from "@/server/db/actions/PostActions";
-import PostComponent from "@/components/PostComponent";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { PopulatedPost } from "@/utils/types/post";
-import { LoaderCircle } from "lucide-react";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
+import { useUser } from "@/contexts/UserContext";
+import { useSearch } from "@/contexts/SearchContext";
+import { useDisabilities } from "@/contexts/DisabilityContext";
+
+import { getPopulatedPosts, getPopulatedPinnedPosts } from "@/server/db/actions/PostActions";
+
+import PostComponent from "@/components/PostComponent";
 import FilterComponent from "@/components/FilterComponent";
+import ContactButton from "@/components/ContactButton";
+import PinnedPosts from "@/components/PinnedPosts";
+import AccountSetupModal from "@/components/AccountSetupModal";
+import DisclaimerModal from "@/components/DisclaimerModal";
+
+import { LoaderCircle } from "lucide-react";
+
+import { PopulatedPost } from "@/utils/types/post";
 import { Disability } from "@/utils/types/disability";
 import { Location } from "@/utils/types/location";
 import { Visiblity } from "@/utils/types/visibility";
 import { AgeSelection, Filter } from "@/utils/types/common";
-import {
-  MAX_FILTER_AGE,
-  MIN_FILTER_AGE,
-  PAGINATION_LIMIT,
-} from "@/utils/consts";
-import { useUser } from "@/contexts/UserContext";
+
+import { MAX_FILTER_AGE, MIN_FILTER_AGE, PAGINATION_LIMIT } from "@/utils/consts";
 import { GEORGIA_CITIES } from "@/utils/cities";
-import { useSearch } from "@/contexts/SearchContext";
-import ContactButton from "@/components/ContactButton";
-import { useDisabilities } from "@/contexts/DisabilityContext";
-import { getPopulatedPinnedPosts } from "@/server/db/actions/PostActions";
-import PinnedPosts from "@/components/PinnedPosts";
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import AccountSetupModal from "@/components/AccountSetupModal";
-import DisclaimerModal from "@/components/DisclaimerModal";
+import BackButton from "@/components/BackButton";
 
 export const dynamic = "force-dynamic";
 
@@ -267,83 +268,90 @@ export default function Home() {
   }, [user]);
 
   return (
-    <main className="flex flex-col items-center px-16">
-      <AccountSetupModal
-        isOpen={isSetupModalVisible}
-        closeModal={handleCloseSetupModal}
-      ></AccountSetupModal>
-      <DisclaimerModal
-        isOpen={isDisclaimerVisible}
-        onAccept={handleDisclaimerAccept}
-      />
-      <div className="w-full max-w-4xl space-y-8">
-        {searchTerm && searchTerm.length ? (
-          <div className="flex flex-row justify-between">
-            <p className="text-lg">
-              <span className="font-bold">Showing results for: </span>
-              <span>{searchTerm}</span>
-            </p>
-            <p className="font-bold text-theme-gray">
-              {totalPostsCount} {totalPostsCount !== 1 ? "Results" : "Result"}
-            </p>
-          </div>
-        ) : null}
-        <FilterComponent
-          filters={[
-            disabilityFilter,
-            locationFilter,
-            demographicFilter,
-            visibilityFilter,
-          ].filter((filter) => user?.isAdmin || filter !== visibilityFilter)}
-          setClearAll={setClearAll}
+    <>
+      { searchTerm && searchTerm.length ?
+      <div className="mx-16 my-4 text-lg text-theme-gray">
+        <BackButton overrideToHome/>
+      </div> :
+      <></> }
+      <main className="flex flex-col items-center px-16">
+        <AccountSetupModal
+          isOpen={isSetupModalVisible}
+          closeModal={handleCloseSetupModal}
+        ></AccountSetupModal>
+        <DisclaimerModal
+          isOpen={isDisclaimerVisible}
+          onAccept={handleDisclaimerAccept}
         />
-        {pinnedPostContents.length > 0 && (
-          <PinnedPosts posts={pinnedPostContents} />
-        )}
-        <div>
-          {posts.length ? (
-            posts.map((post, index) => {
-              if (posts.length <= index + 2) {
-                // Attach observer to the second-to-last post
-                return (
-                  <div ref={secondLastPostRef} key={post._id}>
-                    <PostComponent post={post} clickable={true} />
-                  </div>
-                );
-              } else {
-                return (
-                  <PostComponent key={post._id} post={post} clickable={true} />
-                );
-              }
-            })
-          ) : (
-            <>
-              {!loading && searchTerm && searchTerm.length ? (
-                <div className="text-center text-[22px] font-bold text-theme-gray">
-                  <p>No results found for &quot;{searchTerm}&quot;.</p>
-                  <p>Please try another search!</p>
-                </div>
-              ) : null}
-
-              {!loading && !searchTerm && (
-                <div className="text-center text-[22px] font-bold text-theme-gray">
-                  <p>No posts found.</p>
-                </div>
-              )}
-            </>
-          )}
-          {loading && (
-            <div className="mt-8 flex items-center justify-center">
-              <LoaderCircle
-                className="animate-spin"
-                size={32}
-                color="#475CC6"
-              />
+        <div className="w-full max-w-4xl space-y-8">
+          {searchTerm && searchTerm.length ? (
+            <div className="flex flex-row justify-between">
+              <p className="text-lg">
+                <span className="font-bold">Showing results for: </span>
+                <span>{searchTerm}</span>
+              </p>
+              <p className="font-bold text-theme-gray">
+                {totalPostsCount} {totalPostsCount !== 1 ? "Results" : "Result"}
+              </p>
             </div>
+          ) : null}
+          <FilterComponent
+            filters={[
+              disabilityFilter,
+              locationFilter,
+              demographicFilter,
+              visibilityFilter,
+            ].filter((filter) => user?.isAdmin || filter !== visibilityFilter)}
+            setClearAll={setClearAll}
+          />
+          {pinnedPostContents.length > 0 && (
+            <PinnedPosts posts={pinnedPostContents} />
           )}
+          <div>
+            {posts.length ? (
+              posts.map((post, index) => {
+                if (posts.length <= index + 2) {
+                  // Attach observer to the second-to-last post
+                  return (
+                    <div ref={secondLastPostRef} key={post._id}>
+                      <PostComponent post={post} clickable={true} />
+                    </div>
+                  );
+                } else {
+                  return (
+                    <PostComponent key={post._id} post={post} clickable={true} />
+                  );
+                }
+              })
+            ) : (
+              <>
+                {!loading && searchTerm && searchTerm.length ? (
+                  <div className="text-center text-[22px] font-bold text-theme-gray">
+                    <p>No results found for &quot;{searchTerm}&quot;.</p>
+                    <p>Please try another search!</p>
+                  </div>
+                ) : null}
+
+                {!loading && !searchTerm && (
+                  <div className="text-center text-[22px] font-bold text-theme-gray">
+                    <p>No posts found.</p>
+                  </div>
+                )}
+              </>
+            )}
+            {loading && (
+              <div className="mt-8 flex items-center justify-center">
+                <LoaderCircle
+                  className="animate-spin"
+                  size={32}
+                  color="#475CC6"
+                />
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-      <ContactButton />
-    </main>
+        <ContactButton />
+      </main>
+    </>
   );
 }
