@@ -339,7 +339,8 @@ export default function EditPostModal(props: EditPostModalProps) {
               )}
             >
               <div className="font-bold text-white">
-                {isSubmitting ? "Posting..." : "Post"}
+                {modalTitle === "Create New Post" ? (isSubmitting ? "Posting..." : "Post") : (isSubmitting ? "Editing..." : "Edit")}
+                
               </div>
             </button>
           </div>
