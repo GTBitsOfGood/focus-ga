@@ -28,11 +28,6 @@ export default function RangeSliderComponent({
   const [showPopover, setShowPopover] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
 
-  useEffect(() => {
-    setCurrentMinAge(initialMinAge);
-    setCurrentMaxAge(initialMaxAge);
-  }, [initialMinAge, initialMaxAge]);
-
   const [currentMinAge, setCurrentMinAge] = useState(initialMinAge);
   const [currentMaxAge, setCurrentMaxAge] = useState(initialMaxAge);
 
@@ -42,6 +37,13 @@ export default function RangeSliderComponent({
   // Ref to store the dragging min and max age values
   const currentMinAgeRef = useRef(currentMinAge);
   const currentMaxAgeRef = useRef(currentMaxAge);
+
+  useEffect(() => {
+    setCurrentMinAge(initialMinAge);
+    setCurrentMaxAge(initialMaxAge);
+    currentMinAgeRef.current = initialMinAge;
+    currentMaxAgeRef.current = initialMaxAge;
+  }, [initialMinAge, initialMaxAge]);
 
   const debounceOpenDropdown = (open: boolean) => {
     setShowPopover(open);
@@ -107,8 +109,6 @@ export default function RangeSliderComponent({
 
   const minPosition = calculatePosition(currentMinAge);
   const maxPosition = calculatePosition(currentMaxAge);
-  // console.log(currentMinAge, currentMaxAge);
-  // console.log(minPosition, maxPosition);
 
   return (
     <Popover onOpenChange={debounceOpenDropdown} open={showPopover}>

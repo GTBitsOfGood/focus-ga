@@ -6,22 +6,13 @@ import RangeSliderComponent from "./RangeSliderComponent";
 import { Filter } from "@/utils/types/common";
 
 type FilterProps = {
+  setClearAll: React.Dispatch<React.SetStateAction<boolean>>;
   filters: Filter<any>[];
 };
 
 export default function FilterComponent(props: FilterProps) {
   const handleClearFilters = () => {
-    props.filters.map((filter) => {
-      if (filter.label === "Age") {
-        filter.setSelected({
-          minAge: MIN_FILTER_AGE,
-          maxAge: MAX_FILTER_AGE,
-          _id: `age-${MIN_FILTER_AGE}-${MAX_FILTER_AGE}`,
-        });
-      } else {
-        filter.setSelected(null);
-      }
-    });
+    props.setClearAll(true);
   };
 
   return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import focusLogo from "@/../public/focus-logo.png";
 import Image from "next/image";
 import { SquarePen, Search, ChevronDown, ChevronUp, X } from "lucide-react";
@@ -45,7 +45,6 @@ export default function Navbar({ openModal }: NavbarProps) {
   };
 
   const goToHome = () => {
-    console.log(pathname);
     if (pathname === "/") {
       window.location.reload();
     } else {
@@ -53,10 +52,9 @@ export default function Navbar({ openModal }: NavbarProps) {
     }
   };
 
-  const clearSearch = () => {
-    setInputValue("");
-    setSearchTerm("");
-  };
+  useEffect(() => {
+    setInputValue(searchTerm);
+  }, [searchTerm]);
 
   if (!user) {
     return;
@@ -66,14 +64,12 @@ export default function Navbar({ openModal }: NavbarProps) {
     <div className="fixed top-0 z-50 flex h-[100px] w-full items-center justify-between gap-4 border-b border-gray-300 bg-white pl-8 md:gap-12">
       {/* Logo plus search bar*/}
       <div className="cursor-pointer" onClick={goToHome}>
-        {/* <Link href="/" className="cursor-pointer"> */}
         <Image
           src={focusLogo}
           alt="focus-logo"
           className="mb-2 w-24 min-w-24"
         />
       </div>
-      {/* </Link> */}
       <div className="relative flex-grow">
         <input
           type="text"
@@ -89,7 +85,7 @@ export default function Navbar({ openModal }: NavbarProps) {
         />
         {inputValue.length ? (
           <button
-            onClick={clearSearch}
+            onClick={() => setSearchTerm("")}
             className="absolute right-4 top-1/2 -translate-y-1/2 transform text-gray-500"
           >
             <X strokeWidth={2} />

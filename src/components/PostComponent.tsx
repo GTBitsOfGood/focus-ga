@@ -380,38 +380,63 @@ export default function PostComponent(props: PostComponentProps) {
             </span>
           )}
         </h2>
-        {!clickable && (
-          <DropdownMenu modal={false}>
-            <DropdownMenuTrigger>
-              <Ellipsis className="h-6 w-6" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent side="bottom" align="end">
-              {onEditClick && (
-                <DropdownMenuItem onClick={() => setShowEditModal(true)}>
-                  Edit
-                </DropdownMenuItem>
-              )}
-              {onDeleteClick && (
-                <DropdownMenuItem onClick={() => setShowDeleteDialog(true)}>
-                  Delete
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem onClick={handleShareClick}>
-                Share
+        {/* {!clickable && ( */}
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
+            <Ellipsis className="h-6 w-6" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="bottom" align="end">
+            {onEditClick && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowEditModal(true);
+                }}
+              >
+                Edit
               </DropdownMenuItem>
-              {showReport && !isPrivate && (
-                <DropdownMenuItem onClick={() => setShowReportModal(true)}>
-                  Report
-                </DropdownMenuItem>
-              )}
-              {onPostPin && !isPrivate && (
-                <DropdownMenuItem onClick={onPostPin}>
-                  {post.isPinned ? "Unpin Post" : "Pin Post"}
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+            )}
+            {onDeleteClick && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDeleteDialog(true);
+                }}
+              >
+                Delete
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                handleShareClick();
+              }}
+            >
+              Share
+            </DropdownMenuItem>
+            {showReport && !isPrivate && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowReportModal(true);
+                }}
+              >
+                Report
+              </DropdownMenuItem>
+            )}
+            {onPostPin && !isPrivate && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPostPin();
+                }}
+              >
+                {post.isPinned ? "Unpin Post" : "Pin Post"}
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        {/* )} */}
       </div>
       <MarkdownRenderer
         className={cn("text-lg leading-7", {

@@ -44,7 +44,7 @@ export default function Home() {
   const locations = GEORGIA_CITIES.map((city) => ({ name: city, _id: city }));
   const [selectedLocations, setSelectedLocations] = useState<Location[]>([]);
 
-  const { searchTerm } = useSearch();
+  const { searchTerm, setSearchTerm } = useSearch();
 
   const [selectedVisibility, setSelectedVisibility] = useState<Visiblity[]>([
     { visibility: "All", _id: "All" },
@@ -52,6 +52,7 @@ export default function Home() {
   const [selectedAge, setSelectedAge] = useState<AgeSelection[]>([
     { minAge: MIN_FILTER_AGE, maxAge: MAX_FILTER_AGE },
   ]);
+  const [clearAll, setClearAll] = useState(false);
 
   const [totalPostsCount, setTotalPostsCount] = useState(0);
   const [pinnedPostContents, setPinnedPostContents] = useState<PopulatedPost[]>(
@@ -78,6 +79,21 @@ export default function Home() {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    if (clearAll) {
+      setSelectedDisabilities([]);
+      setSelectedLocations([]);
+      setSelectedVisibility([{ visibility: "All", _id: "All" }]);
+      demographicFilter.setSelected({
+        minAge: MIN_FILTER_AGE,
+        maxAge: MAX_FILTER_AGE,
+        _id: `age-${MIN_FILTER_AGE}-${MAX_FILTER_AGE}`,
+      });
+      setSearchTerm("");
+      setClearAll(false);
+    }
+  }, [clearAll]);
+
   const handleCloseSetupModal = () => {
     setIsSetupModalVisible(false);
     setIsDisclaimerVisible(true);
@@ -98,10 +114,6 @@ export default function Home() {
     selected: T,
     setSelected: React.Dispatch<React.SetStateAction<T[]>>,
   ) => {
-    if (!selected) {
-      setSelected([]);
-      return [];
-    }
     setSelected((prevSelected) => {
       if (prevSelected.some((item) => item._id === selected._id)) {
         return prevSelected.filter((item) => item._id !== selected._id);
@@ -283,6 +295,7 @@ export default function Home() {
             demographicFilter,
             visibilityFilter,
           ].filter((filter) => user?.isAdmin || filter !== visibilityFilter)}
+          setClearAll={setClearAll}
         />
         {pinnedPostContents.length > 0 && (
           <PinnedPosts posts={pinnedPostContents} />
