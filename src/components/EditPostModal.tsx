@@ -15,6 +15,7 @@ import DropdownWithDisplay from "./DropdownWithDisplay";
 import { useDisabilities } from "@/contexts/DisabilityContext";
 import { useUser } from "@/contexts/UserContext";
 import { useToast } from "@/hooks/use-toast";
+import { marked, Renderer } from "marked";
 
 const EditorComp = dynamic(() => import("./EditorComponent"), { ssr: false });
 
@@ -103,10 +104,19 @@ export default function EditPostModal(props: EditPostModalProps) {
     setTitleError(false);
   };
 
-  const handleEditorChange = (text: string) => {
+  const renderer = new Renderer();
+  renderer.link = ({ href, text }: { href: string; text: string }): string => {
+    return `<a href="${href}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+  };
+  const processMarkdownLinks = async (markdown: string): Promise<string> => {
+    return marked(markdown, { renderer });
+  };
+
+  const handleEditorChange = async (text: string) => {
     const textLength = countNonMarkdownCharacters(text);
     if (textLength <= MAX_POST_CONTENT_LEN) {
-      setContent(text);
+      const processedContent = await processMarkdownLinks(text);
+      setContent(processedContent);
     } else {
       editorRef.current?.setMarkdown(content);
     }
