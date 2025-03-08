@@ -241,7 +241,7 @@ export default function PostComponent(props: PostComponentProps) {
     }
   }, [fromReports]);
 
-  const editedByAdminText = editedByAdmin ? "(Edited by FOCUS)" : "";
+  const editedByAdminText = editedByAdmin && !author?.isAdmin ? "(Edited by FOCUS)" : "";
   async function handleEditClick(
     newTitle: string,
     newContent: string,

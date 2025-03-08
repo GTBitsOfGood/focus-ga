@@ -141,7 +141,7 @@ export default function CommentComponent(props: CommentComponentProps) {
       }
     }
   }
-  const editedByAdminText = editedByAdmin ? "(Edited by FOCUS)" : "";
+  const editedByAdminText = editedByAdmin && !author?.isAdmin ? "(Edited by FOCUS)" : "";
   async function handleEditClick(
     newComment: string,
     newEditedByAdmin: boolean | undefined,

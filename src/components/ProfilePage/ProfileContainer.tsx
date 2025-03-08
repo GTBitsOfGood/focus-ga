@@ -240,7 +240,7 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
                 ) : (
                   <></>
                 )}
-                {userPosts.map((post) => {
+                {[...userPosts].reverse().map((post) => {
                   return (
                     <PostComponent
                       key={post._id}

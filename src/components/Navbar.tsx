@@ -149,9 +149,6 @@ export default function Navbar({ openModal }: NavbarProps) {
           <div className="p-2 text-center text-theme-gray">
             <div className="flex flex-row justify-center">
             <p className="text-lg break-words w-full">{user.lastName.charAt(0).toUpperCase() + user.lastName.slice(1)} Family</p>
-              {user?.isAdmin && (
-                <ShieldCheck className="admin-icon mt-1 h-5 w-5 fill-theme-gray text-white" />
-              )}
               <Tooltip anchorSelect=".admin-icon" className="py-1 text-xs">
                 Admin User
               </Tooltip>
