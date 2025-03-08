@@ -47,7 +47,7 @@ export async function loginUser(email: string, uid: string) {
       lastName, 
       childDisabilities: [],
       city: "Atlanta",
-      bio: "Hello World!",
+      bio: "",
       salesforce_uid: uid,
       profileColor: generateRandomColor(),
     });
