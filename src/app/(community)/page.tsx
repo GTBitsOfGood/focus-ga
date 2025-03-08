@@ -303,6 +303,7 @@ export default function Home() {
               visibilityFilter,
             ].filter((filter) => user?.isAdmin || filter !== visibilityFilter)}
             setClearAll={setClearAll}
+            searchTerm={searchTerm}
           />
           {pinnedPostContents.length > 0 && (
             <PinnedPosts posts={pinnedPostContents} />

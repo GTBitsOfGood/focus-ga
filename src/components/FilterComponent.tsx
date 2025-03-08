@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 type FilterProps = {
   setClearAll: React.Dispatch<React.SetStateAction<boolean>>;
   filters: Filter<any>[];
+  searchTerm: String;
 };
 
 export default function FilterComponent(props: FilterProps) {
@@ -19,10 +20,11 @@ export default function FilterComponent(props: FilterProps) {
 
   useEffect(() => {
     setHasFilters(
-      props.filters[0].selected.length > 0 ||
-      props.filters[1].selected.length > 0 ||
-      (props.filters[2].selected[0].minAge !== 0 || props.filters[2].selected[0].maxAge !== 20) ||
-      props.filters[3].selected[0].visibility !== 'All'
+      props?.filters[0]?.selected?.length > 0 ||
+      props?.filters[1]?.selected?.length > 0 ||
+      (props?.filters[2]?.selected[0]?.minAge !== 0 || props?.filters[2]?.selected[0]?.maxAge !== 20) ||
+      props?.filters[3]?.selected[0]?.visibility !== 'All'||
+      props?.searchTerm?.length > 0
     );
   }, [props]);
 
