@@ -41,7 +41,6 @@ const PinnedPosts: React.FC<PinnedPostsProps> = ({ posts }) => {
         ))}
       </motion.div>
     
-      {isOpen && <div className="absolute bottom-3 left-0 right-0 h-1 bg-white" />}
     </div>
   );
 };
