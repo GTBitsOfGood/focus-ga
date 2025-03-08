@@ -36,7 +36,6 @@ export default function AdminLayout({
     const fetchFlaggedContent = async () => {
       const posts = await hasFlaggedPosts();
       const comments = await hasFlaggedComments();
-      console.log(posts, comments)
       setFlaggedContent(posts || comments);
     };
 

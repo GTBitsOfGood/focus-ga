@@ -221,6 +221,9 @@ export default function PostComponent(props: PostComponentProps) {
     if (onDeleteClick) {
       setDeleteLoading(true);
       try {
+        if (reports.length > 0) {
+          resolveReports();
+        }
         await onDeleteClick();
       } catch (err) {
         setDeleteLoading(false);
