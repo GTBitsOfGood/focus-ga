@@ -357,6 +357,7 @@ export default function PostComponent(props: PostComponentProps) {
         />
       ),
       onClick: saveLoading ? undefined : handleSaveClick,
+      hide: author?._id === user?._id
     },
   ];
 
@@ -457,7 +458,7 @@ export default function PostComponent(props: PostComponentProps) {
           {bottomRow.map((item, index) => (
             <div
               key={`${post._id}-${index}`}
-              className="flex items-center gap-1.5 px-2"
+              className={`flex items-center gap-1.5 px-2 ${item.hide ? 'hidden' : ''}`}
             >
               <div
                 onClick={(e) => {
