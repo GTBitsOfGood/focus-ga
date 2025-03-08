@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import focusLogo from "@/../public/focus-logo.png";
 import Image from "next/image";
 import { SquarePen, Search, ChevronDown, ChevronUp, X } from "lucide-react";
@@ -10,7 +10,7 @@ import { signOut } from "@/server/db/actions/AuthActions";
 import { ProfileColors } from "@/utils/consts";
 import { useUser } from "@/contexts/UserContext";
 import { useSearch } from "@/contexts/SearchContext";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 import { Tooltip } from "react-tooltip";
 
@@ -26,6 +26,7 @@ export default function Navbar({ openModal }: NavbarProps) {
   const { user, setUser } = useUser();
   const { searchTerm, setSearchTerm } = useSearch();
   const router = useRouter();
+  const pathname = usePathname();
 
   useClickOff(dropdownRef, () => setMenuIsOpen(false), [
     dropdownRef,
@@ -43,10 +44,17 @@ export default function Navbar({ openModal }: NavbarProps) {
     }
   };
 
-  const clearSearch = () => {
-    setInputValue("");
-    setSearchTerm("");
+  const goToHome = () => {
+    if (pathname === "/") {
+      window.location.reload();
+    } else {
+      router.push("/");
+    }
   };
+
+  useEffect(() => {
+    setInputValue(searchTerm);
+  }, [searchTerm]);
 
   if (!user) {
     return;
@@ -55,13 +63,13 @@ export default function Navbar({ openModal }: NavbarProps) {
   return (
     <div className="fixed top-0 z-50 flex h-[100px] w-full items-center justify-between gap-4 border-b border-gray-300 bg-white pl-8 md:gap-12">
       {/* Logo plus search bar*/}
-      <Link href="/" className="cursor-pointer">
+      <div className="cursor-pointer" onClick={goToHome}>
         <Image
           src={focusLogo}
           alt="focus-logo"
           className="mb-2 w-24 min-w-24"
         />
-      </Link>
+      </div>
       <div className="relative flex-grow">
         <input
           type="text"
@@ -77,7 +85,7 @@ export default function Navbar({ openModal }: NavbarProps) {
         />
         {inputValue.length ? (
           <button
-            onClick={clearSearch}
+            onClick={() => setSearchTerm("")}
             className="absolute right-4 top-1/2 -translate-y-1/2 transform text-gray-500"
           >
             <X strokeWidth={2} />
@@ -152,7 +160,10 @@ export default function Navbar({ openModal }: NavbarProps) {
             <div className="border-sm mx-auto mt-[18px] w-44 border-t border-theme-medlight-gray" />
             <Link
               href={`/`}
-              onClick={toggleDropdown}
+              onClick={() => {
+                toggleDropdown();
+                goToHome();
+              }}
               className="ml-4 mt-4 block cursor-pointer py-1 text-left transition-colors hover:underline"
             >
               Home
@@ -184,7 +195,7 @@ export default function Navbar({ openModal }: NavbarProps) {
                 href={`https://mapscout.io/auth`}
                 onClick={toggleDropdown}
                 target="_blank"
-                className="ml-4 mt-2 block cursor-pointer py-1 text-left font-bold transition-colors hover:underline flex row"
+                className="row ml-4 mt-2 block flex cursor-pointer py-1 text-left font-bold transition-colors hover:underline"
               >
                 Edit Resource Map
                 <ShieldCheck className="admin-icon mt-1 h-5 w-5 fill-theme-gray text-white" />
@@ -194,7 +205,7 @@ export default function Navbar({ openModal }: NavbarProps) {
               <Link
                 href={`/admin-dashboard/admin-privileges`}
                 onClick={toggleDropdown}
-                className="ml-4 mt-2 block cursor-pointer py-1 text-left font-bold transition-colors hover:underline flex row"
+                className="row ml-4 mt-2 block flex cursor-pointer py-1 text-left font-bold transition-colors hover:underline"
               >
                 Admin Dashboard
                 <ShieldCheck className="admin-icon mt-1 h-5 w-5 fill-theme-gray text-white" />

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Popover,
   PopoverContent,
@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/popover";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import cn from "classnames";
+import { MAX_FILTER_AGE, MIN_FILTER_AGE } from "@/utils/consts";
 
 type AgeFilterProps = {
   label: string;
@@ -18,11 +19,11 @@ type AgeFilterProps = {
 
 export default function RangeSliderComponent({
   label,
-  minAge = 0,
-  maxAge = 20,
+  minAge = MIN_FILTER_AGE,
+  maxAge = MAX_FILTER_AGE,
   onChange,
-  initialMinAge = 0,
-  initialMaxAge = 20,
+  initialMinAge = MIN_FILTER_AGE,
+  initialMaxAge = MAX_FILTER_AGE,
 }: AgeFilterProps) {
   const [showPopover, setShowPopover] = useState(false);
   const [isDisabled, setIsDisabled] = useState(false);
@@ -37,6 +38,13 @@ export default function RangeSliderComponent({
   const currentMinAgeRef = useRef(currentMinAge);
   const currentMaxAgeRef = useRef(currentMaxAge);
 
+  useEffect(() => {
+    setCurrentMinAge(initialMinAge);
+    setCurrentMaxAge(initialMaxAge);
+    currentMinAgeRef.current = initialMinAge;
+    currentMaxAgeRef.current = initialMaxAge;
+  }, [initialMinAge, initialMaxAge]);
+
   const debounceOpenDropdown = (open: boolean) => {
     setShowPopover(open);
     setIsDisabled(true);
@@ -49,26 +57,41 @@ export default function RangeSliderComponent({
   };
 
   const calculateAge = (position: number): number => {
-    return Math.max(minAge, Math.min(maxAge, Math.round(((position / 100) * (maxAge - minAge)) + minAge)));
+    return Math.max(
+      minAge,
+      Math.min(
+        maxAge,
+        Math.round((position / 100) * (maxAge - minAge) + minAge),
+      ),
+    );
   };
 
   const handlePointerDown = (e: React.PointerEvent, thumb: string) => {
     e.preventDefault();
     isDraggingRef.current = thumb;
-    window.addEventListener('pointermove', handlePointerMove);
-    window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
   };
 
   const handlePointerMove = (e: PointerEvent) => {
     if (!isDraggingRef.current || !sliderRef.current) return;
 
     const rect = sliderRef.current.getBoundingClientRect();
-    const position = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+    const position = Math.max(
+      0,
+      Math.min(100, ((e.clientX - rect.left) / rect.width) * 100),
+    );
 
-    if (isDraggingRef.current === 'min') {
-      currentMinAgeRef.current = Math.min(calculateAge(position), currentMaxAgeRef.current - 1);
+    if (isDraggingRef.current === "min") {
+      currentMinAgeRef.current = Math.min(
+        calculateAge(position),
+        currentMaxAgeRef.current - 1,
+      );
     } else {
-      currentMaxAgeRef.current = Math.max(calculateAge(position), currentMinAgeRef.current + 1);
+      currentMaxAgeRef.current = Math.max(
+        calculateAge(position),
+        currentMinAgeRef.current + 1,
+      );
     }
 
     // Update the displayed min/max positions smoothly during dragging
@@ -80,8 +103,8 @@ export default function RangeSliderComponent({
     // Update state after dragging ends
     onChange(currentMinAgeRef.current, currentMaxAgeRef.current);
     isDraggingRef.current = null;
-    window.removeEventListener('pointermove', handlePointerMove);
-    window.removeEventListener('pointerup', handlePointerUp);
+    window.removeEventListener("pointermove", handlePointerMove);
+    window.removeEventListener("pointerup", handlePointerUp);
   };
 
   const minPosition = calculatePosition(currentMinAge);
@@ -92,59 +115,69 @@ export default function RangeSliderComponent({
       <PopoverTrigger asChild>
         <div
           className={cn(
-            "relative flex items-center justify-center rounded-full cursor-pointer bg-dropdown-gray py-1 px-3 hover:bg-gray-200 transition",
+            "relative flex cursor-pointer items-center justify-center rounded-full bg-dropdown-gray px-3 py-1 transition hover:bg-gray-200",
             { "pointer-events-none": isDisabled },
-            { "bg-gray-200": showPopover }
+            { "bg-gray-200": showPopover },
           )}
         >
-          <div className="text-black text-sm font-normal">
-            {label}
-          </div>
+          <div className="text-sm font-normal text-black">{label}</div>
 
           {!showPopover ? (
-            <ChevronDown className="w-4 h-4 ml-1" color="black" />
+            <ChevronDown className="ml-1 h-4 w-4" color="black" />
           ) : (
-            <ChevronUp className="w-4 h-4 ml-1" color="black" />
+            <ChevronUp className="ml-1 h-4 w-4" color="black" />
           )}
         </div>
       </PopoverTrigger>
 
-      <PopoverContent className="w-[300px] p-6 pb-0 shadow-lg rounded-md">
+      <PopoverContent className="w-[300px] rounded-md p-6 pb-0 shadow-lg">
         <div className="space-y-3">
-          <h3 className="text-base font-medium text-gray-700">Range for age filter</h3>
+          <h3 className="text-base font-medium text-gray-700">
+            Range for age filter
+          </h3>
           <div className="relative h-16 pt-6">
             <div
               ref={sliderRef}
-              className="absolute mx-2 inset-x-0 h-[5px] bg-gray-200 rounded cursor-pointer"
+              className="absolute inset-x-0 mx-2 h-[5px] cursor-pointer rounded bg-gray-200"
               style={{ top: "24px" }}
             >
               <div
-                className="absolute h-full bg-theme-blue rounded opacity-80"
+                className="absolute h-full rounded bg-theme-blue opacity-80"
                 style={{
                   left: `${Math.max(0, minPosition)}%`,
-                  width: `${maxPosition - Math.max(0, minPosition)}%`
+                  width: `${maxPosition - Math.max(0, minPosition)}%`,
                 }}
               />
-              <div className="absolute flex flex-col items-center" style={{
-                left: `${minPosition}%`,
-                transform: 'translateX(-50%)',
-                top: "-30px",
-              }}>
-                <span className="text-sm text-gray-600 mb-1">{currentMinAge}</span>
+              <div
+                className="absolute flex flex-col items-center"
+                style={{
+                  left: `${minPosition}%`,
+                  transform: "translateX(-50%)",
+                  top: "-30px",
+                }}
+              >
+                <span className="mb-1 text-sm text-gray-600">
+                  {currentMinAge}
+                </span>
                 <div
-                  className="w-4 h-4 -mb-1.5 bg-theme-blue rounded-full shadow cursor-grab z-10"
-                  onPointerDown={(e) => handlePointerDown(e, 'min')}
+                  className="z-10 -mb-1.5 h-4 w-4 cursor-grab rounded-full bg-theme-blue shadow"
+                  onPointerDown={(e) => handlePointerDown(e, "min")}
                 />
               </div>
-              <div className="absolute flex flex-col items-center" style={{
-                left: `${maxPosition}%`,
-                transform: 'translateX(-50%)',
-                top: "-30px",
-              }}>
-                <span className="text-sm text-gray-600 mb-1">{currentMaxAge === maxAge ? `${maxAge}+` : currentMaxAge}</span>
+              <div
+                className="absolute flex flex-col items-center"
+                style={{
+                  left: `${maxPosition}%`,
+                  transform: "translateX(-50%)",
+                  top: "-30px",
+                }}
+              >
+                <span className="mb-1 text-sm text-gray-600">
+                  {currentMaxAge === maxAge ? `${maxAge}+` : currentMaxAge}
+                </span>
                 <div
-                  className="w-4 h-4 -mb-1.5 bg-theme-blue rounded-full shadow cursor-grab z-10"
-                  onPointerDown={(e) => handlePointerDown(e, 'max')}
+                  className="z-10 -mb-1.5 h-4 w-4 cursor-grab rounded-full bg-theme-blue shadow"
+                  onPointerDown={(e) => handlePointerDown(e, "max")}
                 />
               </div>
             </div>

@@ -8,9 +8,13 @@ import { LoaderCircle } from "lucide-react";
 import FilterComponent from "@/components/FilterComponent";
 import { Disability } from "@/utils/types/disability";
 import { Location } from "@/utils/types/location";
-import { Visiblity } from "@/utils/types/visibility"; 
+import { Visiblity } from "@/utils/types/visibility";
 import { AgeSelection, Filter } from "@/utils/types/common";
-import { PAGINATION_LIMIT } from "@/utils/consts";
+import {
+  MAX_FILTER_AGE,
+  MIN_FILTER_AGE,
+  PAGINATION_LIMIT,
+} from "@/utils/consts";
 import { useUser } from "@/contexts/UserContext";
 import { GEORGIA_CITIES } from "@/utils/cities";
 import { useSearch } from "@/contexts/SearchContext";
@@ -40,10 +44,15 @@ export default function Home() {
   const locations = GEORGIA_CITIES.map((city) => ({ name: city, _id: city }));
   const [selectedLocations, setSelectedLocations] = useState<Location[]>([]);
 
-  const { searchTerm } = useSearch();
+  const { searchTerm, setSearchTerm } = useSearch();
 
-  const [selectedVisibility, setSelectedVisibility] = useState<Visiblity[]>([{visibility: 'All', _id: 'All'}]);
-  const [selectedAge, setSelectedAge] = useState<AgeSelection[]>([{ minAge: 0, maxAge: 20 }]);
+  const [selectedVisibility, setSelectedVisibility] = useState<Visiblity[]>([
+    { visibility: "All", _id: "All" },
+  ]);
+  const [selectedAge, setSelectedAge] = useState<AgeSelection[]>([
+    { minAge: MIN_FILTER_AGE, maxAge: MAX_FILTER_AGE },
+  ]);
+  const [clearAll, setClearAll] = useState(false);
 
   const [totalPostsCount, setTotalPostsCount] = useState(0);
   const [pinnedPostContents, setPinnedPostContents] = useState<PopulatedPost[]>(
@@ -69,6 +78,21 @@ export default function Home() {
       setIsSetupModalVisible(true);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    if (clearAll) {
+      setSelectedDisabilities([]);
+      setSelectedLocations([]);
+      setSelectedVisibility([{ visibility: "All", _id: "All" }]);
+      demographicFilter.setSelected({
+        minAge: MIN_FILTER_AGE,
+        maxAge: MAX_FILTER_AGE,
+        _id: `age-${MIN_FILTER_AGE}-${MAX_FILTER_AGE}`,
+      });
+      setSearchTerm("");
+      setClearAll(false);
+    }
+  }, [clearAll]);
 
   const handleCloseSetupModal = () => {
     setIsSetupModalVisible(false);
@@ -100,31 +124,37 @@ export default function Home() {
   };
 
   //Max one element in array at time
-  const handleVisibility = <T extends {_id: string}>(selected: T, setSelected: React.Dispatch<React.SetStateAction<T[]>>) => {
-    setSelected([selected])
-  }
+  const handleVisibility = <T extends { _id: string }>(
+    selected: T,
+    setSelected: React.Dispatch<React.SetStateAction<T[]>>,
+  ) => {
+    setSelected([selected]);
+  };
 
   const disabilityFilter: Filter<Disability> = {
     label: "Disability",
     data: disabilities,
     selected: selectedDisabilities,
-    setSelected: (selected: Disability) => handleSelected(selected, setSelectedDisabilities),
-    searchable: true
+    setSelected: (selected: Disability) =>
+      handleSelected(selected, setSelectedDisabilities),
+    searchable: true,
   };
 
   const locationFilter: Filter<Location> = {
     label: "Location",
     data: locations,
     selected: selectedLocations,
-    setSelected: (selected: Location) => handleSelected(selected, setSelectedLocations),
-    searchable: true
+    setSelected: (selected: Location) =>
+      handleSelected(selected, setSelectedLocations),
+    searchable: true,
   };
 
   const visibilityFilter: Filter<Visiblity> = {
     label: "Visibility",
     data: [],
     selected: selectedVisibility,
-    setSelected: (selected: Visiblity) => handleVisibility(selected, setSelectedVisibility)
+    setSelected: (selected: Visiblity) =>
+      handleVisibility(selected, setSelectedVisibility),
   };
 
   const demographicFilter: Filter<any> = {
@@ -133,13 +163,19 @@ export default function Home() {
     selected: selectedAge,
     setSelected: (selected) => {
       handleVisibility(selected, setSelectedAge);
-    }
+    },
   };
 
   // fetch posts when filter changes
   useEffect(() => {
     fetchPosts(true);
-  }, [selectedDisabilities, selectedLocations, searchTerm, selectedVisibility, selectedAge])
+  }, [
+    selectedDisabilities,
+    selectedLocations,
+    searchTerm,
+    selectedVisibility,
+    selectedAge,
+  ]);
 
   // fetch posts when page changes
   const fetchPosts = async (clear: boolean = false) => {
@@ -160,12 +196,27 @@ export default function Home() {
         const newPage = clear ? 0 : page;
         const tags = selectedDisabilities.map((disability) => disability._id);
         const locations = selectedLocations.map((location) => location.name);
-        const visibility = user.isAdmin ? selectedVisibility[0].visibility : "All";
+        const visibility = user.isAdmin
+          ? selectedVisibility[0].visibility
+          : "All";
         const age = selectedAge[0];
 
-        const filters = { tags, locations, searchTerm, visibility, age, isFlagged: [false]};
+        const filters = {
+          tags,
+          locations,
+          searchTerm,
+          visibility,
+          age,
+          isFlagged: [false],
+        };
 
-        const {count, posts: newPosts } = await getPopulatedPosts(user._id, user.isAdmin, newPage * PAGINATION_LIMIT, PAGINATION_LIMIT, filters);
+        const { count, posts: newPosts } = await getPopulatedPosts(
+          user._id,
+          user.isAdmin,
+          newPage * PAGINATION_LIMIT,
+          PAGINATION_LIMIT,
+          filters,
+        );
         setTotalPostsCount(count);
         if (newPosts.length > 0) {
           setPosts(clear ? newPosts : [...posts, ...newPosts]);
@@ -226,19 +277,29 @@ export default function Home() {
         onAccept={handleDisclaimerAccept}
       />
       <div className="w-full max-w-4xl space-y-8">
-        {
-          searchTerm && searchTerm.length ? (
-            <div className="flex flex-row justify-between">
-              <p className="text-lg">
-                <span className="font-bold">Showing results for: </span>
-                <span>{searchTerm}</span>
-              </p>
-              <p className="font-bold text-theme-gray">{totalPostsCount} {totalPostsCount !== 1 ? "Results" : "Result"}</p>
-            </div>
-          ) : null
-        }
-        <FilterComponent filters={[disabilityFilter, locationFilter, demographicFilter, visibilityFilter].filter((filter) => user?.isAdmin || filter !== visibilityFilter)}/>
-        { pinnedPostContents.length > 0 && <PinnedPosts posts={pinnedPostContents} />}
+        {searchTerm && searchTerm.length ? (
+          <div className="flex flex-row justify-between">
+            <p className="text-lg">
+              <span className="font-bold">Showing results for: </span>
+              <span>{searchTerm}</span>
+            </p>
+            <p className="font-bold text-theme-gray">
+              {totalPostsCount} {totalPostsCount !== 1 ? "Results" : "Result"}
+            </p>
+          </div>
+        ) : null}
+        <FilterComponent
+          filters={[
+            disabilityFilter,
+            locationFilter,
+            demographicFilter,
+            visibilityFilter,
+          ].filter((filter) => user?.isAdmin || filter !== visibilityFilter)}
+          setClearAll={setClearAll}
+        />
+        {pinnedPostContents.length > 0 && (
+          <PinnedPosts posts={pinnedPostContents} />
+        )}
         <div>
           {posts.length ? (
             posts.map((post, index) => {
