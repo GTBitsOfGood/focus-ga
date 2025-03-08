@@ -116,7 +116,7 @@ export default function ReportContentModal(props: ReportContentModalProps) {
 
               <PopoverContent align="start" className="overflow-visible p-2">
                 <Command>
-                  <CommandList className="max-h-32 overflow-y-auto">
+                  <CommandList className="max-h-48 overflow-y-auto">
                     <CommandEmpty>No city found.</CommandEmpty>
                     <CommandGroup>
                       {Object.values(ReportReason).map((reason: string) => (
