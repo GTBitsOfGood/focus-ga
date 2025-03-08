@@ -148,7 +148,7 @@ export default function Navbar({ openModal }: NavbarProps) {
                 Admin User
               </Tooltip>
             </div>
-            <p className="text-sm">{user.email}</p>
+            <p className="text-sm whitespace-normal break-words">{user.email}</p>
             <div className="border-sm mx-auto mt-[18px] w-44 border-t border-theme-medlight-gray" />
             <Link
               href={`/`}
