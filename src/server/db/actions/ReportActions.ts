@@ -154,3 +154,30 @@ export async function editReport(
     }
   }
 }
+
+/**
+ * Updates reports for a content piece (post or comment) to be resolved
+ * @param id - The ID of the content to update
+ * @throws Will throw an error if the report update fails or if the input data is invalid
+ */
+export async function updateAllReportedContentResolved(id: string) {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new Error("Invalid report ID");
+  }
+
+  try {
+    await dbConnect();
+    const reportsForContent = await getReportsByContentId(id);
+
+    //this checks for content that do not have any reports, so that this function can still be called on them
+    if (reportsForContent.length > 0) {
+      reportsForContent.map(async (report) => {
+        const updatedReport: PopulatedReport = { ...report, isResolved: true };
+        await ReportModel.findByIdAndUpdate(report._id, updatedReport);
+      });
+    }
+  } catch (e) {
+    console.error(`Failed to update all reported content ${id}:`, e);
+    throw new Error(`Failed to update all reported content ${id}`);
+  }
+}
