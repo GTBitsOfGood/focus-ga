@@ -268,7 +268,7 @@ export default function EditPostModal(props: EditPostModalProps) {
               Make your post <span className="font-bold">public</span> or{" "}
               <span className="font-bold">private</span>
             </label>
-            <form className="flex flex-col items-start gap-[16px] rounded-[8px] border-[1px] border-theme-medlight-gray p-[16px]">
+            <form className="flex flex-col items-start gap-2 rounded-lg border border-theme-medlight-gray p-4">
               <label className="flex gap-2">
                 <div>
                   <input

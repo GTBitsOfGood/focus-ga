@@ -14,7 +14,6 @@ import EditPostModal from "@/components/EditPostModal";
 import Image from "next/image";
 import focusLogo from "../../../public/focus-logo.png";
 import { DisabilityProvider } from "@/contexts/DisabilityContext";
-import { useRouter } from "next/navigation";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -38,7 +37,6 @@ function CommunityLayout({ children }: LayoutProps) {
   const closeCreatePostModal = () => setCreatePostModal(false);
   const { toast } = useToast();
   const { user } = useUser();
-  const router = useRouter();
 
   const notifySuccess = () => {
     toast({
@@ -109,7 +107,7 @@ function CommunityLayout({ children }: LayoutProps) {
         onSubmit={onPostSubmit}
         tags={user.defaultDisabilityTags}
       />
-      <div className="mt-[100px] p-4">
+      <div className="mt-32 p-4">
         {user.isBanned ? bannedView : children}
         <Toaster />
       </div>

@@ -327,14 +327,14 @@ export default function Home() {
             ) : (
               <>
                 {!loading && searchTerm && searchTerm.length ? (
-                  <div className="text-center text-[22px] font-bold text-theme-gray">
+                  <div className="text-center text-xl font-bold text-theme-gray">
                     <p>No results found for &quot;{searchTerm}&quot;.</p>
                     <p>Please try another search!</p>
                   </div>
                 ) : null}
 
                 {!loading && !searchTerm && (
-                  <div className="text-center text-[22px] font-bold text-theme-gray">
+                  <div className="text-center text-xl font-bold text-theme-gray">
                     <p>No posts found.</p>
                   </div>
                 )}

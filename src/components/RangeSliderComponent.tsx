@@ -121,13 +121,13 @@ export default function RangeSliderComponent({
         </div>
       </PopoverTrigger>
 
-      <PopoverContent className="w-[300px] rounded-md p-6 pb-0 shadow-lg">
+      <PopoverContent className="w-64 rounded-md p-6 pb-0 shadow-lg">
         <div className="space-y-3">
           <h3 className="text-base font-medium text-gray-700">Age Range</h3>
           <div className="relative h-16 pt-6">
             <div 
               ref={sliderRef}
-              className="absolute inset-x-0 mx-2 h-[5px] cursor-pointer rounded bg-gray-200"
+              className="absolute inset-x-0 mx-2 h-1 cursor-pointer rounded bg-gray-200"
               style={{ top: "24px" }}
             >
               <div

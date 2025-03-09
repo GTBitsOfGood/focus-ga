@@ -100,7 +100,7 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
           <div className="mb-6 flex flex-row items-start justify-between">
             <div className="flex flex-row space-x-6">
               <div
-                className={`flex h-[108px] w-[108px] items-center justify-center rounded-full bg-${user.profileColor} relative`}
+                className={`flex h-24 w-24 items-center justify-center rounded-full bg-${user.profileColor} relative`}
               >
                 <span className="select-none text-6xl font-medium text-black">
                   {user.lastName.charAt(0).toUpperCase()}
