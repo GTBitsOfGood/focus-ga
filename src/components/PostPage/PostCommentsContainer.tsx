@@ -8,7 +8,7 @@ import {
   PopulatedComment,
 } from "@/utils/types/comment";
 import { PopulatedPost } from "@/utils/types/post";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CommentInputComponent from "./CommentInputComponent";
 import CommentTreeContainer from "./CommentTreeContainer";
 import {
@@ -63,6 +63,7 @@ export default function PostCommentsContainer(
     ),
   );
 
+  const [focusCommentInput, setFocusCommentInput] = useState<boolean>(false);
   const showEdit = post.author?._id === authUser._id || authUser.isAdmin;
   const showDelete = post.author?._id === authUser._id || authUser.isAdmin;
 
@@ -200,10 +201,22 @@ export default function PostCommentsContainer(
     }
   }
 
+  const onCommentClick = () => {
+    setFocusCommentInput(true);
+  };
+
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("focusCommentInput") === "true") {
+      setFocusCommentInput(true);
+    }
+  }, []);
+
   return (
     <>
       <div className="mx-16 my-4 text-lg text-[#686868]">
-        <BackButton />
+        <BackButton overrideToHome={true} />
       </div>
       <div className="mx-0 mb-16 flex flex-col items-stretch gap-4 p-4 sm:mx-32">
         <PostComponent
@@ -211,10 +224,13 @@ export default function PostCommentsContainer(
           onEditClick={showEdit ? onPostEditClick : undefined}
           onDeleteClick={showDelete ? onPostDeleteClick : undefined}
           onPostPin={authUser.isAdmin ? onPostPin : undefined}
+          onCommentClick={onCommentClick}
         />
         <CommentInputComponent
           placeholder="Add comment"
           onSubmit={onNewCommentSubmit}
+          focusFlag={focusCommentInput}
+          setFocusCommentInput={setFocusCommentInput}
         />
         {parentComments.map((comment) => (
           <CommentTreeContainer
