@@ -16,6 +16,7 @@ import UserModel from "../models/UserModel";
 import { getAllProfanities } from "./ProfanityActions";
 import { containsProfanity } from "@/utils/profanityChecker";
 import { revalidatePath } from "next/cache";
+import { getAuthenticatedUser } from "./AuthActions";
 
 /**
  * Creates a new comment in the database.
@@ -109,7 +110,15 @@ export async function editComment(
     if (comment.editedByAdmin !== undefined) {
       parsedData.editedByAdmin = comment.editedByAdmin;
     }
-    const updatedComment = await CommentModel.findByIdAndUpdate(id, parsedData, { new: true });
+    const currentUser = await getAuthenticatedUser();
+    if (parsedData.editedByAdmin && !currentUser?.isAdmin) {
+      throw new Error("This edit can only be made by an admin");
+    }
+    const updatedComment = await CommentModel.findByIdAndUpdate(
+      id,
+      parsedData,
+      { new: true },
+    );
     if (!updatedComment) {
       throw new Error("Comment not found");
     }
@@ -358,8 +367,7 @@ export const getFlaggedComments = async (
   return populatedComments;
 };
 
-
 export const hasFlaggedComments = async (): Promise<boolean> => {
   const count = await CommentModel.countDocuments({ isFlagged: true });
   return count > 0;
-}
+};

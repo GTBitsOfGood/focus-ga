@@ -24,21 +24,22 @@ import { revalidatePath } from "next/cache";
 import dayjs from "dayjs";
 import { PostDeletionDurations } from "@/utils/consts";
 import { AgeSelection } from "@/utils/types/common";
+import { getAuthenticatedUser } from "./AuthActions";
 
 // A MongoDB aggregation pipeline that efficiently populates a post
 type PipelineArgs = {
-  authUserId: string,
-  isFlagged: boolean[],
-  isAdmin?: boolean,
-  visibility?: string,
-  offset?: number,
-  limit?: number,
-  tags?: string[],
-  locations?: string[],
-  postId?: string,
-  searchTerm?: string,
-  age?: AgeSelection,
-}
+  authUserId: string;
+  isFlagged: boolean[];
+  isAdmin?: boolean;
+  visibility?: string;
+  offset?: number;
+  limit?: number;
+  tags?: string[];
+  locations?: string[];
+  postId?: string;
+  searchTerm?: string;
+  age?: AgeSelection;
+};
 
 type PostAggregationResult = {
   count: number;
@@ -58,7 +59,6 @@ function postPopulationPipeline({
   searchTerm,
   age,
 }: PipelineArgs): mongoose.PipelineStage[] {
-
   if (age && age.maxAge && age.maxAge === 20) {
     age.maxAge = 100;
   }
@@ -121,7 +121,9 @@ function postPopulationPipeline({
     ...(visibility === "All" ? [] : []),
 
     // Filter by isFlagged
-    ...(isFlagged.length ? [{ $match: { isFlagged: { $in: isFlagged } } }] : []),
+    ...(isFlagged.length
+      ? [{ $match: { isFlagged: { $in: isFlagged } } }]
+      : []),
 
     // Use $facet to perform two separate aggregations: totalPostCount and posts (paginated)
     {
@@ -143,7 +145,7 @@ function postPopulationPipeline({
           { $unwind: { path: "$author", preserveNullAndEmptyArrays: true } },
 
           { $match: { "author.isBanned": false } },
-          
+
           // Age filter - lookup childBirthdates and filter by age
           ...(age && age.minAge !== undefined && age.maxAge !== undefined
             ? [
@@ -153,14 +155,25 @@ function postPopulationPipeline({
                     from: UserModel.collection.name,
                     let: { authorId: "$author._id" },
                     pipeline: [
-                      { $match: { $expr: { $eq: ["$_id", { $toObjectId: "$$authorId" }] } } },
-                      { $project: { childBirthdates: 1, _id: 0 } }
+                      {
+                        $match: {
+                          $expr: {
+                            $eq: ["$_id", { $toObjectId: "$$authorId" }],
+                          },
+                        },
+                      },
+                      { $project: { childBirthdates: 1, _id: 0 } },
                     ],
-                    as: "ageData"
-                  }
+                    as: "ageData",
+                  },
                 },
-                { $unwind: { path: "$ageData", preserveNullAndEmptyArrays: true } },
-                
+                {
+                  $unwind: {
+                    path: "$ageData",
+                    preserveNullAndEmptyArrays: true,
+                  },
+                },
+
                 // Now filter based on the age range
                 {
                   $match: {
@@ -168,19 +181,27 @@ function postPopulationPipeline({
                       // No childBirthdates - include these posts
                       { "ageData.childBirthdates": { $exists: false } },
                       { "ageData.childBirthdates": { $size: 0 } },
-                      
+
                       // Has at least one child in the age range
                       {
                         "ageData.childBirthdates": {
                           $elemMatch: {
-                            $lte: new Date(new Date().getFullYear() - age.minAge, new Date().getMonth(), new Date().getDate()),
-                            $gte: new Date(new Date().getFullYear() - age.maxAge - 1, new Date().getMonth(), new Date().getDate())
-                          }
-                        }
-                      }
-                    ]
-                  }
-                }
+                            $lte: new Date(
+                              new Date().getFullYear() - age.minAge,
+                              new Date().getMonth(),
+                              new Date().getDate(),
+                            ),
+                            $gte: new Date(
+                              new Date().getFullYear() - age.maxAge - 1,
+                              new Date().getMonth(),
+                              new Date().getDate(),
+                            ),
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
               ]
             : []),
 
@@ -323,6 +344,10 @@ export async function pinPost(
   postId: string,
 ): Promise<{ success: boolean; error?: string }> {
   await dbConnect();
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser?.isAdmin) {
+    throw new Error("Only admins can pin posts");
+  }
 
   if (!mongoose.Types.ObjectId.isValid(postId)) {
     return { success: false, error: "Invalid post ID" };
@@ -370,6 +395,10 @@ export async function unpinPost(
   postId: string,
 ): Promise<{ success: boolean; error?: string }> {
   await dbConnect();
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser?.isAdmin) {
+    throw new Error("This edit can only be made by an admin");
+  }
 
   if (!mongoose.Types.ObjectId.isValid(postId)) {
     return { success: false, error: "Invalid post ID" };
@@ -400,7 +429,7 @@ export async function unpinPost(
  * @returns A promise that resolves to an object containing the count and an array of populated post objects.
  */
 export async function getPopulatedPinnedPosts(
-  authUserId: string
+  authUserId: string,
 ): Promise<PostAggregationResult> {
   await dbConnect();
 
@@ -431,18 +460,37 @@ export async function getPopulatedPinnedPosts(
  */
 
 type Filters = {
-  tags?: string[],
-  locations?: string[],
-  searchTerm?: string,
-  visibility?: string,
-  isFlagged?: boolean[],
-  age?: AgeSelection,
-}
+  tags?: string[];
+  locations?: string[];
+  searchTerm?: string;
+  visibility?: string;
+  isFlagged?: boolean[];
+  age?: AgeSelection;
+};
 
-export async function getPopulatedPosts(authUserId: string, isAdmin : boolean, offset: number, limit: number, {tags, locations, searchTerm, visibility, isFlagged, age}: Filters): Promise<PostAggregationResult> {
+export async function getPopulatedPosts(
+  authUserId: string,
+  isAdmin: boolean,
+  offset: number,
+  limit: number,
+  { tags, locations, searchTerm, visibility, isFlagged, age }: Filters,
+): Promise<PostAggregationResult> {
   await dbConnect();
 
-  const postsInfo = await PostModel.aggregate(postPopulationPipeline({authUserId, isFlagged : (isFlagged ?? [true, false]), isAdmin, visibility, offset, limit, tags, locations, searchTerm, age}));
+  const postsInfo = await PostModel.aggregate(
+    postPopulationPipeline({
+      authUserId,
+      isFlagged: isFlagged ?? [true, false],
+      isAdmin,
+      visibility,
+      offset,
+      limit,
+      tags,
+      locations,
+      searchTerm,
+      age,
+    }),
+  );
 
   return {
     count: postsInfo[0].count.length ? postsInfo[0].count[0].count : 0,
@@ -497,7 +545,14 @@ export async function getPopulatedPost(
     throw new Error("Invalid post ID");
   }
 
-  const aggregationResult = await PostModel.aggregate(postPopulationPipeline({authUserId, isAdmin, postId: id, isFlagged: [true, false]}));
+  const aggregationResult = await PostModel.aggregate(
+    postPopulationPipeline({
+      authUserId,
+      isAdmin,
+      postId: id,
+      isFlagged: [true, false],
+    }),
+  );
   const post = aggregationResult[0].posts[0];
   if (!post) {
     throw new Error("Post not found");
@@ -641,15 +696,23 @@ export async function getPopulatedSavedPosts(
   const pipeline: mongoose.PipelineStage[] = [
     { $match: { user: new mongoose.Types.ObjectId(userId) } },
     { $sort: { date: -1 as const } },
-    { $lookup: {
-      from: PostModel.collection.name,
-      localField: 'post',
-      foreignField: '_id',
-      as: 'post'
-    } },
-    { $unwind: { path: '$post' } },
-    { $replaceRoot: { newRoot: '$post' } }
-  ].concat(postPopulationPipeline({ authUserId: userId, isAdmin: isAdmin, isFlagged: [true, false] }).slice(2) satisfies mongoose.PipelineStage[] as any);
+    {
+      $lookup: {
+        from: PostModel.collection.name,
+        localField: "post",
+        foreignField: "_id",
+        as: "post",
+      },
+    },
+    { $unwind: { path: "$post" } },
+    { $replaceRoot: { newRoot: "$post" } },
+  ].concat(
+    postPopulationPipeline({
+      authUserId: userId,
+      isAdmin: isAdmin,
+      isFlagged: [true, false],
+    }).slice(2) satisfies mongoose.PipelineStage[] as any,
+  );
 
   const pipelineResult = await PostSaveModel.aggregate(pipeline);
   const savedPosts = pipelineResult[0].posts;
@@ -802,6 +865,9 @@ export async function deletePostLike(
  */
 export async function hasFlaggedPosts(): Promise<boolean> {
   await dbConnect();
-  const flaggedPostsCount = await PostModel.countDocuments({ isFlagged: true, isDeleted: false});
+  const flaggedPostsCount = await PostModel.countDocuments({
+    isFlagged: true,
+    isDeleted: false,
+  });
   return flaggedPostsCount > 0;
 }

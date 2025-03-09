@@ -12,6 +12,7 @@ import dbConnect from "../dbConnect";
 import { revalidatePath } from "next/cache";
 import PostModel from "../models/PostModel";
 import { PostDeletionDurations } from "@/utils/consts";
+import { getAuthenticatedUser } from "./AuthActions";
 
 /**
  * Creates a new user in the database.
@@ -133,6 +134,12 @@ export async function editUser(
   await dbConnect();
 
   const parsedData = editUserSchema.parse(updated);
+
+  const currentUser = await getAuthenticatedUser();
+  if ((parsedData.isBanned || parsedData.isAdmin) && !currentUser?.isAdmin) {
+    throw new Error("Only admins can update a user's banned or admin status");
+  }
+
   const updatedUser = await UserModel.findByIdAndUpdate(id, parsedData, {
     new: true,
   });
