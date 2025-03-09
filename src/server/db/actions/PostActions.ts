@@ -25,6 +25,7 @@ import { revalidatePath } from "next/cache";
 import dayjs from "dayjs";
 import { PostDeletionDurations } from "@/utils/consts";
 import { AgeSelection } from "@/utils/types/common";
+import { getAuthenticatedUser } from "./AuthActions";
 
 // A MongoDB aggregation pipeline that efficiently populates a post
 type PipelineArgs = {
@@ -377,6 +378,10 @@ export async function pinPost(
   postId: string,
 ): Promise<{ success: boolean; error?: string }> {
   await dbConnect();
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser?.isAdmin) {
+    throw new Error("Only admins can pin posts");
+  }
 
   if (!mongoose.Types.ObjectId.isValid(postId)) {
     return { success: false, error: "Invalid post ID" };
@@ -424,6 +429,10 @@ export async function unpinPost(
   postId: string,
 ): Promise<{ success: boolean; error?: string }> {
   await dbConnect();
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser?.isAdmin) {
+    throw new Error("This edit can only be made by an admin");
+  }
 
   if (!mongoose.Types.ObjectId.isValid(postId)) {
     return { success: false, error: "Invalid post ID" };

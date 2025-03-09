@@ -16,7 +16,7 @@ import MarkdownIt from "markdown-it";
 import MarkdownRenderer from "./MarkdownRenderer";
 import { cn } from "@/lib/utils";
 import VisiblityIcon from "./ui/visibilityIcon";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   createPostLike,
@@ -88,6 +88,11 @@ export default function PostComponent(props: PostComponentProps) {
     onPostPin,
   } = props;
 
+  const searchParams = useSearchParams();
+  const openModal = ["edit", "report", "delete"].filter(
+    (param) => searchParams.get(param) === "true",
+  );
+
   // don't render links for clickable components to avoid nested a tags
   if (clickable) {
     mdParser.renderer.rules.link_open = () =>
@@ -120,11 +125,17 @@ export default function PostComponent(props: PostComponentProps) {
   const [likeLoading, setLikeLoading] = useState<boolean>(false);
   const [saved, setSaved] = useState<boolean>(initialSaved);
   const [saveLoading, setSaveLoading] = useState<boolean>(false);
-  const [showEditModal, setShowEditModal] = useState<boolean>(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
+  const [showEditModal, setShowEditModal] = useState<boolean>(
+    openModal.includes("edit") && openModal.length === 1,
+  );
+  const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(
+    openModal.includes("delete") && openModal.length === 1,
+  );
   const [showIgnoreDialog, setShowIgnoreDialog] = useState<boolean>(false);
   const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
-  const [showReportModal, setShowReportModal] = useState<boolean>(false);
+  const [showReportModal, setShowReportModal] = useState<boolean>(
+    openModal.includes("report") && openModal.length === 1,
+  );
   const [reports, setReports] = useState<PopulatedReport[]>([]);
   const [showContentReports, setShowContentReports] = useState<boolean>(false);
   const [fromReports, setFromReports] = useState<boolean>(false);
@@ -244,14 +255,18 @@ export default function PostComponent(props: PostComponentProps) {
     }
   }, [fromReports]);
 
-  const editedByAdminText = editedByAdmin && !author?.isAdmin ? "(Edited by FOCUS)" : "";
+  const editedByAdminText =
+    editedByAdmin && !author?.isAdmin ? "(Edited by FOCUS)" : "";
+
   async function handleEditClick(
     newTitle: string,
     newContent: string,
     newTags: Disability[],
     newVisibility: boolean,
     newEditedByAdmin: boolean | undefined,
+    event?: React.FormEvent<HTMLFormElement>,
   ) {
+    event?.preventDefault();
     setTitle(newTitle);
     setContent(newContent);
     setTags(newTags);
@@ -360,11 +375,15 @@ export default function PostComponent(props: PostComponentProps) {
         />
       ),
       onClick: saveLoading ? undefined : handleSaveClick,
-      hide: author?._id === user?._id
+      hide: author?._id === user?._id,
     },
   ];
 
-  const showReport = user && user._id !== author?._id;
+  const isAuthor = user && user._id === author?._id;
+
+  const getActionUrl = (action: string) => {
+    return `/posts/${post._id}?${action}=true`;
+  };
 
   const reactContent = (
     <>
@@ -384,32 +403,35 @@ export default function PostComponent(props: PostComponentProps) {
             </span>
           )}
         </h2>
-        {/* {!clickable && ( */}
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger onClick={(e) => e.stopPropagation()}>
             <Ellipsis className="h-6 w-6" />
           </DropdownMenuTrigger>
           <DropdownMenuContent side="bottom" align="end">
-            {onEditClick && (
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowEditModal(true);
-                }}
-              >
-                Edit
-              </DropdownMenuItem>
-            )}
-            {onDeleteClick && (
-              <DropdownMenuItem
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowDeleteDialog(true);
-                }}
-              >
-                Delete
-              </DropdownMenuItem>
-            )}
+            {isAuthor ||
+              (user?.isAdmin && (
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowEditModal(true);
+                    router.push(getActionUrl("edit"));
+                  }}
+                >
+                  Edit
+                </DropdownMenuItem>
+              ))}
+            {isAuthor ||
+              (user?.isAdmin && (
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowDeleteDialog(true);
+                    router.push(getActionUrl("delete"));
+                  }}
+                >
+                  Delete
+                </DropdownMenuItem>
+              ))}
             <DropdownMenuItem
               onClick={(e) => {
                 e.stopPropagation();
@@ -418,11 +440,12 @@ export default function PostComponent(props: PostComponentProps) {
             >
               Share
             </DropdownMenuItem>
-            {showReport && !isPrivate && (
+            {!isAuthor && !isPrivate && (
               <DropdownMenuItem
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowReportModal(true);
+                  router.push(getActionUrl("report"));
                 }}
               >
                 Report
@@ -440,7 +463,6 @@ export default function PostComponent(props: PostComponentProps) {
             )}
           </DropdownMenuContent>
         </DropdownMenu>
-        {/* )} */}
       </div>
       <MarkdownRenderer
         className={cn("text-lg leading-7", {
@@ -461,7 +483,7 @@ export default function PostComponent(props: PostComponentProps) {
           {bottomRow.map((item, index) => (
             <div
               key={`${post._id}-${index}`}
-              className={`flex items-center gap-1.5 px-2 ${item.hide ? 'hidden' : ''}`}
+              className={`flex items-center gap-1.5 px-2 ${item.hide ? "hidden" : ""}`}
             >
               <div
                 onClick={(e) => {
