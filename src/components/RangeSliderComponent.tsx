@@ -149,14 +149,14 @@ export default function RangeSliderComponent({
                 }}
               />
               <div
-                className="absolute flex flex-col items-center"
+                className="absolute flex flex-col items-center cursor-default"
                 style={{
                   left: `${minPosition}%`,
                   transform: "translateX(-50%)",
                   top: "-30px",
                 }}
               >
-                <span className="mb-1 text-sm text-gray-600">
+                <span className="mb-1 text-sm text-gray-600 select-none">
                   {currentMinAge}
                 </span>
                 <div
@@ -172,7 +172,7 @@ export default function RangeSliderComponent({
                   top: "-30px",
                 }}
               >
-                <span className="mb-1 text-sm text-gray-600">
+                <span className="mb-1 text-sm text-gray-600 select-none">
                   {currentMaxAge === maxAge ? `${maxAge}+` : currentMaxAge}
                 </span>
                 <div
