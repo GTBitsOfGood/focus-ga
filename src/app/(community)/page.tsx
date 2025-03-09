@@ -341,11 +341,10 @@ export default function Home() {
               </>
             )}
             {loading && (
-              <div className="mt-8 flex items-center justify-center">
+              <div className="mt-8 flex items-center justify-center text-theme-blue">
                 <LoaderCircle
                   className="animate-spin"
                   size={32}
-                  color="#475CC6"
                 />
               </div>
             )}

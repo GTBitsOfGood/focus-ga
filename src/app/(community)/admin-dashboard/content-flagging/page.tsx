@@ -273,11 +273,10 @@ export default function ProfanityList() {
               </p>
             )}
             {postsLoading && (
-              <div className="mt-8 flex items-center justify-center">
+              <div className="mt-8 flex items-center justify-center text-theme-blue">
                 <LoaderCircle
                   className="animate-spin"
                   size={32}
-                  color="#475CC6"
                 />
               </div>
             )}
@@ -295,11 +294,10 @@ export default function ProfanityList() {
             );
           })}
           {commentsLoading ? (
-            <div className="mt-8 flex items-center justify-center">
+            <div className="mt-8 flex items-center justify-center text-theme-blue">
               <LoaderCircle
                 className="animate-spin"
                 size={32}
-                color="#475CC6"
               />
             </div>
           ) : (
@@ -315,7 +313,7 @@ export default function ProfanityList() {
   };
 
   return (
-    <div className="mt-9 max-w-[78%] md:ml-10">
+    <div className="mt-9 md:ml-10">
       <h1 className="mb-8 text-2xl font-bold">Content Flagging</h1>
       <div className="mb-6 flex space-x-16">
         <button

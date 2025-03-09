@@ -17,7 +17,7 @@ export default function ContactButton() {
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
       >
-        {hovered ? 'Contact FOCUS' : <Mail className="w-6 h-6 my-auto ml-[2px]" color="#475CC6" />}
+        {hovered ? 'Contact FOCUS' : <Mail className="w-6 h-6 my-auto ml-[2px] text-theme-blue" />}
       </button>
     </a>
   );
