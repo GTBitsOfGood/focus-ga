@@ -346,8 +346,8 @@ export default function EditPostModal(props: EditPostModalProps) {
                   ? "Posting..."
                   : "Post"
                 : isSubmitting
-                  ? "Editing..."
-                  : "Edit"}
+                  ? "Saving..."
+                  : "Save"}
             </div>
           </button>
         </div>
