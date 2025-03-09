@@ -7,12 +7,14 @@
  * @return {boolean} - True if profanity found, otherwise false.
  */
 export function containsProfanity(text : string, profanities : string[]) {
+    const wordsFound = []
+
     for (const profanity of profanities) {
       const regex = new RegExp(`(^|[^a-zA-Z])${profanity}(?=[^a-zA-Z]|$)`, 'i');
       
       if (regex.test(text)) {
-        return true; 
+        wordsFound.push(profanity); 
       }
     }
-    return false;
+    return wordsFound;
 }

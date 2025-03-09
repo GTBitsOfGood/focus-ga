@@ -112,9 +112,16 @@ export default function PostComponent(props: PostComponentProps) {
   const { toast } = useToast();
 
   const [title, setTitle] = useState<string>(initialTitle);
+  const [editorTitle, setEditorTitle] = useState<string>(initialTitle);
+
   const [content, setContent] = useState<string>(initialContent);
+  const [editorContent, setEditorContent] = useState<string>(initialContent);
+
   const [isPrivate, setIsPrivate] = useState<boolean>(initialIsPrivate);
+
   const [tags, setTags] = useState<(Disability | null)[]>(initialTags);
+  const [editorTags, setEditorTags] = useState<(Disability)[]>(initialTags.filter((tag) => tag !== null));
+
   const [likes, setLikes] = useState<number>(initialLikes);
   const [liked, setLiked] = useState<boolean>(initialLiked);
   const [likeLoading, setLikeLoading] = useState<boolean>(false);
@@ -539,9 +546,9 @@ export default function PostComponent(props: PostComponentProps) {
       {showEditModal && (
         <EditPostModal
           isOpen={showEditModal}
-          title={title}
-          content={content}
-          tags={tags.filter((tag) => tag !== null)}
+          title={editorTitle}
+          content={editorContent}
+          tags={editorTags}
           isPrivate={isPrivate}
           closeModal={() => {
             setShowEditModal(false);
@@ -553,6 +560,9 @@ export default function PostComponent(props: PostComponentProps) {
           {...(fromReports
             ? { modalTitle: `Edit ${author?.lastName}'s post` }
             : {})}
+          setTags={setEditorTags}
+          setContent={setEditorContent}
+          setTitle={setEditorTitle}
         />
       )}
       {showReportModal && (

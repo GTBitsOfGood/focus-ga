@@ -24,9 +24,9 @@ type EditPostModalProps = {
   openModal?: () => void;
   closeModal: () => void;
   modalTitle?: string;
-  title?: string;
-  content?: string;
-  tags?: Disability[];
+  title: string;
+  content: string;
+  tags: Disability[];
   isPrivate?: boolean;
   editedByAdmin?: boolean | undefined;
   onSubmit: (
@@ -36,6 +36,9 @@ type EditPostModalProps = {
     isPrivate: boolean,
     editedByAdmin: boolean | undefined,
   ) => Promise<void>;
+  setTitle : any;
+  setContent : any;
+  setTags: any
 };
 
 export default function EditPostModal(props: EditPostModalProps) {
@@ -44,17 +47,18 @@ export default function EditPostModal(props: EditPostModalProps) {
     openModal,
     closeModal,
     modalTitle = "Edit Post",
-    title: initialTitle,
-    content: initialContent,
-    tags: initialTags,
+    title,
+    content,
+    tags,
     isPrivate: initialIsPrivate,
     editedByAdmin: initialEditedByAdmin,
     onSubmit,
+    setTitle,
+    setContent,
+    setTags
   } = props;
 
-  const [title, setTitle] = useState<string>(initialTitle || "");
-  const [content, setContent] = useState<string>(initialContent || "");
-  const [tags, setTags] = useState<Disability[]>(initialTags || []);
+  
   const [showTitleError, setTitleError] = useState(false);
   const [showBodyError, setBodyError] = useState(false);
   const disabilities = useDisabilities();
@@ -79,9 +83,9 @@ export default function EditPostModal(props: EditPostModalProps) {
           isPrivate,
           isAdmin || editedByAdmin,
         );
-        closeModal();
-        window.location.reload();
-        editorRef.current?.setMarkdown("");
+        // closeModal();
+        // window.location.reload();
+        // editorRef.current?.setMarkdown("");  
       }
     } catch (error) {
     } finally {
@@ -325,7 +329,7 @@ export default function EditPostModal(props: EditPostModalProps) {
               Cancel
             </button>
             <button
-              onClick={(e) => {
+              onClick={(e) => { 
                 handleSubmit();
                 e.stopPropagation();
               }}
