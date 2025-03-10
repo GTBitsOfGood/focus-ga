@@ -181,8 +181,8 @@ function postPopulationPipeline({
                   $match: {
                     $or: [
                       // No childBirthdates - include these posts
-                      { "ageData.childBirthdates": { $exists: false } },
-                      { "ageData.childBirthdates": { $size: 0 } },
+                      ...(age.maxAge === 100 ? [{ "ageData.childBirthdates": { $exists: false } },
+                        { "ageData.childBirthdates": { $size: 0 } }] : []),
 
                       // Has at least one child in the age range
                       {
