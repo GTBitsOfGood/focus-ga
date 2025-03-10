@@ -107,7 +107,7 @@ function CommunityLayout({ children }: LayoutProps) {
         onSubmit={onPostSubmit}
         tags={user.defaultDisabilityTags}
       />
-      <div className="mt-32 p-4">
+      <div className="mt-24 sm:mt-32 p-4">
         {user.isBanned ? bannedView : children}
         <Toaster />
       </div>

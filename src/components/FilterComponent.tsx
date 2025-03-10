@@ -31,7 +31,7 @@ export default function FilterComponent({ setClearAll, filters, searchTerm }: Fi
 
   return (
     <div className="relative flex flex-wrap w-full items-center space-x-4">
-      <label className="block text-sm font-medium">Filter By:</label>
+      <label className="block text-sm font-medium hidden sm:block">Filter By:</label>
       
       {filters.map((filter, index) => 
         filter.label === "Age" ? (

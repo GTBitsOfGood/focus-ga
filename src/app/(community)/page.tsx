@@ -274,7 +274,7 @@ export default function Home() {
         <BackButton overrideToHome/>
       </div> :
       <></> }
-      <main className="flex flex-col items-center px-16">
+      <main className="flex flex-col items-center sm:px-16">
         <AccountSetupModal
           isOpen={isSetupModalVisible}
           closeModal={handleCloseSetupModal}
@@ -283,7 +283,7 @@ export default function Home() {
           isOpen={isDisclaimerVisible}
           onAccept={handleDisclaimerAccept}
         />
-        <div className="w-full max-w-4xl space-y-8">
+        <div className="w-full max-w-4xl space-y-4 sm:space-y-8">
           {searchTerm && searchTerm.length ? (
             <div className="flex flex-row justify-between">
               <p className="text-lg">
