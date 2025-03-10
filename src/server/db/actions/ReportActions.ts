@@ -11,6 +11,7 @@ import dbConnect from "../dbConnect";
 import ReportModel from "../models/ReportModel";
 import mongoose from "mongoose";
 import UserModel from "../models/UserModel";
+import { getAuthenticatedUser } from "./AuthActions";
 
 /**
  * Retrieves all reports from the database, sorted by date in descending order.
@@ -137,6 +138,11 @@ export async function editReport(
   try {
     await dbConnect();
     const parsedData = editReportSchema.parse(report);
+    const currentUser = await getAuthenticatedUser();
+    if (parsedData.isResolved && !currentUser?.isAdmin) {
+      throw new Error("Only admins can resolve reports");
+    }
+
     const updatedReport = await ReportModel.findByIdAndUpdate(id, parsedData, {
       new: true,
     });
@@ -152,5 +158,32 @@ export async function editReport(
       console.error(`Failed to update report ${id}:`, error);
       throw new Error(`Failed to update report ${id}`);
     }
+  }
+}
+
+/**
+ * Updates reports for a content piece (post or comment) to be resolved
+ * @param id - The ID of the content to update
+ * @throws Will throw an error if the report update fails or if the input data is invalid
+ */
+export async function updateAllReportedContentResolved(id: string) {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new Error("Invalid report ID");
+  }
+
+  try {
+    await dbConnect();
+    const reportsForContent = await getReportsByContentId(id);
+
+    //this checks for content that do not have any reports, so that this function can still be called on them
+    if (reportsForContent.length > 0) {
+      reportsForContent.map(async (report) => {
+        const updatedReport: PopulatedReport = { ...report, isResolved: true };
+        await ReportModel.findByIdAndUpdate(report._id, updatedReport);
+      });
+    }
+  } catch (e) {
+    console.error(`Failed to update all reported content ${id}:`, e);
+    throw new Error(`Failed to update all reported content ${id}`);
   }
 }
