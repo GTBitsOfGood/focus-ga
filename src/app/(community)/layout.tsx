@@ -2,18 +2,20 @@
 
 import "@/app/globals.css";
 import Navbar from "@/components/Navbar";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { AppProgressBar as ProgressBar } from "next-nprogress-bar";
 import { UserProvider, useUser } from "@/contexts/UserContext";
 import { SearchProvider } from "@/contexts/SearchContext";
 import { Disability } from "@/utils/types/disability";
-import { createPost } from "@/server/db/actions/PostActions";
+import { createPost, validatePost } from "@/server/db/actions/PostActions";
 import { useToast } from "@/hooks/use-toast";
 import EditPostModal from "@/components/EditPostModal";
 import Image from "next/image";
 import focusLogo from "../../../public/focus-logo.png";
 import { DisabilityProvider } from "@/contexts/DisabilityContext";
+import { useRouter } from "next/navigation";
+import ProfanityModal from "@/components/ProfanityModal";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -33,10 +35,28 @@ export default function ContextWrapper({ children }: LayoutProps) {
 
 function CommunityLayout({ children }: LayoutProps) {
   const [isCreatePostModalOpen, setCreatePostModal] = useState(false);
+  const [flaggedContentModal, setFlaggedContentModal] = useState(false);
+  const [flaggedWords, setFlaggedWords] = useState<string[]>([]);
+  const [tempFormattedData, setTempFormattedData] = useState<any>();
+
+  const [childrenKey, setChildrenKey] = useState<number>(0);
+
   const openCreatePostModal = () => setCreatePostModal(true);
   const closeCreatePostModal = () => setCreatePostModal(false);
   const { toast } = useToast();
   const { user } = useUser();
+
+  const [title, setTitle] = useState<string>("");
+  const [content, setContent] = useState<string>("");
+  const [tags, setTags] = useState<Disability[]>([]);
+
+  useEffect(() => {
+    if (user) { 
+      setTags(user.defaultDisabilityTags);
+    } 
+  }, [user])
+
+  const router = useRouter();
 
   const notifySuccess = () => {
     toast({
@@ -44,6 +64,13 @@ function CommunityLayout({ children }: LayoutProps) {
       description: "Your post has been successfully added to the community.",
     });
   };
+
+  const notifyFlaggedPost = () => {
+    toast({
+      title: "Review Submitted",
+      description: "Your post has been submitted for admin review. You can check the status in “My Posts” under the Under Review section.",
+    });
+  }
 
   const notifyFailure = () => {
     toast({
@@ -62,8 +89,24 @@ function CommunityLayout({ children }: LayoutProps) {
         tags: tags.map((tag) => tag._id),
         isPrivate
       };
-      await createPost(formattedData);
-      notifySuccess();
+
+      setTempFormattedData(formattedData);
+
+      const flaggedWords = await validatePost(formattedData);
+
+      if (flaggedWords.length > 0) {
+        setFlaggedWords(flaggedWords);
+        setFlaggedContentModal(true);
+        setCreatePostModal(false);
+      } else {
+        await createPost(formattedData);
+        notifySuccess();
+        setCreatePostModal(false);
+        setTitle("");
+        setContent("");
+        setChildrenKey(childrenKey + 1);
+      }
+
     } catch (error) {
       notifyFailure();
       throw error;
@@ -105,9 +148,27 @@ function CommunityLayout({ children }: LayoutProps) {
         openModal={openCreatePostModal}
         closeModal={closeCreatePostModal}
         onSubmit={onPostSubmit}
-        tags={user.defaultDisabilityTags}
+        tags={tags}
+        title={title}
+        setTitle={setTitle}
+        content={content}
+        setContent={setContent}
+        setTags={setTags}
       />
-      <div className="mt-24 sm:mt-32 p-4">
+      <ProfanityModal
+        flaggedWords={flaggedWords}
+        onCancel={() => {
+          setFlaggedContentModal(false);
+          setCreatePostModal(true);
+        }}
+        onSubmitReview={async () => {
+          setFlaggedContentModal(false);
+          await createPost(tempFormattedData);
+          notifyFlaggedPost();
+        }}
+        isOpen={flaggedContentModal}
+      />
+      <div className="mt-24 sm:mt-32 p-4" key={childrenKey}>
         {user.isBanned ? bannedView : children}
         <Toaster />
       </div>

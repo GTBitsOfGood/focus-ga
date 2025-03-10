@@ -34,7 +34,9 @@ export async function createComment(comment: CommentInput): Promise<Comment> {
     const profanities = await getAllProfanities();
     const profanityWords = profanities.map((profanity) => profanity.name);
 
-    const isFlagged = containsProfanity(comment.content, profanityWords);
+    const flaggedWordsFound = containsProfanity(comment.content, profanityWords);
+    const isFlagged = flaggedWordsFound.length > 0;
+    
     const parsedData = commentSchema.parse({
       ...comment,
       isFlagged,

@@ -345,9 +345,11 @@ export async function createPost(post: PostInput): Promise<Post> {
   const profanities = await getAllProfanities();
   const profanityWords = profanities.map((profanity) => profanity.name);
 
-  const isFlagged =
-    containsProfanity(post.content, profanityWords) ||
-    containsProfanity(post.title, profanityWords);
+  const contentProfanities = containsProfanity(post.content, profanityWords);
+  const titleProfanities = containsProfanity(post.title, profanityWords);
+  const uniqueProfanities = Array.from(new Set([...contentProfanities, ...titleProfanities]));
+
+  const isFlagged = uniqueProfanities.length > 0;
 
   const author = await UserModel.findById(post.author);
 
@@ -369,6 +371,26 @@ export async function createPost(post: PostInput): Promise<Post> {
   revalidatePath("/");
   return createdPost.toObject();
 }
+
+
+/**
+ * Validates a post to determine if it will be flagged based on its content and title.
+ * @param post - The post input data.
+ * @returns A boolean indicating whether the post will be flagged.
+ */
+export async function validatePost(post: PostInput): Promise<string[]> {
+  await dbConnect();
+
+  const profanities = await getAllProfanities();
+  const profanityWords = profanities.map((profanity) => profanity.name);
+
+  const contentProfanities = containsProfanity(post.content, profanityWords);
+  const titleProfanities = containsProfanity(post.title, profanityWords);
+  const uniqueProfanities = Array.from(new Set([...contentProfanities, ...titleProfanities]));
+
+  return uniqueProfanities;
+}
+
 
 /**
  * Pins a post in the database.

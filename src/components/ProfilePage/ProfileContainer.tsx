@@ -111,7 +111,7 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
               </div>
               <div className="flex flex-col justify-center">
                 <div className="flex items-center gap-1">
-                  <p className="text-2xl font-bold break-words">{user.lastName} Family</p>
+                  <p className="text-2xl font-bold break-words">{user.lastName.charAt(0).toUpperCase() + user.lastName.slice(1)} Family</p>
                   {user.isAdmin && (
                     <>
                       <ShieldCheck className="admin-icon-profile h-8 w-8 fill-theme-gray text-white" />

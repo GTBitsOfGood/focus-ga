@@ -181,9 +181,9 @@ export default function Login() {
               
               <Image
                 src={netlify_logo}
-                height={40}
+                height={30}
                 alt="focus-logo"
-                className="fixed ml-14 mt-6 left-0 bottom-10 sm:block hidden"
+                className="fixed ml-14 mt-6 right-6 top-6 sm:block hidden"
               />
             </p>
           </div>

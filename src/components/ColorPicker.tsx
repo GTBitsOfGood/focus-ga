@@ -18,7 +18,7 @@ export default function ColorPicker(props: ColorPickerProps) {
           <Palette className="text-theme-gray"/>
         </PopoverTrigger>
         {showColorPicker && <PopoverContent align="start" sideOffset={-24}>
-          <div className="grid grid-cols-2 gap-4 p-4 bg-white rounded-lg items-center justify-center z-20">
+          <div className="grid grid-cols-2 gap-4 p-4 rounded-lg items-center justify-center z-20 shadow-lg bg-white">
             {Object.values(ProfileColors).map((color) => (
             <div
               key={color}
