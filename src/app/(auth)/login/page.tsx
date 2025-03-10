@@ -84,7 +84,7 @@ export default function Login() {
           width={181}
           height={87}
           alt="focus-logo"
-          className="fixed ml-14 mt-6"
+          className="fixed ml-14 mt-6 sm:block hidden"
         />
       </a>
       <div className="flex flex-col items-center justify-center">
@@ -170,7 +170,7 @@ export default function Login() {
           <div className="flex w-[33%] flex-col items-center justify-center">
             <button
               onClick={() => router.push("https://focus-ga.org/donate/")}
-              className="py-3 px-16 rounded-sm bg-theme-blue text-white hover:bg-opacity-80"
+              className="py-3 px-16 rounded-sm bg-theme-blue text-white hover:bg-opacity-80 sm:block hidden"
             >
               Donate
             </button>
@@ -183,7 +183,7 @@ export default function Login() {
                 src={netlify_logo}
                 height={40}
                 alt="focus-logo"
-                className="fixed ml-14 mt-6 left-0 bottom-10"
+                className="fixed ml-14 mt-6 left-0 bottom-10 sm:block hidden"
               />
             </p>
           </div>
