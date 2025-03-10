@@ -66,6 +66,7 @@ type PostComponentProps = {
     editedByAdmin: boolean | undefined,
   ) => Promise<void>;
   onDeleteClick?: () => Promise<void>;
+  onCommentClick?: () => void;
   onPostPin?: () => Promise<void>;
 };
 
@@ -86,6 +87,7 @@ export default function PostComponent(props: PostComponentProps) {
     onDeleteClick,
     onEditClick,
     onPostPin,
+    onCommentClick,
   } = props;
 
   const searchParams = useSearchParams();
@@ -337,6 +339,13 @@ export default function PostComponent(props: PostComponentProps) {
     }
   }
 
+  const handleCommentClick = () => {
+    if (onCommentClick) {
+      onCommentClick();
+    }
+    router.push(`/posts/${post._id}?focusCommentInput=true`);
+  };
+
   const bottomRow = [
     {
       label: likes.toString(),
@@ -357,7 +366,14 @@ export default function PostComponent(props: PostComponentProps) {
     },
     {
       label: (comments ?? "").toString(),
-      icon: <MessageSquare />,
+      icon: (
+        <MessageSquare
+          className={cn({
+            "transform transition-transform hover:scale-110": !clickable,
+          })}
+        />
+      ),
+      onClick: handleCommentClick,
     },
     {
       label: saved ? "Saved Post" : "Save Post",

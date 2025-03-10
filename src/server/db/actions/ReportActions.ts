@@ -11,6 +11,7 @@ import dbConnect from "../dbConnect";
 import ReportModel from "../models/ReportModel";
 import mongoose from "mongoose";
 import UserModel from "../models/UserModel";
+import { getAuthenticatedUser } from "./AuthActions";
 
 /**
  * Retrieves all reports from the database, sorted by date in descending order.
@@ -137,6 +138,11 @@ export async function editReport(
   try {
     await dbConnect();
     const parsedData = editReportSchema.parse(report);
+    const currentUser = await getAuthenticatedUser();
+    if (parsedData.isResolved && !currentUser?.isAdmin) {
+      throw new Error("Only admins can resolve reports");
+    }
+
     const updatedReport = await ReportModel.findByIdAndUpdate(id, parsedData, {
       new: true,
     });
