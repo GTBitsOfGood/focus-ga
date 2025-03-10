@@ -156,7 +156,7 @@ export default function PostCommentsContainer(
 
   async function onPostDeleteClick() {
     try {
-      await deletePost(post._id);
+      await deletePost(post._id, authUser._id);
       router.push("/");
       toast({
         title: "Post successfully deleted",

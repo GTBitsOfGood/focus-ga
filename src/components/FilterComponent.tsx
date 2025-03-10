@@ -9,61 +9,59 @@ import { useEffect, useState } from "react";
 type FilterProps = {
   setClearAll: React.Dispatch<React.SetStateAction<boolean>>;
   filters: Filter<any>[];
-  searchTerm: String;
+  searchTerm: string;
 };
 
-export default function FilterComponent(props: FilterProps) {
+export default function FilterComponent({ setClearAll, filters, searchTerm }: FilterProps) {
   const [hasFilters, setHasFilters] = useState(false);
-  const handleClearFilters = () => {
-    props.setClearAll(true);
-  };
-
+  
   useEffect(() => {
+    const hasDisabilityFilters = filters[0]?.selected?.length > 0;
+    const hasTagFilters = filters[1]?.selected?.length > 0;
+    const ageFilter = filters[2]?.selected[0];
+    const hasAgeFilter = ageFilter?.minAge !== MIN_FILTER_AGE || ageFilter?.maxAge !== MAX_FILTER_AGE;
+    
     setHasFilters(
-      props?.filters[0]?.selected?.length > 0 ||
-      props?.filters[1]?.selected?.length > 0 ||
-      (props?.filters[2]?.selected[0]?.minAge !== 0 || props?.filters[2]?.selected[0]?.maxAge !== 20) ||
-      props?.filters[3]?.selected[0]?.visibility !== 'All'||
-      props?.searchTerm?.length > 0
+      hasDisabilityFilters || 
+      hasTagFilters || 
+      hasAgeFilter || 
+      searchTerm.length > 0
     );
-  }, [props]);
+  }, [filters, searchTerm]);
 
   return (
     <div className="relative flex flex-wrap w-full items-center space-x-4">
       <label className="block text-sm font-medium">Filter By:</label>
-      {props.filters.map((filter, index) =>
+      
+      {filters.map((filter, index) => 
         filter.label === "Age" ? (
           <RangeSliderComponent
-            key={index}
+            key={`age-filter-${index}`}
             label={filter.label}
             minAge={MIN_FILTER_AGE}
             maxAge={MAX_FILTER_AGE}
-            onChange={(minAge, maxAge) => {
-              filter.setSelected({
-                minAge,
-                maxAge,
-                _id: `age-${minAge}-${maxAge}`,
-              });
-            }}
-            initialMinAge={
-              filter.selected.length > 0 ? filter.selected[0].minAge : 3
-            }
-            initialMaxAge={
-              filter.selected.length > 0 ? filter.selected[0].maxAge : 20
-            }
+            onChange={(minAge, maxAge) => filter.setSelected({
+              minAge,
+              maxAge,
+              _id: `age-${minAge}-${maxAge}`
+            })}
+            initialMinAge={filter.selected[0]?.minAge ?? MIN_FILTER_AGE}
+            initialMaxAge={filter.selected[0]?.maxAge ?? MAX_FILTER_AGE}
           />
         ) : (
-          <DropdownComponent key={index} filter={filter} />
-        ),
+          <DropdownComponent 
+            key={`${filter.label}-${index}`} 
+            filter={filter} 
+          />
+        )
       )}
+      
       <button
         disabled={!hasFilters}
-        onClick={handleClearFilters}
-        className={`text-sm text-theme-blue font-bold ${
-          hasFilters ? "" : "hidden"
-        }`}
+        onClick={() => setClearAll(true)}
+        className={`text-sm text-theme-blue font-bold ${!hasFilters && 'hidden'}`}
       >
-        Clear All 
+        Clear All
       </button>
     </div>
   );
