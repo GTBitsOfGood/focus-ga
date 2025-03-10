@@ -136,7 +136,7 @@ export async function editUser(
   const parsedData = editUserSchema.parse(updated);
 
   const currentUser = await getAuthenticatedUser();
-  if ((parsedData.isBanned || parsedData.isAdmin) && !currentUser?.isAdmin) {
+  if ((parsedData.isBanned ) && !currentUser?.isAdmin) { {/** TODO: remove this comment when not dev: || parsedData.isAdmin */}
     throw new Error("Only admins can update a user's banned or admin status");
   }
 
