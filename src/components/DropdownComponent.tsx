@@ -110,7 +110,7 @@ export default function DropdownComponent (
         </Command>
       </PopoverContent>}
       {label === "Visibility" &&
-      <PopoverContent className="w-[160px]">
+      <PopoverContent className="w-42">
         <Command>
           <CommandList>
           <CommandGroup>

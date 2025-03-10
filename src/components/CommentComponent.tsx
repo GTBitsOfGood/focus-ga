@@ -262,7 +262,7 @@ export default function CommentComponent(props: CommentComponentProps) {
             {getDateDifferenceString(new Date(), date)} {editedByAdminText}
           </p>
         </div>
-        <div className="flex flex-col gap-2 pl-8">
+        <div className="flex flex-col gap-2 pl-8 break-words">
           {!isDeleted && (
             <>
               <MarkdownRenderer

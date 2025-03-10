@@ -274,7 +274,7 @@ export default function Home() {
         <BackButton overrideToHome/>
       </div> :
       <></> }
-      <main className="flex flex-col items-center px-16">
+      <main className="flex flex-col items-center sm:px-16">
         <AccountSetupModal
           isOpen={isSetupModalVisible}
           closeModal={handleCloseSetupModal}
@@ -283,7 +283,7 @@ export default function Home() {
           isOpen={isDisclaimerVisible}
           onAccept={handleDisclaimerAccept}
         />
-        <div className="w-full max-w-4xl space-y-8">
+        <div className="w-full max-w-4xl space-y-4 sm:space-y-8">
           {searchTerm && searchTerm.length ? (
             <div className="flex flex-row justify-between">
               <p className="text-lg">
@@ -327,25 +327,24 @@ export default function Home() {
             ) : (
               <>
                 {!loading && searchTerm && searchTerm.length ? (
-                  <div className="text-center text-[22px] font-bold text-theme-gray">
+                  <div className="text-center text-xl font-bold text-theme-gray">
                     <p>No results found for &quot;{searchTerm}&quot;.</p>
                     <p>Please try another search!</p>
                   </div>
                 ) : null}
 
                 {!loading && !searchTerm && (
-                  <div className="text-center text-[22px] font-bold text-theme-gray">
+                  <div className="text-center text-xl font-bold text-theme-gray">
                     <p>No posts found.</p>
                   </div>
                 )}
               </>
             )}
             {loading && (
-              <div className="mt-8 flex items-center justify-center">
+              <div className="mt-8 flex items-center justify-center text-theme-blue">
                 <LoaderCircle
                   className="animate-spin"
                   size={32}
-                  color="#475CC6"
                 />
               </div>
             )}

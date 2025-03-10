@@ -1,9 +1,15 @@
-'use server'
+"use server";
 
-import { Disability, DisabilityInput, disabilitySchema, editDisabilitySchema } from "@/utils/types/disability";
+import {
+  Disability,
+  DisabilityInput,
+  disabilitySchema,
+  editDisabilitySchema,
+} from "@/utils/types/disability";
 import dbConnect from "../dbConnect";
 import DisabilityModel from "../models/DisabilityModel";
 import mongoose from "mongoose";
+import { getAuthenticatedUser } from "./AuthActions";
 
 /**
  * Creates a new disability record in the database.
@@ -11,9 +17,12 @@ import mongoose from "mongoose";
  * @throws Will throw an error if the disability creation fails.
  * @returns The created disability object.
  */
-export async function createDisability(disability: DisabilityInput): Promise<Disability> {
+export async function createDisability(
+  disability: DisabilityInput,
+): Promise<Disability> {
   try {
     await dbConnect();
+    const currentUser = await getAuthenticatedUser();
     const parsedData = disabilitySchema.parse(disability);
     const createdDisability = await DisabilityModel.create(parsedData);
     return createdDisability.toObject();
@@ -32,7 +41,7 @@ export async function getDisabilities(): Promise<Disability[]> {
   try {
     await dbConnect();
     const disabilities = await DisabilityModel.find();
-    return disabilities.map(disability => disability.toObject());
+    return disabilities.map((disability) => disability.toObject());
   } catch (error) {
     console.error("Failed to retrieve disabilities:", error);
     throw new Error("Failed to retrieve disabilities");
@@ -63,15 +72,26 @@ export async function getDisability(id: String): Promise<Disability> {
  * @throws Will throw an error if the disability update fails or if the disability is not found.
  * @returns The updated disability object.
  */
-export async function editDisability(id: string, updated: Partial<DisabilityInput>): Promise<Disability> {
+export async function editDisability(
+  id: string,
+  updated: Partial<DisabilityInput>,
+): Promise<Disability> {
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new Error("Invalid disability ID");
   }
 
   try {
     await dbConnect();
+    const currentUser = await getAuthenticatedUser();
+    if (!currentUser?.isAdmin) {
+      throw new Error("Only admins can edit disabilities");
+    }
     const parsedData = editDisabilitySchema.parse(updated);
-    const updatedDisability = await DisabilityModel.findByIdAndUpdate(id, parsedData, { new: true });
+    const updatedDisability = await DisabilityModel.findByIdAndUpdate(
+      id,
+      parsedData,
+      { new: true },
+    );
     if (!updatedDisability) {
       throw new Error("Disability not found");
     }
@@ -89,13 +109,17 @@ export async function editDisability(id: string, updated: Partial<DisabilityInpu
  * @returns The deleted disability object.
  */
 export async function deleteDisability(id: string): Promise<Disability> {
-  console.log("Received ID:", id); 
+  console.log("Received ID:", id);
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new Error("Invalid disability ID");
   }
 
   try {
     await dbConnect();
+    const currentUser = await getAuthenticatedUser();
+    if (!currentUser?.isAdmin) {
+      throw new Error("Only admins can delete disbilities");
+    }
     const deletedDisability = await DisabilityModel.findByIdAndDelete(id);
     if (!deletedDisability) {
       throw new Error("Disability not found");

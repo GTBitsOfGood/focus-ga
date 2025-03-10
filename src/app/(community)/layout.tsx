@@ -168,7 +168,7 @@ function CommunityLayout({ children }: LayoutProps) {
         }}
         isOpen={flaggedContentModal}
       />
-      <div className="mt-[100px] p-4" key={childrenKey}>
+      <div className="mt-24 sm:mt-32 p-4" key={childrenKey}>
         {user.isBanned ? bannedView : children}
         <Toaster />
       </div>
