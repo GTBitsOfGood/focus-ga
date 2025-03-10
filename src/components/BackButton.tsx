@@ -24,7 +24,7 @@ export default function BackButton({ overrideToHome = false }) {
           router.back();
         }
       }}
-      className="flex items-center gap-1 w-min p-2 cursor-pointer select-none"
+      className="flex items-center gap-1 w-min p-2 cursor-pointer select-none hidden sm:block"
     >
       <ChevronLeftIcon className="w-6 h-6" /> Back
     </div>
