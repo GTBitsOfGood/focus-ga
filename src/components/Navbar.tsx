@@ -61,15 +61,23 @@ export default function Navbar({ openModal }: NavbarProps) {
   }
 
   return (
-    <div className="fixed top-0 z-50 flex h-[100px] w-full items-center justify-between gap-4 border-b border-gray-300 bg-white pl-8 md:gap-12">
+    <div className="fixed top-0 z-50 flex h-[100px] w-full items-center justify-between gap-4 border-b border-gray-300 bg-white pl-2 sm:pl-8 md:gap-12">
       {/* Logo plus search bar*/}
       <div className="cursor-pointer" onClick={goToHome}>
         <Image
           src={focusLogo}
           alt="focus-logo"
-          className="mb-2 w-24 min-w-24"
+          className="sm:block hidden mb-2 w-24 min-w-24"
         />
       </div>
+      {!user.isBanned && (
+        <button
+          className="flex flex-row items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-theme-blue px-4 py-2 text-base font-semibold text-white transition hover:opacity-90 sm:hidden"
+          onClick={() => openModal()}
+        >
+          <SquarePen className="h-6 w-6" color="#ffffff" />
+        </button>
+      )}
       <div className="relative flex-grow">
         <input
           type="text"
@@ -77,11 +85,11 @@ export default function Navbar({ openModal }: NavbarProps) {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="h-11 w-full rounded-2xl bg-theme-lightgray px-12 pl-16 tracking-wide focus:outline-none"
+          className="h-11 w-full rounded-2xl bg-theme-lightgray px-12 tracking-wide focus:outline-none"
         />
         <Search
           strokeWidth={3}
-          className="absolute left-6 top-1/2 -translate-y-1/2 transform text-gray-500"
+          className="absolute left-4 top-1/2 -translate-y-1/2 transform text-gray-500"
         />
         {inputValue.length ? (
           <button
@@ -96,10 +104,10 @@ export default function Navbar({ openModal }: NavbarProps) {
       {/* Create Post*/}
       {!user.isBanned && (
         <button
-          className="flex flex-row items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-theme-blue px-4 py-2 text-base font-semibold text-white transition hover:opacity-90"
+          className="hidden sm:inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-theme-blue px-4 py-2 text-base font-semibold text-white transition hover:opacity-90"
           onClick={() => openModal()}
         >
-          <SquarePen className="h-6 w-6" color="#ffffff" /> Create Post
+          <SquarePen className="h-6 w-6" color="#ffffff" />Create Post
         </button>
       )}
 
