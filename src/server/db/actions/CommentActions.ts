@@ -16,6 +16,7 @@ import UserModel from "../models/UserModel";
 import { getAllProfanities } from "./ProfanityActions";
 import { containsProfanity } from "@/utils/profanityChecker";
 import { revalidatePath } from "next/cache";
+import { getAuthenticatedUser } from "./AuthActions";
 import { updateAllReportedContentResolved } from "./ReportActions";
 
 /**
@@ -112,6 +113,10 @@ export async function editComment(
     const parsedData = commentSchema.partial().parse(comment);
     if (comment.editedByAdmin !== undefined) {
       parsedData.editedByAdmin = comment.editedByAdmin;
+    }
+    const currentUser = await getAuthenticatedUser();
+    if (parsedData.editedByAdmin && !currentUser?.isAdmin) {
+      throw new Error("This edit can only be made by an admin");
     }
     const updatedComment = await CommentModel.findByIdAndUpdate(
       id,
