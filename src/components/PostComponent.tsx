@@ -66,6 +66,7 @@ type PostComponentProps = {
     editedByAdmin: boolean | undefined,
   ) => Promise<void>;
   onDeleteClick?: () => Promise<void>;
+  onCommentClick?: () => void;
   onPostPin?: () => Promise<void>;
 };
 
@@ -86,6 +87,7 @@ export default function PostComponent(props: PostComponentProps) {
     onDeleteClick,
     onEditClick,
     onPostPin,
+    onCommentClick,
   } = props;
 
   // don't render links for clickable components to avoid nested a tags
@@ -244,7 +246,8 @@ export default function PostComponent(props: PostComponentProps) {
     }
   }, [fromReports]);
 
-  const editedByAdminText = editedByAdmin && !author?.isAdmin ? "(Edited by FOCUS)" : "";
+  const editedByAdminText =
+    editedByAdmin && !author?.isAdmin ? "(Edited by FOCUS)" : "";
   async function handleEditClick(
     newTitle: string,
     newContent: string,
@@ -322,6 +325,13 @@ export default function PostComponent(props: PostComponentProps) {
     }
   }
 
+  const handleCommentClick = () => {
+    if (onCommentClick) {
+      onCommentClick();
+    }
+    router.push(`/posts/${post._id}?focusCommentInput=true`);
+  };
+
   const bottomRow = [
     {
       label: likes.toString(),
@@ -342,7 +352,14 @@ export default function PostComponent(props: PostComponentProps) {
     },
     {
       label: (comments ?? "").toString(),
-      icon: <MessageSquare />,
+      icon: (
+        <MessageSquare
+          className={cn({
+            "transform transition-transform hover:scale-110": !clickable,
+          })}
+        />
+      ),
+      onClick: handleCommentClick,
     },
     {
       label: saved ? "Saved Post" : "Save Post",
@@ -360,7 +377,7 @@ export default function PostComponent(props: PostComponentProps) {
         />
       ),
       onClick: saveLoading ? undefined : handleSaveClick,
-      hide: author?._id === user?._id
+      hide: author?._id === user?._id,
     },
   ];
 
@@ -461,7 +478,7 @@ export default function PostComponent(props: PostComponentProps) {
           {bottomRow.map((item, index) => (
             <div
               key={`${post._id}-${index}`}
-              className={`flex items-center gap-1.5 px-2 ${item.hide ? 'hidden' : ''}`}
+              className={`flex items-center gap-1.5 px-2 ${item.hide ? "hidden" : ""}`}
             >
               <div
                 onClick={(e) => {
