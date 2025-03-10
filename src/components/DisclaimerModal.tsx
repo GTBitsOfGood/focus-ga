@@ -19,7 +19,7 @@ export default function Disclaimer(props: DisclaimerProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="relative z-50 flex max-h-[80vh] max-w-3xl flex-col rounded-lg bg-white p-8 shadow-lg">
+      <div className="relative z-50 flex sm:max-h-[80vh] max-w-3xl flex-col rounded-lg bg-white p-8 shadow-lg">
         <div className="mb-4 w-full">
           <div className="mb-4 flex justify-center">
             <div className="text-2xl font-bold text-black">Disclaimer:</div>

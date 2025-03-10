@@ -59,7 +59,7 @@ export default function FilterComponent({ setClearAll, filters, searchTerm }: Fi
       <button
         disabled={!hasFilters}
         onClick={() => setClearAll(true)}
-        className={`text-sm text-theme-blue pt-4 sm:py-0 w-full font-bold ${!hasFilters && 'hidden'}`}
+        className={`text-sm text-theme-blue pt-4 sm:py-0 w-full sm:w-min whitespace-nowrap font-bold ${!hasFilters && 'hidden'}`}
       >
         Clear All
       </button>
