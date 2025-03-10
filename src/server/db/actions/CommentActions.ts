@@ -17,6 +17,7 @@ import { getAllProfanities } from "./ProfanityActions";
 import { containsProfanity } from "@/utils/profanityChecker";
 import { revalidatePath } from "next/cache";
 import { getAuthenticatedUser } from "./AuthActions";
+import { updateAllReportedContentResolved } from "./ReportActions";
 
 /**
  * Creates a new comment in the database.
@@ -77,6 +78,9 @@ export async function deleteComment(id: string): Promise<void> {
     if (!comment) {
       throw new Error("Comment does not exist");
     }
+
+    //resolves all reports for the comment being deleted
+    await updateAllReportedContentResolved(id);
 
     await PostModel.findByIdAndUpdate(
       comment.post,

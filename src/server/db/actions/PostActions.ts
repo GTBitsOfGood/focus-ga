@@ -14,6 +14,8 @@ import PostModel from "../models/PostModel";
 import PostSaveModel from "../models/PostSaveModel";
 import PostLikeModel from "../models/PostLikeModel";
 import CommentModel from "../models/CommentModel";
+import { deleteComment, getPostComments } from "./CommentActions";
+import { updateAllReportedContentResolved } from "./ReportActions";
 import { getAllProfanities } from "./ProfanityActions";
 import { postSaveSchema, postLikeSchema } from "@/utils/types/post";
 import dbConnect from "../dbConnect";
@@ -180,8 +182,8 @@ function postPopulationPipeline({
                   $match: {
                     $or: [
                       // No childBirthdates - include these posts
-                      { "ageData.childBirthdates": { $exists: false } },
-                      { "ageData.childBirthdates": { $size: 0 } },
+                      ...(age.maxAge === 100 ? [{ "ageData.childBirthdates": { $exists: false } },
+                        { "ageData.childBirthdates": { $size: 0 } }] : []),
 
                       // Has at least one child in the age range
                       {
@@ -629,11 +631,15 @@ export async function editPost(
   };
 }
 /**
- * Marks a post as deleted in the database and deletes its associated likes and saves.
+ * Marks a post as deleted in the database and deletes its associated likes, saves, and comments.
  * @param id - The ID of the post to delete.
  * @throws Will throw an error if the post deletion fails or if the post is not found.
  */
-export async function deletePost(id: string): Promise<void> {
+
+export async function deletePost(
+  id: string,
+  authUserId: string,
+): Promise<void> {
   await dbConnect();
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -647,6 +653,18 @@ export async function deletePost(id: string): Promise<void> {
     tags: [],
     isDeleted: true,
   });
+
+  //resolves all reports for a post
+  await updateAllReportedContentResolved(id);
+
+  // deletes all comments under a deleted post and resolves any reports they might have
+  const commentsForCurrPost = await getPostComments(id, authUserId);
+  if (commentsForCurrPost.length > 0) {
+    commentsForCurrPost.map(async (comment) => {
+      await deleteComment(comment._id);
+    });
+  }
+
   if (!updatedPost) {
     throw new Error("Post not found");
   }
