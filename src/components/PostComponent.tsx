@@ -424,30 +424,28 @@ export default function PostComponent(props: PostComponentProps) {
             <Ellipsis className="h-6 w-6" />
           </DropdownMenuTrigger>
           <DropdownMenuContent side="bottom" align="end">
-            {isAuthor ||
-              (user?.isAdmin && (
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowEditModal(true);
-                    router.push(getActionUrl("edit"));
-                  }}
-                >
-                  Edit
-                </DropdownMenuItem>
-              ))}
-            {isAuthor ||
-              (user?.isAdmin && (
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowDeleteDialog(true);
-                    router.push(getActionUrl("delete"));
-                  }}
-                >
-                  Delete
-                </DropdownMenuItem>
-              ))}
+            {(isAuthor || user?.isAdmin) && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowEditModal(true);
+                  router.push(getActionUrl("edit"));
+                }}
+              >
+                Edit
+              </DropdownMenuItem>
+            )}
+            {(isAuthor || user?.isAdmin) && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDeleteDialog(true);
+                  router.push(getActionUrl("delete"));
+                }}
+              >
+                Delete
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem
               onClick={(e) => {
                 e.stopPropagation();

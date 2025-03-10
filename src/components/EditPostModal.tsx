@@ -315,7 +315,6 @@ export default function EditPostModal(props: EditPostModalProps) {
             </label>
           </form>
         </div>
-
         <div className="flex justify-end space-x-4">
           <button
             onClick={(e) => {
