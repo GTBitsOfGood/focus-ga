@@ -93,7 +93,7 @@ export default function EditCommentModal(props: EditCommentModalProps) {
               value={comment}
               placeholder="Enter comment content"
               onChange={(event) => setComment(event.target.value)}
-              className="max-h-[35vh] min-h-[25px] w-full focus:outline-none"
+              className="max-h-32 min-h-16 w-full focus:outline-none"
             />
           </div>
 

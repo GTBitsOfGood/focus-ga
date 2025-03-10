@@ -270,83 +270,78 @@ export default function EditPostModal(props: EditPostModalProps) {
             Make your post <span className="font-bold">public</span> or{" "}
             <span className="font-bold">private</span>
           </label>
-          <form className="flex flex-col items-start gap-[16px] rounded-[8px] border-[1px] border-theme-medlight-gray p-[16px]">
-            <label className="flex gap-2">
-              <div>
-                <input
-                  type="radio"
-                  className="border-theme-medlight-gray"
-                  id="editPrivate"
-                  checked={isPrivate}
-                  onChange={() => {
-                    setIsPrivate(true);
-                  }}
-                  name="postVisibility"
-                />
-              </div>
-              <div>
-                Private
-                <br></br>
-                <span className="font-[400] text-[#A3A3A3]">
-                  Only you and FOCUS admin can see your post
-                </span>
-              </div>
-            </label>
-            <label className="flex gap-2">
-              <div>
-                <input
-                  type="radio"
-                  className="border-theme-medlight-gray"
-                  id="editPublic"
-                  checked={!isPrivate}
-                  onChange={() => {
-                    setIsPrivate(false);
-                  }}
-                  name="postVisibility"
-                />
-              </div>
-              <div>
-                Public
-                <br></br>
-                <span className="font-[400] text-[#A3A3A3]">
-                  Everyone in FOCUS group can see your post
-                </span>
-              </div>
-            </label>
-          </form>
-        </div>
-        <div className="flex justify-end space-x-4">
-          <button
-            onClick={(e) => {
-              handleClose();
-              e.stopPropagation();
-            }}
-            className="w-20 rounded-md bg-gray-300 py-2 font-bold text-gray-700 transition hover:bg-gray-400"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={(e) => {
-              handleSubmit();
-              e.stopPropagation();
-            }}
-            disabled={isSubmitting}
-            className={cn(
-              "inline-flex min-w-20 items-center justify-center gap-2.5 rounded-lg bg-theme-blue px-4 py-2",
-              {
-                "cursor-not-allowed opacity-50": isSubmitting,
-                "transition hover:bg-blue-900": !isSubmitting,
-              },
-            )}
-          >
-            <div className="font-bold text-white">
-              {modalTitle === "Create New Post"
-                ? isSubmitting
-                  ? "Posting..."
-                  : "Post"
-                : isSubmitting
-                  ? "Saving..."
-                  : "Save"}
+            <form className="flex flex-col items-start gap-2 rounded-lg border border-theme-medlight-gray p-4">
+              <label className="flex gap-2">
+                <div>
+                  <input
+                    type="radio"
+                    className="border-theme-medlight-gray"
+                    id="editPrivate"
+                    checked={isPrivate}
+                    onChange={() => {
+                      setIsPrivate(true);
+                    }}
+                    name="postVisibility"
+                  />
+                </div>
+                <div>
+                  Private
+                  <br></br>
+                  <span className="font-[400] text-[#A3A3A3]">
+                    Only you and FOCUS admin can see your post
+                  </span>
+                </div>
+              </label>
+              <label className="flex gap-2">
+                <div>
+                  <input
+                    type="radio"
+                    className="border-theme-medlight-gray"
+                    id="editPublic"
+                    checked={!isPrivate}
+                    onChange={() => {
+                      setIsPrivate(false);
+                    }}
+                    name="postVisibility"
+                  />
+                </div>
+                <div>
+                  Public
+                  <br></br>
+                  <span className="font-[400] text-[#A3A3A3]">
+                    Everyone in FOCUS group can see your post
+                  </span>
+                </div>
+              </label>
+            </form>
+          </div>
+
+          <div className="flex justify-end space-x-4">
+            <button
+              onClick={(e) => {
+                handleClose();
+                e.stopPropagation();
+              }}
+              className="w-20 rounded-md bg-gray-300 py-2 font-bold text-gray-700 transition hover:bg-gray-400"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={(e) => {
+                handleSubmit();
+                e.stopPropagation();
+              }}
+              disabled={isSubmitting}
+              className={cn(
+                "inline-flex min-w-20 items-center justify-center gap-2.5 rounded-lg bg-theme-blue px-4 py-2",
+                {
+                  "cursor-not-allowed opacity-50": isSubmitting,
+                  "transition hover:bg-blue-900": !isSubmitting,
+                },
+              )}
+            >
+              <div className="font-bold text-white">
+                {modalTitle === "Create New Post" ? (isSubmitting ? "Posting..." : "Post") : (isSubmitting ? "Saving..." : "Save")}
             </div>
           </button>
         </div>

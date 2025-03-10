@@ -77,7 +77,7 @@ export default function Navbar({ openModal }: NavbarProps) {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="h-11 w-full rounded-[20px] bg-theme-lightgray px-12 pl-16 tracking-wide focus:outline-none"
+          className="h-11 w-full rounded-2xl bg-theme-lightgray px-12 pl-16 tracking-wide focus:outline-none"
         />
         <Search
           strokeWidth={3}
@@ -96,7 +96,7 @@ export default function Navbar({ openModal }: NavbarProps) {
       {/* Create Post*/}
       {!user.isBanned && (
         <button
-          className="flex flex-row items-center justify-center gap-2 whitespace-nowrap rounded-[12px] bg-theme-blue px-4 py-2 text-base font-semibold text-white transition hover:opacity-90"
+          className="flex flex-row items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-theme-blue px-4 py-2 text-base font-semibold text-white transition hover:opacity-90"
           onClick={() => openModal()}
         >
           <SquarePen className="h-6 w-6" color="#ffffff" /> Create Post
@@ -105,13 +105,13 @@ export default function Navbar({ openModal }: NavbarProps) {
 
       {/* Profile Picture menu button */}
       <div
-        className="group relative flex h-full w-[88px] cursor-pointer items-center justify-center pl-12 pr-16 transition-colors duration-200 hover:bg-gray-100"
+        className="group relative flex h-full cursor-pointer items-center justify-centerZ pr-4 transition-colors duration-200 hover:bg-gray-100"
         onClick={toggleDropdown}
         ref={dropdownButtonRef}
       >
         <div className="border-l pl-6">
           <div
-            className={`h-[46px] w-[46px] bg-${user.profileColor ? user.profileColor : ProfileColors.ProfileDefault} flex cursor-pointer items-center justify-center rounded-full`}
+            className={`h-12 w-12 bg-${user.profileColor ? user.profileColor : ProfileColors.ProfileDefault} flex cursor-pointer items-center justify-center rounded-full`}
           >
             {" "}
             {/** Change to whatever color is chosen */}
@@ -128,18 +128,18 @@ export default function Navbar({ openModal }: NavbarProps) {
           )}
         </div>
         {menuIsOpen && (
-          <div className="absolute bottom-[-1px] left-0 h-[4px] w-full bg-theme-blue"></div>
+          <div className="absolute bottom-[-1px] left-0 h-1 w-full bg-theme-blue"></div>
         )}
       </div>
 
       {/* Dropdown Menu */}
       {menuIsOpen && (
         <div
-          className="absolute right-[10px] top-[110px] z-10 w-[218px] rounded-lg border border-theme-medlight-gray bg-white"
+          className="absolute right-2 top-[110px] z-10 w-64 rounded-lg border border-theme-medlight-gray bg-white"
           ref={dropdownRef}
         >
           <div
-            className={`h-[64px] w-[64px] bg-${user.profileColor ? user.profileColor : ProfileColors.ProfileDefault} m-auto mt-[21px] flex items-center justify-center rounded-full`}
+            className={`h-16 w-16 bg-${user.profileColor ? user.profileColor : ProfileColors.ProfileDefault} m-auto mt-5 flex items-center justify-center rounded-full`}
           >
             <span className="select-none text-3xl font-bold text-black">
               {user.lastName.charAt(0).toUpperCase()}
@@ -154,7 +154,7 @@ export default function Navbar({ openModal }: NavbarProps) {
               </Tooltip>
             </div>
             <p className="text-sm whitespace-normal break-words">{user.email}</p>
-            <div className="border-sm mx-auto mt-[18px] w-44 border-t border-theme-medlight-gray" />
+            <div className="border-sm mx-auto mt-5 w-44 border-t border-theme-medlight-gray" />
             <Link
               href={`/`}
               onClick={() => {
@@ -208,7 +208,7 @@ export default function Navbar({ openModal }: NavbarProps) {
                 <ShieldCheck className="admin-icon mt-1 h-5 w-5 fill-theme-gray text-white" />
               </Link>
             )}
-            <div className="border-sm mx-auto mt-[18px] w-44 border-t border-theme-medlight-gray" />
+            <div className="border-sm mx-auto mt-5 w-44 border-t border-theme-medlight-gray" />
             <div
               onClick={async () => {
                 setUser(null);

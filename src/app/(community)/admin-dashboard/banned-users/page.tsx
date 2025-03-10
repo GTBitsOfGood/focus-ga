@@ -138,8 +138,8 @@ export default function BannedUsers() {
         ))}
       </div>
           {loading ?
-            <div className="flex items-center justify-center mt-8">
-              <LoaderCircle className="animate-spin" size={32} color="#475CC6"/>
+            <div className="flex items-center justify-center mt-8 text-theme-blue">
+              <LoaderCircle className="animate-spin" size={32} />
             </div>
             :
             (!(bannedUsers.length === 0)) || <p className="text-center font-bold text-theme-med-gray">No banned users!</p> 

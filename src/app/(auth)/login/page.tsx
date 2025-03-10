@@ -84,19 +84,19 @@ export default function Login() {
           width={181}
           height={87}
           alt="focus-logo"
-          className="fixed ml-[60px] mt-6"
+          className="fixed ml-14 mt-6"
         />
       </a>
       <div className="flex flex-col items-center justify-center">
         <div className="mx-[24vw] mt-[16vh] flex flex-col items-center justify-center">
           <Image src={focusLogo} width={295} height={145} alt="focus-logo" />
-          <div className="relative mt-3">
+          <div className="relative mt-3 w-full">
             <i className="absolute left-4 top-1/2 -translate-y-1/2 transform text-gray-500">
               <Image src={user} width={17} alt="user-icon" />
             </i>
 
             <input
-              className="placeholder-med-gray text-med-gray h-[51px] w-[295px] rounded-sm border-[1px] border-gray-300 pl-10 pr-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="placeholder-med-gray text-med-gray py-3 w-full rounded-sm border border-gray-300 pl-10 pr-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
               type="email"
               placeholder="Email"
               value={email}
@@ -105,12 +105,12 @@ export default function Login() {
             />
           </div>
 
-          <div className="relative mt-4">
+          <div className="relative mt-4 w-full">
             <i className="absolute left-4 top-1/2 -translate-y-1/2 transform text-gray-500">
               <Image src={lock} width={17} alt="lock-icon" />
             </i>
             <input
-              className="placeholder-med-gray text-med-gray h-[51px] w-[295px] rounded-sm border-[1px] border-gray-300 pl-10 pr-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="placeholder-med-gray text-med-gray py-3 w-full rounded-sm border border-gray-300 pl-10 pr-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
               type="password"
               placeholder="Password"
               value={password}
@@ -128,7 +128,7 @@ export default function Login() {
           <button
             onClick={handleLogin}
             disabled={isLoading}
-            className={`mt-5 h-[51px] w-[295px] rounded-sm bg-theme-blue text-white ${
+            className={`mt-5 py-3 w-full rounded-sm bg-theme-blue text-white ${
               isLoading ? "bg-opacity-80" : "hover:bg-opacity-80"
             }`}
           >
@@ -137,18 +137,18 @@ export default function Login() {
 
           <button
             onClick={handleSalesforceLogin}
-            className="mt-2 h-[51px] w-[295px] rounded-sm bg-green-500 text-white"
+            className="mt-2 py-3 w-full rounded-sm bg-green-500 text-white"
           >
             Log in with Salesforce
           </button>
           <a
             href="https://focus-ga.my.site.com/s/login/ForgotPassword"
-            className="mt-8 w-[295px] text-left"
+            className="mt-8 w-full text-left"
           >
             Forgot your password?
           </a>
         </div>
-        <div className="mx-[17vw] mb-0 mt-12 flex flex-row items-center justify-between">
+        <div className="mb-0 mt-12 flex flex-row items-center justify-between">
           <div className="w-[33%] text-base">
             <p>770-234-9111 (phone)</p>
             <p>770-234-9131 (fax)</p>
@@ -158,7 +158,7 @@ export default function Login() {
             <p className="mt-2">inquiry@focus-ga.org</p>
           </div>
           <div className="flex w-[33%] flex-row items-center justify-center">
-            <div className="h-[85px] w-[85px]">
+            <div>
               <Image
                 src={transparencyBadge}
                 width={85}
@@ -170,7 +170,7 @@ export default function Login() {
           <div className="flex w-[33%] flex-col items-center justify-center">
             <button
               onClick={() => router.push("https://focus-ga.org/donate/")}
-              className="h-[57px] w-[171px] rounded-sm bg-theme-blue text-white hover:bg-opacity-80"
+              className="py-3 px-16 rounded-sm bg-theme-blue text-white hover:bg-opacity-80"
             >
               Donate
             </button>
@@ -183,8 +183,7 @@ export default function Login() {
                 src={netlify_logo}
                 height={40}
                 alt="focus-logo"
-                className="fixed ml-[60px] mt-6"
-                style={{ left: "0px", bottom: "40px"}}
+                className="fixed ml-14 mt-6 left-0 bottom-10"
               />
             </p>
           </div>

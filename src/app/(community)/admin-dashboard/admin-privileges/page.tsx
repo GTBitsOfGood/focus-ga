@@ -1,6 +1,6 @@
 "use client";
 import { User } from "@/utils/types/user";
-import { FormEvent, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import {
   getUserByEmail,
@@ -148,8 +148,8 @@ export default function AdminPrivileges() {
         ))}
       </div>
           {loading &&
-            <div className="flex items-center justify-center mt-8">
-              <LoaderCircle className="animate-spin" size={32} color="#475CC6"/>
+            <div className="flex items-center justify-center mt-8 text-theme-blue">
+              <LoaderCircle className="animate-spin" size={32} />
             </div>
           }
     </div>
