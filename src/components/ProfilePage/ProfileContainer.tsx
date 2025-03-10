@@ -95,12 +95,12 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
       <div className="mx-16 my-4 text-lg text-theme-gray">
         <BackButton />
       </div>
-      <div className="mx-16 my-4">
-        <div className="mx-14 mt-8">
+      <div className="sm:mx-16 my-4">
+        <div className="sm:mx-14 mt-8">
           <div className="mb-6 flex flex-row items-start justify-between">
             <div className="flex flex-row space-x-6">
               <div
-                className={`flex h-24 w-24 items-center justify-center rounded-full bg-${user.profileColor} relative`}
+                className={`h-24 w-24 items-center justify-center rounded-full bg-${user.profileColor} relative hidden sm:flex`}
               >
                 <span className="select-none text-6xl font-medium text-black">
                   {user.lastName.charAt(0).toUpperCase()}
@@ -111,7 +111,7 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
               </div>
               <div className="flex flex-col justify-center">
                 <div className="flex items-center gap-1">
-                  <p className="text-2xl font-bold">{user.lastName} Family</p>
+                  <p className="text-2xl font-bold break-words">{user.lastName} Family</p>
                   {user.isAdmin && (
                     <>
                       <ShieldCheck className="admin-icon-profile h-8 w-8 fill-theme-gray text-white" />
@@ -124,7 +124,7 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
                     </>
                   )}
                 </div>
-                <p className="text-lg font-normal">{user.email}</p>
+                <p className="text-lg font-normal break-words">{user.email}</p>
               </div>
             </div>
             {user._id === currUser._id ? (
@@ -132,7 +132,7 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
                 onClick={() => setIsModalOpen(true)}
                 className="bg-light-gray rounded-lg px-4 py-2 text-lg font-bold text-theme-gray transition hover:bg-zinc-300"
               >
-                <div className="flex flex-row items-center space-x-2.5">
+                <div className="flex flex-row items-center space-x-2.5 sm:inline-flex hidden">
                   <Pencil color="#636363" className="h-6 w-6" />
                   <p>Edit</p>
                 </div>
