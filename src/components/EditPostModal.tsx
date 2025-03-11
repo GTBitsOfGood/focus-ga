@@ -234,6 +234,7 @@ export default function EditPostModal(props: EditPostModalProps) {
                 editorRef={editorRef}
                 markdown={content}
                 handleEditorChange={handleEditorChange}
+                disableURL={false}
               />
             </Suspense>
           </div>
