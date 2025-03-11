@@ -3,6 +3,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ChevronDown, ChevronUp } from "lucide-react";
 import cn from "classnames";
 import { MAX_FILTER_AGE, MIN_FILTER_AGE } from "@/utils/consts";
+import { Tooltip } from "react-tooltip";
+import { Info } from "lucide-react";
 
 type AgeFilterProps = {
   label: string;
@@ -123,7 +125,14 @@ export default function RangeSliderComponent({
 
       <PopoverContent className="w-64 rounded-md p-6 pb-0 shadow-lg">
         <div className="space-y-3">
-          <h3 className="text-base font-medium text-gray-700">Age Range</h3>
+          <div className="flex row">
+            <h3 className="text-base font-medium text-gray-700">Age Range</h3> 
+            <Tooltip anchorSelect=".age-filter" className="absolute text-xs right-4 max-w-48 text-center">
+              Age is calculated from the birthdate of the user&apos;s child/children.
+            </Tooltip>
+            <Info className="ml-2 age-filter h-4 w-4" color="#374151"/>
+            
+          </div>
           <div className="relative h-16 pt-6">
             <div 
               ref={sliderRef}
