@@ -57,14 +57,14 @@ export default function CommentInputComponent(
         placeholder={placeholder}
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && value !== "" && handleSubmit()}
+        onKeyDown={(e) => e.key === "Enter" && value.trim() !== "" && handleSubmit()}
         ref={inputRef}
         onBlur={onBlur}
       />
-      <button onClick={handleSubmit}>
+      <button onClick={handleSubmit} disabled={ value.trim() === ""}>
         <PaperAirplaneIcon
           className="mr-4 h-6 w-6"
-          color={value === "" ? "#C7C7C7" : "#475CC6"}
+          color={value.trim() === "" ? "#C7C7C7" : "#475CC6"}
         />
       </button>
     </div>
