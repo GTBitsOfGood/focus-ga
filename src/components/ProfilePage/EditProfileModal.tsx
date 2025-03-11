@@ -278,7 +278,7 @@ export default function EditProfileModal( props: EditProfileModalProps ) {
           </label>
           <div className={`mt-1 rounded-lg h-full border`}>
             <Suspense fallback={null}>
-              <EditorComp editorRef={editorRef} markdown={userData.bio} handleEditorChange={handleEditorChange} />
+              <EditorComp editorRef={editorRef} markdown={userData.bio} handleEditorChange={handleEditorChange} disableURL={true}/>
             </Suspense>
           </div>
         </div>

@@ -8,13 +8,14 @@ interface EditorProps {
   markdown: string;
   editorRef?: React.MutableRefObject<MDXEditorMethods | null>;
   handleEditorChange: (text: string) => void;
+  disableURL: boolean;
 }
 
 /**
  * Extend this Component further with the necessary plugins or props you need.
  * proxying the ref is necessary. Next.js dynamically imported components don't support refs.
  */
-const Editor: FC<EditorProps> = ({ markdown, editorRef, handleEditorChange }) => {
+const Editor: FC<EditorProps> = ({ markdown, editorRef, handleEditorChange, disableURL }) => {
   
   return (
     <div className="h-full flex flex-col overflow-auto border border-gray-300 pb-2 rounded-md">
@@ -29,7 +30,7 @@ const Editor: FC<EditorProps> = ({ markdown, editorRef, handleEditorChange }) =>
               <>
                 <UndoRedo />
                 <BoldItalicUnderlineToggles />
-                <CreateLink />
+                {!disableURL && <CreateLink />}
                 <ListsToggle options={["bullet", "number"]}/>
               </>
             ),

@@ -213,10 +213,12 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
               )}
             </div>
             <div className="flex flex-row gap-2">
-              {user.bio ? <p className="text-lg font-semibold">Bio:</p> : <></>}
-              <p className="overflow-hidden break-words text-lg text-theme-gray">
+              <p className="text-lg font-semibold">Bio:</p>
+              {user.bio ? <p className="overflow-hidden break-words text-lg text-theme-gray">
                 {user.bio}
-              </p>
+              </p> : <p className="overflow-hidden break-words text-lg text-theme-gray">
+                N/A
+              </p>}
             </div>
           </div>
           <Separator className="my-6 bg-theme-gray" />
