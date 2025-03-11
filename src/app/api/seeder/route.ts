@@ -80,10 +80,10 @@ const DISABILITIES = [
   "Down Syndrome",
   "Fragile X Syndrome",
 ];
-const NUM_USERS = 8;
+const NUM_USERS = 10;
 const MAX_CHILD_AGE = 20;
 const MAX_CHILD_BIRTHDATES_PER_USER = 10;
-const MAX_POSTS_PER_USER = 5;
+const MAX_POSTS_PER_USER = 8;
 const MAX_USER_DISABILITIES = 3;
 const MAX_COMMENTS_PER_POST = 5;
 const MAX_LIKED_SAVED_POSTS_PER_USER = 10;
