@@ -28,7 +28,7 @@ export default function UserIcon({ user, clickable, boldText }: UserIconProps) {
       <span className={cn(
         { 'font-bold text-black': boldText },
       )}>
-        {user ? `${user.lastName} Family` : 'Deleted User'}
+        {user ? `${user.lastName} Family (${user.city}, GA)` : 'Deleted User'}
       </span>
     </div>
   );
