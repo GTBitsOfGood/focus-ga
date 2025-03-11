@@ -284,7 +284,7 @@ export default function CommentComponent(props: CommentComponentProps) {
                       </button>
                     </div>
                   ))}
-                  {onDeleteClick && (
+                  {!clickable && (
                     <DropdownMenu modal={false}>
                       <DropdownMenuTrigger>
                         <Ellipsis className="h-5 w-5" />
@@ -297,11 +297,13 @@ export default function CommentComponent(props: CommentComponentProps) {
                             Edit
                           </DropdownMenuItem>
                         ) : null}
-                        <DropdownMenuItem
-                          onClick={() => setShowDeleteDialog(true)}
-                        >
-                          Delete
-                        </DropdownMenuItem>
+                        {user?._id === comment.author?._id || user?.isAdmin ? (
+                          <DropdownMenuItem
+                            onClick={() => setShowDeleteDialog(true)}
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        ) : null}
                         {user?._id !== comment.author?._id ? (
                           <DropdownMenuItem
                             onClick={() => setShowReportModal(true)}
