@@ -424,6 +424,7 @@ export const GEORGIA_CITIES = [
   'Mountain City',
   'Mountain Park',
   'Musella',
+  'N/A',
   'Nahunta',
   'Nashville',
   'Naylor',
