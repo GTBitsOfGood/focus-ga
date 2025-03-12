@@ -16,7 +16,7 @@ export const sessionOptions: SessionOptions = {
   cookieOptions: {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production", // Only send cookie over HTTPS in production.
-    sameSite: "lax", // Adjust to 'strict' or 'none' as needed for your app.
+    sameSite: "strict", // Adjust to 'strict' or 'none' as needed for your app.
     path: "/", // Makes the cookie available across your entire site.
     // domain: process.env.COOKIE_DOMAIN, // Uncomment and set this if you have a custom domain.
     maxAge: 60 * 60 * 24 * 7, // Cookie expires in 7 days.
