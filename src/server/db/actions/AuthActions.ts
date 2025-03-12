@@ -57,7 +57,9 @@ export async function loginUser(email: string, uid: string) {
 
   session.userId = user._id.toString();
   session.isLoggedIn = true;
+  console.log("START: ", session)
   await session.save();
+  console.log("LAST: ", session)
 
   return { success: true, isFirstTime };
 }
