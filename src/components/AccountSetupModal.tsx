@@ -120,7 +120,9 @@ export default function AccountSetupModal({
           }}
         >
           <div className="mb-4">
-            <label className="mb-2 block">Location</label>
+            <label className="mb-2 block">
+              Location<span className="ml-1 text-red-500">*</span>
+            </label>
             <DropdownWithDisplay
               items={[...GEORGIA_CITIES]
                 .sort()
