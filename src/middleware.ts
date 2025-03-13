@@ -14,13 +14,21 @@ import { cookies } from "next/headers";
  */
 export async function middleware(request: NextRequest) {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
-  
+  const isSetupPage = request.nextUrl.pathname === "/" && request.nextUrl.searchParams.has("setup");
   if (request.nextUrl.pathname === "/login" && session.isLoggedIn) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
   if (request.nextUrl.pathname !== "/login" && !session.isLoggedIn) {
     return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  if (session.isLoggedIn && !session.setupComplete && !isSetupPage) {
+    return NextResponse.redirect(new URL("/?setup=true", request.url));
+  }
+
+  if (session.setupComplete && isSetupPage) {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();

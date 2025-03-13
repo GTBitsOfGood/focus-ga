@@ -13,6 +13,9 @@ import { revalidatePath } from "next/cache";
 import PostModel from "../models/PostModel";
 import { PostDeletionDurations } from "@/utils/consts";
 import { getAuthenticatedUser } from "./AuthActions";
+import { cookies } from "next/headers";
+import { getIronSession } from "iron-session";
+import { SessionData, sessionOptions } from "@/lib/session";
 
 /**
  * Creates a new user in the database.
@@ -164,4 +167,49 @@ export async function editUser(
 
   revalidatePath(`/family/${id}`);
   return updatedUser.toObject();
+}
+
+/**
+ * Saves the setup information for an authenticated user.
+ * @param location - The location of the user.
+ * @param children - An array of child objects containing birthdates and disabilities.
+ * @throws Will throw an error if saving the setup information fails.
+ * @returns A success object if the setup information is saved successfully.
+ */
+
+export async function saveSetupUser(location: string, children: any[]) {
+  const session = await getIronSession<SessionData>(
+    cookies(),
+    sessionOptions,
+  );
+
+  if (!location) {
+    throw new Error("Please enter a location.");
+  }
+
+  try {
+    const authenticatedUser = await getAuthenticatedUser();
+    const childBirthdates = children
+      .map((child) => child.dob)
+      .filter((dob) => dob !== null) as Date[];
+    const childDisabilities = children
+      .flatMap((child) => child.disability || [])
+      .map((disability) => disability._id);
+
+    if (authenticatedUser) {
+      await editUser(authenticatedUser._id, {
+        city: location,
+        childBirthdates,
+        childDisabilities,
+      });
+    }
+
+    session.setupComplete = true;
+    await session.save();
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to save:", error);
+    throw new Error("Failed to save information. Please try again.");
+  }
 }

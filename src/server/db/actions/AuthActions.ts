@@ -65,6 +65,7 @@ export async function loginUser(email: string, uid: string) {
 
   session.userId = user._id.toString();
   session.isLoggedIn = true;
+  session.setupComplete = user.city !== "N/A"; 
   await session.save();
 
   return { success: true, isFirstTime };

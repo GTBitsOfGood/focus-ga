@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { editUser } from "@/server/db/actions/UserActions";
+import { editUser, saveSetupUser } from "@/server/db/actions/UserActions";
 import { getDisabilities } from "@/server/db/actions/DisabilityActions";
 import { Disability } from "@/utils/types/disability";
 import { getAuthenticatedUser } from "@/server/db/actions/AuthActions";
@@ -80,36 +80,22 @@ export default function AccountSetupModal({
     });
   };
 
-  const handleSave = async () => {
-    if (!location) {
+  const onSave = async () => {
+    try {
+      await saveSetupUser(location, children);
+      closeModal();
+    } catch (error) {
       toast({
         title: "Failed to save",
-        description: "Please enter a location.",
+        description:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred",
         variant: "destructive",
       });
-      return;
-    }
-    try {
-      const authenticatedUser = await getAuthenticatedUser();
-      const childBirthdates = children
-        .map((child) => child.dob)
-        .filter((dob) => dob !== null) as Date[];
-      const childDisabilities = children
-        .flatMap((child) => child.disability || []) //since it's currently an array of arrays
-        .map((disability) => disability._id);
-
-      if (authenticatedUser) {
-        await editUser(authenticatedUser._id, {
-          city: location,
-          childBirthdates,
-          childDisabilities,
-        });
-      }
-      closeModal();
-    } catch {
-      setError("Failed to save information. Please try again.");
     }
   };
+
   if (!isOpen) return null;
 
   return (
@@ -243,7 +229,7 @@ export default function AccountSetupModal({
 
         <footer className="flex flex-col items-center space-y-2 bg-white px-6 py-2 pb-6">
           <button
-            onClick={handleSave}
+            onClick={onSave}
             className="w-full rounded-lg bg-theme-blue px-6 py-2 text-white transition hover:opacity-90"
           >
             Save
