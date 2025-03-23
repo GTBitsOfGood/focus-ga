@@ -16,7 +16,6 @@ export default function Login() {
   const router = useRouter();
   const [credentialsError, setCredentialsError] = useState(false);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
@@ -101,23 +100,10 @@ export default function Login() {
             />
           </div>
 
-          <div className="relative mt-4 w-full">
-            <i className="absolute left-4 top-1/2 -translate-y-1/2 transform text-gray-500">
-              <Image src={lock} width={17} alt="lock-icon" />
-            </i>
-            <input
-              className="placeholder-med-gray text-med-gray w-full rounded-sm border border-gray-300 py-3 pl-10 pr-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={handleKeyDown} // Submit on "Enter"
-            />
-          </div>
 
           {credentialsError && (
             <p className="mt-2 text-sm text-red-500">
-              Invalid username or password. Please try again.
+              Invalid email. Please try again.
             </p>
           )}
 

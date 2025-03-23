@@ -24,7 +24,7 @@ export default function Disclaimer(props: DisclaimerProps) {
           <div className="mb-4 flex justify-center">
             <div className="text-2xl font-bold text-black">Disclaimer:</div>
           </div>
-          <p className="text-lg text-gray-600 text-center">
+          <div className="text-lg text-gray-600 text-center">
           <p><strong>    Welcome to the FOCUS Community Page!</strong> <br />This forum is designed to allow FOCUS families to share ideas, resources, 
                 and questions with one another. Families are encouraged to make posts, 
                 comment, and share anything related to their current journey.
@@ -36,7 +36,7 @@ export default function Disclaimer(props: DisclaimerProps) {
                 Any such posts can be reported, and the admin may take necessary action.
                 Thank you for your understanding.
             </p>
-          </p>
+          </div>
         </div>
         <div className="mt-4 flex justify-center">
           <button
