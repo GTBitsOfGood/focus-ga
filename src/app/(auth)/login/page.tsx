@@ -74,17 +74,21 @@ export default function Login() {
   return (
     <div className="min-h-screen w-screen bg-[url('/Portal_Background.avif')] bg-cover">
       <a href="https://focus-ga.org/">
-        <Image
-          src={focusLogo}
-          width={181}
-          height={87}
-          alt="focus-logo"
-          className="fixed ml-14 mt-6 hidden sm:block"
-        />
+      <Image
+        src={focusLogo}
+        width={181}
+        alt="focus-logo"
+        className="h-auto fixed ml-14 mt-6 hidden sm:block"
+      />
       </a>
       <div className="flex flex-col items-center justify-center">
         <div className="mx-[24vw] mt-[16vh] flex flex-col items-center justify-center">
-          <Image src={focusLogo} width={295} height={145} alt="focus-logo" />
+        <Image
+          src={focusLogo}
+          width={295}
+          alt="focus-logo"
+          className="h-auto"
+        />
           <div className="relative mt-3 w-full">
             <i className="absolute left-4 top-1/2 -translate-y-1/2 transform text-gray-500">
               <Image src={user} width={17} alt="user-icon" />
@@ -163,8 +167,8 @@ export default function Login() {
               <Image
                 src={netlify_logo}
                 height={30}
-                alt="focus-logo"
-                className="fixed right-6 top-6 ml-14 mt-6 hidden sm:block"
+                alt="netlify-logo"
+                className="fixed right-6 top-6 ml-14 mt-6 hidden sm:block w-auto"
               />
             </p>
           </div>
