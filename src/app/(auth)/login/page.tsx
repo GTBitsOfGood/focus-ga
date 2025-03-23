@@ -24,11 +24,7 @@ export default function Login() {
     try {
       const result = await loginUser(email, email);
       if (result.success) {
-        const authenticatedUser = await getAuthenticatedUser();
-        if (
-          result.isFirstTime &&
-          authenticatedUser?.childDisabilities.length === 0
-        ) {
+        if (result.isFirstTime) {
           router.push("/?setup=true");
         } else {
           router.push("/");
@@ -84,7 +80,7 @@ export default function Login() {
           width={181}
           height={87}
           alt="focus-logo"
-          className="fixed ml-14 mt-6 sm:block hidden"
+          className="fixed ml-14 mt-6 hidden sm:block"
         />
       </a>
       <div className="flex flex-col items-center justify-center">
@@ -96,7 +92,7 @@ export default function Login() {
             </i>
 
             <input
-              className="placeholder-med-gray text-med-gray py-3 w-full rounded-sm border border-gray-300 pl-10 pr-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="placeholder-med-gray text-med-gray w-full rounded-sm border border-gray-300 py-3 pl-10 pr-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
               type="email"
               placeholder="Email"
               value={email}
@@ -110,7 +106,7 @@ export default function Login() {
               <Image src={lock} width={17} alt="lock-icon" />
             </i>
             <input
-              className="placeholder-med-gray text-med-gray py-3 w-full rounded-sm border border-gray-300 pl-10 pr-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="placeholder-med-gray text-med-gray w-full rounded-sm border border-gray-300 py-3 pl-10 pr-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
               type="password"
               placeholder="Password"
               value={password}
@@ -128,7 +124,7 @@ export default function Login() {
           <button
             onClick={handleLogin}
             disabled={isLoading}
-            className={`mt-5 py-3 w-full rounded-sm bg-theme-blue text-white ${
+            className={`mt-5 w-full rounded-sm bg-theme-blue py-3 text-white ${
               isLoading ? "bg-opacity-80" : "hover:bg-opacity-80"
             }`}
           >
@@ -137,7 +133,7 @@ export default function Login() {
 
           <button
             onClick={handleSalesforceLogin}
-            className="mt-2 py-3 w-full rounded-sm bg-green-500 text-white"
+            className="mt-2 w-full rounded-sm bg-green-500 py-3 text-white"
           >
             Log in with Salesforce
           </button>
@@ -170,7 +166,7 @@ export default function Login() {
           <div className="flex w-[33%] flex-col items-center justify-center">
             <button
               onClick={() => router.push("https://focus-ga.org/donate/")}
-              className="py-3 px-16 rounded-sm bg-theme-blue text-white hover:bg-opacity-80 sm:block hidden"
+              className="hidden rounded-sm bg-theme-blue px-16 py-3 text-white hover:bg-opacity-80 sm:block"
             >
               Donate
             </button>
@@ -178,12 +174,11 @@ export default function Login() {
               FOCUS (Families of Children Under Stress) is a 501(c)(3) nonprofit
               organization with tax ID&nbsp;
               <span className="whitespace-nowrap">#58-1577602</span>.
-              
               <Image
                 src={netlify_logo}
                 height={30}
                 alt="focus-logo"
-                className="fixed ml-14 mt-6 right-6 top-6 sm:block hidden"
+                className="fixed right-6 top-6 ml-14 mt-6 hidden sm:block"
               />
             </p>
           </div>

@@ -3,11 +3,13 @@ import { SessionOptions } from "iron-session";
 export interface SessionData {
   userId: string;
   isLoggedIn: boolean;
+  setupComplete?: boolean;
 }
 
 export const defaultSession: SessionData = {
   userId: "",
   isLoggedIn: false,
+  setupComplete: false,
 };
 
 export const sessionOptions: SessionOptions = {

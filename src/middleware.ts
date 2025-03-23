@@ -13,29 +13,25 @@ import { cookies } from "next/headers";
  * @returns A Next.js response object that either redirects or allows the request to proceed.
  */
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  if (pathname.startsWith('/api/auth/callback/saml')) {
-    const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-forwarded-host', 'focus-ga.netlify.app');
-    requestHeaders.set('origin', 'focus-ga.netlify.app');
-    return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
-  } else {
-    const session = await getIronSession<SessionData>(cookies(), sessionOptions);
-  
-    if (request.nextUrl.pathname === "/login" && session.isLoggedIn) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
-
-    if (request.nextUrl.pathname !== "/login" && !session.isLoggedIn) {
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
-
-    return NextResponse.next();
+  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+  const isSetupPage = request.nextUrl.pathname === "/" && request.nextUrl.searchParams.has("setup");
+  if (request.nextUrl.pathname === "/login" && session.isLoggedIn) {
+    return NextResponse.redirect(new URL("/", request.url));
   }
+
+  if (request.nextUrl.pathname !== "/login" && !session.isLoggedIn) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  if (session.isLoggedIn && !session.setupComplete && !isSetupPage) {
+    return NextResponse.redirect(new URL("/?setup=true", request.url));
+  }
+
+  if (session.setupComplete && isSetupPage) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
