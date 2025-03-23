@@ -417,12 +417,14 @@ export default function PostComponent(props: PostComponentProps) {
         </p>
       </div>
       <div className="flex items-center justify-between py-0.5">
-        <h2 className="flex gap-4 text-2xl font-bold text-black">
+        <h2 className="flex gap-4 text-2xl font-bold text-black break-all">
           {title}
           {isPrivate && (
             <span className="flex items-center gap-2 text-sm font-normal text-theme-gray">
-              <VisiblityIcon />
-              <p>Private</p>
+              <div className="w-5 h-5">
+                <img src="/eyeslash.svg" alt="Eye Slash Icon" className="w-full h-full grayscale opacity-60" />
+              </div>
+              <p className="whitespace-nowrap mr-2">Private</p>
             </span>
           )}
         </h2>

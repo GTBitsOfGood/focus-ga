@@ -7,6 +7,9 @@ import { createUser, getPopulatedUser, getUserBySalesforceUid } from './UserActi
 import { PopulatedUser } from '@/utils/types/user';
 import { redirect } from 'next/navigation';
 import { generateRandomColor } from '@/utils/consts';
+import dbConnect from "@/server/db/dbConnect";
+import DisabilityModel from "@/server/db/models/DisabilityModel";
+import { createDisability } from "@/server/db/actions/DisabilityActions";
 
 /**
  * Retrieves the authenticated user from the session.
@@ -42,6 +45,7 @@ export async function getAuthenticatedUser(refresh = false): Promise<PopulatedUs
  * @returns A promise that resolves to an object indicating the success of the login operation.
  */
 export async function loginUser(email: string, uid: string) {
+  ping();
   let user = await getUserBySalesforceUid(uid);
   let isFirstTime = false
   if (!user) {
@@ -81,4 +85,22 @@ export async function signOut() {
   
   session.destroy();
   return { success: true };
+}
+
+/**
+ * Pings the database by creating and immediately deleting a dummy disability object.
+ * @returns A response indicating the success of the operation.
+ */
+export async function ping() {
+  try {
+    await dbConnect();
+    const dummyDisability = await createDisability({ name: "Ping" });
+    console.log("Successfully created dummy disability:", dummyDisability._id);
+    await DisabilityModel.findByIdAndDelete(dummyDisability._id);
+    console.log("Successfully deleted dummy disability:", dummyDisability._id);
+  } catch (error) {
+    console.error("Error during database ping:", error);
+    throw error;
+  }
+  return { status: 200, message: "Database ping successful" };
 }

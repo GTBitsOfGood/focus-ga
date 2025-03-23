@@ -47,12 +47,12 @@ export default function Login() {
     const request = `
     <samlp:AuthnRequest
       xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"
-      ID="http://localhost:3000/"
+      ID="https://focus-ga.netlify.app/"
       Version="2.0"
       IssueInstant="${new Date().toISOString()}"
     >
       <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
-        http://localhost:3000/
+        https://focus-ga.netlify.app/
       </saml:Issuer>
       <samlp:NameIDPolicy
         Format="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"

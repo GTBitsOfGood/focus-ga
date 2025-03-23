@@ -29,7 +29,7 @@ export default function UserIcon({ user, clickable, boldText }: UserIconProps) {
         { 'font-bold text-black': boldText },
       )}>
         {user 
-          ? `${user.lastName.charAt(0).toUpperCase()}${user.lastName.slice(1)} Family (${user.city}, GA)` 
+          ? `${user.lastName.charAt(0).toUpperCase()}${user.lastName.slice(1)} Family • ${user.city}, GA` 
           : 'Deleted User'}
       </span>
     </div>
