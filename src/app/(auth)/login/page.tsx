@@ -129,7 +129,7 @@ export default function Login() {
           </button>
           <a
             href="https://focus-ga.my.site.com/s/login/ForgotPassword"
-            className="mt-8 w-full text-left"
+            className="mt-6 w-full text-left underline hover:font-bold"
           >
             Forgot your password?
           </a>
