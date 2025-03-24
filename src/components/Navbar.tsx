@@ -78,28 +78,30 @@ export default function Navbar({ openModal }: NavbarProps) {
           <SquarePen className="h-6 w-6" color="#ffffff" />
         </button>
       )}
-      <div className="relative flex-grow">
-        <input
-          type="text"
-          placeholder="Search for a post"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="h-11 w-full rounded-2xl bg-theme-lightgray px-12 tracking-wide focus:outline-none"
-        />
-        <Search
-          strokeWidth={3}
-          className="absolute left-4 top-1/2 -translate-y-1/2 transform text-gray-500"
-        />
-        {inputValue.length ? (
-          <button
-            onClick={() => setSearchTerm("")}
-            className="absolute right-4 top-1/2 -translate-y-1/2 transform text-gray-500"
-          >
-            <X strokeWidth={2} />
-          </button>
-        ) : null}
-      </div>
+      {!pathname.includes("family") &&
+        <div className="relative flex-grow">
+          <input
+            type="text"
+            placeholder="Search for a post"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="h-11 w-full rounded-2xl bg-theme-lightgray px-12 tracking-wide focus:outline-none"
+          />
+          <Search
+            strokeWidth={3}
+            className="absolute left-4 top-1/2 -translate-y-1/2 transform text-gray-500"
+          />
+          {inputValue.length ? (
+            <button
+              onClick={() => setSearchTerm("")}
+              className="absolute right-4 top-1/2 -translate-y-1/2 transform text-gray-500"
+            >
+              <X strokeWidth={2} />
+            </button>
+          ) : null}
+        </div> }
+        {pathname.includes("family") && <div className="w-full"/>}
 
       {/* Create Post*/}
       {!user.isBanned && (
