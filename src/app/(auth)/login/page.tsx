@@ -134,7 +134,7 @@ export default function Login() {
             Forgot your password?
           </a>
         </div>
-        <div className="mb-0 mt-12 flex flex-row items-center justify-between">
+        <div className="mb-0 mt-12 flex flex-row items-center justify-between sm:p-0 p-10">
           <div className="w-[33%] text-base">
             <p>770-234-9111 (phone)</p>
             <p>770-234-9131 (fax)</p>
