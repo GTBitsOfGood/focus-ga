@@ -98,9 +98,9 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
       <div className="sm:mx-16 my-4">
         <div className="sm:mx-14 mt-8">
           <div className="mb-6 flex flex-row items-start justify-between">
-            <div className="flex flex-row space-x-6">
+            <div className="flex sm:flex-row sm:space-x-6 flex-col sm:mx-0 mx-auto">
               <div
-                className={`h-24 w-24 items-center justify-center rounded-full bg-${user.profileColor} relative hidden sm:flex`}
+                className={`h-24 w-24 items-center justify-center rounded-full bg-${user.profileColor} relative flex mx-auto sm:mx-0`}
               >
                 <span className="select-none text-6xl font-medium text-black">
                   {user.lastName.charAt(0).toUpperCase()}
@@ -109,9 +109,11 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
                   <ColorPicker handleColorPick={handleColorPick} />
                 )}
               </div>
-              <div className="flex flex-col justify-center">
-                <div className="flex items-center gap-1">
-                  <p className="text-2xl font-bold break-words">{user.lastName.charAt(0).toUpperCase() + user.lastName.slice(1)} Family</p>
+              <div className="flex flex-col sm:items-start items-center justify-center sm:text-start text-center mx-auto">
+                <div className="flex items-center sm:justify-start justify-center gap-1">
+                  <p className="text-2xl font-bold break-words">
+                    {user.lastName.charAt(0).toUpperCase() + user.lastName.slice(1)} Family
+                  </p>
                   {user.isAdmin && (
                     <>
                       <ShieldCheck className="admin-icon-profile h-8 w-8 fill-theme-gray text-white" />
@@ -124,7 +126,10 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
                     </>
                   )}
                 </div>
-                <p className="text-lg font-normal break-words">{user.email}</p>
+
+                <p className="text-lg font-normal break-words w-3/4 sm:w-auto">
+                  {user.email}
+                </p>
               </div>
             </div>
             {user._id === currUser._id ? (
@@ -192,7 +197,7 @@ export default function ProfileContainer({ user }: ProfileContainerProps) {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-          <div>
+          <div className="sm:mx-0 mx-auto w-fit">
             <p className="mb-4 text-lg">
               <span className="font-semibold">Location: </span>
               <span className="ml-1 text-theme-gray">{user.city}, GA</span>

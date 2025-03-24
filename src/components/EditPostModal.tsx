@@ -338,10 +338,10 @@ export default function EditPostModal(props: EditPostModalProps) {
               }}
               disabled={isSubmitting}
               className={cn(
-                "inline-flex min-w-20 items-center justify-center gap-2.5 rounded-lg bg-theme-blue px-4 py-2",
+                "inline-flex min-w-20 items-center justify-center gap-2.5 rounded-lg  bg-theme-blue px-4 py-2",
                 {
                   "cursor-not-allowed opacity-50": isSubmitting,
-                  "transition hover:bg-blue-900": !isSubmitting,
+                  "transition  hover:opacity-90": !isSubmitting,
                 },
               )}
             >

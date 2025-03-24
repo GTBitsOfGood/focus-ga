@@ -104,7 +104,7 @@ export default function Navbar({ openModal }: NavbarProps) {
       {/* Create Post*/}
       {!user.isBanned && (
         <button
-          className="hidden sm:inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-theme-blue px-4 py-2 text-base font-semibold text-white transition hover:opacity-90"
+          className="hidden sm:inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 py-2 text-base font-semibold text-white transition bg-theme-blue hover:opacity-90"
           onClick={() => openModal()}
         >
           <SquarePen className="h-6 w-6" color="#ffffff" />Create Post

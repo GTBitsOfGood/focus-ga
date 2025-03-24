@@ -72,7 +72,7 @@ export default function ConfirmationDialog({
               handleConfirm();
               if (resolveReports) resolveReports();
             }}
-            className="inline-flex w-24 items-center justify-center gap-2.5 rounded-lg bg-theme-blue px-4 py-2"
+            className="inline-flex w-24 items-center justify-center gap-2.5 rounded-lg bg-theme-blue hover:opacity-90 px-4 py-2"
           >
             <div className="font-bold text-white">
               {loading ? dialogText.loading : dialogText.button}

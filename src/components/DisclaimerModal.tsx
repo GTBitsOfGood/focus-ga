@@ -31,7 +31,8 @@ export default function Disclaimer(props: DisclaimerProps) {
     comment, and share anything related to their journey.
     We kindly ask that you keep discussions civil and treat other FOCUS families 
     with respect. FOCUS does not condone harmful or inappropriate content; any 
-    such posts can be reported, and the admin may take necessary action.
+    such posts can be reported, and the admin may take necessary action. If
+    necessary, posts can be edited or deleted by admin.
   </p>
 
   <p className="text-lg text-gray-600">
