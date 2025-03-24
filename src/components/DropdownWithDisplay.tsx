@@ -4,6 +4,7 @@ import { Command, CommandInput, CommandList, CommandGroup, CommandItem, CommandE
 import { ChevronDown, ChevronUp, Check } from "lucide-react";
 import Tag from "./Tag";
 import { useToast } from "@/hooks/use-toast";
+import { FixedSizeList as List } from "react-window";
 
 type DropdownWithDisplayProps<T extends { _id: string }> = {
   items: T[];
@@ -88,22 +89,33 @@ const DropdownWithDisplay = <T extends { _id: string }>({
         <PopoverContent align="start" className="p-2">
           <Command>
             <CommandInput placeholder={`Search ${typeDropdown}`} />
-            <CommandList>
+            <CommandList className="overflow-y-hidden">
               <CommandEmpty>No {typeDropdown} found.</CommandEmpty>
-              <CommandGroup>
-                {items.map((item, index) => (
-                  <CommandItem
-                    key={index}
-                    value={item[displayKey] as string}
-                    onSelect={() => onItemToggle(item)}
-                    className="flex items-center p-2 cursor-pointer rounded-lg hover:bg-gray-100 h-10"
-                  >
-                    {selectedItems.some(selectedItem => selectedItem._id === item._id) && (
-                      <Check className="w-4 h-4 mr-2" color="#7D7E82" />
-                    )}
-                    {item[displayKey] as string}
-                  </CommandItem>
-                ))}
+              <CommandGroup className="overflow-y-hidden">
+                <List
+                  height={300} // Total height of the dropdown content area
+                  itemCount={items.length}
+                  itemSize={40} // Height of each item (adjust if needed)
+                  width="100%"
+                >
+                  {({ index, style }) => {
+                    const item = items[index];
+                    const isSelected = selectedItems.some(selectedItem => selectedItem._id === item._id);
+                    
+                    return (
+                      <div style={style} key={item._id}>
+                        <CommandItem
+                          value={item[displayKey] as string}
+                          onSelect={() => onItemToggle(item)}
+                          className="flex items-center p-2 cursor-pointer rounded-lg hover:bg-gray-100 h-10"
+                        >
+                          {isSelected && <Check className="w-4 h-4 mr-2" color="#7D7E82" />}
+                          {item[displayKey] as string}
+                        </CommandItem>
+                      </div>
+                    );
+                  }}
+                </List>
               </CommandGroup>
             </CommandList>
           </Command>

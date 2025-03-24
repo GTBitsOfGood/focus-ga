@@ -20,24 +20,24 @@ export default function Disclaimer(props: DisclaimerProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="relative z-50 flex sm:max-h-[80vh] max-w-3xl flex-col rounded-lg bg-white p-8 shadow-lg">
-        <div className="mb-4 w-full">
-          <div className="mb-4 flex justify-center">
-            <div className="text-2xl font-bold text-black">Disclaimer:</div>
-          </div>
-          <div className="text-lg text-gray-600 text-center">
-          <p><strong>    Welcome to the FOCUS Community Page!</strong> <br />This forum is designed to allow FOCUS families to share ideas, resources, 
-                and questions with one another. Families are encouraged to make posts, 
-                comment, and share anything related to their current journey.
+      <div className="p-4 w-full space-y-4 text-center">
+  <h2 className="text-2xl font-bold text-gray-800">
+    Welcome to the FOCUS Community Page!
+  </h2>
 
+  <p className="text-lg text-gray-600">
+    This forum is designed to allow FOCUS families to share ideas, resources, 
+    and questions. Families are encouraged to make posts, 
+    comment, and share anything related to their journey.
+    We kindly ask that you keep discussions civil and treat other FOCUS families 
+    with respect. FOCUS does not condone harmful or inappropriate content; any 
+    such posts can be reported, and the admin may take necessary action.
+  </p>
 
-                We kindly ask that you keep discussions civil and treat other FOCUS families 
-                with respect. Since the Community Page is an open forum, <u>FOCUS does not 
-                condone harmful or inappropriate content</u>. 
-                Any such posts can be reported, and the admin may take necessary action.
-                Thank you for your understanding.
-            </p>
-          </div>
-        </div>
+  <p className="text-lg text-gray-600">
+    Thank you for your understanding.
+  </p>
+</div>
         <div className="mt-4 flex justify-center">
           <button
             onClick={() => {
