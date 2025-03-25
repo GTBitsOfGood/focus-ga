@@ -215,7 +215,6 @@ export async function saveSetupUser(location: string, children: any[]) {
 
     return { success: true };
   } catch (error) {
-    console.error("Failed to save:", error);
     throw new Error("Failed to save information. Please try again.");
   }
 }
