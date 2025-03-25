@@ -187,6 +187,12 @@ export async function saveSetupUser(location: string, children: any[]) {
     throw new Error("Please enter a location.");
   }
 
+  const now = new Date();
+  const futureDob = children.find((child) => child.dob && new Date(child.dob) > now);
+  if (futureDob) {
+    throw new Error("Date of birth cannot be in the future.");
+  }
+
   try {
     const authenticatedUser = await getAuthenticatedUser();
     const childBirthdates = children
