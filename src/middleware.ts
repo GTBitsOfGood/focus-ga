@@ -19,10 +19,8 @@ export async function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   const origin = requestHeaders.get('origin');
 
-  console.log(request.url)
   if (origin && origin.includes('https://focus-ga.my.site.com')) {
     requestHeaders.set('x-forwarded-host', 'https://focus-ga.my.site.com');
-    console.log("inside")
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
   
