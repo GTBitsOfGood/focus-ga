@@ -19,10 +19,13 @@ export async function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   const origin = requestHeaders.get('origin');
 
+  console.log("outside")
   if (origin && origin.includes('focus-ga.my.site.com')) {
     requestHeaders.set('x-forwarded-host', 'focus-ga.my.site.com');
+    console.log("inside")
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
+  
 
   if (request.nextUrl.pathname === "/login" && session.isLoggedIn) {
     return NextResponse.redirect(new URL("/", request.url));
