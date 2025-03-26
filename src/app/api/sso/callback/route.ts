@@ -10,7 +10,13 @@ if (!SALESFORCE_CERTIFICATE && process.env["NODE_ENV"] === "production")
 
 const isDevelopment = process.env["NODE_ENV"] !== "production";
 
-export async function POST(request : NextRequest) {
+export async function POST(request: NextRequest) {
+  // Print all headers
+  // @ts-ignore
+for (const [key, value] of request.headers.entries()) {
+  console.log(`${key}: ${value}`);
+}
+
   const formData = await request.formData();
   const encodedSAMLResp = formData.get('SAMLResponse') as string;
 
