@@ -15,6 +15,15 @@ import { cookies } from "next/headers";
 export async function middleware(request: NextRequest) {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
   const isSetupPage = request.nextUrl.pathname === "/" && request.nextUrl.searchParams.has("setup");
+
+  const requestHeaders = new Headers(request.headers);
+  const origin = requestHeaders.get('origin');
+
+  if (origin && origin.includes('focus-ga.my.site.com')) {
+    requestHeaders.set('x-forwarded-host', 'focus-ga.my.site.com');
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
   if (request.nextUrl.pathname === "/login" && session.isLoggedIn) {
     return NextResponse.redirect(new URL("/", request.url));
   }
