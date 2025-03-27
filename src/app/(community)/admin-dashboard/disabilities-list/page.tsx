@@ -32,16 +32,20 @@ export default function DisabilitiesList() {
 
   const handleAddDisability = async () => {
     if (!disabilityName.trim()) return;
-    
+
     // Check if disability already exists
-    if (disabilities.some(d => d.name.toLowerCase() === disabilityName.toLowerCase())) {
+    if (
+      disabilities.some(
+        (d) => d.name.toLowerCase() === disabilityName.toLowerCase(),
+      )
+    ) {
       toast({
         title: "Duplicate disability",
         description: `${disabilityName} already exists in the list.`,
       });
       return;
     }
-  
+
     try {
       const newDisability = await createDisability({ name: disabilityName });
       setDisabilities((prev) =>
@@ -64,10 +68,13 @@ export default function DisabilitiesList() {
   const handleDeleteDisability = async (id: string) => {
     try {
       await deleteDisability(id);
-      setDisabilities((prev) => prev.filter((d) => d._id !== id));
-      toast({
-        title: "Disability deleted",
-        description: `${disabilityName} has been deleted as a disability.`,
+      setDisabilities((prev) => {
+        const deletedDisability = prev.find((d) => d._id === id);
+        toast({
+          title: "Disability deleted",
+          description: `${deletedDisability?.name} has been deleted as a disability.`,
+        });
+        return prev.filter((d) => d._id !== id);
       });
     } catch (error) {
       toast({
@@ -86,7 +93,7 @@ export default function DisabilitiesList() {
     (acc: Record<string, Disability[]>, disability) => {
       const firstLetter = disability.name[0].toUpperCase();
       const category = /^[A-Z]$/.test(firstLetter) ? firstLetter : "Other";
-      
+
       if (!acc[category]) {
         acc[category] = [];
       }
@@ -101,7 +108,7 @@ export default function DisabilitiesList() {
     if (b === "Other") return -1;
     return a.localeCompare(b);
   });
-  
+
   return (
     <div className="mt-9 max-w-[78%] md:ml-10">
       <h1 className="mb-7 text-2xl font-bold">Disabilities List</h1>
