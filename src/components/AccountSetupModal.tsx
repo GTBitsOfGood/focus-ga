@@ -121,7 +121,7 @@ export default function AccountSetupModal({
         >
           <div className="mb-4">
             <label className="mb-2 block">
-              Location<span className="ml-1 text-red-500">*</span>
+              Select one location:<span className="ml-1 text-red-500">*</span>
             </label>
             <DropdownWithDisplay
               items={[...GEORGIA_CITIES]
@@ -130,13 +130,13 @@ export default function AccountSetupModal({
               selectedItems={
                 location ? [{ _id: location, name: location }] : []
               }
-              onChange={(selectedItems) =>
-                setLocation(selectedItems[0]?.name || "")
-              }
+              onChange={(selectedItems) => {
+                const newSelection = selectedItems[selectedItems.length - 1];
+                setLocation(newSelection?.name || "");
+              }}
               displayKey="name"
               placeholder="Search for location"
               typeDropdown="locations"
-              //maxSelectionCount={1}
             />
           </div>
 
@@ -146,7 +146,7 @@ export default function AccountSetupModal({
                 <div key={index} className="mb-2 flex flex-col gap-2">
                   <div className="flex items-center justify-between">
                     <label className="mb-2 block">
-                      FOCUS Child {index + 1}{" "}
+                      FOCUS Child {index + 1}:
                     </label>
                     {index === 0 ? (
                       <button

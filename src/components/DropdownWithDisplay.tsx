@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Command, CommandInput, CommandList, CommandGroup, CommandItem, CommandEmpty } from "@/components/ui/command";
 import { ChevronDown, ChevronUp, Check } from "lucide-react";
@@ -10,7 +10,7 @@ type DropdownWithDisplayProps<T extends { _id: string }> = {
   items: T[];
   selectedItems: T[];
   onChange: (items: T[]) => void;
-  displayKey: keyof T;  // The key to display in the dropdown (e.g., "name")
+  displayKey: keyof T;
   placeholder?: string;
   maxSelectionCount?: number;
   typeDropdown: string;
@@ -26,13 +26,20 @@ const DropdownWithDisplay = <T extends { _id: string }>({
   typeDropdown
 }: DropdownWithDisplayProps<T>) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
 
+  const filteredItems = useMemo(() => {
+    return items.filter((item) =>
+      (item[displayKey] as string).toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [items, searchQuery, displayKey]);
+
   function onItemToggle(item: T) {
-    const hasItem = selectedItems.some(selectedItem => selectedItem._id.toString() === item._id.toString());
+    const hasItem = selectedItems.some(selectedItem => selectedItem._id === item._id);
     let newItems;
     if (hasItem) {
-      newItems = selectedItems.filter(i => i._id.toString() !== item._id.toString());
+      newItems = selectedItems.filter(i => i._id !== item._id);
     } else if (selectedItems.length < maxSelectionCount) {
       newItems = [...selectedItems, item];
     } else {
@@ -59,9 +66,8 @@ const DropdownWithDisplay = <T extends { _id: string }>({
             <div className="flex flex-wrap -mt-2 items-center w-full">
               {selectedItems.length === 0 ? (
                 <div className="text-neutral-400 text-sm font-normal mt-2">
-                    {placeholder} {maxSelectionCount === Infinity ? "" : ` (up to ${maxSelectionCount})`}
+                  {placeholder} {maxSelectionCount === Infinity ? "" : ` (up to ${maxSelectionCount})`}
                 </div>
-            
               ) : (
                 selectedItems.map((item, index) => (
                   <div
@@ -72,7 +78,7 @@ const DropdownWithDisplay = <T extends { _id: string }>({
                     }}
                     className="mr-2 mt-2"
                   >
-                    <Tag text={item[displayKey] as string} isClickable={true}/>
+                    <Tag text={item[displayKey] as string} isClickable={true} />
                   </div>
                 ))
               )}
@@ -86,37 +92,48 @@ const DropdownWithDisplay = <T extends { _id: string }>({
           </div>
         </PopoverTrigger>
 
-        <PopoverContent align="start" className="p-2">
+        <PopoverContent align="start" className="p-2 w-[300px]">
           <Command>
-            <CommandInput placeholder={`Search ${typeDropdown}`} />
+            <CommandInput
+              placeholder={`Search ${typeDropdown}`}
+              value={searchQuery}
+              onValueChange={setSearchQuery}
+            />
             <CommandList className="overflow-y-hidden">
-              <CommandEmpty>No {typeDropdown} found.</CommandEmpty>
-              <CommandGroup className="overflow-y-hidden">
-                <List
-                  height={300} // Total height of the dropdown content area
-                  itemCount={items.length}
-                  itemSize={40} // Height of each item (adjust if needed)
-                  width="100%"
-                >
-                  {({ index, style }) => {
-                    const item = items[index];
-                    const isSelected = selectedItems.some(selectedItem => selectedItem._id === item._id);
-                    
-                    return (
-                      <div style={style} key={item._id}>
-                        <CommandItem
-                          value={item[displayKey] as string}
-                          onSelect={() => onItemToggle(item)}
-                          className="flex items-center p-2 cursor-pointer rounded-lg hover:bg-gray-100 h-10"
-                        >
-                          {isSelected && <Check className="w-4 h-4 mr-2" color="#7D7E82" />}
-                          {item[displayKey] as string}
-                        </CommandItem>
-                      </div>
-                    );
-                  }}
-                </List>
-              </CommandGroup>
+              {filteredItems.length === 0 ? (
+                <CommandEmpty>No {typeDropdown} found.</CommandEmpty>
+              ) : (
+                <CommandGroup className="overflow-y-hidden">
+                  <List
+                    height={300}
+                    itemCount={filteredItems.length}
+                    itemSize={40}
+                    width="100%"
+                  >
+                    {({ index, style }) => {
+                      const item = filteredItems[index];
+                      const isSelected = selectedItems.some(
+                        selectedItem => selectedItem._id === item._id
+                      );
+
+                      return (
+                        <div style={style} key={item._id}>
+                          <CommandItem
+                            value={item[displayKey] as string}
+                            onSelect={() => onItemToggle(item)}
+                            className="flex items-center p-2 cursor-pointer rounded-lg hover:bg-gray-100 h-10"
+                          >
+                            {isSelected && (
+                              <Check className="w-4 h-4 mr-2" color="#7D7E82" />
+                            )}
+                            {item[displayKey] as string}
+                          </CommandItem>
+                        </div>
+                      );
+                    }}
+                  </List>
+                </CommandGroup>
+              )}
             </CommandList>
           </Command>
         </PopoverContent>
