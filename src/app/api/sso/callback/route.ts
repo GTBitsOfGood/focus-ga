@@ -11,43 +11,17 @@ if (!SALESFORCE_CERTIFICATE && process.env["NODE_ENV"] === "production")
 const isDevelopment = process.env["NODE_ENV"] !== "production";
 
 export async function POST(request: NextRequest) {
-  // 🚨 Log request headers
-  if (isDevelopment) {
-    console.log("🔍 Request Headers:");
-    request.headers.forEach((value, key) => {
-      console.log(`${key}: ${value}`);
-    });
-  }
+  
+  
 
   const formData = await request.formData();
   const encodedSAMLResp = formData.get('SAMLResponse') as string;
 
-  // 🚨 Log the raw encoded SAML response
-  if (isDevelopment) {
-    console.log("🔐 Encoded SAML Response:");
-    console.log(encodedSAMLResp);
-  }
-
   let result;
   try {
     const decodedSAMLResp = decodeSAMLResponse(encodedSAMLResp ?? "");
-
-    // 🚨 Log decoded SAML Response
-    if (isDevelopment) {
-      console.log("📜 Decoded SAML Response:");
-      console.log(decodedSAMLResp);
-    }
-
     result = validateSAMLResponse(decodedSAMLResp, SALESFORCE_CERTIFICATE ?? "");
-
-    // 🚨 Log validation result
-    if (isDevelopment) {
-      console.log("✅ SAML Validation Result:");
-      console.log(result);
-    }
-
   } catch (e) {
-    console.error("❌ Error processing SAML response:", e);
     result = { error: "Error processing SAML response" };
   }
 
@@ -62,12 +36,6 @@ export async function POST(request: NextRequest) {
 
   if (userLogin.success) {
     const authenticatedUser = await getAuthenticatedUser();
-
-    if (isDevelopment) {
-      console.log("👤 Authenticated User:");
-      console.log(authenticatedUser);
-    }
-
     if (
       userLogin.isFirstTime &&
       authenticatedUser?.childDisabilities.length === 0
@@ -75,6 +43,5 @@ export async function POST(request: NextRequest) {
       return redirect('/?setup=true');
     }
   }
-
   return redirect('/');
 }
