@@ -18,6 +18,7 @@ import { containsProfanity } from "@/utils/profanityChecker";
 import { revalidatePath } from "next/cache";
 import { getAuthenticatedUser } from "./AuthActions";
 import { updateAllReportedContentResolved } from "./ReportActions";
+import sanitizeHtml from "sanitize-html";
 
 /**
  * Creates a new comment in the database.
@@ -34,12 +35,16 @@ export async function createComment(comment: CommentInput): Promise<Comment> {
     const profanities = await getAllProfanities();
     const profanityWords = profanities.map((profanity) => profanity.name);
 
-    const flaggedWordsFound = containsProfanity(comment.content, profanityWords);
+    const flaggedWordsFound = containsProfanity(
+      comment.content,
+      profanityWords,
+    );
     const isFlagged = flaggedWordsFound.length > 0;
-    
+
     const parsedData = commentSchema.parse({
       ...comment,
       isFlagged,
+      content: sanitizeHtml(comment.content),
     });
     const createdComment = await CommentModel.create([parsedData], { session });
 
@@ -115,6 +120,9 @@ export async function editComment(
     const parsedData = commentSchema.partial().parse(comment);
     if (comment.editedByAdmin !== undefined) {
       parsedData.editedByAdmin = comment.editedByAdmin;
+    }
+    if (comment.content) {
+      parsedData.content = sanitizeHtml(comment.content);
     }
     const currentUser = await getAuthenticatedUser();
     if (parsedData.editedByAdmin && !currentUser?.isAdmin) {

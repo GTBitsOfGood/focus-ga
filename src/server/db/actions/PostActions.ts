@@ -28,6 +28,7 @@ import dayjs from "dayjs";
 import { PostDeletionDurations } from "@/utils/consts";
 import { AgeSelection } from "@/utils/types/common";
 import { getAuthenticatedUser } from "./AuthActions";
+import sanitizeHtml from "sanitize-html";
 
 // A MongoDB aggregation pipeline that efficiently populates a post
 type PipelineArgs = {
@@ -182,8 +183,12 @@ function postPopulationPipeline({
                   $match: {
                     $or: [
                       // No childBirthdates - include these posts
-                      ...(age.maxAge === 100 ? [{ "ageData.childBirthdates": { $exists: false } },
-                        { "ageData.childBirthdates": { $size: 0 } }] : []),
+                      ...(age.maxAge === 100
+                        ? [
+                            { "ageData.childBirthdates": { $exists: false } },
+                            { "ageData.childBirthdates": { $size: 0 } },
+                          ]
+                        : []),
 
                       // Has at least one child in the age range
                       {
@@ -347,7 +352,9 @@ export async function createPost(post: PostInput): Promise<Post> {
 
   const contentProfanities = containsProfanity(post.content, profanityWords);
   const titleProfanities = containsProfanity(post.title, profanityWords);
-  const uniqueProfanities = Array.from(new Set([...contentProfanities, ...titleProfanities]));
+  const uniqueProfanities = Array.from(
+    new Set([...contentProfanities, ...titleProfanities]),
+  );
 
   const isFlagged = uniqueProfanities.length > 0;
 
@@ -355,6 +362,8 @@ export async function createPost(post: PostInput): Promise<Post> {
 
   const validatedPost = postSchema.parse({
     ...post,
+    title: sanitizeHtml(post.title),
+    content: sanitizeHtml(post.content),
     expiresAt: dayjs(post.date)
       .add(
         PostDeletionDurations[
@@ -372,7 +381,6 @@ export async function createPost(post: PostInput): Promise<Post> {
   return createdPost.toObject();
 }
 
-
 /**
  * Validates a post to determine if it will be flagged based on its content and title.
  * @param post - The post input data.
@@ -386,11 +394,12 @@ export async function validatePost(post: PostInput): Promise<string[]> {
 
   const contentProfanities = containsProfanity(post.content, profanityWords);
   const titleProfanities = containsProfanity(post.title, profanityWords);
-  const uniqueProfanities = Array.from(new Set([...contentProfanities, ...titleProfanities]));
+  const uniqueProfanities = Array.from(
+    new Set([...contentProfanities, ...titleProfanities]),
+  );
 
   return uniqueProfanities;
 }
-
 
 /**
  * Pins a post in the database.
@@ -638,6 +647,12 @@ export async function editPost(
   const validatedPost = editPostSchema.parse(post);
   if (post.editedByAdmin !== undefined) {
     validatedPost.editedByAdmin = post.editedByAdmin;
+  }
+  if (post.title) {
+    validatedPost.title = sanitizeHtml(post.title);
+  }
+  if (post.content) {
+    validatedPost.content = sanitizeHtml(post.content);
   }
   const updatedPost = await PostModel.findByIdAndUpdate(id, validatedPost, {
     new: true,
