@@ -23,6 +23,9 @@ export async function createDisability(
   try {
     await dbConnect();
     const currentUser = await getAuthenticatedUser();
+    if (!currentUser || !currentUser.isAdmin) {
+      throw new Error("Only admins can create disabilities");
+    }
     const parsedData = disabilitySchema.parse(disability);
     const createdDisability = await DisabilityModel.create(parsedData);
     return createdDisability.toObject();
@@ -40,6 +43,10 @@ export async function createDisability(
 export async function getDisabilities(): Promise<Disability[]> {
   try {
     await dbConnect();
+    const currentUser = await getAuthenticatedUser();
+    if (!currentUser) {
+      throw new Error("User does not have access");
+    }
     const disabilities = await DisabilityModel.find();
     return disabilities.map((disability) => disability.toObject());
   } catch (error) {
@@ -57,6 +64,10 @@ export async function getDisabilities(): Promise<Disability[]> {
 export async function getDisability(id: String): Promise<Disability> {
   try {
     await dbConnect();
+    const currentUser = await getAuthenticatedUser();
+    if (!currentUser) {
+      throw new Error("User does not have access");
+    }
     const disability = await DisabilityModel.findById(id);
     return disability.toObject();
   } catch (error) {

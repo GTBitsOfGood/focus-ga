@@ -39,6 +39,11 @@ export async function createUser(user: UserInput): Promise<User> {
 export async function getUser(id: string): Promise<User> {
   await dbConnect();
 
+  const currentUser = getAuthenticatedUser();
+  if (!currentUser) {
+    throw new Error("User does not have access");
+  }
+
   const user = await UserModel.findById(id);
   if (!user) {
     throw new Error("User not found");
@@ -55,6 +60,10 @@ export async function getUser(id: string): Promise<User> {
 export async function getUserByEmail(email: string): Promise<User> {
   await dbConnect();
 
+  const currentUser = getAuthenticatedUser();
+  if (!currentUser) {
+    throw new Error("User does not have access");
+  }
   const user = await UserModel.findOne({
     email: { $regex: new RegExp("^" + email + "$", "i") },
   });
@@ -69,6 +78,10 @@ export async function getUserBySalesforceUid(
 ): Promise<User> {
   await dbConnect();
 
+  const currentUser = getAuthenticatedUser();
+  if (!currentUser) {
+    throw new Error("User does not have access");
+  }
   const user = await UserModel.findOne({ salesforce_uid: salesforceUid });
   if (!user) {
     return user;
@@ -84,6 +97,11 @@ export async function getUserBySalesforceUid(
  */
 export async function getPopulatedUser(id: string): Promise<PopulatedUser> {
   await dbConnect();
+
+  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+  if (!session.isLoggedIn) {
+    throw new Error("User does not have access");
+  }
 
   const user = await UserModel.findById(id)
     .populate({ path: "childDisabilities", model: "Disability" })
@@ -102,8 +120,12 @@ export async function getPopulatedUser(id: string): Promise<PopulatedUser> {
 export async function getAdminUsers(): Promise<User[]> {
   await dbConnect();
 
-  const adminUsers = await UserModel.find({ isAdmin: true });
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || !currentUser.isAdmin) {
+    throw new Error("User does not have access");
+  }
 
+  const adminUsers = await UserModel.find({ isAdmin: true });
   return !adminUsers || adminUsers.length === 0
     ? []
     : adminUsers.map((user) => user.toObject());
@@ -116,6 +138,10 @@ export async function getAdminUsers(): Promise<User[]> {
 export async function getBannedUsers(): Promise<User[]> {
   await dbConnect();
 
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || !currentUser.isAdmin) {
+    throw new Error("User does not have access");
+  }
   const bannedUsers = await UserModel.find({ isBanned: true });
 
   return !bannedUsers || bannedUsers.length === 0
@@ -139,7 +165,11 @@ export async function editUser(
   const parsedData = editUserSchema.parse(updated);
 
   const currentUser = await getAuthenticatedUser();
-  if ((parsedData.isBanned) && !currentUser?.isAdmin) { // TODO: uncomment after demoing prod -- || parsedData.isAdmin
+  if (!currentUser || (currentUser._id !== id && !currentUser.isAdmin)) {
+    throw new Error("User does not have access");
+  }
+  if (parsedData.isBanned && !currentUser?.isAdmin) {
+    // TODO: uncomment after demoing prod -- || parsedData.isAdmin
     throw new Error("Only admins can update a user's banned or admin status");
   }
 
@@ -178,23 +208,26 @@ export async function editUser(
  */
 
 export async function saveSetupUser(location: string, children: any[]) {
-  const session = await getIronSession<SessionData>(
-    cookies(),
-    sessionOptions,
-  );
+  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
   if (!location) {
     throw new Error("Please enter a location.");
   }
 
   const now = new Date();
-  const futureDob = children.find((child) => child.dob && new Date(child.dob) > now);
+  const futureDob = children.find(
+    (child) => child.dob && new Date(child.dob) > now,
+  );
   if (futureDob) {
     throw new Error("Date of birth cannot be in the future.");
   }
 
+  const authenticatedUser = await getAuthenticatedUser();
+  if (!authenticatedUser) {
+    throw new Error("User does not have access");
+  }
+
   try {
-    const authenticatedUser = await getAuthenticatedUser();
     const childBirthdates = children
       .map((child) => child.dob)
       .filter((dob) => dob !== null) as Date[];
@@ -202,13 +235,11 @@ export async function saveSetupUser(location: string, children: any[]) {
       .flatMap((child) => child.disability || [])
       .map((disability) => disability._id);
 
-    if (authenticatedUser) {
-      await editUser(authenticatedUser._id, {
-        city: location,
-        childBirthdates,
-        childDisabilities,
-      });
-    }
+    await editUser(authenticatedUser._id, {
+      city: location,
+      childBirthdates,
+      childDisabilities,
+    });
 
     session.setupComplete = true;
     await session.save();

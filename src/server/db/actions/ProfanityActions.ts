@@ -16,8 +16,8 @@ export async function addProfanity(
 ): Promise<Profanity> {
   await dbConnect();
   const currentUser = await getAuthenticatedUser();
-  if (!currentUser?.isAdmin) {
-    throw new Error("Only admins can add profanities");
+  if (!currentUser || !currentUser.isAdmin) {
+    throw new Error("User does not have access");
   }
   let trimmed: ProfanityInput = {
     name: profanity.name.trim(),
@@ -29,8 +29,8 @@ export async function addProfanity(
 export async function deleteProfanity(id: string): Promise<Profanity | null> {
   await dbConnect();
   const currentUser = await getAuthenticatedUser();
-  if (!currentUser?.isAdmin) {
-    throw new Error("Only admins can delete profanities");
+  if (!currentUser || !currentUser.isAdmin) {
+    throw new Error("User does not have access");
   }
   let deletedDisability = await ProfanityModel.findByIdAndDelete(id);
   return deletedDisability.toObject();
