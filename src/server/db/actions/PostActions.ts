@@ -182,8 +182,12 @@ function postPopulationPipeline({
                   $match: {
                     $or: [
                       // No childBirthdates - include these posts
-                      ...(age.maxAge === 100 ? [{ "ageData.childBirthdates": { $exists: false } },
-                        { "ageData.childBirthdates": { $size: 0 } }] : []),
+                      ...(age.maxAge === 100
+                        ? [
+                            { "ageData.childBirthdates": { $exists: false } },
+                            { "ageData.childBirthdates": { $size: 0 } },
+                          ]
+                        : []),
 
                       // Has at least one child in the age range
                       {
@@ -308,6 +312,7 @@ function postPopulationPipeline({
                           $eq: ["$post", { $toObjectId: "$$postId" }],
                         },
                         { $eq: ["$isFlagged", false] },
+                        { $eq: ["$isDeleted", false] },
                       ],
                     },
                   },
@@ -347,7 +352,9 @@ export async function createPost(post: PostInput): Promise<Post> {
 
   const contentProfanities = containsProfanity(post.content, profanityWords);
   const titleProfanities = containsProfanity(post.title, profanityWords);
-  const uniqueProfanities = Array.from(new Set([...contentProfanities, ...titleProfanities]));
+  const uniqueProfanities = Array.from(
+    new Set([...contentProfanities, ...titleProfanities]),
+  );
 
   const isFlagged = uniqueProfanities.length > 0;
 
@@ -372,7 +379,6 @@ export async function createPost(post: PostInput): Promise<Post> {
   return createdPost.toObject();
 }
 
-
 /**
  * Validates a post to determine if it will be flagged based on its content and title.
  * @param post - The post input data.
@@ -386,11 +392,12 @@ export async function validatePost(post: PostInput): Promise<string[]> {
 
   const contentProfanities = containsProfanity(post.content, profanityWords);
   const titleProfanities = containsProfanity(post.title, profanityWords);
-  const uniqueProfanities = Array.from(new Set([...contentProfanities, ...titleProfanities]));
+  const uniqueProfanities = Array.from(
+    new Set([...contentProfanities, ...titleProfanities]),
+  );
 
   return uniqueProfanities;
 }
-
 
 /**
  * Pins a post in the database.
