@@ -37,7 +37,11 @@ export async function getReports(): Promise<Report[]> {
 export async function hasUnresolvedReports(): Promise<boolean> {
   try {
     await dbConnect();
-    const count = await ReportModel.countDocuments({ isResolved: "false" });
+    const count = await ReportModel.countDocuments({
+      isResolved: "false",
+      contentType: { $in: ["Post", "Comment"] },
+    });
+    console.log("APPLE", count);
     return count > 0;
   } catch (error) {
     console.error("Failed to retrieve reports:", error);
