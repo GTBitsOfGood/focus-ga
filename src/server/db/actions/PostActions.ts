@@ -644,7 +644,6 @@ export async function getPopulatedPost(
   );
   const post = aggregationResult[0].posts[0];
   if (!post) {
-    console.log("here: " + id);
     throw new Error("Post not found");
   }
   return post;
