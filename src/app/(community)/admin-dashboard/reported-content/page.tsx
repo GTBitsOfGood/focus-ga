@@ -119,7 +119,7 @@ export default function ReportedContent() {
               );
             })}
             {loading ? (
-              <div className="mt-8 flex items-center justify-center text-theme-blue">
+              <div className="mt-8 flex items-center justify-center text-theme-blue ">
                 <LoaderCircle className="animate-spin" size={32} />
               </div>
             ) : (
