@@ -18,6 +18,9 @@ export default function ReportedContent() {
   const { user } = useUser();
   const [loading, setLoading] = useState(true);
 
+  const hasUnresolvedPosts = posts.length !== 0;
+  const hasUnresolvedComments = comments.length != 0;
+
   useEffect(() => {
     fetchUnresolvedReports();
   }, []);
@@ -86,11 +89,26 @@ export default function ReportedContent() {
       <h1 className="mb-7 text-2xl font-bold">Reported Content</h1>
       <Tabs defaultValue="posts" onValueChange={fetchUnresolvedReports}>
         <TabsList className="mb-4">
-          <TabsTrigger size="large" className="text-lg font-semibold" value="posts">
+          <TabsTrigger
+            size="large"
+            className="flex gap-3 text-lg font-semibold"
+            value="posts"
+          >
             Reported Posts
+            {hasUnresolvedPosts && (
+              <span className="aspect-square h-2 w-2 rounded-full bg-red-500"></span>
+            )}
           </TabsTrigger>
-          <TabsTrigger size="large" className="text-lg font-semibold" value="comments">
+
+          <TabsTrigger
+            size="large"
+            className="flex gap-3 text-lg font-semibold"
+            value="comments"
+          >
             Reported Comments
+            {hasUnresolvedComments && (
+              <span className="aspect-square h-2 w-2 rounded-full bg-red-500"></span>
+            )}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="posts">
@@ -102,13 +120,10 @@ export default function ReportedContent() {
             })}
             {loading ? (
               <div className="mt-8 flex items-center justify-center text-theme-blue">
-                <LoaderCircle
-                  className="animate-spin"
-                  size={32}
-                />
+                <LoaderCircle className="animate-spin" size={32} />
               </div>
             ) : (
-              posts.length != 0 || (
+              hasUnresolvedPosts || (
                 <p className="text-center font-bold text-theme-med-gray">
                   No reported posts!
                 </p>
@@ -127,13 +142,10 @@ export default function ReportedContent() {
             })}
             {loading ? (
               <div className="mt-8 flex items-center justify-center text-theme-blue">
-                <LoaderCircle
-                  className="animate-spin"
-                  size={32}
-                />
+                <LoaderCircle className="animate-spin" size={32} />
               </div>
             ) : (
-              comments.length != 0 || (
+              hasUnresolvedComments || (
                 <p className="text-center font-bold text-theme-med-gray">
                   No reported comments!
                 </p>
