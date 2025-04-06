@@ -11,9 +11,9 @@ export default function RedoSetupConfirmModal({
 }: RedoSetupConfirmModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="w-96 max-w-3xl rounded-lg bg-white p-6 shadow-lg">
+      <div className="w-1/3 max-w-3xl rounded-lg bg-white p-8 shadow-lg">
         <h2 className="text-lg font-bold">Redo Setup</h2>
-        <p className="mt-2 text-gray-800">
+        <p className="mt-2 text-theme-gray">
           Are you sure you want to redo your profile setup? This will
           permanently delete your child, disabilities, and location information.
           You must set up your account again to continue using the community
