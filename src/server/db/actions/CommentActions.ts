@@ -18,6 +18,7 @@ import { containsProfanity } from "@/utils/profanityChecker";
 import { revalidatePath } from "next/cache";
 import { getAuthenticatedUser } from "./AuthActions";
 import { updateAllReportedContentResolved } from "./ReportActions";
+import sanitizeHtml from "sanitize-html";
 
 /**
  * Creates a new comment in the database.
@@ -49,6 +50,7 @@ export async function createComment(comment: CommentInput): Promise<Comment> {
     const parsedData = commentSchema.parse({
       ...comment,
       isFlagged,
+      content: sanitizeHtml(comment.content),
     });
     const createdComment = await CommentModel.create([parsedData], { session });
 
@@ -135,7 +137,9 @@ export async function editComment(
     if (comment.editedByAdmin !== undefined) {
       parsedData.editedByAdmin = comment.editedByAdmin;
     }
-
+    if (comment.content) {
+      parsedData.content = sanitizeHtml(comment.content);
+    }
     const currentUser = await getAuthenticatedUser();
     if (!currentUser) {
       throw new Error("User does not have access");

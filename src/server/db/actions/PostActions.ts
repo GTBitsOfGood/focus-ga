@@ -28,6 +28,7 @@ import dayjs from "dayjs";
 import { PostDeletionDurations } from "@/utils/consts";
 import { AgeSelection } from "@/utils/types/common";
 import { getAuthenticatedUser } from "./AuthActions";
+import sanitizeHtml from "sanitize-html";
 
 // A MongoDB aggregation pipeline that efficiently populates a post
 type PipelineArgs = {
@@ -312,6 +313,7 @@ function postPopulationPipeline({
                           $eq: ["$post", { $toObjectId: "$$postId" }],
                         },
                         { $eq: ["$isFlagged", false] },
+                        { $eq: ["$isDeleted", false] },
                       ],
                     },
                   },
@@ -366,6 +368,8 @@ export async function createPost(post: PostInput): Promise<Post> {
 
   const validatedPost = postSchema.parse({
     ...post,
+    title: sanitizeHtml(post.title),
+    content: sanitizeHtml(post.content),
     expiresAt: dayjs(post.date)
       .add(
         PostDeletionDurations[
@@ -679,6 +683,12 @@ export async function editPost(
   const validatedPost = editPostSchema.parse(post);
   if (post.editedByAdmin !== undefined) {
     validatedPost.editedByAdmin = post.editedByAdmin;
+  }
+  if (post.title) {
+    validatedPost.title = sanitizeHtml(post.title);
+  }
+  if (post.content) {
+    validatedPost.content = sanitizeHtml(post.content);
   }
   const updatedPost = await PostModel.findByIdAndUpdate(id, validatedPost, {
     new: true,

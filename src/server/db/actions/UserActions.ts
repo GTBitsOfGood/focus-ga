@@ -249,3 +249,29 @@ export async function saveSetupUser(location: string, children: any[]) {
     throw new Error("Failed to save information. Please try again.");
   }
 }
+
+/**
+* Resets the setup information for an authenticated user.
+* @throws Will throw an error if resetting the user data fails.
+* @returns A success object if the user data is reset successfully.
+*/
+
+export const resetUserData = async () => {
+  try {
+    const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+    session.setupComplete = false; 
+    session.save(); 
+    const authenticatedUser = await getAuthenticatedUser();
+    if (authenticatedUser) {
+      await editUser(authenticatedUser._id, {
+        city: "N/A",
+        childBirthdates: [],
+        childDisabilities: [],
+      });
+    }
+
+    return { success: true };
+  } catch (error) {
+    throw new Error("Failed to reset user data.");
+  }
+};

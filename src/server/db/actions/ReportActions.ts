@@ -45,7 +45,10 @@ export async function hasUnresolvedReports(): Promise<boolean> {
     if (!currentUser || !currentUser.isAdmin) {
       throw new Error("User does not have access");
     }
-    const count = await ReportModel.countDocuments({ isResolved: "false" });
+    const count = await ReportModel.countDocuments({
+      isResolved: "false",
+      contentType: { $in: ["Post", "Comment"] },
+    });
     return count > 0;
   } catch (error) {
     console.error("Failed to retrieve reports:", error);
