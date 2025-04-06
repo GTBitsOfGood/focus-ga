@@ -30,8 +30,14 @@ export async function createComment(comment: CommentInput): Promise<Comment> {
   const session = await mongoose.startSession();
   session.startTransaction();
 
+  await dbConnect();
+
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || currentUser.isBanned) {
+    throw new Error("User does not have access");
+  }
+
   try {
-    await dbConnect();
     const profanities = await getAllProfanities();
     const profanityWords = profanities.map((profanity) => profanity.name);
 
@@ -75,8 +81,13 @@ export async function deleteComment(id: string): Promise<void> {
   const session = await mongoose.startSession();
   session.startTransaction();
 
+  await dbConnect();
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser) {
+    throw new Error("User does not have access");
+  }
+
   try {
-    await dbConnect();
     const comment = await CommentModel.findByIdAndUpdate(id, {
       content: "[deleted]",
       author: new mongoose.Types.ObjectId("000000000000000000000000"),
@@ -84,6 +95,10 @@ export async function deleteComment(id: string): Promise<void> {
     });
     if (!comment) {
       throw new Error("Comment does not exist");
+    }
+
+    if (currentUser._id !== comment.author.toString() && !currentUser.isAdmin) {
+      throw new Error("User does not have access");
     }
 
     //resolves all reports for the comment being deleted
@@ -104,6 +119,7 @@ export async function deleteComment(id: string): Promise<void> {
     session.endSession();
   }
 }
+
 /**
  * Edits an existing comment in the database.
  * @param id - The ID of the comment to edit.
@@ -125,9 +141,19 @@ export async function editComment(
       parsedData.content = sanitizeHtml(comment.content);
     }
     const currentUser = await getAuthenticatedUser();
-    if (parsedData.editedByAdmin && !currentUser?.isAdmin) {
+    if (!currentUser) {
+      throw new Error("User does not have access");
+    }
+    if (parsedData.editedByAdmin && !currentUser.isAdmin) {
       throw new Error("This edit can only be made by an admin");
     }
+    if (
+      currentUser._id !== comment.author?.toString() ||
+      currentUser.isBanned
+    ) {
+      throw new Error("User does not have access");
+    }
+
     const updatedComment = await CommentModel.findByIdAndUpdate(
       id,
       parsedData,
@@ -161,6 +187,11 @@ export async function createCommentLike(
       !mongoose.Types.ObjectId.isValid(commentId)
     ) {
       throw new Error("Invalid userId or commentId");
+    }
+
+    const currentUser = await getAuthenticatedUser();
+    if (!currentUser || (currentUser._id !== userId && !currentUser.isAdmin)) {
+      throw new Error("User does not have access");
     }
 
     const doesLikeExist = await CommentLikeModel.findOne({
@@ -215,6 +246,11 @@ export async function deleteCommentLike(
       throw new Error("Invalid userId or commentId");
     }
 
+    const currentUser = await getAuthenticatedUser();
+    if (!currentUser || (currentUser._id !== userId && !currentUser.isAdmin)) {
+      throw new Error("User does not have access");
+    }
+
     const doesLikeExist = await CommentLikeModel.findOne({
       user: userId,
       comment: commentId,
@@ -255,6 +291,11 @@ export async function getPostComments(
   authUserId: string,
 ): Promise<PopulatedComment[]> {
   await dbConnect();
+
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || currentUser._id !== authUserId) {
+    throw new Error("User does not have access");
+  }
 
   const comments = await CommentModel.aggregate([
     // Match post ID and filter out deleted child comments (but not deleted parent comments) and flagged comments
@@ -333,6 +374,11 @@ export async function getPopulatedComment(
 ): Promise<PopulatedComment> {
   await dbConnect();
 
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || currentUser._id !== authUserId) {
+    throw new Error("User does not have access");
+  }
+
   const comment = await CommentModel.findOne({ _id: id, isDeleted: false })
     .populate("author")
     .exec();
@@ -358,6 +404,11 @@ export async function getPopulatedComment(
 export const getFlaggedComments = async (
   userId: string,
 ): Promise<PopulatedComment[]> => {
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || !currentUser.isAdmin) {
+    throw new Error("User does not have access");
+  }
+
   // Fetch flagged comments from the database and populate the author field
   const comments = await CommentModel.find({ isFlagged: true })
     .populate("author")
@@ -382,6 +433,11 @@ export const getFlaggedComments = async (
 };
 
 export const hasFlaggedComments = async (): Promise<boolean> => {
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || !currentUser.isAdmin) {
+    throw new Error("User does not have access");
+  }
+
   const count = await CommentModel.countDocuments({ isFlagged: true });
   return count > 0;
 };

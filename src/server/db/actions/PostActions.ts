@@ -348,6 +348,11 @@ function postPopulationPipeline({
 export async function createPost(post: PostInput): Promise<Post> {
   await dbConnect();
 
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || currentUser.isBanned) {
+    throw new Error("User does not have access");
+  }
+
   const profanities = await getAllProfanities();
   const profanityWords = profanities.map((profanity) => profanity.name);
 
@@ -465,7 +470,7 @@ export async function unpinPost(
   await dbConnect();
   const currentUser = await getAuthenticatedUser();
   if (!currentUser?.isAdmin) {
-    throw new Error("This edit can only be made by an admin");
+    throw new Error("Only admins can unpin posts");
   }
 
   if (!mongoose.Types.ObjectId.isValid(postId)) {
@@ -500,6 +505,11 @@ export async function getPopulatedPinnedPosts(
   authUserId: string,
 ): Promise<PostAggregationResult> {
   await dbConnect();
+
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser) {
+    throw new Error("User does not have access");
+  }
 
   const pipeline = [
     { $match: { isPinned: true, isPrivate: false } },
@@ -545,6 +555,11 @@ export async function getPopulatedPosts(
 ): Promise<PostAggregationResult> {
   await dbConnect();
 
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser) {
+    throw new Error("User does not have access");
+  }
+
   const postsInfo = await PostModel.aggregate(
     postPopulationPipeline({
       authUserId,
@@ -577,6 +592,11 @@ export async function getPopulatedUserPosts(
   isAdmin?: boolean,
 ): Promise<PopulatedPost[]> {
   await dbConnect();
+
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser) {
+    throw new Error("User does not have access");
+  }
 
   const postsShown =
     currUserId === userId || isAdmin
@@ -613,6 +633,11 @@ export async function getPopulatedPost(
     throw new Error("Invalid post ID");
   }
 
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser) {
+    throw new Error("User does not have access");
+  }
+
   const aggregationResult = await PostModel.aggregate(
     postPopulationPipeline({
       authUserId,
@@ -645,6 +670,16 @@ export async function editPost(
     throw new Error("Invalid post ID");
   }
 
+  const currentUser = await getAuthenticatedUser();
+  const postInfo = await PostModel.findById(id);
+  if (
+    !currentUser ||
+    (!currentUser.isAdmin && currentUser._id !== postInfo.author?.toString()) ||
+    currentUser.isBanned
+  ) {
+    throw new Error("User does not have access");
+  }
+
   const validatedPost = editPostSchema.parse(post);
   if (post.editedByAdmin !== undefined) {
     validatedPost.editedByAdmin = post.editedByAdmin;
@@ -658,7 +693,6 @@ export async function editPost(
   const updatedPost = await PostModel.findByIdAndUpdate(id, validatedPost, {
     new: true,
   });
-  console.log(updatedPost);
   if (!updatedPost) {
     throw new Error("Post not found");
   }
@@ -682,6 +716,14 @@ export async function deletePost(
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw new Error("Invalid post ID");
+  }
+
+  const currentUser = await getAuthenticatedUser();
+  if (
+    !currentUser ||
+    (!currentUser.isAdmin && currentUser._id !== authUserId)
+  ) {
+    throw new Error("User does not have access");
   }
 
   const updatedPost = await PostModel.findByIdAndUpdate(id, {
@@ -731,6 +773,11 @@ export async function createPostSave(
     throw new Error("Invalid user ID or post ID");
   }
 
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || (!currentUser.isAdmin && currentUser._id !== userId)) {
+    throw new Error("User does not have access");
+  }
+
   const existingSave = await PostSaveModel.findOne({
     user: userId,
     post: postId,
@@ -760,6 +807,11 @@ export async function getSavedPosts(userId: string): Promise<Post[]> {
     throw new Error("Invalid user ID");
   }
 
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser) {
+    throw new Error("User does not have access");
+  }
+
   const savedPosts = await PostSaveModel.find({ user: userId })
     .sort({ date: -1 })
     .populate("post")
@@ -781,6 +833,11 @@ export async function getPopulatedSavedPosts(
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     throw new Error("Invalid user ID");
+  }
+
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser) {
+    throw new Error("User does not have access");
   }
 
   const pipeline: mongoose.PipelineStage[] = [
@@ -828,6 +885,11 @@ export async function deletePostSave(
     throw new Error("Invalid user ID or post ID");
   }
 
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || (!currentUser.isAdmin && currentUser._id !== userId)) {
+    throw new Error("User does not have access");
+  }
+
   const deletedSave = await PostSaveModel.findOneAndDelete({
     user: userId,
     post: postId,
@@ -856,6 +918,11 @@ export async function createPostLike(
     !mongoose.Types.ObjectId.isValid(postId)
   ) {
     throw new Error("Invalid user ID or post ID");
+  }
+
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || (!currentUser.isAdmin && currentUser._id !== userId)) {
+    throw new Error("User does not have access");
   }
 
   const session = await PostModel.startSession();
@@ -916,6 +983,11 @@ export async function deletePostLike(
     throw new Error("Invalid user ID or post ID");
   }
 
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || (!currentUser.isAdmin && currentUser._id !== userId)) {
+    throw new Error("User does not have access");
+  }
+
   const session = await PostModel.startSession();
   session.startTransaction();
 
@@ -955,6 +1027,10 @@ export async function deletePostLike(
  */
 export async function hasFlaggedPosts(): Promise<boolean> {
   await dbConnect();
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || !currentUser.isAdmin) {
+    throw new Error("User does not access");
+  }
   const flaggedPostsCount = await PostModel.countDocuments({
     isFlagged: true,
     isDeleted: false,

@@ -21,6 +21,10 @@ import { getAuthenticatedUser } from "./AuthActions";
 export async function getReports(): Promise<Report[]> {
   try {
     await dbConnect();
+    const currentUser = await getAuthenticatedUser();
+    if (!currentUser || !currentUser.isAdmin) {
+      throw new Error("User does not have access");
+    }
     const reports = await ReportModel.find().sort({ date: "desc" });
     return reports;
   } catch (error) {
@@ -37,11 +41,14 @@ export async function getReports(): Promise<Report[]> {
 export async function hasUnresolvedReports(): Promise<boolean> {
   try {
     await dbConnect();
+    const currentUser = await getAuthenticatedUser();
+    if (!currentUser || !currentUser.isAdmin) {
+      throw new Error("User does not have access");
+    }
     const count = await ReportModel.countDocuments({
       isResolved: "false",
       contentType: { $in: ["Post", "Comment"] },
     });
-    console.log("APPLE", count);
     return count > 0;
   } catch (error) {
     console.error("Failed to retrieve reports:", error);
@@ -61,8 +68,14 @@ export async function getReportsByContentId(
     throw new Error("Invalid contentId");
   }
 
+  await dbConnect();
+
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser) {
+    throw new Error("User does not have access");
+  }
+
   try {
-    await dbConnect();
     const reports = await ReportModel.find({ reportedContent: contentId })
       .populate({ path: "sourceUser", model: UserModel })
       .sort({ date: "desc" });
@@ -89,8 +102,13 @@ export async function getReportsByReportedUser(
     throw new Error("Invalid userId");
   }
 
+  await dbConnect();
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || !currentUser.isAdmin) {
+    throw new Error("User does not have access");
+  }
+
   try {
-    await dbConnect();
     const reports = await ReportModel.find({ reportedUser: userId }).sort({
       date: "desc",
     });
@@ -108,8 +126,13 @@ export async function getReportsByReportedUser(
  * @returns The created report object.
  */
 export async function createReport(report: ReportInput): Promise<Report> {
+  await dbConnect();
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser) {
+    throw new Error("User does not have access");
+  }
+
   try {
-    await dbConnect();
     const parsedData = reportSchema.parse(report);
     const createdReport = await ReportModel.create(parsedData);
     return createdReport.toObject();
@@ -139,8 +162,13 @@ export async function editReport(
     throw new Error("Invalid report ID");
   }
 
+  await dbConnect();
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || !currentUser.isAdmin) {
+    throw new Error("User does not have access");
+  }
+
   try {
-    await dbConnect();
     const parsedData = editReportSchema.parse(report);
     const currentUser = await getAuthenticatedUser();
     if (parsedData.isResolved && !currentUser?.isAdmin) {
@@ -175,8 +203,13 @@ export async function updateAllReportedContentResolved(id: string) {
     throw new Error("Invalid report ID");
   }
 
+  await dbConnect();
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser) {
+    throw new Error("User does not have access");
+  }
+
   try {
-    await dbConnect();
     const reportsForContent = await getReportsByContentId(id);
 
     //this checks for content that do not have any reports, so that this function can still be called on them
