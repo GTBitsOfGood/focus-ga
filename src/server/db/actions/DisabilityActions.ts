@@ -23,9 +23,6 @@ export async function createDisability(
   try {
     await dbConnect();
     const currentUser = await getAuthenticatedUser();
-    if (!currentUser || !currentUser.isAdmin) {
-      throw new Error("Only admins can create disabilities");
-    }
     const parsedData = disabilitySchema.parse(disability);
     const createdDisability = await DisabilityModel.create(parsedData);
     return createdDisability.toObject();
