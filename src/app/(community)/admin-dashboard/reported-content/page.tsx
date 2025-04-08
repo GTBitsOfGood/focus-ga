@@ -33,7 +33,7 @@ export default function ReportedContent() {
     const unresolvedReportedComments: { id: Types.ObjectId; date: Date }[] = [];
     initReports.forEach((report) => {
       const reportedContentId = report.reportedContent;
-      if (!report.isResolved) {
+      if (!report.isResolved && report.reason !== 'Language') {
         if (
           !unresolvedReportedPosts.some(
             (item) => item.id.toString() === reportedContentId.toString(),

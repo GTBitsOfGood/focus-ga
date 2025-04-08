@@ -29,6 +29,7 @@ import { PostDeletionDurations } from "@/utils/consts";
 import { AgeSelection } from "@/utils/types/common";
 import { getAuthenticatedUser } from "./AuthActions";
 import sanitizeHtml from "sanitize-html";
+import { createReport } from "./ReportActions";
 
 // A MongoDB aggregation pipeline that efficiently populates a post
 type PipelineArgs = {
@@ -382,6 +383,17 @@ export async function createPost(post: PostInput): Promise<Post> {
   });
 
   const createdPost = await PostModel.create(validatedPost);
+
+  // Create a report if the post is flagged
+  if (isFlagged) {
+    await createReport({
+      reason: 'Language',
+      reportedUser: post.author,
+      sourceUser: post.author,
+      reportedContent: createdPost._id.toString(),
+      contentType: 'Post'
+    });
+  }
 
   revalidatePath("/");
   return createdPost.toObject();
@@ -1029,7 +1041,7 @@ export async function hasFlaggedPosts(): Promise<boolean> {
   await dbConnect();
   const currentUser = await getAuthenticatedUser();
   if (!currentUser || !currentUser.isAdmin) {
-    throw new Error("User does not access");
+    throw new Error("User does access");
   }
   const flaggedPostsCount = await PostModel.countDocuments({
     isFlagged: true,

@@ -12,6 +12,8 @@ import ReportModel from "../models/ReportModel";
 import mongoose from "mongoose";
 import UserModel from "../models/UserModel";
 import { getAuthenticatedUser } from "./AuthActions";
+import PostModel from "../models/PostModel";
+import CommentModel from "../models/CommentModel";
 
 /**
  * Retrieves all reports from the database, sorted by date in descending order.
@@ -218,6 +220,14 @@ export async function updateAllReportedContentResolved(id: string) {
         const updatedReport: PopulatedReport = { ...report, isResolved: true };
         await ReportModel.findByIdAndUpdate(report._id, updatedReport);
       });
+
+      // Update the isFlagged field of the associated content
+      const firstReport = reportsForContent[0];
+      if (firstReport.contentType === 'Post') {
+        await PostModel.findByIdAndUpdate(id, { isFlagged: false });
+      } else if (firstReport.contentType === 'Comment') {
+        await CommentModel.findByIdAndUpdate(id, { isFlagged: false });
+      }
     }
   } catch (e) {
     console.error(`Failed to update all reported content ${id}:`, e);

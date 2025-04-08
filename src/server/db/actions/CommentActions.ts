@@ -19,6 +19,7 @@ import { revalidatePath } from "next/cache";
 import { getAuthenticatedUser } from "./AuthActions";
 import { updateAllReportedContentResolved } from "./ReportActions";
 import sanitizeHtml from "sanitize-html";
+import { createReport } from "./ReportActions";
 
 /**
  * Creates a new comment in the database.
@@ -59,6 +60,17 @@ export async function createComment(comment: CommentInput): Promise<Comment> {
       { $inc: { comments: 1 } },
       { session },
     );
+
+    // Create a report if the comment is flagged
+    if (isFlagged) {
+      await createReport({
+        reason: 'Language',
+        reportedUser: comment.author,
+        sourceUser: comment.author,
+        reportedContent: createdComment[0]._id.toString(),
+        contentType: 'Comment'
+      });
+    }
 
     await session.commitTransaction();
     return createdComment[0].toObject();
