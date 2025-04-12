@@ -29,6 +29,8 @@ import { PostDeletionDurations } from "@/utils/consts";
 import { AgeSelection } from "@/utils/types/common";
 import { getAuthenticatedUser } from "./AuthActions";
 import sanitizeHtml from "sanitize-html";
+import { ReportReason, ContentType } from "@/utils/types/report";
+import { createReport } from "./ReportActions";
 
 // A MongoDB aggregation pipeline that efficiently populates a post
 type PipelineArgs = {
@@ -362,7 +364,7 @@ export async function createPost(post: PostInput): Promise<Post> {
     new Set([...contentProfanities, ...titleProfanities]),
   );
 
-  const isFlagged = uniqueProfanities.length > 0;
+  const isFlagged = false;
 
   const author = await UserModel.findById(post.author);
 
@@ -382,15 +384,27 @@ export async function createPost(post: PostInput): Promise<Post> {
   });
 
   const createdPost = await PostModel.create(validatedPost);
+  
+  if (uniqueProfanities.length > 0) {
+    await createReport({
+      reason: ReportReason.LANGUAGE,
+      description: `Profane language detected: ${uniqueProfanities.join(", ")}`,
+      reportedUser: post.author,
+      sourceUser: currentUser._id, // System is reporting this
+      reportedContent: createdPost._id.toString(),
+      contentType: ContentType.POST,
+      isResolved: false,
+    });
+  }
 
   revalidatePath("/");
   return createdPost.toObject();
 }
 
 /**
- * Validates a post to determine if it will be flagged based on its content and title.
+ * Validates a post to determine if it will trigger a LANGUAGE report based on its content and title.
  * @param post - The post input data.
- * @returns A boolean indicating whether the post will be flagged.
+ * @returns An array of profane words found in the post content or title.
  */
 export async function validatePost(post: PostInput): Promise<string[]> {
   await dbConnect();
@@ -1021,19 +1035,24 @@ export async function deletePostLike(
 }
 
 /**
- * Checks if there are any flagged posts or comments in the database.
+ * Checks if there are any posts that need moderation due to language issues.
  * This is useful for administrators to know if there's any content that needs moderation.
- * @returns A promise that resolves to a boolean indicating whether there are any flagged posts or comments.
+ * @returns A promise that resolves to a boolean indicating whether there are any unresolved LANGUAGE reports.
  */
 export async function hasFlaggedPosts(): Promise<boolean> {
   await dbConnect();
   const currentUser = await getAuthenticatedUser();
   if (!currentUser || !currentUser.isAdmin) {
-    throw new Error("User does not access");
+    throw new Error("User does not have access");
   }
-  const flaggedPostsCount = await PostModel.countDocuments({
-    isFlagged: true,
-    isDeleted: false,
+
+  const ReportModel = mongoose.models.Report || mongoose.model('Report', require('../models/ReportModel').default.schema);
+
+  const unresolvedLanguageReportsCount = await ReportModel.countDocuments({
+    reason: ReportReason.LANGUAGE,
+    isResolved: false,
+    contentType: ContentType.POST
   });
-  return flaggedPostsCount > 0;
+  
+  return unresolvedLanguageReportsCount > 0;
 }
