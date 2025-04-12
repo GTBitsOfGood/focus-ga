@@ -7,7 +7,8 @@ export enum ReportReason {
   SPAM = 'Spam',
   INAPPROPRIATE = 'Inappropriate',
   HARASSMENT = 'Harassment',
-  OTHER = 'Other'
+  LANGUAGE = 'Language',
+  OTHER = 'Other',
 }
 
 export enum ContentType {
