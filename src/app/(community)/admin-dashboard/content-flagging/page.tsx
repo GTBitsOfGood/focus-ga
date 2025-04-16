@@ -10,7 +10,7 @@ import {
   getAllProfanities,
   deleteProfanity,
 } from "@/server/db/actions/ProfanityActions";
-import { getPopulatedPosts } from "@/server/db/actions/PostActions";
+import { getPopulatedPosts, getPopulatedPost } from "@/server/db/actions/PostActions";
 import { useUser } from "@/contexts/UserContext";
 import { PAGINATION_LIMIT } from "@/utils/consts";
 import { PopulatedPost } from "@/utils/types/post";
@@ -18,13 +18,17 @@ import PostComponent from "@/components/PostComponent";
 import { getFlaggedComments } from "@/server/db/actions/CommentActions";
 import { PopulatedComment } from "@/utils/types/comment";
 import CommentComponent from "@/components/CommentComponent";
+import { getLanguageReportedContentIds } from "@/server/db/actions/ReportActions";
+import { ContentType } from "@/utils/types/report";
 
 export default function ProfanityList() {
   const [profanities, setProfanities] = useState<Profanity[]>([]);
   const [posts, setPosts] = useState<PopulatedPost[]>([]);
+  const [languageReportedPosts, setLanguageReportedPosts] = useState<PopulatedPost[]>([]);
   const [profanityName, setProfanityName] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [postsLoading, setPostsLoading] = useState(true);
+  const [languagePostsLoading, setLanguagePostsLoading] = useState(true);
   const [commentsLoading, setCommentsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
 
@@ -91,9 +95,54 @@ export default function ProfanityList() {
     setPostsLoading(false);
   };
 
+  // Fetch posts reported for LANGUAGE reason
+  const fetchLanguageReportedPosts = async () => {
+    if (!user) return;
+    
+    setLanguagePostsLoading(true);
+    
+    try {
+      // Get IDs of posts with LANGUAGE reports
+      const reportedPostIds = await getLanguageReportedContentIds(ContentType.POST);
+      
+      if (reportedPostIds.length === 0) {
+        setLanguageReportedPosts([]);
+        setLanguagePostsLoading(false);
+        return;
+      }
+      
+      // Fetch the actual post data for each ID
+      const postsPromises = reportedPostIds.map(async (postInfo) => {
+        const idAsString = postInfo.id.toString();
+        try {
+          return await getPopulatedPost(idAsString, user._id, user.isAdmin);
+        } catch (error) {
+          console.error(`Failed to fetch post ${idAsString}:`, error);
+          return null;
+        }
+      });
+      
+      const fetchedPosts = await Promise.all(postsPromises);
+      const validPosts = fetchedPosts.filter(post => post !== null) as PopulatedPost[];
+      
+      setLanguageReportedPosts(validPosts);
+    } catch (error) {
+      console.error("Failed to fetch language reported posts:", error);
+    }
+    
+    setLanguagePostsLoading(false);
+  };
+
   useEffect(() => {
     fetchPosts();
+    fetchLanguageReportedPosts();
   }, [user]);
+
+  useEffect(() => {
+    if (activeTab === "flagged") {
+      fetchLanguageReportedPosts();
+    }
+  }, [activeTab]);
 
   const observer = useRef<IntersectionObserver | null>(null);
   const secondLastPostRef = useCallback(
@@ -245,12 +294,20 @@ export default function ProfanityList() {
         </>
       );
     } else if (activeTab === "flagged") {
+      const allFlaggedPosts = [...languageReportedPosts];
+      const isLoading = languagePostsLoading;
+      
+
+      const uniquePosts = Array.from(
+        new Map(allFlaggedPosts.map(post => [post._id, post])).values()
+      );
+      
       return (
         <div>
           <div>
-            {posts.length ? (
-              posts.map((post, index) => {
-                if (posts.length <= index + 2) {
+            {uniquePosts.length ? (
+              uniquePosts.map((post, index) => {
+                if (posts.length && posts.length <= index + 2) {
                   // Attach observer to the second-to-last post
                   return (
                     <div ref={secondLastPostRef} key={post._id}>
@@ -268,16 +325,25 @@ export default function ProfanityList() {
                 }
               })
             ) : (
-              <p className="text-center font-bold text-theme-med-gray">
-                No flagged posts!
-              </p>
+              !isLoading && (
+                <p className="text-center font-bold text-theme-med-gray">
+                  No flagged or profane posts!
+                </p>
+              )
             )}
-            {postsLoading && (
-              <div className="mt-8 flex items-center justify-center text-theme-blue">
+            {isLoading && (
+              <div className="mt-8 flex flex-col items-center justify-center text-theme-blue">
                 <LoaderCircle
-                  className="animate-spin"
+                  className="animate-spin mb-2"
                   size={32}
                 />
+                <span className="text-sm text-theme-med-gray">
+                  { languagePostsLoading 
+                    ? "Loading flagged and profane posts..." 
+                    : postsLoading 
+                      ? "Loading flagged posts..." 
+                      : "Loading profane posts..."}
+                </span>
               </div>
             )}
           </div>

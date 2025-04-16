@@ -1,7 +1,7 @@
 "use client";
 import PostComponent from "@/components/PostComponent";
 import { getPopulatedPost } from "@/server/db/actions/PostActions";
-import { getReports } from "@/server/db/actions/ReportActions";
+import { getReportsExcludingLanguage } from "@/server/db/actions/ReportActions";
 import { useUser } from "@/contexts/UserContext";
 import { useState, useEffect } from "react";
 import { Types } from "mongoose";
@@ -28,7 +28,7 @@ export default function ReportedContent() {
   const fetchUnresolvedReports = async () => {
     if (!user) return;
     setLoading(true);
-    const initReports = await getReports();
+    const initReports = await getReportsExcludingLanguage();
     const unresolvedReportedPosts: { id: Types.ObjectId; date: Date }[] = [];
     const unresolvedReportedComments: { id: Types.ObjectId; date: Date }[] = [];
     initReports.forEach((report) => {

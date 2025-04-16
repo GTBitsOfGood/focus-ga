@@ -6,6 +6,7 @@ import {
   Report,
   ReportInput,
   PopulatedReport,
+  ReportReason,
 } from "@/utils/types/report";
 import dbConnect from "../dbConnect";
 import ReportModel from "../models/ReportModel";
@@ -34,8 +35,30 @@ export async function getReports(): Promise<Report[]> {
 }
 
 /**
- * Returns if there are any unresolved reports
- * @returns True if there are unresolved reports, otherwise false
+ * Retrieves all reports from the database except those with reason LANGUAGE, sorted by date in descending order.
+ * @returns A promise that resolves to an array of report objects.
+ * @throws Will throw an error if the database connection fails.
+ */
+export async function getReportsExcludingLanguage(): Promise<Report[]> {
+  try {
+    await dbConnect();
+    const currentUser = await getAuthenticatedUser();
+    if (!currentUser || !currentUser.isAdmin) {
+      throw new Error("User does not have access");
+    }
+    const reports = await ReportModel.find({
+      reason: { $ne: ReportReason.LANGUAGE }
+    }).sort({ date: "desc" });
+    return reports;
+  } catch (error) {
+    console.error("Failed to retrieve reports:", error);
+    throw new Error("Failed to retrieve reports");
+  }
+}
+
+/**
+ * Returns if there are any unresolved reports, excluding reports with reason LANGUAGE
+ * @returns True if there are unresolved reports (excluding LANGUAGE reports), otherwise false
  * @throws Will throw an error if the database connection fails.
  */
 export async function hasUnresolvedReports(): Promise<boolean> {
@@ -46,8 +69,9 @@ export async function hasUnresolvedReports(): Promise<boolean> {
       throw new Error("User does not have access");
     }
     const count = await ReportModel.countDocuments({
-      isResolved: "false",
+      isResolved: false,
       contentType: { $in: ["Post", "Comment"] },
+      reason: { $ne: ReportReason.LANGUAGE }
     });
     return count > 0;
   } catch (error) {
@@ -222,5 +246,45 @@ export async function updateAllReportedContentResolved(id: string) {
   } catch (e) {
     console.error(`Failed to update all reported content ${id}:`, e);
     throw new Error(`Failed to update all reported content ${id}`);
+  }
+}
+
+/**
+ * Retrieves the IDs of content (posts/comments) that have unresolved reports with LANGUAGE reason.
+ * @param contentType - The type of content to get reports for (Post or Comment).
+ * @returns A promise that resolves to an array of objects containing content IDs and report dates.
+ * @throws Will throw an error if the database connection fails.
+ */
+export async function getLanguageReportedContentIds(contentType: string): Promise<{ id: mongoose.Types.ObjectId; date: Date }[]> {
+  try {
+    await dbConnect();
+    const currentUser = await getAuthenticatedUser();
+    if (!currentUser || !currentUser.isAdmin) {
+      throw new Error("User does not have access");
+    }
+    
+    const reports = await ReportModel.find({
+      reason: ReportReason.LANGUAGE,
+      isResolved: false,
+      contentType: contentType
+    }).sort({ date: "desc" });
+    
+    // Extract unique content IDs with their dates
+    const contentMap = new Map<string, Date>();
+    reports.forEach(report => {
+      const idStr = report.reportedContent.toString();
+      if (!contentMap.has(idStr) || new Date(contentMap.get(idStr)!) < new Date(report.date)) {
+        contentMap.set(idStr, report.date);
+      }
+    });
+    
+    // Convert back to array of objects
+    return Array.from(contentMap).map(([idStr, date]) => ({
+      id: new mongoose.Types.ObjectId(idStr),
+      date
+    }));
+  } catch (error) {
+    console.error("Failed to retrieve language reported content IDs:", error);
+    throw new Error("Failed to retrieve language reported content IDs");
   }
 }
