@@ -209,6 +209,7 @@ export default function Home() {
           visibility,
           age,
           isFlagged: [false],
+          excludeLanguageReports: true
         };
 
         const { count, posts: newPosts } = await getPopulatedPosts(
@@ -259,7 +260,9 @@ export default function Home() {
   useEffect(() => {
     const fetchPinnedPosts = async () => {
       if (user) {
-        const posts = await getPopulatedPinnedPosts(user._id);
+        const posts = await getPopulatedPinnedPosts(user._id, {
+          excludeLanguageReports: true
+        });
         setPinnedPostContents(posts.posts);
       }
     };

@@ -45,6 +45,7 @@ type PipelineArgs = {
   postId?: string;
   searchTerm?: string;
   age?: AgeSelection;
+  excludeLanguageReports?: boolean;
 };
 
 type PostAggregationResult = {
@@ -64,281 +65,320 @@ function postPopulationPipeline({
   postId,
   searchTerm,
   age,
+  excludeLanguageReports,
 }: PipelineArgs): mongoose.PipelineStage[] {
   if (age && age.maxAge && age.maxAge === 20) {
     age.maxAge = 100;
   }
 
-  return [
-    // Apply search
-    ...(searchTerm
-      ? [
-          {
-            $search: {
-              index: "focus-fuzzy-search-posts",
-              text: {
-                query: searchTerm,
-                path: ["title", "content"],
-                fuzzy: {},
-              },
-            },
-          },
-        ]
-      : postId
-        ? [
-            // Match specific post ID if given
-            { $match: { _id: new mongoose.Types.ObjectId(postId) } },
-          ]
-        : [{ $match: { isDeleted: false } }, { $sort: { date: -1 as const } }]),
+  // Create base pipeline
+  const pipeline: mongoose.PipelineStage[] = [];
 
-    // Filter by tags
-    ...(tags && tags.length
-      ? [
+  // Apply search or basic matching
+  if (searchTerm) {
+    pipeline.push({
+      $search: {
+        index: "focus-fuzzy-search-posts",
+        text: {
+          query: searchTerm,
+          path: ["title", "content"],
+          fuzzy: {},
+        },
+      },
+    });
+  } else if (postId) {
+    pipeline.push({ $match: { _id: new mongoose.Types.ObjectId(postId) } });
+  } else {
+    pipeline.push({ $match: { isDeleted: false } });
+    pipeline.push({ $sort: { date: -1 as const } });
+  }
+
+  // Filter by tags
+  if (tags && tags.length) {
+    pipeline.push({
+      $match: {
+        tags: { $in: tags.map((t) => new mongoose.Types.ObjectId(t)) },
+      },
+    });
+  }
+
+  // Filter out posts with language reports if needed
+  if (excludeLanguageReports) {
+    pipeline.push({
+      $lookup: {
+        from: "reports",
+        let: { postId: "$_id" },
+        pipeline: [
           {
             $match: {
-              tags: { $in: tags.map((t) => new mongoose.Types.ObjectId(t)) },
-            },
-          },
-        ]
-      : []),
+              $expr: {
+                $and: [
+                  { $eq: ["$reportedContent", "$$postId"] },
+                  { $eq: ["$reason", ReportReason.LANGUAGE] },
+                  { $eq: ["$isResolved", false] },
+                  { $eq: ["$contentType", ContentType.POST] }
+                ]
+              }
+            }
+          }
+        ],
+        as: "languageReports"
+      }
+    });
 
-    //User is not an admin, so returns all posts that are not private or are private but made by the user, else return all posts
-    ...(!isAdmin
-      ? [
+    pipeline.push({
+      $match: {
+        languageReports: { $size: 0 }
+      }
+    });
+  }
+
+  // Handle non-admin users - they can only see non-private posts or their own private posts
+  if (!isAdmin) {
+    pipeline.push({
+      $match: {
+        $or: [
+          { isPrivate: false },
           {
-            $match: {
-              $or: [
-                { isPrivate: false },
-                {
-                  $and: [
-                    { isPrivate: true },
-                    { author: new mongoose.Types.ObjectId(authUserId) },
-                  ],
-                },
-              ],
-            },
-          },
-        ]
-      : []),
-
-    //Visibility filter
-    ...(visibility === "Public" ? [{ $match: { isPrivate: false } }] : []),
-    ...(visibility === "Private" ? [{ $match: { isPrivate: true } }] : []),
-    ...(visibility === "All" ? [] : []),
-
-    // Filter by isFlagged
-    ...(isFlagged.length
-      ? [{ $match: { isFlagged: { $in: isFlagged } } }]
-      : []),
-
-    // Use $facet to perform two separate aggregations: totalPostCount and posts (paginated)
-    {
-      $facet: {
-        count: [{ $count: "count" }],
-        posts: [
-          ...(offset ? [{ $skip: offset }] : []),
-          ...(limit ? [{ $limit: limit }] : []),
-
-          {
-            $lookup: {
-              from: UserModel.collection.name,
-              localField: "author",
-              foreignField: "_id",
-              pipeline: [{ $addFields: { _id: { $toString: "$_id" } } }],
-              as: "author",
-            },
-          },
-          { $unwind: { path: "$author", preserveNullAndEmptyArrays: true } },
-
-          { $match: { "author.isBanned": false } },
-
-          // Age filter - lookup childBirthdates and filter by age
-          ...(age && age.minAge !== undefined && age.maxAge !== undefined
-            ? [
-                // First, we need to get the childBirthdates which aren't included in the current author lookup
-                {
-                  $lookup: {
-                    from: UserModel.collection.name,
-                    let: { authorId: "$author._id" },
-                    pipeline: [
-                      {
-                        $match: {
-                          $expr: {
-                            $eq: ["$_id", { $toObjectId: "$$authorId" }],
-                          },
-                        },
-                      },
-                      { $project: { childBirthdates: 1, _id: 0 } },
-                    ],
-                    as: "ageData",
-                  },
-                },
-                {
-                  $unwind: {
-                    path: "$ageData",
-                    preserveNullAndEmptyArrays: true,
-                  },
-                },
-
-                // Now filter based on the age range
-                {
-                  $match: {
-                    $or: [
-                      // No childBirthdates - include these posts
-                      ...(age.maxAge === 100
-                        ? [
-                            { "ageData.childBirthdates": { $exists: false } },
-                            { "ageData.childBirthdates": { $size: 0 } },
-                          ]
-                        : []),
-
-                      // Has at least one child in the age range
-                      {
-                        "ageData.childBirthdates": {
-                          $elemMatch: {
-                            $lte: new Date(
-                              new Date().getFullYear() - age.minAge,
-                              new Date().getMonth(),
-                              new Date().getDate(),
-                            ),
-                            $gte: new Date(
-                              new Date().getFullYear() - age.maxAge - 1,
-                              new Date().getMonth(),
-                              new Date().getDate(),
-                            ),
-                          },
-                        },
-                      },
-                    ],
-                  },
-                },
-              ]
-            : []),
-
-          // Filter by author location
-          ...(locations && locations.length
-            ? [{ $match: { "author.city": { $in: locations } } }]
-            : []),
-
-          // Populate tags
-          {
-            $lookup: {
-              from: DisabilityModel.collection.name,
-              localField: "tags",
-              foreignField: "_id",
-              pipeline: [{ $addFields: { _id: { $toString: "$_id" } } }],
-              as: "tags",
-            },
-          },
-
-          // Replace author and tags with default values if necessary
-          {
-            $addFields: {
-              author: { $ifNull: ["$author", null] },
-              tags: { $ifNull: ["$tags", []] },
-            },
-          },
-
-          // Determine whether user has liked post
-          {
-            $lookup: {
-              from: PostLikeModel.collection.name,
-              let: { postId: "$_id" },
-              pipeline: [
-                {
-                  $match: {
-                    $expr: {
-                      $and: [
-                        { $eq: ["$post", "$$postId"] },
-                        {
-                          $eq: [
-                            "$user",
-                            new mongoose.Types.ObjectId(authUserId),
-                          ],
-                        },
-                      ],
-                    },
-                  },
-                },
-              ],
-              as: "liked",
-            },
-          },
-          {
-            $addFields: {
-              liked: { $gt: [{ $size: "$liked" }, 0] },
-            },
-          },
-
-          // Determine whether user has saved post
-          {
-            $lookup: {
-              from: PostSaveModel.collection.name,
-              let: { postId: "$_id" },
-              pipeline: [
-                {
-                  $match: {
-                    $expr: {
-                      $and: [
-                        { $eq: ["$post", "$$postId"] },
-                        {
-                          $eq: [
-                            "$user",
-                            new mongoose.Types.ObjectId(authUserId),
-                          ],
-                        },
-                      ],
-                    },
-                  },
-                },
-              ],
-              as: "saved",
-            },
-          },
-          {
-            $addFields: {
-              saved: { $gt: [{ $size: "$saved" }, 0] },
-              _id: { $toString: "$_id" },
-            },
-          },
-
-          {
-            $lookup: {
-              from: "comments",
-              let: { postId: "$_id" },
-              pipeline: [
-                {
-                  $match: {
-                    $expr: {
-                      $and: [
-                        {
-                          $eq: ["$post", { $toObjectId: "$$postId" }],
-                        },
-                        { $eq: ["$isFlagged", false] },
-                        { $eq: ["$isDeleted", false] },
-                      ],
-                    },
-                  },
-                },
-                { $count: "count" },
-              ],
-              as: "unflaggedCommentCount",
-            },
-          },
-          {
-            $addFields: {
-              comments: {
-                $ifNull: [
-                  { $arrayElemAt: ["$unflaggedCommentCount.count", 0] },
-                  0,
-                ],
-              },
-            },
+            $and: [
+              { isPrivate: true },
+              { author: new mongoose.Types.ObjectId(authUserId) },
+            ],
           },
         ],
       },
+    });
+  }
+
+  // Visibility filter
+  if (visibility === "Public") {
+    pipeline.push({ $match: { isPrivate: false } });
+  } else if (visibility === "Private") {
+    pipeline.push({ $match: { isPrivate: true } });
+  }
+
+  // Filter by isFlagged
+  if (isFlagged.length) {
+    pipeline.push({ $match: { isFlagged: { $in: isFlagged } } });
+  }
+
+  // Add facet for pagination and additional lookups
+  pipeline.push({
+    $facet: {
+      count: [{ $count: "count" }],
+      posts: [
+        ...(offset ? [{ $skip: offset }] : []),
+        ...(limit ? [{ $limit: limit }] : []),
+
+        {
+          $lookup: {
+            from: UserModel.collection.name,
+            localField: "author",
+            foreignField: "_id",
+            pipeline: [{ $addFields: { _id: { $toString: "$_id" } } }],
+            as: "author",
+          },
+        },
+        { $unwind: { path: "$author", preserveNullAndEmptyArrays: true } },
+
+        { $match: { "author.isBanned": false } },
+
+        // Age filter - lookup childBirthdates and filter by age
+        ...(age && age.minAge !== undefined && age.maxAge !== undefined
+          ? [
+              // First, we need to get the childBirthdates which aren't included in the current author lookup
+              {
+                $lookup: {
+                  from: UserModel.collection.name,
+                  let: { authorId: "$author._id" },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: {
+                          $eq: ["$_id", { $toObjectId: "$$authorId" }],
+                        },
+                      },
+                    },
+                    { $project: { childBirthdates: 1, _id: 0 } },
+                  ],
+                  as: "ageData",
+                },
+              },
+              {
+                $unwind: {
+                  path: "$ageData",
+                  preserveNullAndEmptyArrays: true,
+                },
+              },
+
+              // Now filter based on the age range
+              {
+                $match: {
+                  $or: [
+                    // No childBirthdates - include these posts
+                    ...(age.maxAge === 100
+                      ? [
+                          { "ageData.childBirthdates": { $exists: false } },
+                          { "ageData.childBirthdates": { $size: 0 } },
+                        ]
+                      : []),
+
+                    // Has at least one child in the age range
+                    {
+                      "ageData.childBirthdates": {
+                        $elemMatch: {
+                          $lte: new Date(
+                            new Date().getFullYear() - age.minAge,
+                            new Date().getMonth(),
+                            new Date().getDate(),
+                          ),
+                          $gte: new Date(
+                            new Date().getFullYear() - age.maxAge - 1,
+                            new Date().getMonth(),
+                            new Date().getDate(),
+                          ),
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ]
+          : []),
+
+        // Filter by author location
+        ...(locations && locations.length
+          ? [{ $match: { "author.city": { $in: locations } } }]
+          : []),
+
+        // Populate tags
+        {
+          $lookup: {
+            from: DisabilityModel.collection.name,
+            localField: "tags",
+            foreignField: "_id",
+            pipeline: [{ $addFields: { _id: { $toString: "$_id" } } }],
+            as: "tags",
+          },
+        },
+
+        // Replace author and tags with default values if necessary
+        {
+          $addFields: {
+            author: { $ifNull: ["$author", null] },
+            tags: { $ifNull: ["$tags", []] },
+          },
+        },
+
+        // Determine whether user has liked post
+        {
+          $lookup: {
+            from: PostLikeModel.collection.name,
+            let: { postId: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$post", "$$postId"] },
+                      {
+                        $eq: [
+                          "$user",
+                          new mongoose.Types.ObjectId(authUserId),
+                        ],
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+            as: "liked",
+          },
+        },
+        {
+          $addFields: {
+            liked: { $gt: [{ $size: "$liked" }, 0] },
+          },
+        },
+
+        // Determine whether user has saved post
+        {
+          $lookup: {
+            from: PostSaveModel.collection.name,
+            let: { postId: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$post", "$$postId"] },
+                      {
+                        $eq: [
+                          "$user",
+                          new mongoose.Types.ObjectId(authUserId),
+                        ],
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+            as: "saved",
+          },
+        },
+        {
+          $addFields: {
+            saved: { $gt: [{ $size: "$saved" }, 0] },
+            _id: { $toString: "$_id" },
+          },
+        },
+
+        {
+          $lookup: {
+            from: "comments",
+            let: { postId: "$_id" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      {
+                        $eq: ["$post", { $toObjectId: "$$postId" }],
+                      },
+                      { $eq: ["$isFlagged", false] },
+                      { $eq: ["$isDeleted", false] },
+                    ],
+                  },
+                },
+              },
+              { $count: "count" },
+            ],
+            as: "unflaggedCommentCount",
+          },
+        },
+        {
+          $addFields: {
+            comments: {
+              $ifNull: [
+                { $arrayElemAt: ["$unflaggedCommentCount.count", 0] },
+                0,
+              ],
+            },
+          },
+        },
+      ],
     },
-  ];
+  });
+
+  // Remove the languageReports field from posts since it's only used for filtering
+  if (excludeLanguageReports) {
+    const postsStage = pipeline[pipeline.length - 1] as { $facet: { posts: any[] } };
+    postsStage.$facet.posts.push({
+      $project: { languageReports: 0 }
+    });
+  }
+
+  return pipeline;
 }
 
 /**
@@ -513,10 +553,12 @@ export async function unpinPost(
 /**
  * Retrieves all pinned posts from the database with their author and tags fields populated.
  * @param authUserId - The ID of the currently authenticated user to determine their like and save statuses.
+ * @param options - Optional filters including excludeLanguageReports
  * @returns A promise that resolves to an object containing the count and an array of populated post objects.
  */
 export async function getPopulatedPinnedPosts(
   authUserId: string,
+  options?: { excludeLanguageReports?: boolean }
 ): Promise<PostAggregationResult> {
   await dbConnect();
 
@@ -534,6 +576,7 @@ export async function getPopulatedPinnedPosts(
       locations: [],
       searchTerm: undefined,
       postId: undefined,
+      excludeLanguageReports: options?.excludeLanguageReports
     }),
   ];
 
@@ -558,6 +601,7 @@ type Filters = {
   visibility?: string;
   isFlagged?: boolean[];
   age?: AgeSelection;
+  excludeLanguageReports?: boolean;
 };
 
 export async function getPopulatedPosts(
@@ -565,7 +609,7 @@ export async function getPopulatedPosts(
   isAdmin: boolean,
   offset: number,
   limit: number,
-  { tags, locations, searchTerm, visibility, isFlagged, age }: Filters,
+  { tags, locations, searchTerm, visibility, isFlagged, age, excludeLanguageReports }: Filters,
 ): Promise<PostAggregationResult> {
   await dbConnect();
 
@@ -574,20 +618,22 @@ export async function getPopulatedPosts(
     throw new Error("User does not have access");
   }
 
-  const postsInfo = await PostModel.aggregate(
-    postPopulationPipeline({
-      authUserId,
-      isFlagged: isFlagged ?? [true, false],
-      isAdmin,
-      visibility,
-      offset,
-      limit,
-      tags,
-      locations,
-      searchTerm,
-      age,
-    }),
-  );
+  // Create the pipeline with the appropriate filters
+  const pipeline = postPopulationPipeline({
+    authUserId,
+    isFlagged: isFlagged ?? [true, false],
+    isAdmin,
+    visibility,
+    offset,
+    limit,
+    tags,
+    locations,
+    searchTerm,
+    age,
+    excludeLanguageReports
+  });
+
+  const postsInfo = await PostModel.aggregate(pipeline);
 
   return {
     count: postsInfo[0].count.length ? postsInfo[0].count[0].count : 0,
@@ -633,13 +679,16 @@ export async function getPopulatedUserPosts(
  * Retrieves a single post from the database by its ID with its author and disability fields populated.
  * @param id - The ID of the post to retrieve.
  * @param authUserId - The ID of the currently authenticated user, to determine whether they have liked and/or saved each post.
+ * @param isAdmin - Whether the current user is an admin.
+ * @param options - Optional parameters including excludeLanguageReports.
  * @returns A promise that resolves to a populated post object containing author and disability objects (or null if they are not found)
- * @throws Will throw an error if the post is not found.
+ * @throws Will throw an error if the post is not found or has language reports when excludeLanguageReports is true.
  */
 export async function getPopulatedPost(
   id: string,
   authUserId: string,
   isAdmin: boolean,
+  options?: { excludeLanguageReports?: boolean }
 ): Promise<PopulatedPost> {
   await dbConnect();
 
@@ -652,18 +701,29 @@ export async function getPopulatedPost(
     throw new Error("User does not have access");
   }
 
+  // For individual post lookup, we can still check for language reports in one query
   const aggregationResult = await PostModel.aggregate(
     postPopulationPipeline({
       authUserId,
       isAdmin,
       postId: id,
       isFlagged: [true, false],
+      excludeLanguageReports: options?.excludeLanguageReports
     }),
   );
-  const post = aggregationResult[0].posts[0];
+  
+  const post = aggregationResult[0]?.posts[0];
   if (!post) {
+    if (options?.excludeLanguageReports) {
+      // Check if post exists but was filtered due to language reports
+      const postExists = await PostModel.exists({ _id: new mongoose.Types.ObjectId(id) });
+      if (postExists) {
+        throw new Error("Post has language reports and was excluded from results");
+      }
+    }
     throw new Error("Post not found");
   }
+  
   return post;
 }
 
