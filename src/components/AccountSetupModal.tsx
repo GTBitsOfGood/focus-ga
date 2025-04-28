@@ -218,7 +218,7 @@ export default function AccountSetupModal({
                         }
                         displayKey="name"
                         placeholder="Diagnosis"
-                        typeDropdown="disabilities"
+                        typeDropdown="diagnosis"
                         maxSelectionCount={5}
                       />
                     </div>

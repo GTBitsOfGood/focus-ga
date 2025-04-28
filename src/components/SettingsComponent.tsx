@@ -176,7 +176,7 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
             onChange={(tags) => setDefaultDisabilityTags(tags)}
             displayKey="name"
             placeholder="Select default diagnosis tags"
-            typeDropdown="disabilities"
+            typeDropdown="diagnosis"
             maxSelectionCount={MAX_POST_DISABILITY_TAGS}
           />
         </div>
@@ -192,7 +192,7 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
             displayKey="name"
             placeholder="Select default diagnosis filters"
             maxSelectionCount={MAX_FILTER_DISABILITY_TAGS}
-            typeDropdown="disabilities"
+            typeDropdown="diagnosis"
           />
         </div>
 

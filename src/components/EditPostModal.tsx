@@ -266,7 +266,7 @@ export default function EditPostModal(props: EditPostModalProps) {
             displayKey="name"
             placeholder="Add diagnosis tags"
             maxSelectionCount={5}
-            typeDropdown="disabilities"
+            typeDropdown="diagnosis"
           />
         </div>
 
