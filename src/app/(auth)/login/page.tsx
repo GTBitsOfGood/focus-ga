@@ -89,38 +89,6 @@ export default function Login() {
           alt="focus-logo"
           className="h-auto"
         />
-          <div className="relative mt-3 w-full">
-            <i className="absolute left-4 top-1/2 -translate-y-1/2 transform text-gray-500">
-              <Image src={user} width={17} alt="user-icon" />
-            </i>
-
-            <input
-              className="placeholder-med-gray text-med-gray w-full rounded-sm border border-gray-300 py-3 pl-10 pr-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={handleKeyDown} // Submit on "Enter"
-            />
-          </div>
-
-
-          {credentialsError && (
-            <p className="mt-2 text-sm text-red-500">
-              Invalid email. Please try again.
-            </p>
-          )}
-
-          <button
-            onClick={handleLogin}
-            disabled={isLoading}
-            className={`mt-5 w-full rounded-sm bg-theme-blue py-3 text-white ${
-              isLoading ? "bg-opacity-80" : "hover:bg-opacity-80"
-            }`}
-          >
-            Log in
-          </button>
-
           <button
             onClick={handleSalesforceLogin}
             className="mt-2 w-full rounded-sm bg-green-500 py-3 text-white"
