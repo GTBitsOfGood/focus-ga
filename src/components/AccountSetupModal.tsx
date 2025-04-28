@@ -44,7 +44,7 @@ export default function AccountSetupModal({
         );
         setDisabilities(sortedDisabilities);
       } catch {
-        setError("Failed to load disabilities.");
+        setError("Failed to load diagnoses.");
       }
     };
     fetchDisabilities();
@@ -217,7 +217,7 @@ export default function AccountSetupModal({
                           )
                         }
                         displayKey="name"
-                        placeholder="Disabilities"
+                        placeholder="Diagnosis"
                         typeDropdown="disabilities"
                         maxSelectionCount={5}
                       />

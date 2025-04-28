@@ -257,14 +257,14 @@ export default function EditPostModal(props: EditPostModalProps) {
             htmlFor="title"
             className="block text-sm font-bold text-gray-700"
           >
-            Disability Tags
+            Diagnosis Tags
           </label>
           <DropdownWithDisplay
             items={disabilities}
             selectedItems={tags}
             onChange={(items) => setTags(items)}
             displayKey="name"
-            placeholder="Add disability tags"
+            placeholder="Add diagnosis tags"
             maxSelectionCount={5}
             typeDropdown="disabilities"
           />

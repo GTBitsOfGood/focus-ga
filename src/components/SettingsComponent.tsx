@@ -168,14 +168,14 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
 
         <div>
           <label htmlFor="title" className="text-m block font-bold text-black">
-            Set a default disability tag to attach to your posts
+            Set a default diagnosis tag to attach to your posts
           </label>
           <DropdownWithDisplay
             items={disabilities}
             selectedItems={defaultDisabilityTags}
             onChange={(tags) => setDefaultDisabilityTags(tags)}
             displayKey="name"
-            placeholder="Select default disability tags"
+            placeholder="Select default diagnosis tags"
             typeDropdown="disabilities"
             maxSelectionCount={MAX_POST_DISABILITY_TAGS}
           />
@@ -183,14 +183,14 @@ export default function SettingsPage({ user, disabilities }: SettingsProps) {
 
         <div>
           <label htmlFor="title" className="text-m block font-bold text-black">
-            Set a default disability tag filter for your main feed
+            Set a default diagnosis tag filter for your main feed
           </label>
           <DropdownWithDisplay
             items={disabilities}
             selectedItems={defaultDisabilityFilters}
             onChange={(filters) => setDefaultDisabilityFilters(filters)}
             displayKey="name"
-            placeholder="Select default disability filters"
+            placeholder="Select default diagnosis filters"
             maxSelectionCount={MAX_FILTER_DISABILITY_TAGS}
             typeDropdown="disabilities"
           />

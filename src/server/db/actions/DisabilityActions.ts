@@ -27,8 +27,8 @@ export async function createDisability(
     const createdDisability = await DisabilityModel.create(parsedData);
     return createdDisability.toObject();
   } catch (error) {
-    console.error("Failed to create disability:", error);
-    throw new Error("Failed to create disability");
+    console.error("Failed to create diagnosis:", error);
+    throw new Error("Failed to create diagnosis");
   }
 }
 
@@ -68,8 +68,8 @@ export async function getDisability(id: String): Promise<Disability> {
     const disability = await DisabilityModel.findById(id);
     return disability.toObject();
   } catch (error) {
-    console.error("Failed to retrieve disability: ", error);
-    throw new Error("Failed to retrieve disability");
+    console.error("Failed to retrieve diagnosis: ", error);
+    throw new Error("Failed to retrieve diagnosis");
   }
 }
 
@@ -105,8 +105,8 @@ export async function editDisability(
     }
     return updatedDisability.toObject();
   } catch (error) {
-    console.error(`Failed to update disability ${id}:`, error);
-    throw new Error(`Failed to update disability ${id}`);
+    console.error(`Failed to update diagnosis ${id}:`, error);
+    throw new Error(`Failed to update diagnosis ${id}`);
   }
 }
 
@@ -119,22 +119,22 @@ export async function editDisability(
 export async function deleteDisability(id: string): Promise<Disability> {
   console.log("Received ID:", id);
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw new Error("Invalid disability ID");
+    throw new Error("Invalid diagnosis ID");
   }
 
   try {
     await dbConnect();
     const currentUser = await getAuthenticatedUser();
     if (!currentUser?.isAdmin) {
-      throw new Error("Only admins can delete disbilities");
+      throw new Error("Only admins can delete diagnoses");
     }
     const deletedDisability = await DisabilityModel.findByIdAndDelete(id);
     if (!deletedDisability) {
-      throw new Error("Disability not found");
+      throw new Error("Diagnosis not found");
     }
     return deletedDisability.toObject();
   } catch (error) {
-    console.error(`Failed to delete disability ${id}:`, error);
-    throw new Error(`Failed to delete disability ${id}`);
+    console.error(`Failed to delete diagnosis ${id}:`, error);
+    throw new Error(`Failed to delete diagnosis ${id}`);
   }
 }

@@ -40,7 +40,7 @@ export default function DisabilitiesList() {
       )
     ) {
       toast({
-        title: "Duplicate disability",
+        title: "Duplicate diagnosis",
         description: `${disabilityName} already exists in the list.`,
       });
       return;
@@ -53,14 +53,14 @@ export default function DisabilitiesList() {
       );
       setDisabilityName("");
       toast({
-        title: "Disability added",
-        description: `${disabilityName} has been added as a disability.`,
+        title: "Diagnosis added",
+        description: `${disabilityName} has been added as a diagnosis.`,
       });
     } catch (error) {
       toast({
-        title: "Failed to add disability",
+        title: "Failed to add diagnosis",
         description:
-          "An error occurred while adding the disability. Please try again.",
+          "An error occurred while adding the diagnosis. Please try again.",
       });
     }
   };
@@ -71,16 +71,16 @@ export default function DisabilitiesList() {
       setDisabilities((prev) => {
         const deletedDisability = prev.find((d) => d._id === id);
         toast({
-          title: "Disability deleted",
-          description: `${deletedDisability?.name} has been deleted as a disability.`,
+          title: "Diagnosis deleted",
+          description: `${deletedDisability?.name} has been deleted as a diagnosis.`,
         });
         return prev.filter((d) => d._id !== id);
       });
     } catch (error) {
       toast({
-        title: "Failed to delete disability",
+        title: "Failed to delete diagnosis",
         description:
-          "An error occurred while deleting the disability. Please try again.",
+          "An error occurred while deleting the diagnosis. Please try again.",
       });
     }
   };
@@ -111,16 +111,16 @@ export default function DisabilitiesList() {
 
   return (
     <div className="mt-9 max-w-[78%] md:ml-10">
-      <h1 className="mb-7 text-2xl font-bold">Disabilities List</h1>
+      <h1 className="mb-7 text-2xl font-bold">Diagnosis List</h1>
       {error && <div className="mb-4 text-red-500">{error}</div>}
-      <h2 className="mb-3 text-xl">Add New Disability</h2>
+      <h2 className="mb-3 text-xl">Add New Diagnosis</h2>
       <div className="mb-6 flex items-center gap-3">
         <input
           type="text"
           value={disabilityName}
           onChange={(e) => setDisabilityName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleAddDisability()}
-          placeholder="Enter disability"
+          placeholder="Enter diagnosis"
           className="h-10 w-full rounded-md border p-3 py-1.5 text-sm"
         />
         <button
@@ -132,7 +132,7 @@ export default function DisabilitiesList() {
       </div>
       <div className="mb-6">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl">Current Disability List</h2>
+          <h2 className="text-xl">Current Diagnosis List</h2>
           <div className="flex items-center gap-1.5">
             <Search className="text-theme-gray" size={20} />
             <input
