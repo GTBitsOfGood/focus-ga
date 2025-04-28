@@ -91,7 +91,7 @@ export default function Login() {
         />
           <button
             onClick={handleSalesforceLogin}
-            className="mt-2 w-full rounded-sm bg-green-500 py-3 text-white"
+            className="mt-6 w-full rounded-sm bg-theme-blue py-3 text-white"
           >
             Log in with Salesforce
           </button>
@@ -124,7 +124,7 @@ export default function Login() {
           <div className="flex w-[33%] flex-col items-center justify-center">
             <button
               onClick={() => router.push("https://focus-ga.org/donate/")}
-              className="hidden rounded-sm bg-theme-blue px-16 py-3 text-white hover:bg-opacity-80 sm:block"
+              className="hidden rounded-sm bg-green-500 px-16 py-3 text-white hover:bg-opacity-80 sm:block"
             >
               Donate
             </button>
