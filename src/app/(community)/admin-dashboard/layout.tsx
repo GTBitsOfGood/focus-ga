@@ -100,7 +100,7 @@ export default function AdminLayout({
             } hover:scale-[1.08] hover:text-theme-blue`}
             style={{ marginTop: "2vh", marginLeft: "3vw" }}
           >
-            Disabilities List
+            Diagnosis List
           </Link>
 
           <Link
