@@ -53,7 +53,7 @@ export async function loginUser(email: string, uid: string) {
     user = await createUser({ 
       email,
       username: email,
-      lastName: "BoG", 
+      lastName: email.split('@')[0], 
       childDisabilities: [],
       city: "N/A",
       bio: "Hello World!",
