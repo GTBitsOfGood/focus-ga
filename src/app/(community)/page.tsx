@@ -133,7 +133,7 @@ export default function Home() {
   };
 
   const disabilityFilter: Filter<Disability> = {
-    label: "Disability",
+    label: "Diagnosis",
     data: disabilities,
     selected: selectedDisabilities,
     setSelected: (selected: Disability) =>
