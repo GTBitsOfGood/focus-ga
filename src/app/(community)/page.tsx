@@ -74,8 +74,13 @@ export default function Home() {
   }, [user]);
 
   useEffect(() => {
+    if (!user) return;
+
     const setup = searchParams.get("setup");
-    if (setup === "true") {
+
+    // Show modal only if URL indicates setup AND user hasn't completed setup
+    // user.city === "N/A" means incomplete setup (AuthActions.ts)
+    if (setup === "true" && user.city === "N/A") {
       setIsSetupModalVisible(true);
     }
   }, [searchParams]);
