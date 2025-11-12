@@ -14,7 +14,8 @@ import { cookies } from "next/headers";
  */
 export async function middleware(request: NextRequest) {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
-  const isSetupPage = request.nextUrl.pathname === "/" && request.nextUrl.searchParams.has("setup");
+  const setupParam = request.nextUrl.searchParams.get("setup");
+  const isSetupPage = request.nextUrl.pathname === "/" && setupParam === "true";
 
   if (request.nextUrl.pathname === "/login" && session.isLoggedIn) {
     return NextResponse.redirect(new URL("/", request.url));
